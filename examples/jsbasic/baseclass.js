@@ -16,22 +16,26 @@ var guid = require('./guid');
 
 /**
  * Initializes a new instance of fco.
- * This is a dummy class, representing an actual object in the webGME model.
  *
- * In general properties should be defined in the constructor as is done here.
+ * @class
+ * @classdesc This is a dummy class, representing an object in the webGME model.
+ * @param {string} name The name of the FCO.
+ * @param {string} ID The ID of the FCO.
  * @constructor
  */
 function FCO(name, ID){
     this.name = name;
     this.ID = ID;
     this.GUID = guid.generateGUID();
+    this.value = null;
 }
 
 /**
  * Initializes a new instance of DomainFCO.
- * This class represents the base-object in a domain specific api.
- * All kinds/types in the dsa should extend this class.
- * Note that it does not extend the FCO, but rather wraps it.
+ *
+ * @class
+ * @classdesc This class represents the base-object in a domain specific api.
+ * @param {FCO} fco The wrapped webGME object.
  * @constructor
  */
 function DomainFCO(fco){
@@ -41,12 +45,22 @@ function DomainFCO(fco){
     this.GUID_ = null;
 }
 
-// Expose the properties through getters and setters.
-// These are used here since we don't want to enter the webGME layer
-// at every call and we should only expose setters where applicable.
-//
-// In general methods (which getters and setters are) should be defined through the
-// prototype.
+/**
+ * ---------------------------------------------------------------------------------------------------------------------
+ * Expose the properties through getters and setters.
+ * These are used here since we don't want to enter the webGME layer
+ * at every call and we should only expose setters where applicable.
+ *
+ * In general methods (which getters and setters are) should be defined through the
+ * prototype.
+ * ---------------------------------------------------------------------------------------------------------------------
+ */
+
+/**
+ * Returns the name of the item.
+ * @returns {string} The name of the item.
+ * @public
+ */
 DomainFCO.prototype.getName = function(){
     if (this.name_ == null){
         this.name_ = this.fco_.name;
@@ -54,9 +68,14 @@ DomainFCO.prototype.getName = function(){
     return this.name_;
 };
 
+/**
+ * Sets the name of the item.
+ * @param {string} value The new name of the item.
+ * @public
+ */
 DomainFCO.prototype.setName = function(value){
     this.name_ = value;
-    this.fco_.name = this.name;
+    this.fco_.name = this.name_;
 };
 
 DomainFCO.prototype.getGUID = function(){
@@ -73,7 +92,12 @@ DomainFCO.prototype.getID = function(){
     return this.ID_
 };
 
-// Override inherited methods.
+/**
+ * ---------------------------------------------------------------------------------------------------------------------
+ * Override inherited methods.
+ * ---------------------------------------------------------------------------------------------------------------------
+ */
+
 DomainFCO.prototype.toString = function(){
     return 'Name : ' + this.getName() + ', ID: ' + this.getID() + ', GUID: ' + this.getGUID();
 };
@@ -82,7 +106,11 @@ DomainFCO.prototype.equals = function(other){
     return this.getID() == other.getID();
 };
 
-// Utility methods
+/**
+ * ---------------------------------------------------------------------------------------------------------------------
+ * Utility methods
+ * ---------------------------------------------------------------------------------------------------------------------
+ */
 DomainFCO.prototype.getParentID = function(){
     var path = this.getID().split('/');
     path.pop();
@@ -97,7 +125,11 @@ DomainFCO.prototype.shareParent = function(other){
     }
 };
 
-// In node js you can simulate python's if __name__=='__main__' like this.
+/**
+ * ---------------------------------------------------------------------------------------------------------------------
+ * In node js you can simulate python's if __name__=='__main__' like this.
+ * ---------------------------------------------------------------------------------------------------------------------
+ */
 if (require.main === module) {
     // Create two dummy webGME objects.
     var fcoA = new FCO('A', '/-1/-1/-4');
