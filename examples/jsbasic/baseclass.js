@@ -10,16 +10,9 @@
  */
 
 'use strict';
-//var guidgen = require('guid.js');
-// TODO : move to separate file
-var guid = function () {
-    var S4 = function () {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        };
-
-        //return GUID
-        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-};
+// See http://openmymind.net/2012/2/3/Node-Require-and-Exports/
+// for info about how importing modules work in nodeJS.
+var guid = require('./guid');
 
 /**
  * Initializes a new instance of fco.
@@ -31,7 +24,7 @@ var guid = function () {
 function FCO(name, ID){
     this.name = name;
     this.ID = ID;
-    this.GUID = guid();
+    this.GUID = guid.generateGUID();
 }
 
 /**
@@ -104,28 +97,38 @@ DomainFCO.prototype.shareParent = function(other){
     }
 };
 
-// Create two dummy webGME objects.
-var fcoA = new FCO('A', '/-1/-1/-4');
-var fcoB = new FCO('B', '/-1/-1/-2');
-// Using these create two new DomainFCOs.
-var a = new DomainFCO(fcoA);
-var b = new DomainFCO(fcoB);
+// In node js you can simulate python's if __name__=='__main__' like this.
+if (require.main === module) {
+    // Create two dummy webGME objects.
+    var fcoA = new FCO('A', '/-1/-1/-4');
+    var fcoB = new FCO('B', '/-1/-1/-2');
+    // Using these create two new DomainFCOs.
+    var a = new DomainFCO(fcoA);
+    var b = new DomainFCO(fcoB);
 
-// Printing objects (invokes toString implicitly only IE).
-console.log(a.toString());
-console.log(b.toString());
+    // Printing objects (invokes toString implicitly only IE).
+    console.log(a.toString());
+    console.log(b.toString());
 
-// Are they the same webGME object?
-if (a == b){
-    console.log('a and b represent the same webGME object.');
-} else {
-    console.log('a and b represent two different webGME objects.');
+    // Are they the same webGME object?
+    if (a == b){
+        console.log('a and b represent the same webGME object.');
+    } else {
+        console.log('a and b represent two different webGME objects.');
+    }
+
+    // Do they share a parent at least?
+    var commonParent = a.shareParent(b);
+    if (commonParent){
+        console.log('a and b share the parent with ID: ' + commonParent);
+    } else {
+        console.log('a and b do not have the same parent');
+    }
 }
 
-// Do they share a parent at least?
-var commonParent = a.shareParent(b);
-if (commonParent){
-    console.log('a and b share the parent with ID: ' + commonParent);
-} else {
-    console.log('a and b do not have the same parent');
-}
+
+// See http://openmymind.net/2012/2/3/Node-Require-and-Exports/
+// for info about how importing modules work in nodeJS.
+module.exports.FCO = FCO;
+module.exports.DomainFCO = DomainFCO;
+
