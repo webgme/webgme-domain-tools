@@ -21,8 +21,7 @@ function ValueFlowTarget(fco){
 
 
 //This is one way to do the inheritance. It'll do for now, but might not be the optimal solution.
-ValueFlowTarget.prototype = Object.create(base.DomainFCO);
-ValueFlowTarget.constructor = ValueFlowTarget;
+ValueFlowTarget.prototype = Object.create(base.DomainFCO.prototype);
 
 /**
  * ---------------------------------------------------------------------------------------------------------------------
