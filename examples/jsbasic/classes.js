@@ -1,5 +1,8 @@
 /**
  * Created by pmeijer on 3/13/14.
+ * This script illustrates how inheritance can be emulated in JavaScript.
+ * There are more than one way to do this and this approach uses Object.create() and thus assumes ECMAScript >= 5.
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript
  */
 
 'use strict';
@@ -21,9 +24,10 @@ function ValueFlowTarget(fco){
 }
 
 
-//This is one way to do the inheritance. It'll do for now, but might not be the optimal solution.
+// This is one way to do the inheritance. It'll do for now, but might not be the optimal solution.
+//
 ValueFlowTarget.prototype = Object.create(base.DomainFCO.prototype);
-// the assignment overrides all prototype properties, but we want the constructor to point to the one defined above.
+// The assignment overrides all prototype properties, but we want the constructor to point to the one defined above.
 ValueFlowTarget.prototype.constructor = ValueFlowTarget;
 
 /**

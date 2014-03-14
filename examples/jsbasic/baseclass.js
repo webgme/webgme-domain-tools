@@ -1,7 +1,7 @@
 /**
  * Created by pmeijer on 3/13/14.
  * This script illustrates how to define "Classes" in javaScript using constructors and
- * prototypes.
+ * prototypes. These are simple classes with no inheritance, that will be shown in classes.js.
  *
  * BONUS:
  * split()
