@@ -28,6 +28,8 @@ function FCO(name, ID){
     this.ID = ID;
     this.GUID = guid.generateGUID();
     this.value = null;
+    this.description = null;
+    this.range = null;
 }
 
 /**
@@ -39,6 +41,7 @@ function FCO(name, ID){
  * @constructor
  */
 function DomainFCO(fco){
+    console.log('Inside DomainFCO constructor.');
     this.fco_ = fco;
     this.name_ = null;
     this.ID_ = null;
