@@ -1,0 +1,132 @@
+/*
+ config object structure
+ {
+ "host": <string> shows the location of the webGME server //not really used by internally run interpreters = NUII,
+ "project": <string> show the name of the project,
+ "token": <string> authentication token for REST API //NUII,
+ "selected": <string> gives the URL / path of the selected object , you can convert URL to path,
+ "commit": <string> the hash / URL part of the selected commit, you can convert URL part to hash,
+ "root": <string> the hash / URL of the root object, you can convert URL to hash,
+ "branch": <string> the name of the selected branch
+ }
+ */
+var requirejs = require("requirejs");
+
+var CONFIG = {
+    port: 8888,
+    autorecconnect: true,
+    reconndelay: 1000,
+    reconnamount: 1000,
+
+    //used by the server
+    loglevel: 2, // 5 = ALL, 4 = DEBUG, 3 = INFO, 2 = WARNING, 1 = ERROR, 0 = OFF
+    logfile: 'server.log',
+    mongoip: 'zsolt-ws.isis.vanderbilt.edu',
+    mongoport: 27017,
+    mongodatabase: "multi",
+    authentication: false,
+    httpsecure: false,
+    guest: false,
+    sessioncookieid : 'webgmeSid',
+    sessioncookiesecret : 'meWebGMEez',
+    debug: false,
+
+    // Extra application configuration
+    basedir: __dirname + '/node_modules/webgme',
+    clientbasedir: __dirname + '/node_modules/webgme/client',
+    decoratorpaths: ['./decorators', __dirname + '/node_modules/webgme/client/decorators']
+    //interpreterpaths: ['./interpreters']
+};
+
+requirejs.config({
+    nodeRequire: require,
+    baseUrl: __dirname,
+    paths: {
+        //interpreters: 'interpreters'
+    }
+});
+
+// TODO: get this from command line argument
+var interpreterName = './interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica';
+
+// FIXME: dependency does matter!
+requirejs([interpreterName, 'webgme'],
+    function(Interpreter, WebGME){
+        console.log(Interpreter);
+        var Core = WebGME.core,
+            Storage = WebGME.serverUserStorage;
+
+        //somehow you should build up a config object for the interpreter
+        //and get the name of the interpreter
+        //now we start with a predefined ones
+
+        var getContext = function(config,callback) {
+            var context = { storage: new Storage({'host':config.host, 'port':config.port, 'database':config.database})};
+            context.storage.openDatabase(function(err){
+                    if (!err) {
+                        context.storage.openProject(config.project,function(err,project){
+                            if(!err){
+                                context.project = project;
+                                context.core = new Core(context.project,{corerel:2});
+                                context.commitHash = config.commit;
+                                context.selected = config.selected;
+                                context.project.loadObject(context.commitHash, function(err, commitObj) {
+                                    if(!err && commitObj !== null && commitObj !== undefined){
+                                        context.core.loadRoot(commitObj.root, function(err, rootNode) {
+                                            if(!err){
+                                                context.rootNode = rootNode;
+                                                if(typeof context.selected === 'string'){
+                                                    context.core.loadByPath(context.rootNode, context.selected, function (err, selectedNode) {
+                                                        if(!err){
+                                                            context.selectedNode = selectedNode;
+                                                            callback(null,context);
+                                                        } else {
+                                                            callback("unable to load selected object",context);
+                                                        }
+                                                    });
+                                                } else {
+                                                    context.selectedNode = null;
+                                                    callback(null,context);
+                                                }
+                                            } else {
+                                                callback("unable to load root",context);
+                                            }
+                                        });
+                                    } else {
+                                        callback('cannot find commit',context);
+                                    }
+
+                                });
+                            } else {
+                                callback("cannot openproject",context);
+                            }
+                        });
+                    } else {
+                        callback("cannot open database",context);
+                    }
+            });
+        };
+
+        // TODO: read from file or command line arguments
+        var config = {
+                "host": CONFIG.mongoip,
+                "port": CONFIG.mongoport,
+                "database": "multi",
+                "project": "CyPhyLight",
+                "token": "",
+                "selected": "/-1/-2/-1/-1",
+                "commit": "#58269780be380112c11ae00277b5ea896f4af2aa"
+                //"root": ""
+                //"branch": "master"
+            };
+
+        getContext(config,function(err,context) {
+            console.log(Interpreter);
+            var interpreter = new Interpreter();
+            interpreter.run(context, function(result) {
+                console.log(result);
+            });
+        });
+
+    }
+);
