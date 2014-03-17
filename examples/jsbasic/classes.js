@@ -16,11 +16,11 @@ var base = require('./baseclass');
  * @param {FCO} fco The wrapped webGME object.
  * @constructor
  */
-function ValueFlowTarget(fco){
+function ValueFlowTarget(fco) {
     // Call the constructor of the base-class as if it were acting on this.
     base.DomainFCO.call(this, fco);
     console.log('Inside ValueFlowTarget constructor.');
-    this.value_ = null;
+    this.value = null;
 }
 
 
@@ -35,11 +35,11 @@ ValueFlowTarget.prototype.constructor = ValueFlowTarget;
  * @returns {string} The value of the item.
  * @public
  */
-ValueFlowTarget.prototype.getValue = function(){
-    if (this.value_ == null){
-        this.value_ = this.fco_.value;
+ValueFlowTarget.prototype.getValue = function () {
+    if (this.value === null) {
+        this.value = this.fco.value;
     }
-    return this.value_;
+    return this.value;
 };
 
 /**
@@ -47,9 +47,9 @@ ValueFlowTarget.prototype.getValue = function(){
  * @param {string} value The new value of the item.
  * @public
  */
-ValueFlowTarget.prototype.setValue = function(value){
-    this.value_ = value;
-    this.fco_.value = this.value_;
+ValueFlowTarget.prototype.setValue = function (value) {
+    this.value = value;
+    this.fco.value = this.value;
 };
 
 /**
@@ -65,10 +65,10 @@ ValueFlowTarget.prototype.setValue = function(value){
  * @param {FCO} fco The wrapped webGME object.
  * @constructor
  */
-function Property(fco){
+function Property(fco) {
     ValueFlowTarget.call(this, fco);
     console.log('Inside Property constructor.');
-    this.description_ = null;
+    this.description = null;
 }
 
 
@@ -81,11 +81,11 @@ Property.prototype.constructor = Property;
  * @returns {string} The description of the item.
  * @public
  */
-Property.prototype.getDescription = function(){
-    if (this.description_ == null){
-        this.description_ = this.fco_.description;
+Property.prototype.getDescription = function () {
+    if (this.description === null) {
+        this.description = this.fco.description;
     }
-    return this.description_;
+    return this.description;
 };
 
 /**
@@ -93,9 +93,9 @@ Property.prototype.getDescription = function(){
  * @param {string} value The new description of the item.
  * @public
  */
-Property.prototype.setDescription = function(value){
-    this.description_ = value;
-    this.fco_.description = this.description_;
+Property.prototype.setDescription = function (value) {
+    this.description = value;
+    this.fco.description = this.description;
 };
 
 /**
@@ -111,10 +111,10 @@ Property.prototype.setDescription = function(value){
  * @param {FCO} fco The wrapped webGME object.
  * @constructor
  */
-function Parameter(fco){
+function Parameter(fco) {
     ValueFlowTarget.call(this, fco);
     console.log('Inside Parameter constructor.');
-    this.range_ = null;
+    this.range = null;
 }
 
 
@@ -127,11 +127,11 @@ Parameter.prototype.constructor = Parameter;
  * @returns {string} The range of the item.
  * @public
  */
-Parameter.prototype.getRange = function(){
-    if (this.range_ == null){
-        this.range_ = this.fco_.range;
+Parameter.prototype.getRange = function () {
+    if (this.range === null) {
+        this.range = this.fco.range;
     }
-    return this.range_;
+    return this.range;
 };
 
 /**
@@ -139,9 +139,9 @@ Parameter.prototype.getRange = function(){
  * @param {string} value The new description of the item.
  * @public
  */
-Parameter.prototype.setRange = function(value){
-    this.range_ = value;
-    this.fco_.range = this.range_;
+Parameter.prototype.setRange = function (value) {
+    this.range = value;
+    this.fco.range = this.range;
 };
 
 // Execution
@@ -165,13 +165,13 @@ if (require.main === module) {
     console.log(vfA.getDescription());
     console.log(vfB.getRange());
 
-    if (vfA instanceof base.DomainFCO){
-        console.log('vfA is a DomainFCO.')
+    if (vfA instanceof base.DomainFCO) {
+        console.log('vfA is a DomainFCO.');
     }
-    if (vfB instanceof ValueFlowTarget){
-        console.log('vfB is a ValueFlowTarget.')
+    if (vfB instanceof ValueFlowTarget) {
+        console.log('vfB is a ValueFlowTarget.');
     }
-    if (vfA instanceof Parameter == false){
-        console.log('vfA is not a Parameter.')
+    if (vfA instanceof Parameter === false) {
+        console.log('vfA is not a Parameter.');
     }
 }

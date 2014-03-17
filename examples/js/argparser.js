@@ -26,8 +26,8 @@ program.option('-f, --fileName <name>', 'Add a file with given name. [info.txt]'
 program.option('-r, --a-float <value>', 'Pass a float.', parseFloat);
 program.option('-n, --an-integer <value>', 'Pass an integer.', parseInt);
 // You can pass any function as action.
-function list(value){
-    return value.split(';')
+function list(value) {
+    return value.split(';');
 }
 // Be careful when you pass spaces, add quotes to fix this potential issue.
 program.option('-p, --paths <items>', 'Paths, (separated by semicolons), to some resources.', list);

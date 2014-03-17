@@ -15,7 +15,7 @@
  * Generates a GUID string. Note the inner function s4 (it has access to whatever is defined in generateGUID.
  * @returns {string}
  */
-function generateGUID(){
+function generateGUID() {
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
     }
@@ -26,8 +26,9 @@ function generateGUID(){
 // In nodeJS you can simulate python's if __name__=='__main__' like this.
 if (require.main === module) {
     // Generate and print 10 GUIDs.
-    for (var i=1; i < 10; i++)
-    {
+    var i = 10;
+    while (i) {
+        i -= 1;
         console.log(generateGUID());
     }
 }

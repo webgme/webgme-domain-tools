@@ -2,11 +2,6 @@
  * Created by pmeijer on 3/13/14.
  * This script illustrates how to define "Classes" in javaScript using constructors and
  * prototypes. These are simple classes with no inheritance, that will be shown in classes.js.
- *
- * BONUS:
- * split()
- * join()
- * pop()
  */
 
 'use strict';
@@ -23,7 +18,7 @@ var guid = require('./guid');
  * @param {string} ID The ID of the FCO.
  * @constructor
  */
-function FCO(name, ID){
+function FCO(name, ID) {
     this.name = name;
     this.ID = ID;
     this.GUID = guid.generateGUID();
@@ -40,12 +35,12 @@ function FCO(name, ID){
  * @param {FCO} fco The wrapped webGME object.
  * @constructor
  */
-function DomainFCO(fco){
+function DomainFCO(fco) {
     console.log('Inside DomainFCO constructor.');
-    this.fco_ = fco;
-    this.name_ = null;
-    this.ID_ = null;
-    this.GUID_ = null;
+    this.fco = fco;
+    this.name = null;
+    this.ID = null;
+    this.GUID = null;
 }
 
 /**
@@ -64,11 +59,11 @@ function DomainFCO(fco){
  * @returns {string} The name of the item.
  * @public
  */
-DomainFCO.prototype.getName = function(){
-    if (this.name_ == null){
-        this.name_ = this.fco_.name;
+DomainFCO.prototype.getName = function () {
+    if (this.name === null) {
+        this.name = this.fco.name;
     }
-    return this.name_;
+    return this.name;
 };
 
 /**
@@ -76,23 +71,23 @@ DomainFCO.prototype.getName = function(){
  * @param {string} value The new name of the item.
  * @public
  */
-DomainFCO.prototype.setName = function(value){
-    this.name_ = value;
-    this.fco_.name = this.name_;
+DomainFCO.prototype.setName = function (value) {
+    this.name = value;
+    this.fco.name = this.name;
 };
 
-DomainFCO.prototype.getGUID = function(){
-    if (this.GUID_ == null){
-        this.GUID_ = this.fco_.GUID;
+DomainFCO.prototype.getGUID = function () {
+    if (this.GUID === null) {
+        this.GUID = this.fco.GUID;
     }
-    return this.GUID_
+    return this.GUID;
 };
 
-DomainFCO.prototype.getID = function(){
-    if (this.ID_ == null){
-        this.ID_ = this.fco_.ID;
+DomainFCO.prototype.getID = function () {
+    if (this.ID === null) {
+        this.ID = this.fco.ID;
     }
-    return this.ID_
+    return this.ID;
 };
 
 /**
@@ -101,12 +96,12 @@ DomainFCO.prototype.getID = function(){
  * ---------------------------------------------------------------------------------------------------------------------
  */
 
-DomainFCO.prototype.toString = function(){
+DomainFCO.prototype.toString = function () {
     return 'Name : ' + this.getName() + ', ID: ' + this.getID() + ', GUID: ' + this.getGUID();
 };
 
-DomainFCO.prototype.equals = function(other){
-    return this.getID() == other.getID();
+DomainFCO.prototype.equals = function (other) {
+    return this.getID() === other.getID();
 };
 
 /**
@@ -114,18 +109,18 @@ DomainFCO.prototype.equals = function(other){
  * Utility methods
  * ---------------------------------------------------------------------------------------------------------------------
  */
-DomainFCO.prototype.getParentID = function(){
+DomainFCO.prototype.getParentID = function () {
     var path = this.getID().split('/');
     path.pop();
     return path.join('/');
 };
 
-DomainFCO.prototype.shareParent = function(other){
-    if(this.getParentID() == other.getParentID()){
+DomainFCO.prototype.shareParent = function (other) {
+    if (this.getParentID() === other.getParentID()) {
         return this.getParentID();
-    } else {
-        return null;
     }
+
+    return null;
 };
 
 /**
@@ -146,7 +141,7 @@ if (require.main === module) {
     console.log(b.toString());
 
     // Are they the same webGME object?
-    if (a == b){
+    if (a === b) {
         console.log('a and b represent the same webGME object.');
     } else {
         console.log('a and b represent two different webGME objects.');
@@ -154,7 +149,7 @@ if (require.main === module) {
 
     // Do they share a parent at least?
     var commonParent = a.shareParent(b);
-    if (commonParent){
+    if (commonParent) {
         console.log('a and b share the parent with ID: ' + commonParent);
     } else {
         console.log('a and b do not have the same parent');
