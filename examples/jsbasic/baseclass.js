@@ -141,7 +141,7 @@ if (require.main === module) {
     console.log(b.toString());
 
     // Are they the same webGME object?
-    if (a === b) {
+    if (a.equals(b)) {
         console.log('a and b represent the same webGME object.');
     } else {
         console.log('a and b represent two different webGME objects.');

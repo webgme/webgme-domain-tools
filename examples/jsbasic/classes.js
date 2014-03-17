@@ -175,3 +175,7 @@ if (require.main === module) {
         console.log('vfA is not a Parameter.');
     }
 }
+
+module.exports.ValueFlowTarget = ValueFlowTarget;
+module.exports.Parameter = Parameter;
+module.exports.Property = Property;
