@@ -7,17 +7,22 @@
  */
 
 
-define([], function () {
+define(['../../node_modules/webgme/common/LogManager'], function (logManager) {
 	"use strict";
 
     var CyPhy2ModelicaInterpreter = function () {};
 
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
-        console.log('Run started.');
+        // Setup the logger.
+        logManager.setLogLevel(logManager.logLevels.DEBUG);
+        // Will only log to file.
+        logManager.setFileLogPath('CyPhy2ModelicaInterpreter.log');
+        // Create an instance of it.
+        var logger = logManager.create('CyPhy2ModelicaInterpreter');
 
+        logger.info('Run started..');
         // TODO: check config structure
         // TODO: set default parameters
-
         var rootNode = config.rootNode,
             selectedNode = config.selectedNode,
             core = config.core,
@@ -27,14 +32,13 @@ define([], function () {
         result = {'commitHash': config.commitHash};
 
         // root name
-
-        console.log(core.getAttribute(rootNode, 'name'));
+        logger.info(core.getAttribute(rootNode, 'name'));
 
         // selected object name
-        console.log(core.getAttribute(selectedNode, 'name'));
+        logger.info(core.getAttribute(selectedNode, 'name'));
 
         // selected object position
-        console.log(core.getRegistry(selectedNode, 'position'));
+        logger.info(core.getRegistry(selectedNode, 'position'));
 
         // selected object children
         core.loadChildren(selectedNode, function (err, childNodes) {
@@ -42,7 +46,7 @@ define([], function () {
             var len = childNodes.length;
 
             while (len--) {
-                console.log(core.getAttribute(childNodes[len], 'name'));
+                logger.debug(core.getAttribute(childNodes[len], 'name'));
                 if (core.getAttribute(childNodes[len], 'name').toLowerCase() === 'solversettings') {
                     baseNode = core.getBase(childNodes[len]);
                 }
@@ -59,12 +63,12 @@ define([], function () {
             // save project
             core.persist(rootNode, function(err) {});
             var newRootHash = core.getHash(rootNode);
-            console.log(project.makeCommit);
+            logger.info(project.makeCommit);
             result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function(err) {
 
             });
 
-            console.log('Run done.');
+            logger.info('Run done.');
             if (callback) {
                 callback({'success': true, 'run_command': 'dir'});
             }

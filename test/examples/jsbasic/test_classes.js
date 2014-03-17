@@ -10,7 +10,7 @@ var chai = require('chai'),
     expect = chai.expect;
 
 describe('classes', function() {
-    describe('oneParameterAndOneProperty', function(done) {
+    describe('oneParameterAndOneProperty', function() {
         it ('should inherit types', function() {
             // A is a Property
             var fcoA = new base.FCO('A', '/-1/-1/-4');
@@ -26,12 +26,10 @@ describe('classes', function() {
 
             expect(vfA instanceof fut.ValueFlowTarget).to.equal(true);
             expect(vfB instanceof fut.ValueFlowTarget).to.equal(true);
-            //expect(vfB instanceof typeof vfA).to.equal(false);
-            //expect(vfA instanceof typeof vfB).to.equal(false);
         });
     });
 
-    describe('testPropertyFields', function(done) {
+    describe('testPropertyFields', function() {
         it ('should work; set and get', function() {
             var fcoA = new base.FCO('A', '/-1/-1/-4');
             fcoA.value = '1';
@@ -51,7 +49,7 @@ describe('classes', function() {
         });
     });
 
-    describe('testParameterFields', function(done) {
+    describe('testParameterFields', function() {
         it ('should set and get should work', function() {
             var fcoA = new base.FCO('A', '/-1/-1/-4');
             fcoA.value = '1';

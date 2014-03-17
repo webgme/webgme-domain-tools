@@ -20,11 +20,8 @@
     },
     "config": {
         "blanket": {
-            "pattern": "examples",
+            "pattern": "/",
             "data-cover-never": "node_modules"
         }
-    },
-    "scripts": {
-        "test": "mocha --require blanket -R html-cov > coverage.html test/examples/jsbasic/test_baseclass.js"
     }
 }
