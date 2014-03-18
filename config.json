@@ -1,0 +1,23 @@
+{
+    "port": 8888,
+    "autorecconnect": true,
+    "reconndelay": 1000,
+    "reconnamount": 1000,
+
+    "loglevel": 2,
+    "logfile": "server.log",
+    "mongoip": "zsolt-ws.isis.vanderbilt.edu",
+    "mongoport": 27017,
+    "mongodatabase": "multi",
+    "authentication": false,
+    "httpsecure": false,
+    "guest": false,
+    "sessioncookieid": "webgmeSid",
+    "sessioncookiesecret": "meWebGMEez",
+    "debug": false,
+
+    "basedir": "./node_modules/webgme",
+    "clientbasedir": "./node_modules/webgme/client",
+    "decoratorpaths": ["./decorators", "./node_modules/webgme/client/decorators"],
+    "interpreterpaths": ["./interpreters"]
+}

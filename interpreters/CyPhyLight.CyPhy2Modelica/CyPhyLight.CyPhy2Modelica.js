@@ -1,16 +1,17 @@
 /**
- * Created by Zsolt on 3/17/14.
- */
-
-/**
  * Created by Zsolt on 3/5/14.
  */
 
 
-define(['../../node_modules/webgme/common/LogManager'], function (logManager) {
+define(['../../node_modules/webgme/common/LogManager', './CyPhyLight'], function (logManager, METATypes) {
 	"use strict";
 
     var CyPhy2ModelicaInterpreter = function () {};
+
+    CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (GUI, preconfig, callback) {
+        var result = GUI(this.getDefaultConfig);
+        callback(result);
+    };
 
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
         // Setup the logger.
@@ -28,6 +29,18 @@ define(['../../node_modules/webgme/common/LogManager'], function (logManager) {
             core = config.core,
             project = config.project,
             result;
+
+        // FIXME: this is a hack to get intellisense
+        var CyPhyLight = METATypes;
+        for (var name in config.META) {
+            if (config.META.hasOwnProperty(name)) {
+                CyPhyLight[name] = config.META[name];
+            }
+        }
+
+
+        var newCyPhyProjectObj = core.createNode({parent:rootNode, base: CyPhyLight.CyPhyProject});
+        core.setAttribute(newCyPhyProjectObj, 'name', 'New project');
 
         result = {'commitHash': config.commitHash};
 

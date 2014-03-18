@@ -48,6 +48,7 @@ requirejs.config({
 
 // TODO: get this from command line argument
 var interpreterName = './interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica';
+//var interpreterName = './interpreters/DsmlApiGenerator/DsmlApiGenerator';
 
 // FIXME: dependency does matter!
 requirejs([interpreterName, 'webgme'],
@@ -60,9 +61,49 @@ requirejs([interpreterName, 'webgme'],
         //and get the name of the interpreter
         //now we start with a predefined ones
 
+        var loadMetaNodes = function (context, callback) {
+
+             // get meta members
+            var metaIDs = context.core.getMemberPaths(context.rootNode, 'MetaAspectSet');
+
+            var len = metaIDs.length;
+
+            var nodeObjs = [];
+
+
+            var allObjectsLoadedHandler = function () {
+                var len2 = nodeObjs.length;
+
+                var nameObjMap = {};
+
+                while (len2--) {
+                    var nodeObj = nodeObjs[len2];
+
+                    nameObjMap[context.core.getAttribute(nodeObj, 'name')] = nodeObj;
+                }
+
+                context.META = nameObjMap;
+                callback(null, context);
+            };
+
+            var loadedMetaObjectHandler = function (err, nodeObj) {
+                nodeObjs.push(nodeObj);
+
+                if (nodeObjs.length === metaIDs.length) {
+                    allObjectsLoadedHandler();
+                }
+            };
+
+            while (len--) {
+                context.core.loadByPath(context.rootNode, metaIDs[len], loadedMetaObjectHandler);
+            }
+        };
+
         var getContext = function(config,callback) {
             var context = { storage: new Storage({'host':config.host, 'port':config.port, 'database':config.database})};
             context.storage.openDatabase(function(err){
+                console.log('database is open');
+
                     if (!err) {
                         context.storage.openProject(config.project,function(err,project){
                             if(!err){
@@ -79,14 +120,14 @@ requirejs([interpreterName, 'webgme'],
                                                     context.core.loadByPath(context.rootNode, context.selected, function (err, selectedNode) {
                                                         if(!err){
                                                             context.selectedNode = selectedNode;
-                                                            callback(null,context);
+                                                            loadMetaNodes(context, callback);
                                                         } else {
                                                             callback("unable to load selected object",context);
                                                         }
                                                     });
                                                 } else {
                                                     context.selectedNode = null;
-                                                    callback(null,context);
+                                                    loadMetaNodes(context, callback);
                                                 }
                                             } else {
                                                 callback("unable to load root",context);
@@ -105,6 +146,7 @@ requirejs([interpreterName, 'webgme'],
                         callback("cannot open database",context);
                     }
             });
+            console.log('is database already open');
         };
 
         // TODO: read from file or command line arguments
@@ -120,13 +162,23 @@ requirejs([interpreterName, 'webgme'],
                 //"branch": "master"
             };
 
-        getContext(config,function(err,context) {
+        var resultHandler = function(result) {
+                console.log(result);
+            };
+
+        var GUI = function(config) {
+            // readline config arguments
+            return {f:42};
+        };
+
+        var contextHandler = function(err,context) {
             console.log(Interpreter);
             var interpreter = new Interpreter();
-            interpreter.run(context, function(result) {
-                console.log(result);
-            });
-        });
+
+            interpreter.run(context, resultHandler);
+        };
+
+        getContext(config, contextHandler);
 
     }
 );
