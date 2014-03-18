@@ -9,11 +9,13 @@ define(['js/NodePropertyNames',
         'js/Utils/METAAspectHelper',
         './CyPhyLightDecorator.Constants',
         './CyPhyLight.META',
+        './CyPhyLightDecorator.ModelicaURLs',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
                                    METAAspectHelper,
                                    CyPhyLightDecoratorConstants,
                                    CyPhyLightMETA,
+                                   ModelicaURLs,
                                    DiagramDesignerWidgetConstants,
                                    CONSTANTS) {
 
@@ -53,7 +55,7 @@ define(['js/NodePropertyNames',
         var isModelicaModel = METAAspectHelper.isMETAType(gmeID, META_TYPES.ModelicaModel);
         if (isModelicaModel && len){
 
-            this._connectionAreas = {};
+            this._bboxes = [];
             this.skinParts.$connectorContainer.empty();
             var modelSVG = this.skinParts.$svg;
             var portsSvgs = modelSVG.find('g');
@@ -78,6 +80,7 @@ define(['js/NodePropertyNames',
                         if (this.hostDesignerItem) {
                             this.hostDesignerItem.registerConnectors(connDec, childrenIDs[i]);
                             this.hostDesignerItem.registerSubcomponent(childrenIDs[i], {"GME_ID": childrenIDs[i]});
+                            this._bboxes[childrenIDs[i]] = bbox;
                         } else {
                             this.logger.error("Decorator's hostDesignerItem is not set");
                         }
@@ -168,31 +171,29 @@ define(['js/NodePropertyNames',
      */
     CyPhyLightBase.prototype.getConnectionAreas = function (id/*, isEnd, connectionMetaInfo*/) {
 
-    	var result = [],
-            LEN = 10, // length of stem that can stick out of the connector before connections can turn 
-            ANGLES = [270, 90, 180, 0], // L, R, T, B
-            gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = CyPhyLightMETA.META_TYPES;
+        var META_TYPES = CyPhyLightMETA.META_TYPES,
+            isInput = METAAspectHelper.isMETAType(id, META_TYPES.InputPort);
 
-        //by default return the bounding box edges midpoints
+        // TODO: this needs to be modified
+        // if flange_a, LHS; flange_b, RHS
+        var nodeObj = this._control._client.getNode(id);
 
-        if (id === undefined || id === this.hostDesignerItem.id) {
-            
-            for (var i = 0; i < ANGLES.length; i++) {
+        var is_FlangeA = nodeObj ? nodeObj.getAttribute("Class") === ModelicaURLs.Flange_a : false;
 
-                result.push( {"id": i,
-                    "x1": this._connectionAreas[i].x1, // x's and y's determine the lines where connections can be drawn on
-                    "y1": this._connectionAreas[i].y1,
-                    "x2": this._connectionAreas[i].x1,
-                    "y2": this._connectionAreas[i].y1,
-                    "angle1": ANGLES[i], // angles determine from which direction between two angles connections can be drawn
-                    "angle2": ANGLES[i],
-                    "len": LEN} );
-            } 
-            
+        if (this._bboxes[id]) {
+            return [{
+                "id": id,
+                "x1": this._bboxes[id].x + this._bboxes[id].width / 2,
+                "y1": this._bboxes[id].y + this._bboxes[id].height / 2,
+                "x2": this._bboxes[id].x + this._bboxes[id].width / 2,
+                "y2": this._bboxes[id].y + this._bboxes[id].height / 2,
+                "angle1": is_FlangeA ? 0 : 180,
+                "angle2": is_FlangeA ? 0 : 180,
+                "len": 0
+            }];
+        } else {
+            return [];
         }
-        
-        return result;
     };
 
     return CyPhyLightBase;
