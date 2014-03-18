@@ -1,0 +1,8 @@
+<svg width="70" height="50" xmlns="http://www.w3.org/2000/svg">
+ <g class="ports">
+ </g>
+ <g transform="translate(20)">
+  <ellipse ry="24" rx="24" id="svg_10" cy="25" cx="25.000315" stroke-opacity="null" stroke-width="2" stroke="#000" fill="#fff"/>
+  <ellipse ry="18" rx="18" id="svg_11" cy="24.89815" cx="25.000315" fill-opacity="null" stroke-opacity="null" stroke-width="2" stroke="#000" fill="#f2f2a4"/>
+ </g>
+</svg>

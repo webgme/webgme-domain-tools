@@ -1,0 +1,9 @@
+<svg width="112" height="64" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <g class="ports">
+ </g>
+ <g transform="translate(20)">
+  <path stroke="#000" id="svg_4" d="m1.08346,0.96804l31.165827,0l0,0c17.212555,0 31.166042,13.87887 31.166042,30.999422c0,17.120256 -13.953487,30.999338 -31.166042,30.999338l-31.165827,0l0,-61.99876z" stroke-opacity="null" stroke-width="2" fill="#fff"/>
+  <ellipse ry="3" rx="3" id="svg_6" cy="32" cx="68.000486" stroke-opacity="null" stroke-width="2" stroke="#000" fill="#fff"/>
+ </g>
+</svg>

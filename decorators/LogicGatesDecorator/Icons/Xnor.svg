@@ -1,0 +1,9 @@
+<svg width="120" height="64" xmlns="http://www.w3.org/2000/svg">
+ <g class="ports">
+ </g>
+ <g transform="translate(20)">
+  <path stroke="#000000" fill="#fff" fill-rule="evenodd" stroke-width="2" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" d="m9.504624,62.750099c-0.054902,0.002201 12.282937,-2.210701 12.282937,-29.999798c0,-28.062641 -12.284139,-31.333091 -12.282937,-31.332971c26.572555,2.81088 43.878654,-1.16988 62.167121,30.666368c-13.636841,28.1497 -31.520668,29.485802 -62.167121,30.666401z" id="rect2193"/>
+  <path stroke="#000000" fill="none" fill-rule="evenodd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" id="path1315" d="m0.834898,62.006901c-0.095232,0.002098 14.260456,-4.521 14.012657,-28.672401c-0.247803,-24.151279 -12.200601,-30.516919 -14.012657,-30.672069"/>
+  <ellipse ry="3" rx="3" id="svg_1" cy="32" cx="76.000317" stroke-width="2" stroke="#000000" fill="#fff"/>
+ </g>
+</svg>

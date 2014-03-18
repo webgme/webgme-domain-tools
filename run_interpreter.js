@@ -51,8 +51,10 @@ program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './
 program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
 program.parse(process.argv);
 var interpreterName = program.interpreterPath;
+//var interpreterName = './interpreters/DsmlApiGenerator/DsmlApiGenerator';
 var selectedID = program.selectedObjID;
 console.log('Given interpreter : %j', interpreterName);
+
 
 // FIXME: dependency does matter!
 requirejs([interpreterName, 'webgme'],
@@ -65,9 +67,49 @@ requirejs([interpreterName, 'webgme'],
         //and get the name of the interpreter
         //now we start with a predefined ones
 
-        var getContext = function(config, callback) {
+        var loadMetaNodes = function (context, callback) {
+
+             // get meta members
+            var metaIDs = context.core.getMemberPaths(context.rootNode, 'MetaAspectSet');
+
+            var len = metaIDs.length;
+
+            var nodeObjs = [];
+
+
+            var allObjectsLoadedHandler = function () {
+                var len2 = nodeObjs.length;
+
+                var nameObjMap = {};
+
+                while (len2--) {
+                    var nodeObj = nodeObjs[len2];
+
+                    nameObjMap[context.core.getAttribute(nodeObj, 'name')] = nodeObj;
+                }
+
+                context.META = nameObjMap;
+                callback(null, context);
+            };
+
+            var loadedMetaObjectHandler = function (err, nodeObj) {
+                nodeObjs.push(nodeObj);
+
+                if (nodeObjs.length === metaIDs.length) {
+                    allObjectsLoadedHandler();
+                }
+            };
+
+            while (len--) {
+                context.core.loadByPath(context.rootNode, metaIDs[len], loadedMetaObjectHandler);
+            }
+        };
+
+        var getContext = function(config,callback) {
             var context = { storage: new Storage({'host':config.host, 'port':config.port, 'database':config.database})};
             context.storage.openDatabase(function(err){
+                console.log('database is open');
+
                     if (!err) {
                         context.storage.openProject(config.project,function(err,project){
                             if(!err){
@@ -84,14 +126,14 @@ requirejs([interpreterName, 'webgme'],
                                                     context.core.loadByPath(context.rootNode, context.selected, function (err, selectedNode) {
                                                         if(!err){
                                                             context.selectedNode = selectedNode;
-                                                            callback(null,context);
+                                                            loadMetaNodes(context, callback);
                                                         } else {
                                                             callback("unable to load selected object",context);
                                                         }
                                                     });
                                                 } else {
                                                     context.selectedNode = null;
-                                                    callback(null,context);
+                                                    loadMetaNodes(context, callback);
                                                 }
                                             } else {
                                                 callback("unable to load root",context);
@@ -110,6 +152,7 @@ requirejs([interpreterName, 'webgme'],
                         callback("cannot open database",context);
                     }
             });
+            console.log('is database already open');
         };
 
         // TODO: read from file or command line arguments
@@ -133,7 +176,7 @@ requirejs([interpreterName, 'webgme'],
                 console.log(Interpreter);
                 var interpreter = new Interpreter();
                 var dataConfig = null;
-                interpreter.doGUIConfig(null, function (interpreterConfig){
+                interpreter.doGUIConfig(null, function (interpreterConfig) {
                     dataConfig = require(interpreterConfig.dataSourcePath);
                 });
 

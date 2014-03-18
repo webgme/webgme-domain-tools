@@ -1,0 +1,7 @@
+<svg width="104" height="64" xmlns="http://www.w3.org/2000/svg">
+ <g class="ports">
+ </g>
+ <g transform="translate(20)">
+  <path stroke="#000000" fill="#fff" fill-rule="evenodd" stroke-width="2" stroke-linejoin="round" stroke-miterlimit="4" stroke-dashoffset="0" d="m0.354176,63.083241c-0.05491,0.002159 11.009041,-2.757561 11.009041,-30.999912c0,-28.520368 -10.385251,-31.333378 -10.384051,-31.333248c26.572649,2.85672 43.878653,-1.18896 62.166876,31.16658c-13.636631,28.608768 -32.145367,29.966709 -62.791866,31.16658z" id="rect2193"/>
+ </g>
+</svg>

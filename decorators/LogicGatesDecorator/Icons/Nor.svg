@@ -1,0 +1,8 @@
+<svg width="112" height="64" xmlns="http://www.w3.org/2000/svg">
+ <g class="ports">
+ </g>
+  <g transform="translate(20)">  <title>Layer 1</title>
+  <path stroke="#000000" id="rect2193" d="m0.416912,63.083241c-0.055832,0.002155 10.557993,-2.752029 10.557993,-30.937748c0,-28.463175 -9.422988,-30.395544 -10.179248,-31.145414c27.017778,2.850991 44.235013,-1.311576 62.829702,30.979081c-13.865089,28.551399 -32.048569,29.906616 -63.208447,31.10408z" stroke-dashoffset="0" stroke-miterlimit="4" stroke-linejoin="round" stroke-width="2" fill-rule="evenodd" fill="#fff"/>
+  <ellipse fill="#fff" stroke="#000000" stroke-width="2" cx="68.041782" cy="32" id="svg_4" rx="3" ry="3"/>
+ </g>
+</svg>
