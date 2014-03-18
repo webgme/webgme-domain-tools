@@ -1,0 +1,11 @@
+<svg width="104" height="64" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <g class="ports">
+ </g>
+ <g transform="translate(20)">
+  <title>Layer 1</title>
+  <line fill="#fff" stroke="#000" stroke-width="1.5" x1="117.623125" y1="25.374994" x2="117.623125" y2="25.124999" id="svg_2" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <ellipse fill="#fff" stroke-width="2" cx="59.917059" cy="32" id="svg_5" rx="3" ry="3" stroke="#000"/>
+  <path stroke="#000" fill="#fff" stroke-width="2" stroke-opacity="null" fill-opacity="null" d="m0.793631,0.999991l-0.032892,61.833357l54.656207,-30.834021l-54.623316,-30.999336l0.000001,0z" id="svg_7"/>
+ </g>
+</svg>
