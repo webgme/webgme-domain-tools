@@ -7,11 +7,13 @@
 "use strict";
 
 define(['js/NodePropertyNames',
+        'js/RegistryKeys.js',
         'js/Utils/METAAspectHelper',
         './LogicGatesDecorator.Constants',
         './LogicGates.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
+                                   REGISTRY_KEYS,
                                    METAAspectHelper,
                                    LogicGatesDecoratorConstants,
                                    LogicGatesMETA,
@@ -128,11 +130,10 @@ define(['js/NodePropertyNames',
         outputPortNum = 1;
 
         childrenIDs.sort(function (aId, bId) {
-            var nodeA = self._control._client.getNode(aId);
-            var nodeB = self._control._client.getNode(bId);
-            if (nodeA && nodeB) {
-                var nodeA_y = nodeA.getRegistry(nodePropertyNames.Registry.position).y;
-                var nodeB_y = nodeB.getRegistry(nodePropertyNames.Registry.position).y;
+            
+            if (aId && bId) {
+                var nodeA_y = self.preferencesHelper.getRegistry(aId, REGISTRY_KEYS.POSITION, true);
+                var nodeB_y = self.preferencesHelper.getRegistry(bId, REGISTRY_KEYS.POSITION, true);
 
                 return nodeA_y < nodeB_y ? 1 : -1;
             }
