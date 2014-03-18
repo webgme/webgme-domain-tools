@@ -11,7 +11,7 @@
  }
  */
 var requirejs = require("requirejs");
-
+var program = require('commander');
 var CONFIG = {
     port: 8888,
     autorecconnect: true,
@@ -47,7 +47,12 @@ requirejs.config({
 });
 
 // TODO: get this from command line argument
-var interpreterName = './interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica';
+program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
+program.parse(process.argv);
+var interpreterName = program.interpreterPath;
+var selectedID = program.selectedObjID;
+console.log('Given interpreter : %j', interpreterName);
 
 // FIXME: dependency does matter!
 requirejs([interpreterName, 'webgme'],
@@ -60,7 +65,7 @@ requirejs([interpreterName, 'webgme'],
         //and get the name of the interpreter
         //now we start with a predefined ones
 
-        var getContext = function(config,callback) {
+        var getContext = function(config, callback) {
             var context = { storage: new Storage({'host':config.host, 'port':config.port, 'database':config.database})};
             context.storage.openDatabase(function(err){
                     if (!err) {
@@ -114,19 +119,35 @@ requirejs([interpreterName, 'webgme'],
                 "database": "multi",
                 "project": "CyPhyLight",
                 "token": "",
-                "selected": "/-1/-2/-1/-1",
+                "selected": selectedID,
                 "commit": "#58269780be380112c11ae00277b5ea896f4af2aa"
                 //"root": ""
                 //"branch": "master"
             };
 
-        getContext(config,function(err,context) {
-            console.log(Interpreter);
-            var interpreter = new Interpreter();
-            interpreter.run(context, function(result) {
-                console.log(result);
-            });
-        });
+        // callback for getContext
+        function invokeInterpreterHandler(err, context){
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(Interpreter);
+                var interpreter = new Interpreter();
+                var dataConfig = null;
+                interpreter.doGUIConfig(null, function (interpreterConfig){
+                    dataConfig = require(interpreterConfig.dataSourcePath);
+                });
 
+                var len = dataConfig.length;
+                while (len--)
+                {
+                    context.dataConfig = dataConfig[len];
+                    interpreter.run(context, function(result) {
+                        console.log(result);
+                    });
+                }
+            }
+        }
+
+        getContext(config, invokeInterpreterHandler);
     }
 );

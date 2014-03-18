@@ -2,73 +2,101 @@
  * Created by Zsolt on 3/17/14.
  */
 
-/**
- * Created by Zsolt on 3/5/14.
- */
+'use strict';
+define([], function () {
 
 
-define(['../../node_modules/webgme/common/LogManager'], function (logManager) {
-	"use strict";
+    var CyPhy2ModelicaInterpreter = function () {
+    };
 
-    var CyPhy2ModelicaInterpreter = function () {};
+    CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback)
+    {
+        callback({'dataSourcePath': './samples/modelica_components.json'});
+    };
 
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
-        // Setup the logger.
-        logManager.setLogLevel(logManager.logLevels.DEBUG);
-        // Will only log to file.
-        logManager.setFileLogPath('CyPhy2ModelicaInterpreter.log');
-        // Create an instance of it.
-        var logger = logManager.create('CyPhy2ModelicaInterpreter');
+        console.log('Run started..');
 
-        logger.info('Run started..');
-        // TODO: check config structure
-        // TODO: set default parameters
         var rootNode = config.rootNode,
             selectedNode = config.selectedNode,
             core = config.core,
             project = config.project,
+            dataConfig = config.dataConfig,
             result;
 
         result = {'commitHash': config.commitHash};
 
+        console.log(dataConfig);
         // root name
-        logger.info(core.getAttribute(rootNode, 'name'));
+        console.log(core.getAttribute(rootNode, 'name'));
 
         // selected object name
-        logger.info(core.getAttribute(selectedNode, 'name'));
+        console.log(core.getAttribute(selectedNode, 'name'));
 
         // selected object position
-        logger.info(core.getRegistry(selectedNode, 'position'));
+        console.log(core.getRegistry(selectedNode, 'position'));
+
+//        var metaKindBases = {
+//            'ModelicaModel': core.loadByPath(rootNode, '/-2/-23', function (err, selectedNode) {
+//                return selectedNode;
+//            }),
+//            'ModelicaConnector': core.loadByPath(rootNode, '/-2/-28', function (err, selectedNode) {
+//                return selectedNode;
+//            }),
+//            'ModelicaParameter': core.loadByPath(rootNode, '/-2/-39', function (err, selectedNode) {
+//                return selectedNode;
+//            }),
+//            'Connector': core.loadByPath(rootNode, '/-2/-27', function (err, selectedNode) {
+//                return selectedNode;
+//            }),
+//            'Parameter': core.loadByPath(rootNode, '/-2/-33', function (err, selectedNode) {
+//                return selectedNode;
+//            }),
+//            'Property': core.loadByPath(rootNode, '/-2/-30', function (err, selectedNode) {
+//                return selectedNode;
+//            })
+//        };
+
+        //var modelicaModel = core.createNode({parent:selectedNode, base: metaKindBases.ModelicaModel});
+        //core.setAttribute(modelicaModel, 'name', 'Fake');
+//        console.log('========= %j', core.getAttribute(metaKindBases.ModelicaModel, 'name'));
 
         // selected object children
         core.loadChildren(selectedNode, function (err, childNodes) {
             var baseNode = null;
             var len = childNodes.length;
-
+            var metaKinds = {};
             while (len--) {
-                logger.debug(core.getAttribute(childNodes[len], 'name'));
+                var childName = core.getAttribute(childNodes[len], 'name');
+                console.log(childName);
                 if (core.getAttribute(childNodes[len], 'name').toLowerCase() === 'solversettings') {
                     baseNode = core.getBase(childNodes[len]);
+                } else if (childName === 'damper'){
+                    metaKinds['ModelicaModel'] = core.getBase(childNodes[len]);
+                } else if (childName === 'd'){
+                    metaKinds['Property'] = core.getBase(childNodes[len]);
+                }else if (childName === 'flange_a'){
+                    metaKinds['Connector'] = core.getBase(childNodes[len]);
                 }
             }
 
-            // TODO: create 3 objects
+            var modelicaModel = core.createNode({parent: selectedNode, base: metaKinds.ModelicaModel});
+            core.setAttribute(modelicaModel, 'Class', 'Modelica.Does.Not.Exist');
+            //var newObjects = [];
 
-            var newObjects = [];
-
-            var newChild = core.createNode({parent:selectedNode, base: baseNode});
-            core.setAttribute(newChild, 'name', 'Fake');
+            //var newChild = core.createNode({parent:selectedNode, base: baseNode});
+            //core.setAttribute(newChild, 'name', 'Fake');
 
 
             // save project
-            core.persist(rootNode, function(err) {});
-            var newRootHash = core.getHash(rootNode);
-            logger.info(project.makeCommit);
-            result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function(err) {
+            //core.persist(rootNode, function(err) {});
+            //var newRootHash = core.getHash(rootNode);
+            //console.log(project.makeCommit);
+            //result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function(err) {
 
-            });
+            //});
 
-            logger.info('Run done.');
+            console.log('Run done.');
             if (callback) {
                 callback({'success': true, 'run_command': 'dir'});
             }
