@@ -65,7 +65,7 @@ define(['js/NodePropertyNames',
                 var childName = client.getNode(childrenIDs[i]).getAttribute("name");
                 //childrenNames.push(client.getNode(childrenIDs[i]).getAttribute("name"));
                 for(var j = 0; j < portsSvgs.length; j++){
-                    if (childName == $(portsSvgs[j]).attr('id')){
+                    if (childName === $(portsSvgs[j]).attr('id')){
                         var portSvg = $(portsSvgs[j]);
                         var connDec = $('<div/>', {'class': DiagramDesignerWidgetConstants.CONNECTOR_CLASS});
 
@@ -86,6 +86,9 @@ define(['js/NodePropertyNames',
                         }
 
                         this.skinParts.$connectorContainer.append(connDec);
+                    } else if ( // TODO: fill in here to render text ) {
+                        var value = client.getNode(childrenIDs[i]).getAttribute("Value");
+                        //this.skinParts.$svg[0].setAttribute(childName, value);
                     }
                 }
             }
