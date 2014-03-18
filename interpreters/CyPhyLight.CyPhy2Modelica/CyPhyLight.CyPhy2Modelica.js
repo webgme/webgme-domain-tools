@@ -4,9 +4,45 @@
 
 
 define(['../../node_modules/webgme/common/LogManager', './CyPhyLight'], function (logManager, METATypes) {
-	"use strict";
+    "use strict";
 
-    var CyPhy2ModelicaInterpreter = function () {};
+    var CyPhy2ModelicaInterpreter = function () {
+    };
+
+    // TODO: move this function to an API
+    var getMetaType = function (core, nodeObj, metaTypes) {
+
+        while (nodeObj) {
+            var name = core.getAttribute(nodeObj, 'name');
+            if (metaTypes.hasOwnProperty(name) && core.getPath(metaTypes[name]) === core.getPath(nodeObj)) {
+
+                break;
+            } else {
+
+                nodeObj = core.getBase(nodeObj);
+            }
+        }
+
+        return nodeObj;
+
+    };
+
+    var isMetaTypeOf = function (core, nodeObj, metaTypeObj) {
+
+        while (nodeObj) {
+            if (core.getGuid(nodeObj) === core.getGuid(metaTypeObj)) {
+
+                return true;
+            } else {
+
+                nodeObj = core.getBase(nodeObj);
+            }
+        }
+
+        return false;
+
+    };
+
 
     CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (GUI, preconfig, callback) {
         var result = GUI(this.getDefaultConfig);
@@ -39,8 +75,12 @@ define(['../../node_modules/webgme/common/LogManager', './CyPhyLight'], function
         }
 
 
-        var newCyPhyProjectObj = core.createNode({parent:rootNode, base: CyPhyLight.CyPhyProject});
+        var newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
         core.setAttribute(newCyPhyProjectObj, 'name', 'New project');
+
+        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.Connector));
+        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.CyPhyProject));
+        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.FCO));
 
         result = {'commitHash': config.commitHash};
 
@@ -62,6 +102,9 @@ define(['../../node_modules/webgme/common/LogManager', './CyPhyLight'], function
                 logger.debug(core.getAttribute(childNodes[len], 'name'));
                 if (core.getAttribute(childNodes[len], 'name').toLowerCase() === 'solversettings') {
                     baseNode = core.getBase(childNodes[len]);
+                    var metaObj = getMetaType(core, childNodes[len], METATypes);
+                    console.log(core.getPath(baseNode));
+                    console.log(core.getPath(metaObj));
                 }
             }
 
@@ -69,15 +112,16 @@ define(['../../node_modules/webgme/common/LogManager', './CyPhyLight'], function
 
             var newObjects = [];
 
-            var newChild = core.createNode({parent:selectedNode, base: baseNode});
+            var newChild = core.createNode({parent: selectedNode, base: baseNode});
             core.setAttribute(newChild, 'name', 'Fake');
 
 
             // save project
-            core.persist(rootNode, function(err) {});
+            core.persist(rootNode, function (err) {
+            });
             var newRootHash = core.getHash(rootNode);
             logger.info(project.makeCommit);
-            result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function(err) {
+            result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
 
             });
 
