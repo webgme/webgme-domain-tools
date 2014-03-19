@@ -139,7 +139,7 @@ requirejs([interpreterName, 'webgme'],
                 "project": "CyPhyLight",
                 "token": "",
                 "selected": selectedID,
-                "commit": "#58269780be380112c11ae00277b5ea896f4af2aa"
+                "commit": "#668b3babcdf2ddcd7ba38b51acb62d63da859d90"
                 //"root": ""
                 //"branch": "master"
             };
