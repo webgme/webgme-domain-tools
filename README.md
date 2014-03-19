@@ -17,4 +17,4 @@ Domain specific tools for WebGME.
 `node_modules\.bin\bfdocs bfdocs.manifest.json`
 
 ### Run JSLint on java-script files.
-`node_modules\.bin\jslint examples\**\*.js`
+`node_modules\.bin\jslint src/examples\**\*.js`

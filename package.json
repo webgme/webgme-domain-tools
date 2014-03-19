@@ -22,7 +22,7 @@
     },
     "config": {
         "blanket": {
-            "pattern": "/",
+            "pattern": "/src",
             "data-cover-never": "node_modules"
         }
     }

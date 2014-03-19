@@ -41,7 +41,7 @@ define(['./CyPhyLight'], function (METATypes) {
 
 
     CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback) {
-        callback({'dataSourcePath': './samples/modelica_components.json'});
+        callback({'dataSourcePath': './src/samples/modelica_components.json'});
     };
 
 

@@ -2,7 +2,7 @@
  * Created by pmeijer on 3/17/14.
  */
 require('blanket');
-var fut = require('../../../examples/jsbasic/baseclass.js');
+var fut = require('../../../src/examples/jsbasic/baseclass.js');
 var chai = require('chai'),
     should = chai.should(),
     assert = chai.assert,

@@ -23,7 +23,7 @@ requirejs.config({
 });
 
 // TODO: get this from command line argument
-program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
 program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
 program.parse(process.argv);
 var interpreterName = program.interpreterPath;
