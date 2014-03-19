@@ -1,9 +1,10 @@
 /*
  * Copyright (C) 2013 Vanderbilt University, All rights reserved.
- *
- * Authors:
+ * 
+ * Author:
+ * Peng Zhang
  */
-
+ 
 "use strict";
 
 define(['js/Constants',
