@@ -86,10 +86,11 @@ define(['js/NodePropertyNames',
                         }
 
                         this.skinParts.$connectorContainer.append(connDec);
-                    } else if ( // TODO: fill in here to render text ) {
-                        var value = client.getNode(childrenIDs[i]).getAttribute("Value");
-                        //this.skinParts.$svg[0].setAttribute(childName, value);
-                    }
+                    } 
+                    // else if ( // TODO: fill in here to render text ) {
+                    //     var value = client.getNode(childrenIDs[i]).getAttribute("Value");
+                    //     //this.skinParts.$svg[0].setAttribute(childName, value);
+                    // }
                 }
             }
 
