@@ -55,7 +55,10 @@ define(['./CyPhyLight'], function (METATypes) {
             dataConfig = config.dataConfig,
             result,
             CyPhyLight = METATypes,
-            index;
+            index,
+            start = new Date(),
+            nbrOfComponents = dataConfig.length,
+            execTime;
 
 //        console.log(dataConfig);
 //        // root name
@@ -85,7 +88,7 @@ define(['./CyPhyLight'], function (METATypes) {
         var componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components});
         core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
 
-        for (index = 0; index < dataConfig.length; index += 1){
+        for (index = 0; index < nbrOfComponents; index += 1){
             var componentConfig = dataConfig[index];
             var component = core.createNode({parent: componentsFolder, base: CyPhyLight.Component});
             var uriPieces = componentConfig.exportedComponentClass.split('.');
@@ -207,6 +210,8 @@ define(['./CyPhyLight'], function (METATypes) {
         });
 
         console.log('Run done.');
+        execTime = new Date() - start;
+        console.log('Execution Time [n=%j] : %j ms', nbrOfComponents, execTime);
         if (callback) {
             callback({'success': true, 'run_command': 'dir'});
         }

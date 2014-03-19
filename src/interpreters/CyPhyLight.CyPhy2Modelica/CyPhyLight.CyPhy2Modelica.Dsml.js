@@ -47,14 +47,16 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
         console.log('Run started..');
-
         var rootNode = config.rootNode,
             selectedNode = config.selectedNode,
             core = config.core,
             project = config.project,
             dataConfig = config.dataConfig,
             result,
-            index;
+            index,
+            start = new Date(),
+            execTime,
+            nbrOfComponents = dataConfig.length;
 
 //        console.log(dataConfig);
 //        // root name
@@ -75,7 +77,7 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
         var componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components.Type});
         core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
 
-        for (index = 0; index < dataConfig.length; index += 1){
+        for (index = 0; index < nbrOfComponents; index += 1){
             var componentConfig = dataConfig[index];
             var componentObj = core.createNode({parent: componentsFolder, base: CyPhyLight.Component.Type});
             var component = new CyPhyLight.Component(componentObj);
@@ -229,6 +231,8 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
         });
 
         console.log('Run done.');
+        execTime = new Date() - start;
+        console.log('Execution Time [n=%j] : %j ms', nbrOfComponents, execTime);
         if (callback) {
             callback({'success': true, 'run_command': 'dir'});
         }
