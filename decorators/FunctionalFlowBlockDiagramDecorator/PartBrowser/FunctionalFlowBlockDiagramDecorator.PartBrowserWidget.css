@@ -1,8 +1,10 @@
 /*
- * Copyright (C) 2013 Vanderbilt University, All rights reserved.
- *
- * Authors:
+ * Copyright (C) 2013-2014 Vanderbilt University, All rights reserved.
+ * 
+ * Author:
+ * Peng Zhang
  */
+ 
 .functionalflowblockdiagram-decorator {
   text-align: center; }
   .functionalflowblockdiagram-decorator text.port-name {

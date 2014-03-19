@@ -43,3 +43,6 @@ nosetests.xml
 
 # modules installed by "npm install"
 node_modules
+
+# ignore generated files in output directory
+out

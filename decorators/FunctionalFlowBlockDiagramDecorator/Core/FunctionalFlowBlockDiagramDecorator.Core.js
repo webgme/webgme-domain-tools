@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2013 Vanderbilt University, All rights reserved.
+ * Copyright (C) 2013-2014 Vanderbilt University, All rights reserved.
  * 
+ * Author:
+ * Peng Zhang
  */
 
 "use strict";
