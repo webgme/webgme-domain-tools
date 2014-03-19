@@ -1,8 +1,10 @@
 /*
  * Copyright (C) 2013 Vanderbilt University, All rights reserved.
- *
+ * 
+ * Authors:
+ * Zsolt Lattmann
+ * Robert Kereskenyi
  */
-
 
 "use strict";
 
