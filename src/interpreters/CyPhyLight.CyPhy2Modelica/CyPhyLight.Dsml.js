@@ -6,49 +6,26 @@ define([], function() {
 
     var CyPhyLight = function () {};
 
-    CyPhyLight.initialize = function (core, storage) {
+    CyPhyLight.initialize = function (core, storage, META) {
+        var name;
+        for (name in META) {
+            if (META.hasOwnProperty(name)) {
+                if (CyPhyLight.hasOwnProperty(name)) {
+                    CyPhyLight[name].Type = META[name];
+                } else {
+                    CyPhyLight[name] = {};
+                    CyPhyLight[name].Type = META[name];
+                }
+            }
+        }
+
         CyPhyLight._core = core;
         CyPhyLight._storage = storage;
     };
 
-
-//    CyPhyLight.METATypes = {
-//        "TestComponent": "/-2/-20",
-//        "ModelicaConnector": "/-2/-28",
-//        "ValueFlowComposition": "/-2/-41",
-//        "Property": "/-2/-30",
-//        "Parameter": "/-2/-33",
-//        "Connection": "/-2/-40",
-//        "ConnectorComposition": "/-2/-49",
-//        "ModelicaConnectorComposition": "/-2/-52",
-//        "Environment": "/-2/-26",
-//        "ValueFlowTarget": "/-2/-29",
-//        "Metric": "/-2/-36",
-//        "ModelicaParameter": "/-2/-39",
-//        "Components": "/-2/-14",
-//        "TestComponents": "/-2/-50",
-//        "SolverSettings": "/-2/-10",
-//        "PropertyType": "/-2/-2",
-//        "ComponentAssemblies": "/-2/-15",
-//        "ModelicaParameterRedeclare": "/-2/-53",
-//        "PostProcessing": "/-2/-100",
-//        "Component": "/-2/-19",
-//        "TopLevelSystemUnderTest": "/-2/-21",
-//        "ComponentAssembly": "/-2/-57",
-//        "DesignEntity": "/-2/-6",
-//        "ComponentType": "/-2/-7",
-//        "ModelicaModel": "/-2/-23",
-//        "ModelicaModelType": "/-2/-22",
-//        "Connector": "/-2/-27",
-//        "ModelicaTestBench": "/-2/-18",
-//        "CyPhyProject": "/-2/-56",
-//        "Folder": "/-2/-3",
-//        "Testing": "/-2/-16",
-//        "TestBenchType": "/-2/-17",
-//        "FCO": "/-2/-1",
-//        "CyPhyLightModelicaLanguage": "/-2"
-//    };
-
+    /********************************************************
+     * Component
+     ********************************************************/
     CyPhyLight.Component = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
@@ -71,8 +48,33 @@ define([], function() {
         return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
     };
 
+    CyPhyLight.Component.prototype.createModelicaModel = function () {
+        return CyPhyLight.ModelicaModel.createObj(this);
+    };
 
+    CyPhyLight.Component.prototype.createProperty = function () {
+        return CyPhyLight.Property.createObj(this);
+    };
 
+    CyPhyLight.Component.prototype.createConnector = function () {
+        return CyPhyLight.Connector.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createValueFlowComposition = function (src, dst) {
+        return CyPhyLight.ValueFlowComposition.createObj(this, src, dst);
+    };
+
+    CyPhyLight.Component.prototype.createModelicaConnectorComposition = function (src, dst) {
+        return CyPhyLight.ModelicaConnectorComposition.createObj(this, src, dst);
+    };
+
+    /********************************************************
+     * ModelicaModel
+     ********************************************************/
     CyPhyLight.ModelicaModel = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
@@ -110,8 +112,101 @@ define([], function() {
         return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
     };
 
+    CyPhyLight.ModelicaModel.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
 
+    CyPhyLight.ModelicaModel.prototype.createModelicaParameter = function () {
+        return CyPhyLight.ModelicaParameter.createObj(this);
+    };
 
+    /********************************************************
+     * Connector
+     ********************************************************/
+    CyPhyLight.Connector = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.Connector.Type = "/-2/-19";
+
+    CyPhyLight.Connector.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.Connector.Type});
+        return new CyPhyLight.Connector(nodeObj);
+    };
+
+    CyPhyLight.Connector.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.Connector.prototype.Attributes = {};
+    CyPhyLight.Connector.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.Connector.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+
+    CyPhyLight.Connector.prototype.Registry = {};
+    CyPhyLight.Connector.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+
+    CyPhyLight.Connector.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    CyPhyLight.Connector.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
+
+    /********************************************************
+     * ModelicaConnector
+     ********************************************************/
+    CyPhyLight.ModelicaConnector = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.ModelicaConnector.Type = "/-2/-19";
+
+    CyPhyLight.ModelicaConnector.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ModelicaConnector.Type});
+        return new CyPhyLight.ModelicaConnector(nodeObj);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.ModelicaConnector.prototype.Attributes = {};
+    CyPhyLight.ModelicaConnector.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.getClass = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'Class');
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.setClass = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'Class', value);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.Registry = {};
+    CyPhyLight.ModelicaConnector.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.createModelicaParameter = function () {
+        return CyPhyLight.ModelicaParameter.createObj(this);
+    };
+
+    /********************************************************
+     * Property
+     ********************************************************/
     CyPhyLight.Property = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
@@ -149,7 +244,9 @@ define([], function() {
         return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
     };
 
-
+    /********************************************************
+     * ModelicaParameter
+     ********************************************************/
     CyPhyLight.ModelicaParameter = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
@@ -188,7 +285,9 @@ define([], function() {
     };
 
 
-
+    /********************************************************
+     * ValueFlowComposition
+     ********************************************************/
     CyPhyLight.ValueFlowComposition = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
@@ -223,7 +322,9 @@ define([], function() {
     };
 
 
-
+    /********************************************************
+     * ModelicaConnectorComposition
+     ********************************************************/
     CyPhyLight.ModelicaConnectorComposition = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;

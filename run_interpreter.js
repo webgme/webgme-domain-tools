@@ -156,14 +156,10 @@ requirejs([interpreterName, 'webgme'],
                     dataConfig = require(interpreterConfig.dataSourcePath);
                 });
 
-                var len = dataConfig.length;
-                while (len--)
-                {
-                    context.dataConfig = dataConfig[len];
-                    interpreter.run(context, function(result) {
-                        console.log(result);
-                    });
-                }
+                context.dataConfig = dataConfig;
+                interpreter.run(context, function(result) {
+                    console.log(result);
+                });
             }
         }
 
