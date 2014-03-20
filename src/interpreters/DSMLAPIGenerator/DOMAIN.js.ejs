@@ -27,18 +27,18 @@ define([], function() {
     };
 
 
-<% for (var metaType in metaTypes) {
-    if (metaTypes.hasOwnProperty(metaType)) {
-        var metaTypeName = metaTypes[metaType].name;
-        var ID = metaTypes[metaType].ID;
-        var GUID = metaTypes[metaType].GUID;
-        var Hash = metaTypes[metaType].Hash;
-        var attributeNames = metaTypes[metaType].attributeNames;
-        var registryNames = metaTypes[metaType].registryNames;
+<% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
+    var metaTypeName = metaTypes[metaTypeIndex].name;
+    var ID = metaTypes[metaTypeIndex].ID;
+    var GUID = metaTypes[metaTypeIndex].GUID;
+    var Hash = metaTypes[metaTypeIndex].Hash;
+    var base = metaTypes[metaTypeIndex].base;
+    var attributeNames = metaTypes[metaTypeIndex].attributeNames;
+    var registryNames = metaTypes[metaTypeIndex].registryNames;
 
 
-        var isConnection = metaTypes[metaType].isConnection;
-        var children = metaTypes[metaType].children;
+    var isConnection = metaTypes[metaTypeIndex].isConnection;
+    var children = metaTypes[metaTypeIndex].children;
 %>
     //<editor-fold desc="<%- metaTypeName %>">
 
@@ -46,11 +46,20 @@ define([], function() {
     * Initializes a new instance of <%- metaTypeName %>.
     *
     * @class
+    <% if (base) { %>* @augments {<%- base %>}<% } %>
     * @classdesc This class represents a(n) <%- metaTypeName %>.
     * @param {FCO} nodeObj The wrapped WebGME object.
     * @constructor
     */
     <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
+        <%
+        if (base) {
+        %>
+        // Call the constructor of the base-class as if it were acting on this.
+        <%- projectName %>.<%- base %>.call(this, nodeObj);
+        <%
+        }
+        %>
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
         this.Registry._nodeObj = this._nodeObj;
@@ -115,15 +124,37 @@ define([], function() {
 
     //<editor-fold desc="<%- metaTypeName %> create child objects">
 <%
-    for (var i = 0; i < children.length; i += 1) {
-        var child = metaTypesByID[children[i]];
+    for (var j = 0; j < children.length; j += 1) {
+        var childBad = metaTypesByID[children[j]];
+
+//        if (childBad.isConnection) {
+//            console.log('Connection', childBad.name, childBad.isConnection);
+//        }
+//
+//        if (childBad.isAbstract) {
+//            console.log('Abstract', childBad.name, childBad.isAbstract);
+//            console.log(childBad);
+//        }
+
+        // FIXME: we have to get the child in a different way
+
+        var child = null;
+        for (var k = 0; k < metaTypes.length; k += 1) {
+            if (metaTypes[k].ID === children[j]) {
+                child = metaTypes[k];
+                if (child.isAbstract) {
+                   // console.log(child);
+                }
+                break;
+            }
+        }
+
 %>
-
-
 <%
         if (child.isConnection) {
     // FIXME: this is still buggy
 %>
+
         <%- projectName %>.<%- metaTypeName %>.prototype.create<%- child.name %> = function (src, dst) {
             return <%- projectName %>.<%- child.name %>.createObj(this, src, dst);
         };
@@ -139,14 +170,15 @@ define([], function() {
         <%
         }
         %>
-
 <%
     }
 %>
-
     //</editor-fold>
 
     <%- projectName %>.<%- metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    // TODO: get Id
+    // TODO: get Guid
 
     //<editor-fold desc="<%- metaTypeName %> attributes">
 
@@ -201,7 +233,6 @@ define([], function() {
     //</editor-fold>
 
 <%
-    }
 }
 %>
 

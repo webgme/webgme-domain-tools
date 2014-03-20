@@ -4,12 +4,8 @@ define(['fs','ejs'], function (fs, ejs) {
     var DsmlApiGenerator = function () {
     };
 
-    function pathToRefObject(path){
-        var ref = {};
-        ref['$ref'] = path;
-        return ref;
-    }
 
+    // FIXME: this method was copied from webgme meta.js
     function getMeta(_core, nodeObj){
         var meta = {children:{},attributes:{},pointers:{}};
         var node = nodeObj || null;
@@ -86,6 +82,8 @@ define(['fs','ejs'], function (fs, ejs) {
 
         logger.info('Run started..');
 
+
+
         var rootNode = config.rootNode,
             selectedNode = config.selectedNode,
             core = config.core,
@@ -95,6 +93,8 @@ define(['fs','ejs'], function (fs, ejs) {
             result;
 
         result = {'commitHash': config.commitHash};
+
+        logger.info('Generating domain specific JavaScript API for ' + projectName);
 
         var metaTypes = [];
         var metaTypesByID = {};
@@ -115,6 +115,13 @@ define(['fs','ejs'], function (fs, ejs) {
                 metaType.GUID = core.getGuid(META[name]);
                 metaType.Hash = core.getHash(META[name]);
 
+                metaType.isAbstract = core.getRegistry(META[name], 'isAbstract');
+
+                var baseNode = core.getBase(META[name]);
+                if (baseNode) {
+                    metaType.base = core.getAttribute(core.getBase(META[name]), 'name');
+                }
+
                 metaType.attributeNames = core.getAttributeNames(META[name]);
                 metaType.attributeNames.sort();
                 metaType.registryNames = core.getRegistryNames(META[name]);
@@ -128,6 +135,7 @@ define(['fs','ejs'], function (fs, ejs) {
                 var meta = getMeta(core, META[name]);
 
                 metaType.isConnection = meta.pointers.hasOwnProperty('src') && meta.pointers.hasOwnProperty('dst');
+
                 if (metaType.isConnection) {
                     console.log('here');
                 }
@@ -147,16 +155,23 @@ define(['fs','ejs'], function (fs, ejs) {
 
         var DOMAIN_TEMPLATE = fs.readFileSync('src/interpreters/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
 
-        var ret = ejs.render(DOMAIN_TEMPLATE, {
+        var domain = {
             projectName: projectName,
             metaTypes: metaTypes,
             metaTypesByID: metaTypesByID
-        });
+        };
+
+        var ret = ejs.render(DOMAIN_TEMPLATE, domain);
 
         //console.log(ret);
 
-        fs.writeFileSync('src/interpreters/DsmlApiGenerator/' + projectName + '.Dsml.js', ret , 'utf8');
+        var outputfileName = 'src/interpreters/DsmlApiGenerator/' + projectName + '.Dsml.js';
 
+        fs.writeFileSync(outputfileName, ret , 'utf8');
+
+        fs.writeFileSync('src/interpreters/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4) , 'utf8');
+
+        console.info(outputfileName + ' was generated.');
         console.log('done');
     };
 
