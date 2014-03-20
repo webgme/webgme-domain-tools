@@ -286,7 +286,5 @@ define(['./CyPhyLight'], function (METATypes) {
 //        });
     };
 
-    console.log('ssssss');
-
     return CyPhy2ModelicaInterpreter;
 });

@@ -26,6 +26,23 @@ define([], function() {
         <%- projectName %>._storage = storage;
     };
 
+    <%- projectName %>.createMETATypesTests = function (core) {
+        var META = {};
+        var options = {};
+        var node = null;
+
+<% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
+    var metaTypeName = metaTypes[metaTypeIndex].name;
+%>
+        options = {};
+        node = core.createNode(options);
+        core.setAttribute(node, 'name', '<%- metaTypeName %>');
+        META['<%- metaTypeName %>'] = node;
+<%
+}
+%>
+        return META;
+    }
 
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
@@ -61,8 +78,8 @@ define([], function() {
         }
         %>
         this._nodeObj = nodeObj;
-        this.Attributes._nodeObj = this._nodeObj;
-        this.Registry._nodeObj = this._nodeObj;
+        this.attributes = new <%- projectName %>.<%- metaTypeName %>.prototype.Attributes(this._nodeObj);
+        this.registry = new <%- projectName %>.<%- metaTypeName %>.prototype.Registry(this._nodeObj);
     };
 
 
@@ -182,17 +199,19 @@ define([], function() {
 
     //<editor-fold desc="<%- metaTypeName %> attributes">
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes = {};
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
 
 <%
     for (var i = 0; i < attributeNames.length; i += 1) {
        var attributeName = attributeNames[i];
 %>
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.get<%- attributeName %> = function () {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.prototype.get<%- attributeName %> = function () {
         return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
     };
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.set<%- attributeName %> = function (value) {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.prototype.set<%- attributeName %> = function (value) {
         return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
     };
 
@@ -205,17 +224,18 @@ define([], function() {
 
     //<editor-fold desc="<%- metaTypeName %> registry entries">
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry = {};
-
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        };
 <%
     for (var i = 0; i < registryNames.length; i += 1) {
         var registryName = registryNames[i];
 %>
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.get<%- registryName %> = function () {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.prototype.get<%- registryName %> = function () {
         return <%- projectName %>._core.getRegistry(this._nodeObj, '<%- registryName %>');
     };
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.set<%- registryName %> = function (value) {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.prototype.set<%- registryName %> = function (value) {
         return <%- projectName %>._core.setRegistry(this._nodeObj, '<%- registryName %>', value);
     };
 

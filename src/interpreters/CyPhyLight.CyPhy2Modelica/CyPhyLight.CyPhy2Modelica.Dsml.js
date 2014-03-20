@@ -39,6 +39,10 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 
     };
 
+    CyPhy2ModelicaInterpreter.prototype.check = function (fco1, fco2) {
+        return fco1.attributes.getname() === fco2.attributes.getname();
+    };
+
 
     CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback) {
         callback({'dataSourcePath': './src/samples/modelica_components.json'});
@@ -264,8 +268,6 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 //
 //        });
     };
-
-    console.log('ssssss');
 
     return CyPhy2ModelicaInterpreter;
 });
