@@ -90,6 +90,7 @@ requirejs([interpreterName, 'webgme'],
                         context.storage.openProject(config.project,function(err,project){
                             if(!err){
                                 context.project = project;
+                                context.projectName = config.project;
                                 context.core = new Core(context.project,{corerel:2});
                                 context.commitHash = config.commit;
                                 context.selected = config.selected;

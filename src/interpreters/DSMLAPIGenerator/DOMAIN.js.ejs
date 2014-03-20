@@ -40,48 +40,109 @@ define([], function() {
         var Hash = metaTypes[metaType].Hash;
         var attributeNames = metaTypes[metaType].attributeNames;
         var registryNames = metaTypes[metaType].registryNames;
+
+
+        var isConnection = metaTypes[metaType].isConnection;
+        var children = metaTypes[metaType].children;
 %>
+    //<editor-fold desc="<%- metaTypeName %>">
+
     /**
-    * Initializes a new instance of Property.
+    * Initializes a new instance of <%- metaTypeName %>.
     *
     * @class
     * @classdesc This class represents the base-object in a domain specific api.
     * @param {FCO} fco The wrapped webGME object.
     * @constructor
     */
-    <%- projectName %>.<%= metaTypeName %> = function (nodeObj) {
+    <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
         this._nodeObj = nodeObj;
         this.Attributes._nodeObj = this._nodeObj;
         this.Registry._nodeObj = this._nodeObj;
     };
 
-    <%- projectName %>.<%= metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
-    <%- projectName %>.<%= metaTypeName %>.ID = "<%- ID %>";
-    <%- projectName %>.<%= metaTypeName %>.GUID = "<%- GUID %>";
-    <%- projectName %>.<%= metaTypeName %>.Hash = "<%- Hash %>";
 
+    //<editor-fold desc="<%- metaTypeName %> static fields, properties and functions">
 
+    <%- projectName %>.<%- metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
+    <%- projectName %>.<%- metaTypeName %>.ID = "<%- ID %>";
+    <%- projectName %>.<%- metaTypeName %>.GUID = "<%- GUID %>";
+    <%- projectName %>.<%- metaTypeName %>.Hash = "<%- Hash %>";
 
-    <%- projectName %>.<%= metaTypeName %>.createObj = function (parent) {
-        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%= metaTypeName %>.Type});
-        return new <%- projectName %>.<%= metaTypeName %>(nodeObj);
+        <%
+        if (isConnection) {
+        %>
+
+    <%- projectName %>.<%- metaTypeName %>.createObj = function (parent, src, dst) {
+        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
+        <%- projectName %>._core.setPointer(nodeObj, 'src', src.getNodeObj());
+        <%- projectName %>._core.setPointer(nodeObj, 'dst', dst.getNodeObj());
+        return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
     };
 
-    // TODO: DSML child objects
+        <%
+        } else {
+        %>
 
-    <%- projectName %>.<%= metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
+    <%- projectName %>.<%- metaTypeName %>.createObj = function (parent) {
+        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
+        return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
+    };
 
-    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes = {};
+        <%
+        }
+        %>
+    //</editor-fold>
+
+
+    //<editor-fold desc="<%- metaTypeName %> create child objects">
+<%
+    for (var i = 0; i < children.length; i += 1) {
+        var child = metaTypesByID[children[i]];
+%>
+
+
+<%
+        if (child.isConnection) {
+    // FIXME: this is still buggy
+%>
+        <%- projectName %>.<%- metaTypeName %>.prototype.create<%- child.name %> = function (src, dst) {
+            return <%- projectName %>.<%- child.name %>.createObj(this, src, dst);
+        };
+
+<%
+        } else {
+%>
+
+    <%- projectName %>.<%- metaTypeName %>.prototype.create<%- child.name %> = function () {
+        return <%- projectName %>.<%- child.name %>.createObj(this);
+    };
+
+        <%
+        }
+        %>
+
+<%
+    }
+%>
+
+    //</editor-fold>
+
+    <%- projectName %>.<%- metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    //<editor-fold desc="<%- metaTypeName %> attributes">
+
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes = {};
 
 <%
     for (var i = 0; i < attributeNames.length; i += 1) {
        var attributeName = attributeNames[i];
 %>
-    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.get<%- attributeName %> = function () {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.get<%- attributeName %> = function () {
         return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
     };
 
-    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.set<%- attributeName %> = function (value) {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.set<%- attributeName %> = function (value) {
         return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
     };
 
@@ -89,17 +150,22 @@ define([], function() {
     }
 %>
 
-    <%- projectName %>.<%= metaTypeName %>.prototype.Registry = {};
+    //</editor-fold>
+
+
+    //<editor-fold desc="<%- metaTypeName %> registry entries">
+
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry = {};
 
 <%
     for (var i = 0; i < registryNames.length; i += 1) {
         var registryName = registryNames[i];
 %>
-    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.get<%- registryName %> = function () {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.get<%- registryName %> = function () {
         return <%- projectName %>._core.getRegistry(this._nodeObj, '<%- registryName %>');
     };
 
-    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.set<%- registryName %> = function (value) {
+    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.set<%- registryName %> = function (value) {
         return <%- projectName %>._core.setRegistry(this._nodeObj, '<%- registryName %>', value);
     };
 
@@ -107,10 +173,14 @@ define([], function() {
     }
 %>
 
+    //</editor-fold>
+
     // TODO: DSML connections
     // TODO: DSML references
     // TODO: DSML sets
     // TODO: DSML pointers
+
+    //</editor-fold>
 
 <%
     }
