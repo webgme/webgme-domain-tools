@@ -45,6 +45,37 @@ define(['./CyPhyLight'], function (METATypes) {
     };
 
 
+    CyPhy2ModelicaInterpreter.prototype.run2 = function (config, callback) {
+
+        console.log('Run started..');
+
+        var rootNode = config.rootNode,
+            selectedNode = config.selectedNode,
+            core = config.core,
+            project = config.project,
+            dataConfig = config.dataConfig,
+            result,
+            CyPhyLight = METATypes;
+
+
+        // root name
+        console.log(core.getAttribute(rootNode, 'name'));
+
+        // selected object name
+        console.log(core.getAttribute(selectedNode, 'name'));
+
+        // selected object position
+        console.log(core.getRegistry(selectedNode, 'position'));
+
+        var newCyPhyProjectObj = core.createNode({parent: rootNode});
+        core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
+
+        var componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: newCyPhyProjectObj});
+        core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
+
+        console.log('done.');
+    };
+
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
         console.log('Run started..');
 
