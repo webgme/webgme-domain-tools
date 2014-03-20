@@ -1,16 +1,11 @@
-/**
- * Created by Zsolt on 3/18/14.
- */
-
 define([], function() {
 
     /**
-    * TODO: fill this out correctly...
-    * Initializes a new instance of DomainFCO.
+    * A module representing <%- projectName %> domain specific API.
     *
-    * @namespace
-    * @classdesc This class represents the domain specific <%- projectName %> API namespace.
-    * @constructor
+    * Generated on <%- new Date().toString() %> [<%- new Date().toISOString() %>]
+    * @exports <%- projectName %>
+    * @version 1.0
     */
     var <%- projectName %> = function () {};
 
@@ -51,8 +46,8 @@ define([], function() {
     * Initializes a new instance of <%- metaTypeName %>.
     *
     * @class
-    * @classdesc This class represents the base-object in a domain specific api.
-    * @param {FCO} fco The wrapped webGME object.
+    * @classdesc This class represents a(n) <%- metaTypeName %>.
+    * @param {FCO} nodeObj The wrapped WebGME object.
     * @constructor
     */
     <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
@@ -64,9 +59,32 @@ define([], function() {
 
     //<editor-fold desc="<%- metaTypeName %> static fields, properties and functions">
 
+    /**
+    * WebGME node object that represents <%- metaTypeName %> type.
+    * @type {nodeObj}
+    * @static
+    */
     <%- projectName %>.<%- metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
+
+    /**
+    * WebGME node object's meta type ID of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
     <%- projectName %>.<%- metaTypeName %>.ID = "<%- ID %>";
+
+    /**
+    * WebGME node object's meta type GUID of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
     <%- projectName %>.<%- metaTypeName %>.GUID = "<%- GUID %>";
+
+    /**
+    * WebGME node object's meta type hash value of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
     <%- projectName %>.<%- metaTypeName %>.Hash = "<%- Hash %>";
 
         <%
