@@ -73,6 +73,8 @@ define([], function() {
         if (base) {
         %>
         // Call the constructor of the base-class as if it were acting on this.
+        // This call is probably only needed if we want to cache the attributes and registry
+        // while not defining them flat here.
         <%- projectName %>.<%- base %>.call(this, nodeObj);
         <%
         }
@@ -81,7 +83,17 @@ define([], function() {
         this.attributes = new <%- projectName %>.<%- metaTypeName %>.prototype.Attributes(this._nodeObj);
         this.registry = new <%- projectName %>.<%- metaTypeName %>.prototype.Registry(this._nodeObj);
     };
+    <%
+    if (base) {
+    %>
 
+    // This will give inheritance when checking types, but META-types must be sorted based on the order of inheritance.
+    // If not <%- projectName %>.<%- base %>.prototype could be undefined at this point.
+    // <%- projectName %>.<%- metaTypeName %>.prototype = Object.create(<%- projectName %>.<%- base %>.prototype);
+    // <%- projectName %>.<%- metaTypeName %>.prototype.constructor = <%- projectName %>.<%- metaTypeName %>;
+    <%
+    }
+    %>
 
     //<editor-fold desc="<%- metaTypeName %> static fields, properties and functions">
 
@@ -214,6 +226,22 @@ define([], function() {
     <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.prototype.set<%- attributeName %> = function (value) {
         return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
     };
+
+    // N.B.This applies to registry too and "Pros and Cons" are not only in respect to the current implementation.
+    // Pros:
+    // - This will give code-completion after typing e.g. component.attributesG.
+    // - It is defined on the prototype and not on each instance.
+    // - No need to create an Attribute class in the constructor.
+    // Cons:
+    // - It is a bit awkward having the attributes "flat" (create%Type% does the same though and children%Type% probably will too).
+
+    //<%- projectName %>.<%- metaTypeName %>.prototype.attributesGet<%- attributeName %> = function () {
+    //  return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
+    //};
+
+    //<%- projectName %>.<%- metaTypeName %>.prototype.attributesSet<%- attributeName %> = function (value) {
+    //  return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
+    //};
 
 <%
     }
