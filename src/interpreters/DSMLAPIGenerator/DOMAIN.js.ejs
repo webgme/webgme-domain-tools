@@ -4,6 +4,98 @@
 
 define([], function() {
 
-    return <%- nameGUIDmap %>;
+    /**
+    * TODO: fill this out correctly...
+    * Initializes a new instance of DomainFCO.
+    *
+    * @namespace
+    * @classdesc This class represents the domain specific <%- projectName %> API namespace.
+    * @constructor
+    */
+    var <%- projectName %> = function () {};
+
+    <%- projectName %>.initialize = function (core, storage, META) {
+        var name;
+        for (name in META) {
+            if (META.hasOwnProperty(name)) {
+                if (<%- projectName %>.hasOwnProperty(name)) {
+                    <%- projectName %>[name].Type = META[name];
+                } else {
+                    <%- projectName %>[name] = {};
+                    <%- projectName %>[name].Type = META[name];
+                }
+            }
+        }
+
+        <%- projectName %>._core = core;
+        <%- projectName %>._storage = storage;
+    };
+
+
+<% for (var metaType in metaTypes) {
+    if (metaTypes.hasOwnProperty(metaType)) {
+        var metaTypeName = metaTypes[metaType].name;
+        var ID = metaTypes[metaType].ID;
+        var GUID = metaTypes[metaType].GUID;
+%>
+    /**
+    * Initializes a new instance of Property.
+    *
+    * @class
+    * @classdesc This class represents the base-object in a domain specific api.
+    * @param {FCO} fco The wrapped webGME object.
+    * @constructor
+    */
+    <%- projectName %>.<%= metaTypeName %> = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    <%- projectName %>.<%= metaTypeName %>.Type = "/-2/-19";
+    <%- projectName %>.<%= metaTypeName %>.ID = "<%- ID %>";
+    <%- projectName %>.<%= metaTypeName %>.GUID = "<%- GUID %>";
+
+
+
+    <%- projectName %>.<%= metaTypeName %>.createObj = function (parent) {
+        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%= metaTypeName %>.Type});
+        return new <%- projectName %>.<%= metaTypeName %>(nodeObj);
+    };
+
+    // TODO: DSML child objects
+
+    <%- projectName %>.<%= metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes = {};
+    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.getname = function () {
+        return <%- projectName %>._core.getAttribute(this._nodeObj, 'name');
+    };
+    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.setname = function (value) {
+        return <%- projectName %>._core.setAttribute(this._nodeObj, 'name', value);
+    };
+
+
+    // TODO: DSML attributes
+
+    <%- projectName %>.<%= metaTypeName %>.prototype.Registry = {};
+    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.getPosition = function () {
+        return <%- projectName %>._core.getRegistry(this._nodeObj, 'position');
+    };
+    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.setPosition = function (value) {
+        return <%- projectName %>._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    // TODO: DSML connections
+    // TODO: DSML references
+    // TODO: DSML sets
+    // TODO: DSML pointers
+
+<%
+    }
+}
+%>
+
+    return <%- projectName %>;
 
 });

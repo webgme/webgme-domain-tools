@@ -4,6 +4,10 @@ define(['fs','ejs'], function (fs, ejs) {
     var DsmlApiGenerator = function () {
     };
 
+    DsmlApiGenerator.prototype.doGUIConfig = function (preconfig, callback) {
+        callback({});
+    };
+
     DsmlApiGenerator.prototype.run = function (config, callback) {
         var logger = console;
 
@@ -18,20 +22,36 @@ define(['fs','ejs'], function (fs, ejs) {
 
         result = {'commitHash': config.commitHash};
 
-        var nameIDmap = {};
+        var metaTypes = [];
 
         for (var name in META) {
             if (META.hasOwnProperty(name)) {
-                nameIDmap[core.getAttribute(META[name], 'name')] = core.getPath(META[name]);
+                var metaType = {};
+                metaType.name = core.getAttribute(META[name], 'name');
+                metaType.srcEndPoints = [];
+                metaType.dstEndpoints = [];
+                metaType.children = [];
+                metaType.ID = core.getPath(META[name]);
+                metaType.GUID = core.getGuid(META[name]);
+
+                metaTypes.push(metaType);
             }
         }
 
-        var DOMAIN_TEMPLATE = fs.readFileSync('interpreters/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
+        metaTypes.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
-        var ret = ejs.render(DOMAIN_TEMPLATE, {nameGUIDmap: JSON.stringify(nameIDmap, undefined, 2)});
+        var DOMAIN_TEMPLATE = fs.readFileSync('src/interpreters/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
+
+        var ret = ejs.render(DOMAIN_TEMPLATE, {
+            projectName: 'CyPhyLight',
+            metaTypes: metaTypes
+
+//            nameGUIDmap: JSON.stringify(nameIDmap, undefined, 2)
+        });
+
         console.log(ret);
 
-        fs.writeFileSync('interpreters/DsmlApiGenerator/' + 'CyPhyLight' + '.js', ret , 'utf8');
+        fs.writeFileSync('src/interpreters/DsmlApiGenerator/' + 'CyPhyLight' + '.Dsml.js', ret , 'utf8');
 
         console.log('done');
     };

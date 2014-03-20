@@ -153,7 +153,9 @@ requirejs([interpreterName, 'webgme'],
                 var interpreter = new Interpreter();
                 var dataConfig = null;
                 interpreter.doGUIConfig(null, function (interpreterConfig) {
-                    dataConfig = require(interpreterConfig.dataSourcePath);
+                    if (interpreterConfig.dataSourcePath) {
+                        dataConfig = require(interpreterConfig.dataSourcePath);
+                    }
                 });
 
                 context.dataConfig = dataConfig;
