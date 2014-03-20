@@ -29,4 +29,4 @@ Domain specific tools for WebGME.
 ### Run JSLint on java-script files. ###
 
 * On Windows: `node_modules\.bin\jslint src\examples\**\*.js`
-*On Linux and Mac OSX: `node_modules/.bin/jslint src\examples\**\*.js`
+* On Linux and Mac OSX: `node_modules/.bin/jslint src\examples\**\*.js`

@@ -94,33 +94,51 @@ requirejs([interpreterName, 'webgme'],
                                 context.core = new Core(context.project,{corerel:2});
                                 context.commitHash = config.commit;
                                 context.selected = config.selected;
-                                context.project.loadObject(context.commitHash, function(err, commitObj) {
-                                    if(!err && commitObj !== null && commitObj !== undefined){
-                                        context.core.loadRoot(commitObj.root, function(err, rootNode) {
-                                            if(!err){
-                                                context.rootNode = rootNode;
-                                                if(typeof context.selected === 'string'){
-                                                    context.core.loadByPath(context.rootNode, context.selected, function (err, selectedNode) {
-                                                        if(!err){
-                                                            context.selectedNode = selectedNode;
-                                                            loadMetaNodes(context, callback);
-                                                        } else {
-                                                            callback("unable to load selected object",context);
-                                                        }
-                                                    });
-                                                } else {
-                                                    context.selectedNode = null;
-                                                    loadMetaNodes(context, callback);
-                                                }
-                                            } else {
-                                                callback("unable to load root",context);
-                                            }
-                                        });
-                                    } else {
-                                        callback('cannot find commit',context);
-                                    }
 
-                                });
+                                var loadCommitHashAndRun = function (commitHash) {
+                                    context.project.loadObject(commitHash, function(err, commitObj) {
+                                        if(!err && commitObj !== null && commitObj !== undefined){
+                                            context.core.loadRoot(commitObj.root, function(err, rootNode) {
+                                                if(!err){
+                                                    context.rootNode = rootNode;
+                                                    if(typeof context.selected === 'string'){
+                                                        context.core.loadByPath(context.rootNode, context.selected, function (err, selectedNode) {
+                                                            if(!err){
+                                                                context.selectedNode = selectedNode;
+                                                                loadMetaNodes(context, callback);
+                                                            } else {
+                                                                callback("unable to load selected object",context);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        context.selectedNode = null;
+                                                        loadMetaNodes(context, callback);
+                                                    }
+                                                } else {
+                                                    callback("unable to load root",context);
+                                                }
+                                            });
+                                        } else {
+                                            callback('cannot find commit',context);
+                                        }
+
+                                    });
+                                };
+
+                                if (config.branchName) {
+                                    context.project.getBranchNames(function (err, branchNames) {
+                                        if (branchNames.indexOf(config.branchName) > -1) {
+                                            //context.project.getBranch
+                                            callback('branch names are not supported yet',context);
+                                        } else {
+                                            callback('cannot find branch',context);
+                                        }
+                                    });
+                                } else {
+                                    loadCommitHashAndRun(context.commitHash);
+                                }
+
+
                             } else {
                                 callback("cannot openproject",context);
                             }
@@ -140,9 +158,9 @@ requirejs([interpreterName, 'webgme'],
                 "project": "CyPhyLight",
                 "token": "",
                 "selected": selectedID,
-                "commit": "#668b3babcdf2ddcd7ba38b51acb62d63da859d90"
+                "commit": "#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
                 //"root": ""
-                //"branch": "master"
+                "branchName": null //"master"
             };
 
         // callback for getContext
