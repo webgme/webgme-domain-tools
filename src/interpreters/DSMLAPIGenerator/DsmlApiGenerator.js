@@ -28,11 +28,19 @@ define(['fs','ejs'], function (fs, ejs) {
             if (META.hasOwnProperty(name)) {
                 var metaType = {};
                 metaType.name = core.getAttribute(META[name], 'name');
-                metaType.srcEndPoints = [];
-                metaType.dstEndpoints = [];
-                metaType.children = [];
                 metaType.ID = core.getPath(META[name]);
                 metaType.GUID = core.getGuid(META[name]);
+                metaType.Hash = core.getHash(META[name]);
+
+                metaType.children = [];
+                metaType.attributeNames = core.getAttributeNames(META[name]);
+                metaType.attributeNames.sort();
+                metaType.registryNames = core.getRegistryNames(META[name]);
+                metaType.registryNames.sort();
+
+                // TODO: pointers ...
+                // TODO: set members ...
+
 
                 metaTypes.push(metaType);
             }

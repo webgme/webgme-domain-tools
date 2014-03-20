@@ -37,6 +37,9 @@ define([], function() {
         var metaTypeName = metaTypes[metaType].name;
         var ID = metaTypes[metaType].ID;
         var GUID = metaTypes[metaType].GUID;
+        var Hash = metaTypes[metaType].Hash;
+        var attributeNames = metaTypes[metaType].attributeNames;
+        var registryNames = metaTypes[metaType].registryNames;
 %>
     /**
     * Initializes a new instance of Property.
@@ -52,9 +55,10 @@ define([], function() {
         this.Registry._nodeObj = this._nodeObj;
     };
 
-    <%- projectName %>.<%= metaTypeName %>.Type = "/-2/-19";
+    <%- projectName %>.<%= metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
     <%- projectName %>.<%= metaTypeName %>.ID = "<%- ID %>";
     <%- projectName %>.<%= metaTypeName %>.GUID = "<%- GUID %>";
+    <%- projectName %>.<%= metaTypeName %>.Hash = "<%- Hash %>";
 
 
 
@@ -68,23 +72,40 @@ define([], function() {
     <%- projectName %>.<%= metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
 
     <%- projectName %>.<%= metaTypeName %>.prototype.Attributes = {};
-    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.getname = function () {
-        return <%- projectName %>._core.getAttribute(this._nodeObj, 'name');
-    };
-    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.setname = function (value) {
-        return <%- projectName %>._core.setAttribute(this._nodeObj, 'name', value);
+
+<%
+    for (var i = 0; i < attributeNames.length; i += 1) {
+       var attributeName = attributeNames[i];
+%>
+    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.get<%- attributeName %> = function () {
+        return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
     };
 
+    <%- projectName %>.<%= metaTypeName %>.prototype.Attributes.set<%- attributeName %> = function (value) {
+        return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
+    };
 
-    // TODO: DSML attributes
+<%
+    }
+%>
 
     <%- projectName %>.<%= metaTypeName %>.prototype.Registry = {};
-    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.getPosition = function () {
-        return <%- projectName %>._core.getRegistry(this._nodeObj, 'position');
+
+<%
+    for (var i = 0; i < registryNames.length; i += 1) {
+        var registryName = registryNames[i];
+%>
+    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.get<%- registryName %> = function () {
+        return <%- projectName %>._core.getRegistry(this._nodeObj, '<%- registryName %>');
     };
-    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.setPosition = function (value) {
-        return <%- projectName %>._core.setRegistry(this._nodeObj, 'position', value);
+
+    <%- projectName %>.<%= metaTypeName %>.prototype.Registry.set<%- registryName %> = function (value) {
+        return <%- projectName %>._core.setRegistry(this._nodeObj, '<%- registryName %>', value);
     };
+
+<%
+    }
+%>
 
     // TODO: DSML connections
     // TODO: DSML references
