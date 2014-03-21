@@ -34,6 +34,35 @@ define(['js/NodePropertyNames',
 
     };
 
+
+    CyPhyLightBase.prototype._toolTipBase = $('<div class="port_info"> \
+            <span class="class_name">CLASS NAME</span> \
+            <span class="name">NAME</span> \
+            <span class="desc">DESCRIPTION</span> \
+            <span class="class_desc">CLASS DESCRIPTION</span> \
+        </div>');
+
+    CyPhyLightBase.prototype._buildToolTip = function (portConnector, svgPort) {
+
+        var tooltip = this._toolTipBase.clone(),
+            svgInfo = $(svgPort).find('#info');
+
+        if (svgInfo.length === 0) {
+            return;
+        }
+
+        svgInfo = $(svgInfo[0]);
+
+        tooltip.find('.name').text(svgInfo.find('#name').text());
+        tooltip.find('.class_name').text(svgInfo.find('#type').text());
+        tooltip.find('.desc').text(svgInfo.find('#desc').text());
+        tooltip.find('.class_desc').text(svgInfo.find('#classDesc').text());
+
+        svgInfo.remove();
+
+        portConnector.append(tooltip);
+    };
+
     /**
      * Renders and updates the ports for this object.
      * @private
@@ -50,7 +79,11 @@ define(['js/NodePropertyNames',
             SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
             PortWidth = CyPhyLightDecoratorConstants.PORT_WIDTH;
 
-        // reinitialize the port coordinates with an empty object
+        var port,
+            svgPort;
+
+        // var portName = port.getAttribute(nodePropertyNames.Attributes.name);
+        // var svgPort = this.skinParts.$svg.find('#' + portName);
 
         var isModelicaModel = METAAspectHelper.isMETAType(gmeID, META_TYPES.ModelicaModel);
         if (isModelicaModel && len){
@@ -62,12 +95,18 @@ define(['js/NodePropertyNames',
             var childrenNames = [];
             var caCnt = 0;
             for(var i = 0; i < len; i++){
-                var childName = client.getNode(childrenIDs[i]).getAttribute("name");
+                var childName = client.getNode(childrenIDs[i]).getAttribute(nodePropertyNames.Attributes.name);
                 //childrenNames.push(client.getNode(childrenIDs[i]).getAttribute("name"));
                 for(var j = 0; j < portsSvgs.length; j++){
                     if (childName === $(portsSvgs[j]).attr('id')){
                         var portSvg = $(portsSvgs[j]);
                         var connDec = $('<div/>', {'class': DiagramDesignerWidgetConstants.CONNECTOR_CLASS});
+                        
+                        svgPort = this.skinParts.$svg.find('#' + childName);
+                        if (svgPort.length > 0) {
+                            svgPort = svgPort[0];
+                        }
+                        this._buildToolTip(connDec, svgPort);
 
                         // N.B. it's using the x, y assuming rectangle! This is not always the case.
                         var bbox = {
