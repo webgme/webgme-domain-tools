@@ -90,7 +90,7 @@ define(['./PluginBase', './PluginContext'], function (PluginBase, PluginContext)
                         // 6) Update context
                         // 7) return
 
-                        callback(null, pluginContext);
+                        //callback(null, pluginContext);
 
                         pluginContext.project = project;
                         pluginContext.projectName = managerConfiguration.project;

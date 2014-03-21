@@ -3,17 +3,97 @@
  */
 
 'use strict';
-define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, PluginConfig) {
+define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
+    function (METATypes, PluginConfig, PluginBase) {
 
     var CyPhy2ModelicaInterpreter = function () {};
 
+    CyPhy2ModelicaInterpreter.prototype = Object.create(PluginBase.prototype);
 
-    // TODO: this should inherit from PluginBase
+    CyPhy2ModelicaInterpreter.getDefaultConfig = function () {
+        return new PluginConfig();
+    };
 
     CyPhy2ModelicaInterpreter.prototype.main = function (config, callback) {
-        console.log('Inside main ...');
-        callback(null, {success:true});
+        console.log('Inside main...');
+
+        var rootNode = config.rootNode,
+            selectedNode = config.selectedNode,
+            core = config.core,
+            project = config.project,
+            dataConfig = DATACONFIG,
+            result,
+            CyPhyLight = METATypes,
+            index,
+            start = new Date(),
+            nbrOfComponents = dataConfig.length,
+            execTime,
+            newCyPhyProjectObj,
+            componentsFolder,
+            component,
+            modelicaModel;
+
+        // FIXME: this is a hack to get intellisense
+        var name;
+        for (name in config.META) {
+            if (config.META.hasOwnProperty(name)) {
+                CyPhyLight[name] = config.META[name];
+            }
+        }
+
+        newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
+        core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
+
+        componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components});
+        core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
+
+        for (index = 0; index < nbrOfComponents; index += 1){
+            var componentConfig = dataConfig[index],
+                uriPieces = componentConfig.exportedComponentClass.split('.'),
+                componentName = uriPieces[uriPieces.length - 1];
+
+            component = core.createNode({parent: componentsFolder, base: CyPhyLight.Component});
+            core.setAttribute(component, 'name', componentName);
+
+            modelicaModel = core.createNode({parent: component, base: CyPhyLight.ModelicaModel});
+            core.setAttribute(modelicaModel, 'name', componentName.toLowerCase());
+            core.setAttribute(modelicaModel, 'Class', componentConfig.exportedComponentClass);
+            core.setRegistry(modelicaModel, 'position', {x: 300, y: 150});
+            var flatData = {
+                parameters: {},
+                connectors: {}
+            };
+
+            CyPhy2ModelicaInterpreter.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            CyPhy2ModelicaInterpreter.buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
+            CyPhy2ModelicaInterpreter.buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
+
+        }
+
+        // Commit changes.
+        core.persist(rootNode, function (err) {
+        });
+
+        var newRootHash = core.getHash(rootNode);
+        console.info(project.makeCommit);
+        result = {'commitHash': config.commitHash};
+        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
+
+        });
+
+        // Print statistics and call callback.
+        console.log('Run done.');
+        execTime = new Date() - start;
+        console.log('Execution Time [n=%j] : %j ms', nbrOfComponents, execTime);
+        if (callback) {
+            callback(null, {'success': true, 'run_command': 'dir'});
+        }
     };
+
+//    CyPhy2ModelicaInterpreter.prototype.main = function (config, callback) {
+//        console.log('Inside main ...');
+//        callback(null, {success:true});
+//    };
 
 
 //    CyPhy2ModelicaInterpreter.prototype.progress = function (percent, title, description) {
@@ -36,10 +116,6 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
 //    CyPhy2ModelicaInterpreter.getSupportedContexts = function () {
 //        throw new Error('implement this function');
 //    };
-
-    CyPhy2ModelicaInterpreter.getDefaultConfig = function () {
-        return new PluginConfig();
-    };
 
 
     // TODO: move this function to an API
@@ -78,7 +154,6 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
     CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback) {
         callback({'dataSourcePath': './src/samples/modelica_components.json'});
     };
-
 
     CyPhy2ModelicaInterpreter.prototype.run2 = function (config, callback) {
 
@@ -213,82 +288,205 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
         }
     };
 
-
-    CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
-        console.log('Run started..');
-
-        var rootNode = config.rootNode,
-            selectedNode = config.selectedNode,
-            core = config.core,
-            project = config.project,
-            dataConfig = config.dataConfig,
-            result,
-            CyPhyLight = METATypes,
-            index,
-            start = new Date(),
-            nbrOfComponents = dataConfig.length,
-            execTime,
-            newCyPhyProjectObj,
-            componentsFolder,
-            component,
-            modelicaModel;
-
-        // FIXME: this is a hack to get intellisense
-        var name;
-        for (name in config.META) {
-            if (config.META.hasOwnProperty(name)) {
-                CyPhyLight[name] = config.META[name];
-            }
+    var DATACONFIG = [
+        {
+            "exportedComponentClass": "Modelica.Mechanics.Translational.Components.Spring",
+            "components": [
+                {
+                    "comment": "Linear 1D translational spring",
+                    "parameters": [
+                        {
+                            "modifiers": {
+                                "start": "1",
+                                "quantity": "\"TranslationalSpringConstant\"",
+                                "unit": "\"N/m\"",
+                                "min": "0"
+                            },
+                            "name": "c",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": "",
+                            "fullName": "Real",
+                            "description": "Spring constant"
+                        },
+                        {
+                            "modifiers": {
+                                "quantity": "\"Length\"",
+                                "unit": "\"m\"",
+                                "min": "0"
+                            },
+                            "name": "s_rel0",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": 0,
+                            "fullName": "Real",
+                            "description": "Unstretched spring length"
+                        }
+                    ],
+                    "imports": [],
+                    "connectors": [],
+                    "extends": [
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.PartialCompliant",
+                            "modifiers": {},
+                            "redeclare_parameters": [],
+                            "parameters": []
+                        }
+                    ],
+                    "fullName": "Modelica.Mechanics.Translational.Components.Spring",
+                    "packages": [],
+                    "redeclare_parameters": []
+                },
+                {
+                    "comment": "Compliant connection of two translational 1D flanges",
+                    "parameters": [],
+                    "imports": [],
+                    "connectors": [
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_a",
+                            "modifiers": {},
+                            "name": "flange_a",
+                            "parameters": [],
+                            "redeclare_parameters": []
+                        },
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_b",
+                            "modifiers": {},
+                            "name": "flange_b",
+                            "parameters": [],
+                            "redeclare_parameters": []
+                        }
+                    ],
+                    "extends": [],
+                    "fullName": "Modelica.Mechanics.Translational.Interfaces.PartialCompliant",
+                    "packages": [],
+                    "redeclare_parameters": []
+                }
+            ]
+        },
+        {
+            "exportedComponentClass": "Modelica.Mechanics.Translational.Components.Damper",
+            "components": [
+                {
+                    "comment": "Linear 1D translational damper",
+                    "parameters": [
+                        {
+                            "modifiers": {
+                                "start": "0",
+                                "quantity": "\"TranslationalDampingConstant\"",
+                                "unit": "\"N.s/m\"",
+                                "min": "0"
+                            },
+                            "name": "d",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": "",
+                            "fullName": "Real",
+                            "description": "Damping constant"
+                        }
+                    ],
+                    "imports": [],
+                    "connectors": [],
+                    "extends": [
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.PartialCompliantWithRelativeStates",
+                            "modifiers": {},
+                            "redeclare_parameters": [],
+                            "parameters": []
+                        },
+                        {
+                            "fullName": "Modelica.Thermal.HeatTransfer.Interfaces.PartialElementaryConditionalHeatPortWithoutT",
+                            "modifiers": {},
+                            "redeclare_parameters": [],
+                            "parameters": []
+                        }
+                    ],
+                    "fullName": "Modelica.Mechanics.Translational.Components.Damper",
+                    "packages": [],
+                    "redeclare_parameters": []
+                },
+                {
+                    "comment": "Base model for the compliant connection of two translational 1-dim. shaft flanges where the relative position and relative velocities are used as states",
+                    "parameters": [
+                        {
+                            "modifiers": {},
+                            "name": "stateSelect",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": "StateSelect.prefer",
+                            "fullName": "StateSelect",
+                            "description": "Priority to use phi_rel and w_rel as states"
+                        },
+                        {
+                            "modifiers": {
+                                "quantity": "\"Length\"",
+                                "unit": "\"m\"",
+                                "min": "0"
+                            },
+                            "name": "s_nominal",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": 0.0001,
+                            "fullName": "Real",
+                            "description": "Nominal value of s_rel (used for scaling)"
+                        }
+                    ],
+                    "imports": [],
+                    "connectors": [
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_a",
+                            "modifiers": {},
+                            "name": "flange_a",
+                            "parameters": [],
+                            "redeclare_parameters": []
+                        },
+                        {
+                            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_b",
+                            "modifiers": {},
+                            "name": "flange_b",
+                            "parameters": [],
+                            "redeclare_parameters": []
+                        }
+                    ],
+                    "extends": [],
+                    "fullName": "Modelica.Mechanics.Translational.Interfaces.PartialCompliantWithRelativeStates",
+                    "packages": [],
+                    "redeclare_parameters": []
+                },
+                {
+                    "comment": "Partial model to include a conditional HeatPort in order to dissipate losses, used for textual modeling, i.e., for elementary models",
+                    "parameters": [
+                        {
+                            "modifiers": {},
+                            "name": "useHeatPort",
+                            "isCyPhySafe": true,
+                            "isPublic": true,
+                            "value": false,
+                            "fullName": "Boolean",
+                            "description": "=true, if heatPort is enabled"
+                        }
+                    ],
+                    "imports": [],
+                    "connectors": [
+                        {
+                            "fullName": "Modelica.Thermal.HeatTransfer.Interfaces.HeatPort_a",
+                            "modifiers": {
+                                "modifications": "public",
+                                "Q_flow": "-lossPower"
+                            },
+                            "name": "heatPort",
+                            "parameters": [],
+                            "redeclare_parameters": []
+                        }
+                    ],
+                    "extends": [],
+                    "fullName": "Modelica.Thermal.HeatTransfer.Interfaces.PartialElementaryConditionalHeatPortWithoutT",
+                    "packages": [],
+                    "redeclare_parameters": []
+                }
+            ]
         }
-
-        newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
-        core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
-
-        componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components});
-        core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
-
-        for (index = 0; index < nbrOfComponents; index += 1){
-            var componentConfig = dataConfig[index],
-                uriPieces = componentConfig.exportedComponentClass.split('.'),
-                componentName = uriPieces[uriPieces.length - 1];
-
-            component = core.createNode({parent: componentsFolder, base: CyPhyLight.Component});
-            core.setAttribute(component, 'name', componentName);
-
-            modelicaModel = core.createNode({parent: component, base: CyPhyLight.ModelicaModel});
-            core.setAttribute(modelicaModel, 'name', componentName.toLowerCase());
-            core.setAttribute(modelicaModel, 'Class', componentConfig.exportedComponentClass);
-            core.setRegistry(modelicaModel, 'position', {x: 300, y: 150});
-            var flatData = {
-                parameters: {},
-                connectors: {}
-            };
-
-            CyPhy2ModelicaInterpreter.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
-            CyPhy2ModelicaInterpreter.buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
-            CyPhy2ModelicaInterpreter.buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
-
-        }
-
-        // Commit changes.
-        core.persist(rootNode, function (err) {
-        });
-
-        var newRootHash = core.getHash(rootNode);
-        console.info(project.makeCommit);
-        result = {'commitHash': config.commitHash};
-        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
-
-        });
-
-        // Print statistics and call callback.
-        console.log('Run done.');
-        execTime = new Date() - start;
-        console.log('Execution Time [n=%j] : %j ms', nbrOfComponents, execTime);
-        if (callback) {
-            callback({'success': true, 'run_command': 'dir'});
-        }
-    };
+    ];
 
     return CyPhy2ModelicaInterpreter;
 });
