@@ -3,9 +3,44 @@
  */
 
 'use strict';
-define(['./CyPhyLight'], function (METATypes) {
+define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, PluginConfig) {
 
     var CyPhy2ModelicaInterpreter = function () {};
+
+
+    // TODO: this should inherit from PluginBase
+
+    CyPhy2ModelicaInterpreter.prototype.main = function (config, callback) {
+        console.log('Inside main ...');
+        callback(null, {success:true});
+    };
+
+
+//    CyPhy2ModelicaInterpreter.prototype.progress = function (percent, title, description) {
+//        throw new Error('implement this function');
+//    };
+
+
+//    CyPhy2ModelicaInterpreter.prototype.checkModel = function () {
+//        throw new Error('implement this function');
+//    };
+
+//    CyPhy2ModelicaInterpreter.getName = function () {
+//        throw new Error('implement this function');
+//    };
+//
+//    CyPhy2ModelicaInterpreter.getVersion = function () {
+//        throw new Error('implement this function');
+//    };
+//
+//    CyPhy2ModelicaInterpreter.getSupportedContexts = function () {
+//        throw new Error('implement this function');
+//    };
+
+    CyPhy2ModelicaInterpreter.getDefaultConfig = function () {
+        return new PluginConfig();
+    };
+
 
     // TODO: move this function to an API
     var getMetaType = function (core, nodeObj, metaTypes) {
