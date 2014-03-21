@@ -237,10 +237,7 @@ define(['js/Constants',
             // append error svg if the svg does not exist for this element
             this.$el.find('.svg-container').append(this.getErrorSVG());
         }
-//        var isModelicaModel = METAAspectHelper.isMETAType(gmeID, META_TYPES.ModelicaModel);
-//        var isModelicaConnector = METAAspectHelper.isMETAType(gmeID, META_TYPES.ModelicaConnector);
-//        if (isModelicaModel || isModelicaConnector){
-            // Get access to the methods from CyPhyLightBase.
+
         _.extend(this, new CyPhyLightBase());
 
         // call the type specific renderer
@@ -251,6 +248,50 @@ define(['js/Constants',
         //}
     };
 
+    CyPhyLightDecoratorCore.prototype._renderSvgText = function () {
+        var gmeID = this._metaInfo[CONSTANTS.GME_ID],
+            client = this._control._client,
+            nodeObj = client.getNode(gmeID),
+            childrenIDs = nodeObj ?  nodeObj.getChildrenIds() : [];
+
+        var bound_data = this.skinParts.$svg.find('text');
+
+        for (var i = 0; i < bound_data.length; ++i) {
+            // get attribute name that is bound
+            var bound_param = $(bound_data[i]).find('.data-bind').contents()[0];
+            if (bound_param) {
+
+                var data_name = bound_param.data.replace('%', ''),
+                    value;
+
+                // if the attribute is name
+                if (data_name === nodePropertyNames.Attributes.name)
+                {
+                    // render name on svg
+                    value = client.getNode(gmeID).getAttribute(data_name);
+                    $(bound_data[i]).contents()[0].data = value;
+
+                } else {
+                    // if data-bind is not name
+                    var param_name = data_name.split('=')[0];
+                    // find child of bound_param's name: if there is child get & render child value
+                    for (var j = 0; j < childrenIDs.length; ++j) {
+                        
+                        var childName = client.getNode(childrenIDs[j]).getAttribute(nodePropertyNames.Attributes.name);
+                        // check if child name is the bound data name
+                        // TODO: the seond part of the if condition may need fixes
+                        if (childName === param_name || childName[0] === param_name[0]) {
+
+                            value = client.getNode(childrenIDs[j]).getAttribute('Value');
+                            // render value to svg's data holder
+                            $(bound_data[i]).contents()[0].data = param_name + "=" + value;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Updates the rendered object. This function is called by the Widget.
@@ -275,6 +316,7 @@ define(['js/Constants',
 
         // update name of the rendered object
         this._updateName();
+        this._renderSvgText();
         this._updatePorts();
     };
 
