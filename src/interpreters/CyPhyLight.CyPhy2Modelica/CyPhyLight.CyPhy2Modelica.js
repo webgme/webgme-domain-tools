@@ -111,7 +111,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
         console.log('done.');
     };
 
-    var getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
+    CyPhy2ModelicaInterpreter.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
         console.log('Getting content for :: %j', currentModelicaURI);
         var idxC, currComponent,
             idxP, currParameter,
@@ -146,7 +146,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
         }
     };
 
-    var buildParameters = function (core, CyPhyLight, component, modelicaModel, parameters) {
+    CyPhy2ModelicaInterpreter.buildParameters = function (core, CyPhyLight, component, modelicaModel, parameters) {
         var property,
             modelicaParameter,
             param,
@@ -177,7 +177,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
         }
     };
 
-    var buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
+    CyPhy2ModelicaInterpreter.buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
         var key,
             connector,
             modelicaConnector,
@@ -264,9 +264,9 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig'], function (METATypes, 
                 connectors: {}
             };
 
-            getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
-            buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
-            buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
+            CyPhy2ModelicaInterpreter.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            CyPhy2ModelicaInterpreter.buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
+            CyPhy2ModelicaInterpreter.buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
 
         }
 
