@@ -1,0 +1,48 @@
+
+'use strict';
+var requirejs = require("requirejs");
+
+//require('blanket');
+
+requirejs.config({
+    baseUrl: __dirname,
+    nodeRequire: require
+});
+
+
+
+var chai = require('chai'),
+    should = chai.should(),
+    assert = chai.assert,
+    expect = chai.expect;
+
+
+//exports.testSomething = function(test){
+//    var CoreMock = requirejs('../../src/mocks/CoreMock');
+//    var core = new CoreMock();
+//
+//    var n = core.createNode({parent: core.getRootNode()});
+//    core.setAttribute(n, 'name', 'test name');
+//
+//    test.expect(2);
+//    test.ok(n !== undefined, "this assertion should pass");
+//
+//    test.ok(core.getAttribute(n, 'name') === 'test name', "this assertion should pass");
+//
+//    test.done();
+//};
+
+describe('attribute getter and setter', function() {
+    var CoreMock = requirejs('../../src/mocks/CoreMock');
+    var core = new CoreMock();
+
+    it ('should pass', function() {
+        var n = core.createNode({parent: core.getRootNode()});
+        core.setAttribute(n, 'name', 'test name');
+        expect(n).should.not.equal(null);
+        var name = core.getAttribute(n, 'name');
+        expect(name).to.equal('test name');
+
+    });
+});
+

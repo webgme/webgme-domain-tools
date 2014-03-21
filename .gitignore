@@ -46,3 +46,4 @@ node_modules
 
 # ignore generated files in output directory
 out
+coverage
