@@ -63,9 +63,11 @@ define([], function() {
     * Initializes a new instance of <%- metaTypeName %>.
     *
     * @class
-    <% if (base) { %>* @augments {<%- base %>}<% } %>
+    <% if (base) { %>* @augments {<%- projectName %>.<%- base %>}<% } %>
     * @classdesc This class represents a(n) <%- metaTypeName %>.
-    * @param {FCO} nodeObj The wrapped WebGME object.
+    * @property {<%- projectName %>.<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
+    * @property {<%- projectName %>.<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object.
     * @constructor
     */
     <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
@@ -75,13 +77,13 @@ define([], function() {
         // Call the constructor of the base-class as if it were acting on this.
         // This call is probably only needed if we want to cache the attributes and registry
         // while not defining them flat here.
-        <%- projectName %>.<%- base %>.call(this, nodeObj);
-        <%
+        //<%- projectName %>.<%- base %>.call(this, nodeObj);
+        //<%
         }
         %>
         this._nodeObj = nodeObj;
-        this.attributes = new <%- projectName %>.<%- metaTypeName %>.prototype.Attributes(this._nodeObj);
-        this.registry = new <%- projectName %>.<%- metaTypeName %>.prototype.Registry(this._nodeObj);
+        this.attributes = new <%- projectName %>.<%- metaTypeName %>.Attributes(this._nodeObj);
+        this.registry = new <%- projectName %>.<%- metaTypeName %>.Registry(this._nodeObj);
     };
     <%
     if (base) {
@@ -91,9 +93,9 @@ define([], function() {
     // If not <%- projectName %>.<%- base %>.prototype could be undefined at this point.
     // <%- projectName %>.<%- metaTypeName %>.prototype = Object.create(<%- projectName %>.<%- base %>.prototype);
     // <%- projectName %>.<%- metaTypeName %>.prototype.constructor = <%- projectName %>.<%- metaTypeName %>;
-    <%
+    // <%
     }
-    %>
+    // %>
 
     //<editor-fold desc="<%- metaTypeName %> static fields, properties and functions">
 
@@ -128,7 +130,6 @@ define([], function() {
         <%
         if (isConnection) {
         %>
-
     <%- projectName %>.<%- metaTypeName %>.createObj = function (parent, src, dst) {
         var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
         <%- projectName %>._core.setPointer(nodeObj, 'src', src.getNodeObj());
@@ -139,7 +140,12 @@ define([], function() {
         <%
         } else {
         %>
-
+    /**
+    * Creates a new <%- metaTypeName %> inside given parent.
+    * @returns {<%- projectName %>.<%- metaTypeName %>} The newly created <%- metaTypeName %>.
+    * @param {<%- projectName %>.FCO} parent Instance where the new <%- metaTypeName %> should be created.
+    * @public
+    */
     <%- projectName %>.<%- metaTypeName %>.createObj = function (parent) {
         var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
         return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
@@ -177,26 +183,32 @@ define([], function() {
                 break;
             }
         }
-
-%>
-<%
+%><%
         if (child.isConnection) {
     // FIXME: this is still buggy
 %>
-
+        /**
+        * Creates a new <%- child.name %> inside this <%- metaTypeName %> instance with src and dst connected.
+        * @param {<%- projectName %>.FCO} src The source of the new connection.
+        * @param {<%- projectName %>.FCO} dst The destination of the new connection.
+        * @returns {<%- projectName %>.<%- child.name %>} The newly created <%- child.name %>.
+        * @public
+        */
         <%- projectName %>.<%- metaTypeName %>.prototype.create<%- child.name %> = function (src, dst) {
             return <%- projectName %>.<%- child.name %>.createObj(this, src, dst);
         };
-
 <%
         } else {
 %>
-
+    /**
+    * Creates a new <%- child.name %> inside this <%- metaTypeName %> instance.
+    * @returns {<%- projectName %>.<%- child.name %>} The newly created <%- child.name %>.
+    * @public
+    */
     <%- projectName %>.<%- metaTypeName %>.prototype.create<%- child.name %> = function () {
         return <%- projectName %>.<%- child.name %>.createObj(this);
     };
-
-        <%
+<%
         }
         %>
 <%
@@ -210,8 +222,15 @@ define([], function() {
     // TODO: get Guid
 
     //<editor-fold desc="<%- metaTypeName %> attributes">
-
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes = function (nodeObj) {
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Attributes
+    *
+    * @class
+    * @classdesc This class wraps the attributes of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %>.Attributes = function (nodeObj) {
         this._nodeObj = nodeObj;
     };
 
@@ -219,29 +238,24 @@ define([], function() {
     for (var i = 0; i < attributeNames.length; i += 1) {
        var attributeName = attributeNames[i];
 %>
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.prototype.get<%- attributeName %> = function () {
+    /**
+    * Gets the attribute <%- attributeName %> of the <%- metaTypeName %> instance.
+    * @returns {string|object} Currently set <%- attributeName %>.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.Attributes.prototype.get<%- attributeName %> = function () {
         return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
     };
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Attributes.prototype.set<%- attributeName %> = function (value) {
+    /**
+    * Sets the attribute <%- attributeName %> of the <%- metaTypeName %> instance.
+    * @param {string|object} value New <%- attributeName %>.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.Attributes.prototype.set<%- attributeName %> = function (value) {
         return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
     };
 
-    // N.B.This applies to registry too and "Pros and Cons" are not only in respect to the current implementation.
-    // Pros:
-    // - This will give code-completion after typing e.g. component.attributesG.
-    // - It is defined on the prototype and not on each instance.
-    // - No need to create an Attribute class in the constructor.
-    // Cons:
-    // - It is a bit awkward having the attributes "flat" (create%Type% does the same though and children%Type% probably will too).
-
-    //<%- projectName %>.<%- metaTypeName %>.prototype.attributesGet<%- attributeName %> = function () {
-    //  return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
-    //};
-
-    //<%- projectName %>.<%- metaTypeName %>.prototype.attributesSet<%- attributeName %> = function (value) {
-    //  return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
-    //};
 
 <%
     }
@@ -251,19 +265,36 @@ define([], function() {
 
 
     //<editor-fold desc="<%- metaTypeName %> registry entries">
-
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry = function (nodeObj) {
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Registry
+    *
+    * @class
+    * @classdesc This class wraps the registry of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %>.Registry = function (nodeObj) {
         this._nodeObj = nodeObj;
-        };
+    };
 <%
     for (var i = 0; i < registryNames.length; i += 1) {
         var registryName = registryNames[i];
 %>
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.prototype.get<%- registryName %> = function () {
+    /**
+    * Gets the registry value <%- registryName %> of the <%- metaTypeName %> instance.
+    * @returns {string|object} Currently set <%- registryName %>.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.Registry.prototype.get<%- registryName %> = function () {
         return <%- projectName %>._core.getRegistry(this._nodeObj, '<%- registryName %>');
     };
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.Registry.prototype.set<%- registryName %> = function (value) {
+    /**
+    * Sets the registry value <%- registryName %> of the <%- metaTypeName %> instance.
+    * @param {string|object} value New registry value of <%- registryName %>.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.Registry.prototype.set<%- registryName %> = function (value) {
         return <%- projectName %>._core.setRegistry(this._nodeObj, '<%- registryName %>', value);
     };
 
