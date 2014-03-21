@@ -129,9 +129,9 @@ requirejs([interpreterName, 'webgme'],
                                     context.project.getBranchNames(function (err, branchNames) {
                                         console.log(branchNames);
                                         if (branchNames.hasOwnProperty(config.branchName)) {
-                                            context.commit = branchNames[config.branchName];
-                                            console.log(context.commit);
-                                            callback(null,context);
+                                            context.commitHash = branchNames[config.branchName];
+                                            console.log(context.commitHash);
+                                            loadCommitHashAndRun(context.commitHash);
                                         } else {
                                             callback('cannot find branch',context);
                                         }
