@@ -19,7 +19,8 @@ Domain specific tools for WebGME.
 * On Windows: `node_modules\.bin\mocha --require blanket -R html-cov > coverage.html test/examples/jsbasic/test_baseclass.js`
 * On Linux and Mac OSX: `node_modules/.bin/mocha --require blanket -R html-cov > coverage.html test/examples/jsbasic/test_baseclass.js`
 
-'node_modules/.bin/istanbul --hook-run-in-context cover node_modules/.bin/_mocha -- -R spec test/mocks/CoreMock.js'
+* On Windows: 'node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/mocks/CoreMock.js'
+* On Linux and Mac OSX: 'node_modules/.bin/istanbul --hook-run-in-context cover node_modules/.bin/_mocha -- -R spec test/mocks/CoreMock.js'
 
 
 ### Generate documentation. ###
