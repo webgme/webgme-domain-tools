@@ -127,9 +127,11 @@ requirejs([interpreterName, 'webgme'],
 
                                 if (config.branchName) {
                                     context.project.getBranchNames(function (err, branchNames) {
-                                        if (branchNames.indexOf(config.branchName) > -1) {
-                                            //context.project.getBranch
-                                            callback('branch names are not supported yet',context);
+                                        console.log(branchNames);
+                                        if (branchNames.hasOwnProperty(config.branchName)) {
+                                            context.commit = branchNames[config.branchName];
+                                            console.log(context.commit);
+                                            callback(null,context);
                                         } else {
                                             callback('cannot find branch',context);
                                         }
@@ -158,9 +160,9 @@ requirejs([interpreterName, 'webgme'],
                 "project": "CyPhyLight",
                 "token": "",
                 "selected": selectedID,
-                "commit": "#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
+                "commit": null, //"#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
                 //"root": ""
-                "branchName": null //"master"
+                "branchName": "master"
             };
 
         // callback for getContext
