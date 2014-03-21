@@ -5,6 +5,7 @@
 'use strict';
 define([], function () {
 
+    // JSON serializable object, which contains only strings/values
     var PluginConfig = function () {
 
     };

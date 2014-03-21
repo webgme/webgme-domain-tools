@@ -3,24 +3,48 @@
  */
 
 'use strict';
-define([], function () {
+define(['./PluginBase', './PluginContext'], function (PluginBase, PluginContext) {
 
-    var PluginManagerBase = function (core, storage) {
+    var PluginManagerBase = function (core, storage, plugins) {
 
-        this._core = core;
-        this._storage = storage;
+        this._core = core;       // webgme core is used to operate on objects
+        this._storage = storage; // webgme storage
+        this._plugins = plugins; // key value pair of pluginName: pluginType - plugins are already loaded/downloaded
     };
 
+    /**
+     * Gets a new instance of a plugin by name.
+     * @param {string} name
+     * @returns {PluginBase}
+     */
     PluginManagerBase.prototype.getPluginByName = function (name) {
-
+        return new this._plugins[name]();
     };
 
     PluginManagerBase.prototype.loadMetaTypes = function () {
 
     };
 
-    PluginManagerBase.prototype.getPluginConfiguration = function (managerConfiguration) {
+    /**
+     *
+     * @param {PluginManagerConfiguration} managerConfiguration
+     * @param {function} callback
+     */
+    PluginManagerBase.prototype.getPluginContext = function (managerConfiguration, callback) {
+        var pluginContext =  new PluginContext();
 
+        // TODO: initialize context
+
+        // TODO: based on the string values get the node objects
+        // 1) Open project
+        // 2) Load commit hash
+        // 3) Load rootNode
+        // 4) Load selected object
+        // 5) Load selected objects
+        // 6) Update context
+        // 7) return
+
+        callback(null, pluginContext);
     };
 
     PluginManagerBase.prototype.executePlugin = function (name, managerConfiguration, progress, done) {
@@ -28,15 +52,18 @@ define([], function () {
 
         this.loadMetaTypes();
 
-        var pluginConfiguration = this.getPluginConfiguration(managerConfiguration);
-
         // TODO: if automation - get last config
-
+        var pluginConfig = plugin.getDefaultConfig();
 
         // TODO: plugin.doInteractiveConfig
 
-        plugin.main(pluginConfiguration, function () {
+        this.getPluginContext(managerConfiguration, function (err, pluginContext) {
+            pluginContext.setConfig(pluginConfig);
 
+            // TODO: provide implementation here
+            plugin.main(pluginContext, function () {
+
+            });
         });
     };
 
