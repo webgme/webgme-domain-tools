@@ -1,5 +1,5 @@
-define([], function() {
-
+define([], function () {
+    'use strict';
     /**
     * A module representing <%- projectName %> domain specific API.
     *
@@ -27,17 +27,16 @@ define([], function() {
     };
 
     <%- projectName %>.createMETATypesTests = function (core) {
-        var META = {};
-        var options = {};
-        var node = null;
+        var META = {},
+            options = {},
+            node;
 
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
 %>
-        options = {};
         node = core.createNode(options);
         core.setAttribute(node, 'name', '<%- metaTypeName %>');
-        META['<%- metaTypeName %>'] = node;
+        META.<%- metaTypeName %> = node;
 <%
 }
 %>

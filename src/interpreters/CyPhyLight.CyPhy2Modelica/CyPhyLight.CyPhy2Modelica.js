@@ -76,6 +76,109 @@ define(['./CyPhyLight'], function (METATypes) {
         console.log('done.');
     };
 
+    var getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
+        console.log('Getting content for :: %j', currentModelicaURI);
+        var idxC, currComponent,
+            idxP, currParameter,
+            idxCn, currConnector,
+            idxE, currExtends,
+            idxEp, currExtendsParameter,
+            parameters = flatData.parameters,
+            connectors = flatData.connectors;
+
+        for (idxC = 0; idxC < componentConfig.components.length; idxC += 1) {
+            currComponent = componentConfig.components[idxC];
+            if (currComponent.fullName === currentModelicaURI) {
+                for (idxP = 0; idxP < currComponent.parameters.length; idxP += 1) {
+                    currParameter = currComponent.parameters[idxP];
+                    parameters[currParameter.name] = parameters[currParameter.name] || currParameter;
+                }
+                for (idxCn = 0; idxCn < currComponent.connectors.length; idxCn += 1) {
+                    currConnector = currComponent.connectors[idxCn];
+                    connectors[currConnector.name] = connectors[currConnector.name] || currConnector;
+                }
+                for (idxE = 0; idxE < currComponent.extends.length; idxE += 1) {
+                    currExtends = currComponent.extends[idxE];
+                    for (idxEp = 0; idxEp < currExtends.parameters.length; idxEp += 1) {
+                        currExtendsParameter = currExtends.parameters[idxEp];
+                        parameters[currExtendsParameter.name] = parameters[currExtendsParameter.name] || currExtendsParameter;
+                    }
+                    // Recursive Call is made here
+                    getComponentContentRec(flatData, componentConfig, currExtends.fullName);
+                }
+                break;
+            }
+        }
+    };
+
+    var buildParameters = function (core, CyPhyLight, component, modelicaModel, parameters) {
+        var property,
+            modelicaParameter,
+            param,
+            valueFlow,
+            key,
+            y = 70,
+            dY = 70;
+
+        for (key in parameters) {
+            if (parameters.hasOwnProperty(key)) {
+                param = parameters[key];
+                property = core.createNode({parent: component, base: CyPhyLight.Property});
+                core.setAttribute(property, 'name', param.name);
+                core.setAttribute(property, 'Value', param.value);
+                core.setRegistry(property, 'position', {x: 70, y: y});
+
+                modelicaParameter = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaParameter});
+                core.setAttribute(modelicaParameter, 'name', param.name);
+                core.setAttribute(modelicaParameter, 'Value', param.value);
+                core.setRegistry(modelicaParameter, 'position', {x: 70, y: y});
+                y += dY;
+                console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
+                // Create connections
+                valueFlow = core.createNode({parent: component, base: CyPhyLight.ValueFlowComposition});
+                core.setPointer(valueFlow, 'src', property);
+                core.setPointer(valueFlow, 'dst', modelicaParameter);
+            }
+        }
+    };
+
+    var buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
+        var key,
+            connector,
+            modelicaConnector,
+            modelicaConnectorCon,
+            conn,
+            connectorComp,
+            y = 70,
+            dY = 70;
+
+        for (key in connectors) {
+            if (connectors.hasOwnProperty(key)) {
+                conn = connectors[key];
+                connector = core.createNode({parent: component, base: CyPhyLight.Connector});
+                core.setAttribute(connector, 'name', conn.name);
+                core.setRegistry(connector, 'position', {x: 800, y: y});
+                // Create a modelicaConnector in the connector,..
+                modelicaConnectorCon = core.createNode({parent: connector, base: CyPhyLight.ModelicaConnector});
+                core.setAttribute(modelicaConnectorCon, 'name', conn.name);
+                core.setAttribute(modelicaConnectorCon, 'Class', conn.fullName);
+                core.setRegistry(modelicaConnectorCon, 'position', {x: 70, y: y});
+                // ..and one in the modelicaModel.
+                modelicaConnector = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaConnector});
+                core.setAttribute(modelicaConnector, 'name', conn.name);
+                core.setAttribute(modelicaConnector, 'Class', conn.fullName);
+                core.setRegistry(modelicaConnector, 'position', {x: 400, y: y});
+                y += dY;
+                console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
+                // Create connections
+                connectorComp = core.createNode({parent: component, base: CyPhyLight.ModelicaConnectorComposition});
+                core.setPointer(connectorComp, 'src', modelicaConnectorCon);
+                core.setPointer(connectorComp, 'dst', modelicaConnector);
+            }
+        }
+    };
+
+
     CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
         console.log('Run started..');
 
@@ -89,17 +192,11 @@ define(['./CyPhyLight'], function (METATypes) {
             index,
             start = new Date(),
             nbrOfComponents = dataConfig.length,
-            execTime;
-
-//        console.log(dataConfig);
-//        // root name
-//        console.log(core.getAttribute(rootNode, 'name'));
-//
-//        // selected object name
-//        console.log(core.getAttribute(selectedNode, 'name'));
-//
-//        // selected object position
-//        console.log(core.getRegistry(selectedNode, 'position'));
+            execTime,
+            newCyPhyProjectObj,
+            componentsFolder,
+            component,
+            modelicaModel;
 
         // FIXME: this is a hack to get intellisense
         var name;
@@ -109,130 +206,39 @@ define(['./CyPhyLight'], function (METATypes) {
             }
         }
 
-        var newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
+        newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
         core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
 
-//        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.Connector));
-//        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.CyPhyProject));
-//        console.log(isMetaTypeOf(core, newCyPhyProjectObj, CyPhyLight.FCO));
-
-        var componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components});
+        componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components});
         core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
 
         for (index = 0; index < nbrOfComponents; index += 1){
-            var componentConfig = dataConfig[index];
-            var component = core.createNode({parent: componentsFolder, base: CyPhyLight.Component});
-            var uriPieces = componentConfig.exportedComponentClass.split('.');
-            var componentName = uriPieces[uriPieces.length - 1];
+            var componentConfig = dataConfig[index],
+                uriPieces = componentConfig.exportedComponentClass.split('.'),
+                componentName = uriPieces[uriPieces.length - 1];
 
+            component = core.createNode({parent: componentsFolder, base: CyPhyLight.Component});
             core.setAttribute(component, 'name', componentName);
 
-            var modelicaModel = core.createNode({parent: component, base: CyPhyLight.ModelicaModel});
+            modelicaModel = core.createNode({parent: component, base: CyPhyLight.ModelicaModel});
             core.setAttribute(modelicaModel, 'name', componentName.toLowerCase());
             core.setAttribute(modelicaModel, 'Class', componentConfig.exportedComponentClass);
             core.setRegistry(modelicaModel, 'position', {x: 300, y: 150});
-            var parameters = {},
-                connectors = {};
-            var getComponentContent = function getComponentContentRec (modelicaURI) {
-                console.log('Getting content for :: %j', modelicaURI);
-                var idxC, currComponent,
-                    idxP, currParameter,
-                    idxCn, currConnector,
-                    idxE, currExtends,
-                    idxEp, currExtendsParameter;
-
-                for (idxC = 0; idxC < componentConfig.components.length; idxC += 1) {
-                    currComponent = componentConfig.components[idxC];
-                    if (currComponent.fullName === modelicaURI) {
-                        for (idxP = 0; idxP < currComponent.parameters.length; idxP += 1) {
-                            currParameter = currComponent.parameters[idxP];
-                            parameters[currParameter.name] = parameters[currParameter.name] || currParameter;
-                        }
-                        for (idxCn = 0; idxCn < currComponent.connectors.length; idxCn += 1) {
-                            currConnector = currComponent.connectors[idxCn];
-                            connectors[currConnector.name] = connectors[currConnector.name] || currConnector;
-                        }
-                        for (idxE = 0; idxE < currComponent.extends.length; idxE += 1) {
-                            currExtends = currComponent.extends[idxE];
-                            for (idxEp = 0; idxEp < currExtends.parameters.length; idxEp += 1) {
-                                currExtendsParameter = currExtends.parameters[idxEp];
-                                parameters[currExtendsParameter.name] = parameters[currExtendsParameter.name] || currExtendsParameter;
-                            }
-                            // Recursive Call is made here
-                            getComponentContentRec(currExtends.fullName);
-                        }
-                        break;
-                    }
-                }
+            var flatData = {
+                parameters: {},
+                connectors: {}
             };
 
-            getComponentContent(componentConfig.exportedComponentClass);
+            getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
+            buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
 
-            var buildComponent = function () {
-                var property,
-                    modelicaParameter,
-                    param,
-                    valueFlow,
-                    key,
-                    connector,
-                    modelicaConnector,
-                    modelicaConnectorCon,
-                    conn,
-                    connectorComp,
-                    y = 70,
-                    dY = 70;
-
-                for (key in parameters) {
-                    if (parameters.hasOwnProperty(key)) {
-                        param = parameters[key];
-                        property = core.createNode({parent: component, base: CyPhyLight.Property});
-                        core.setAttribute(property, 'name', param.name);
-                        core.setAttribute(property, 'Value', param.value);
-                        core.setRegistry(property, 'position', {x: 70, y: y});
-
-                        modelicaParameter = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaParameter});
-                        core.setAttribute(modelicaParameter, 'name', param.name);
-                        core.setAttribute(modelicaParameter, 'Value', param.value);
-                        core.setRegistry(modelicaParameter, 'position', {x: 70, y: y});
-                        y += dY;
-                        console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
-                        // Create connections
-                        valueFlow = core.createNode({parent: component, base: CyPhyLight.ValueFlowComposition});
-                        core.setPointer(valueFlow, 'src', property);
-                        core.setPointer(valueFlow, 'dst', modelicaParameter);
-                    }
-                }
-                y = 70;
-                for (key in connectors) {
-                    if (connectors.hasOwnProperty(key)) {
-                        conn = connectors[key];
-                        connector = core.createNode({parent: component, base: CyPhyLight.Connector});
-                        core.setAttribute(connector, 'name', conn.name);
-                        core.setRegistry(connector, 'position', {x: 800, y: y});
-                        // Create a modelicaConnector in the connector,..
-                        modelicaConnectorCon = core.createNode({parent: connector, base: CyPhyLight.ModelicaConnector});
-                        core.setAttribute(modelicaConnectorCon, 'name', conn.name);
-                        core.setAttribute(modelicaConnectorCon, 'Class', conn.fullName);
-                        core.setRegistry(modelicaConnectorCon, 'position', {x: 70, y: y});
-                        // ..and one in the modelicaModel.
-                        modelicaConnector = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaConnector});
-                        core.setAttribute(modelicaConnector, 'name', conn.name);
-                        core.setAttribute(modelicaConnector, 'Class', conn.fullName);
-                        core.setRegistry(modelicaConnector, 'position', {x: 400, y: y});
-                        y += dY;
-                        console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
-                        // Create connections
-                        connectorComp = core.createNode({parent: component, base: CyPhyLight.ModelicaConnectorComposition});
-                        core.setPointer(connectorComp, 'src', modelicaConnectorCon);
-                        core.setPointer(connectorComp, 'dst', modelicaConnector);
-                    }
-                }
-            };
-
-            buildComponent();
         }
+
+        // Commit changes.
         core.persist(rootNode, function (err) {
         });
+
         var newRootHash = core.getHash(rootNode);
         console.info(project.makeCommit);
         result = {'commitHash': config.commitHash};
@@ -240,50 +246,13 @@ define(['./CyPhyLight'], function (METATypes) {
 
         });
 
+        // Print statistics and call callback.
         console.log('Run done.');
         execTime = new Date() - start;
         console.log('Execution Time [n=%j] : %j ms', nbrOfComponents, execTime);
         if (callback) {
             callback({'success': true, 'run_command': 'dir'});
         }
-
-        // selected object children
-//        core.loadChildren(selectedNode, function (err, childNodes) {
-//            var baseNode = null;
-//            var len = childNodes.length;
-//            while (len--) {
-//                var childName = core.getAttribute(childNodes[len], 'name');
-//                console.log(childName);
-//                if (core.getAttribute(childNodes[len], 'name').toLowerCase() === 'solversettings') {
-//                    baseNode = core.getBase(childNodes[len]);
-//                    var metaObj = getMetaType(core, childNodes[len], METATypes);
-//                    console.log(core.getPath(baseNode));
-//                    console.log(core.getPath(metaObj));
-//                }
-//            }
-//
-//            var modelicaModel = core.createNode({parent: selectedNode, base: metaKinds.ModelicaModel});
-//            core.setAttribute(modelicaModel, 'Class', 'Modelica.Does.Not.Exist');
-//            var newObjects = [];
-//            if (metaObj){
-//                var newChild = core.createNode({parent:selectedNode, base: metaObj});
-//                core.setAttribute(newChild, 'name', 'Fake');
-//            }
-//
-//            // save project
-//            core.persist(rootNode, function (err) {
-//            });
-//            var newRootHash = core.getHash(rootNode);
-//            console.info(project.makeCommit);
-//            result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
-//
-//            });
-//
-//            console.log('Run done.');
-//            if (callback) {
-//                callback({'success': true, 'run_command': 'dir'});
-//            }
-//        });
     };
 
     return CyPhy2ModelicaInterpreter;
