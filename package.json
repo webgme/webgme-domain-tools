@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "repository": {
         "type": "git",
-        "url": "https://github.com/lattmann/webgme-domain-tools"
+        "url": "https://github.com/webgme/webgme-domain-tools"
     },
     "license": "MIT",
     "dependencies": {
@@ -28,5 +28,9 @@
             "pattern": "/src",
             "data-cover-never": "node_modules"
         }
+    },
+    "scripts": {
+        "start": "node app.js",
+        "test": "./node_modules/.bin/istanbul test ./node_modules/.bin/_mocha -- -R spec --recursive"
     }
 }

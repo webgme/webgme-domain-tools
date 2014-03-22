@@ -2,10 +2,39 @@
 
 Domain specific tools for WebGME.
 
+* Install nodejs
+* Install mongodb if you use a local database
+* Clone the repository
+* Install dependent packages `npm install`
 * Run webgme `node app.js`, goto localhost:8888
 * Run interpreter `node run_interpreter.js`
 
+## npm packages ##
+
+* webgme - using GitHub master branch https://github.com/webgme/webgme
+* ...
+
+TODO - explain other packages and their purpose
+
+
+If the package.json changes then:
+
+* Run `npm list`
+* If there are any errors in the packages use `npm update`
+* If you still experiencing problems: delete the `node_modules` directory and run `npm install`
+
 ## Testing, coverage, style and documentation ##
+
+### Linux and Mac OSX ###
+
+* Run all tests under `test` folder: `npm test`
+* Run all tests with coverage report under `test` folder: `npm test --coverage`. The coverage report is generated to `./coverage/lcov-report/index.html`.
+
+
+
+### Windows ###
+
+TODO ...
 
 
 ### Run tests defined in java-script file. ###
