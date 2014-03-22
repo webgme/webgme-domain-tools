@@ -1,6 +1,6 @@
 /**
  * Run Command :
- *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.js
+ *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.js
  */
 
 'use strict';
@@ -58,7 +58,7 @@ var SPRING_COMPONENT_CONFIG =  {
 
 
 describe('CyPhy2Modelica Helper Methods', function (){
-    var interpreter = requirejs('src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+    var plugin = requirejs('src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
 
     describe('getComponentContent', function() {
             var componentConfig,
@@ -66,7 +66,7 @@ describe('CyPhy2Modelica Helper Methods', function (){
 
         componentConfig = SPRING_COMPONENT_CONFIG;
 
-        interpreter.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+        plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
 
         it ('should be two parameters', function() {
             var cnt = 0;

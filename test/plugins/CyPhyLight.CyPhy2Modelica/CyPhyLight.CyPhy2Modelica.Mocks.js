@@ -8,16 +8,16 @@ requirejs.config({
 });
 
 //suite('CyPhyLightCyPhy2Modelica', function() {
-//    var Interpreter;
+//    var Plugin;
 //    var CoreMock;
 //
 //    setup(function (done) {
 //        // This saves the module foo for use in tests. You have to use
 //        // the done callback because this is asynchronous.
-//        requirejs(['src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica', 'src/mocks/CoreMock'],
+//        requirejs(['src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica', 'src/mocks/CoreMock'],
 //            function(mod, coreMock) {
 //                console.log("fired!");
-//                Interpreter = mod;
+//                Plugin = mod;
 //                CoreMock = coreMock;
 //                done();
 //            });
@@ -42,8 +42,8 @@ requirejs.config({
 //            };
 //
 //            // call functions
-//            var interpreter = new Interpreter();
-//            interpreter.run2(context, function (result) {
+//            var plugin = new Plugin();
+//            plugin.run2(context, function (result) {
 //
 //            });
 //        });

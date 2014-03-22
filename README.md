@@ -6,7 +6,7 @@ Domain specific tools for WebGME.
 * Install mongodb if you use a local database
 * Clone the repository
 * Install dependent packages `npm install`
-* Run webgme `node app.js`, goto localhost:8888
+* Run webgme `npm start` or `node app.js`, goto localhost:8888
 * Run interpreter `node run_interpreter.js`
 
 ## npm packages ##

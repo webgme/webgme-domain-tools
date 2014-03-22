@@ -1,4 +1,4 @@
-// to run this test: node_modules/.bin/mocha -u tdd test/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.Mocks.js
+// to run this test: node_modules/.bin/mocha -u tdd test/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.Mocks.js
 
 'use strict';
 var requirejs = require("requirejs");
@@ -8,19 +8,19 @@ requirejs.config({
 });
 
 //suite('CyPhyLightCyPhy2Modelica', function() {
-//    var Interpreter;
+//    var Plugin;
 //    var CoreMock;
 //    var CyPhyLight;
 //
 //    setup(function (done) {
 //        // This saves the module foo for use in tests. You have to use
 //        // the done callback because this is asynchronous.
-//        requirejs(['src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.Dsml',
+//        requirejs(['src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.Dsml',
 //            'src/mocks/CoreMock',
-//            'src/interpreters/DSMLAPIGenerator/CyPhyLight.Dsml'],
+//            'src/plugins/DSMLAPIGenerator/CyPhyLight.Dsml'],
 //            function(mod, coreMock, domain) {
 //                //console.log("fired!");
-//                Interpreter = mod;
+//                Plugin = mod;
 //                CoreMock = coreMock;
 //                CyPhyLight = domain;
 //                done();
@@ -51,9 +51,9 @@ requirejs.config({
 //            tb2.attributes.setname('name222222222');
 //
 //            // call functions
-//            var interpreter = new Interpreter();
+//            var plugin = new Plugin();
 //
-//            if (interpreter.check(tb1, tb2)) {
+//            if (plugin.check(tb1, tb2)) {
 //                throw new Error('names cannot be the same.');
 //            }
 //
@@ -82,9 +82,9 @@ requirejs.config({
 //            tb2.attributes.setname('name1');
 //
 //            // call functions
-//            var interpreter = new Interpreter();
+//            var plugin = new Plugin();
 //
-//            if (interpreter.check(tb1, tb2) === false) {
+//            if (plugin.check(tb1, tb2) === false) {
 //                throw new Error('names cannot be the same.');
 //            }
 //

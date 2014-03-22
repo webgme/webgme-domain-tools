@@ -6,15 +6,15 @@
 define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
     function (METATypes, PluginConfig, PluginBase) {
 
-    var CyPhy2ModelicaInterpreter = function () {};
+    var CyPhy2ModelicaPlugin = function () {};
 
-    CyPhy2ModelicaInterpreter.prototype = Object.create(PluginBase.prototype);
+    CyPhy2ModelicaPlugin.prototype = Object.create(PluginBase.prototype);
 
-    CyPhy2ModelicaInterpreter.getDefaultConfig = function () {
+    CyPhy2ModelicaPlugin.getDefaultConfig = function () {
         return new PluginConfig();
     };
 
-    CyPhy2ModelicaInterpreter.prototype.main = function (config, callback) {
+    CyPhy2ModelicaPlugin.prototype.main = function (config, callback) {
         console.log('Inside main...');
 
         var rootNode = config.rootNode,
@@ -64,9 +64,9 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
                 connectors: {}
             };
 
-            CyPhy2ModelicaInterpreter.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
-            CyPhy2ModelicaInterpreter.buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
-            CyPhy2ModelicaInterpreter.buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
+            CyPhy2ModelicaPlugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            CyPhy2ModelicaPlugin.buildParameters(core, CyPhyLight, component, modelicaModel, flatData.parameters);
+            CyPhy2ModelicaPlugin.buildConnectors(core, CyPhyLight, component, modelicaModel, flatData.connectors);
 
         }
 
@@ -77,7 +77,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         var newRootHash = core.getHash(rootNode);
         console.info(project.makeCommit);
         result = {'commitHash': config.commitHash};
-        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
+        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Plugin updated the model.', function (err) {
 
         });
 
@@ -90,30 +90,30 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         }
     };
 
-//    CyPhy2ModelicaInterpreter.prototype.main = function (config, callback) {
+//    CyPhy2ModelicaPlugin.prototype.main = function (config, callback) {
 //        console.log('Inside main ...');
 //        callback(null, {success:true});
 //    };
 
 
-//    CyPhy2ModelicaInterpreter.prototype.progress = function (percent, title, description) {
+//    CyPhy2ModelicaPlugin.prototype.progress = function (percent, title, description) {
 //        throw new Error('implement this function');
 //    };
 
 
-//    CyPhy2ModelicaInterpreter.prototype.checkModel = function () {
+//    CyPhy2ModelicaPlugin.prototype.checkModel = function () {
 //        throw new Error('implement this function');
 //    };
 
-//    CyPhy2ModelicaInterpreter.getName = function () {
+//    CyPhy2ModelicaPlugin.getName = function () {
 //        throw new Error('implement this function');
 //    };
 //
-//    CyPhy2ModelicaInterpreter.getVersion = function () {
+//    CyPhy2ModelicaPlugin.getVersion = function () {
 //        throw new Error('implement this function');
 //    };
 //
-//    CyPhy2ModelicaInterpreter.getSupportedContexts = function () {
+//    CyPhy2ModelicaPlugin.getSupportedContexts = function () {
 //        throw new Error('implement this function');
 //    };
 
@@ -151,11 +151,11 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
     };
 
 
-    CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback) {
+    CyPhy2ModelicaPlugin.prototype.doGUIConfig = function (preconfig, callback) {
         callback({'dataSourcePath': './src/samples/modelica_components.json'});
     };
 
-    CyPhy2ModelicaInterpreter.prototype.run2 = function (config, callback) {
+    CyPhy2ModelicaPlugin.prototype.run2 = function (config, callback) {
 
         console.log('Run started..');
 
@@ -186,7 +186,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         console.log('done.');
     };
 
-    CyPhy2ModelicaInterpreter.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
+    CyPhy2ModelicaPlugin.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
         console.log('Getting content for :: %j', currentModelicaURI);
         var idxC, currComponent,
             idxP, currParameter,
@@ -221,7 +221,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         }
     };
 
-    CyPhy2ModelicaInterpreter.buildParameters = function (core, CyPhyLight, component, modelicaModel, parameters) {
+    CyPhy2ModelicaPlugin.buildParameters = function (core, CyPhyLight, component, modelicaModel, parameters) {
         var property,
             modelicaParameter,
             param,
@@ -252,7 +252,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         }
     };
 
-    CyPhy2ModelicaInterpreter.buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
+    CyPhy2ModelicaPlugin.buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
         var key,
             connector,
             modelicaConnector,
@@ -488,5 +488,5 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         }
     ];
 
-    return CyPhy2ModelicaInterpreter;
+    return CyPhy2ModelicaPlugin;
 });

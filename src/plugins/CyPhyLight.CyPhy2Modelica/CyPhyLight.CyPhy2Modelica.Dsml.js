@@ -5,7 +5,7 @@
 'use strict';
 define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 
-    var CyPhy2ModelicaInterpreter = function () {};
+    var CyPhy2ModelicaPlugin = function () {};
 
     // TODO: move this function to an API
     var getMetaType = function (core, nodeObj, metaTypes) {
@@ -39,17 +39,17 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 
     };
 
-    CyPhy2ModelicaInterpreter.prototype.check = function (fco1, fco2) {
+    CyPhy2ModelicaPlugin.prototype.check = function (fco1, fco2) {
         return fco1.attributes.getname() === fco2.attributes.getname();
     };
 
 
-    CyPhy2ModelicaInterpreter.prototype.doGUIConfig = function (preconfig, callback) {
+    CyPhy2ModelicaPlugin.prototype.doGUIConfig = function (preconfig, callback) {
         callback({'dataSourcePath': './src/samples/modelica_components.json'});
     };
 
 
-    CyPhy2ModelicaInterpreter.prototype.run = function (config, callback) {
+    CyPhy2ModelicaPlugin.prototype.run = function (config, callback) {
         console.log('Run started..');
         var rootNode = config.rootNode,
             selectedNode = config.selectedNode,
@@ -230,7 +230,7 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
         var newRootHash = core.getHash(rootNode);
         console.info(project.makeCommit);
         result = {'commitHash': config.commitHash};
-        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Interpreter updated the model.', function (err) {
+        result.commitHash = project.makeCommit([result.commitHash], newRootHash, 'Plugin updated the model.', function (err) {
 
         });
 
@@ -269,5 +269,5 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 //        });
     };
 
-    return CyPhy2ModelicaInterpreter;
+    return CyPhy2ModelicaPlugin;
 });
