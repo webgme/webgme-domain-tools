@@ -4,6 +4,15 @@ define(['fs','ejs'], function (fs, ejs) {
     var DsmlApiGenerator = function () {
     };
 
+    DsmlApiGenerator.Utils = function () {
+    };
+
+    DsmlApiGenerator.Utils.isValidJavascriptIdentifier = function (identifier) {
+        // note: we do not allow unicode characters.
+        var pattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*/g;
+        return pattern.test(identifier);
+    };
+
 
     // FIXME: this method was copied from webgme meta.js
     function getMeta(_core, nodeObj){

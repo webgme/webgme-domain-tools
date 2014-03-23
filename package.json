@@ -31,6 +31,6 @@
     },
     "scripts": {
         "start": "node app.js",
-        "test": "./node_modules/.bin/istanbul test ./node_modules/.bin/_mocha -- -R spec --recursive"
+        "test": "./node_modules/.bin/istanbul --hook-run-in-context test ./node_modules/.bin/_mocha -- -R spec --recursive"
     }
 }
