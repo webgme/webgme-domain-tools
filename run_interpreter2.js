@@ -1,7 +1,7 @@
 /*
  config object structure
  {
- "host": <string> shows the location of the webGME server //not really used by internally run interpreters = NUII,
+ "host": <string> shows the location of the webGME server //not really used by internally run plugins = NUII,
  "project": <string> show the name of the project,
  "token": <string> authentication token for REST API //NUII,
  "selected": <string> gives the URL / path of the selected object , you can convert URL to path,
@@ -10,55 +10,62 @@
  "branch": <string> the name of the selected branch
  }
  */
-var requirejs = require("requirejs");
-var program = require('commander');
-var CONFIG = require('./config.json');
 
-requirejs.config({
-    nodeRequire: require,
-    baseUrl: __dirname
-});
+var main = function() {
+    // main code
+    var requirejs = require("requirejs");
+    var program = require('commander');
+    var CONFIG = require('./config.json');
 
-
-program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
-program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
-program.parse(process.argv);
-var interpreterName = program.interpreterPath;
-//var interpreterName = './interpreters/DsmlApiGenerator/DsmlApiGenerator';
-var selectedID = program.selectedObjID;
-console.log('Given interpreter : %j', interpreterName);
-
-// FIXME: dependency does matter!
-requirejs(['src/PluginManager/PluginManagerBase', 'src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica', 'webgme'],
-    function(PluginManager, CyPhy2Modelica, WebGME){
-        var Core = WebGME.core,
-            Storage = WebGME.serverUserStorage;
+    requirejs.config({
+        nodeRequire: require,
+        baseUrl: __dirname
+    });
 
 
-        // TODO: read from file or command line arguments
-        var config = {
-                "host": CONFIG.mongoip,
-                "port": CONFIG.mongoport,
-                "database": "multi",
-                "project": "CyPhyLight",
-                "token": "",
-                "selected": selectedID,
-                "commit": null, //"#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
-                //"root": ""
-                "branchName": "master"
-            };
+    program.option('-i, --pluginPath <name>', 'Path to given plugin.', './src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+    program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
+    program.parse(process.argv);
+    var pluginName = program.pluginPath;
+//var pluginName = './plugins/DsmlApiGenerator/DsmlApiGenerator';
+    var selectedID = program.selectedObjID;
+    console.log('Given plugin : %j', pluginName);
 
 
-        var storage = new Storage({'host':config.host, 'port':config.port, 'database':config.database});
+// TODO: read from file or command line arguments
+    var config = {
+        "host": CONFIG.mongoip,
+        "port": CONFIG.mongoport,
+        "database": "multi",
+        "project": "CyPhyLight",
+        "token": "",
+        "selected": selectedID,
+        "commit": null, //"#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
+        //"root": ""
+        "branchName": "master"
+    };
 
+    var PluginManager = requirejs('src/PluginManager/PluginManagerBase');
+    // TODO: move the downloader to PluginManager
+    var Plugin = requirejs(pluginName);
 
-        var pluginManager = new PluginManager(storage, Core, {
-       //     'DsmlApiGenerator': requirejs('src/interpreters/DSMLAPIGenerator/DsmlApiGenerator'),
-            'CyPhyLight.CyPhy2Modelica': CyPhy2Modelica
-        });
+    // FIXME: dependency does matter!
+    var WebGME = requirejs('webgme');
 
-        pluginManager.executePlugin('CyPhyLight.CyPhy2Modelica', config, function (err, result) {
-            console.log(result);
-        });
-    }
-);
+    var Core = WebGME.core,
+        Storage = WebGME.serverUserStorage;
+    var storage = new Storage({'host':config.host, 'port':config.port, 'database':config.database});
+
+    var plugins = {};
+    plugins[pluginName] = Plugin;
+
+    var pluginManager = new PluginManager(storage, Core, plugins);
+
+    pluginManager.executePlugin(pluginName, config, function (err, result) {
+        console.log(result);
+    });
+};
+
+if (require.main === module) {
+    main();
+}

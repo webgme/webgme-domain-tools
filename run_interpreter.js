@@ -1,7 +1,7 @@
 /*
  config object structure
  {
- "host": <string> shows the location of the webGME server //not really used by internally run interpreters = NUII,
+ "host": <string> shows the location of the webGME server //not really used by internally run plugins = NUII,
  "project": <string> show the name of the project,
  "token": <string> authentication token for REST API //NUII,
  "selected": <string> gives the URL / path of the selected object , you can convert URL to path,
@@ -18,29 +18,29 @@ requirejs.config({
     nodeRequire: require,
     baseUrl: __dirname,
     paths: {
-        //interpreters: 'interpreters'
+        //plugins: 'plugins'
     }
 });
 
 // TODO: get this from command line argument
-program.option('-i, --interpreterPath <name>', 'Path to given interpreter.', './src/interpreters/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+program.option('-i, --pluginPath <name>', 'Path to given plugin.', './src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
 program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
 program.parse(process.argv);
-var interpreterName = program.interpreterPath;
-//var interpreterName = './interpreters/DsmlApiGenerator/DsmlApiGenerator';
+var pluginName = program.pluginPath;
+//var pluginName = './plugins/DsmlApiGenerator/DsmlApiGenerator';
 var selectedID = program.selectedObjID;
-console.log('Given interpreter : %j', interpreterName);
+console.log('Given plugin : %j', pluginName);
 
 
 // FIXME: dependency does matter!
-requirejs([interpreterName, 'webgme'],
+requirejs([pluginName, 'webgme'],
     function(Interpreter, WebGME){
         console.log(Interpreter);
         var Core = WebGME.core,
             Storage = WebGME.serverUserStorage;
 
-        //somehow you should build up a config object for the interpreter
-        //and get the name of the interpreter
+        //somehow you should build up a config object for the plugin
+        //and get the name of the plugin
         //now we start with a predefined ones
 
         var loadMetaNodes = function (context, callback) {
@@ -171,16 +171,16 @@ requirejs([interpreterName, 'webgme'],
                 console.log(err);
             } else {
                 console.log(Interpreter);
-                var interpreter = new Interpreter();
+                var plugin = new Interpreter();
                 var dataConfig = null;
-                interpreter.doGUIConfig(null, function (interpreterConfig) {
-                    if (interpreterConfig.dataSourcePath) {
-                        dataConfig = require(interpreterConfig.dataSourcePath);
+                plugin.doGUIConfig(null, function (pluginConfig) {
+                    if (pluginConfig.dataSourcePath) {
+                        dataConfig = require(pluginConfig.dataSourcePath);
                     }
                 });
 
                 context.dataConfig = dataConfig;
-                interpreter.run(context, function(result) {
+                plugin.run(context, function(result) {
                     console.log(result);
                 });
             }
