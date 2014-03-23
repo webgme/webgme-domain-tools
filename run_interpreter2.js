@@ -23,6 +23,8 @@ var main = function() {
     });
 
 
+    program.option('-p, --project <name>', 'Name of the project.', 'CyPhyLight');
+    program.option('-b, --branch <name>', 'Name of the branch.', 'master');
     program.option('-i, --pluginPath <name>', 'Path to given plugin.', './src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
     program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
     program.parse(process.argv);
@@ -37,12 +39,12 @@ var main = function() {
         "host": CONFIG.mongoip,
         "port": CONFIG.mongoport,
         "database": "multi",
-        "project": "CyPhyLight",
+        "project": program.project,
         "token": "",
         "selected": selectedID,
         "commit": null, //"#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
         //"root": ""
-        "branchName": "master"
+        "branchName": program.branch
     };
 
     var PluginManager = requirejs('src/PluginManager/PluginManagerBase');

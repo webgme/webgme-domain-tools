@@ -1,10 +1,19 @@
-define(['fs','ejs'], function (fs, ejs) {
+define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','ejs'],
+    function (PluginConfig, PluginBase, fs, ejs) {
     "use strict";
 
     var DsmlApiGenerator = function () {
+
+    };
+
+    DsmlApiGenerator.prototype = Object.create(PluginBase.prototype);
+
+    DsmlApiGenerator.getDefaultConfig = function () {
+        return new PluginConfig();
     };
 
     DsmlApiGenerator.Utils = function () {
+
     };
 
     DsmlApiGenerator.Utils.isValidJavascriptIdentifier = function (identifier) {
@@ -86,7 +95,24 @@ define(['fs','ejs'], function (fs, ejs) {
         callback({});
     };
 
-    DsmlApiGenerator.prototype.run = function (config, callback) {
+    DsmlApiGenerator.prototype.generateFiles = function (domain) {
+        var projectName = domain.projectName;
+        var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
+
+        var ret = ejs.render(DOMAIN_TEMPLATE, domain);
+
+        //console.log(ret);
+
+        var outputfileName = 'src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.js';
+
+        fs.writeFileSync(outputfileName, ret, 'utf8');
+
+        fs.writeFileSync('src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
+
+        console.info(outputfileName + ' was generated.');
+    }
+
+    DsmlApiGenerator.prototype.main = function (config, callback) {
         var logger = console;
 
         logger.info('Run started..');
@@ -162,26 +188,15 @@ define(['fs','ejs'], function (fs, ejs) {
 
         metaTypes.sort(function (a, b) { return a.name.localeCompare(b.name); });
 
-        var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
-
         var domain = {
             projectName: projectName,
-            metaTypes: metaTypes,
-            metaTypesByID: metaTypesByID
+            metaTypes: metaTypes
         };
 
-        var ret = ejs.render(DOMAIN_TEMPLATE, domain);
+        this.generateFiles(domain);
 
-        //console.log(ret);
-
-        var outputfileName = 'src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.js';
-
-        fs.writeFileSync(outputfileName, ret , 'utf8');
-
-        fs.writeFileSync('src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4) , 'utf8');
-
-        console.info(outputfileName + ' was generated.');
         console.log('done');
+        callback(null, {success:true});
     };
 
 

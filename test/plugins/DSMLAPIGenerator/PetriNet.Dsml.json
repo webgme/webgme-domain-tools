@@ -1,0 +1,220 @@
+{
+    "projectName": "PetriNet",
+    "metaTypes": [
+        {
+            "name": "Arc",
+            "ID": "/-2/-6",
+            "GUID": "f738f298-12b2-e0f5-d474-fb51c0dc2087",
+            "Hash": "#1179a4c3f65691360e018feee4247cf34b00accc",
+            "isAbstract": true,
+            "base": "FCO",
+            "attributeNames": [
+                "Delay",
+                "Weight",
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": []
+        },
+        {
+            "name": "FCO",
+            "ID": "/-1",
+            "GUID": "ad07d84a-d13d-b599-3407-04290739da4f",
+            "Hash": "#da052da5d10c9864ba0c7a8db97d0ca9d48899e3",
+            "isAbstract": false,
+            "attributeNames": [
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": []
+        },
+        {
+            "name": "PetriNetDiagram",
+            "ID": "/-2/-4",
+            "GUID": "d0e971c2-bf14-86a0-f435-a09e4e458267",
+            "Hash": "#a6199c2b23ef565e699c4da7b4fb9dc053573770",
+            "isAbstract": false,
+            "base": "FCO",
+            "attributeNames": [
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": [
+                "/-2/-6",
+                "/-2/-5",
+                "/-2/-7"
+            ]
+        },
+        {
+            "name": "PetriNetDiagramFolder",
+            "ID": "/-2/-3",
+            "GUID": "166af587-ff91-5bde-d9a1-8ea6b612ba9f",
+            "Hash": "#c4e2036773ef56e275fa996e9daf830770f3bdf7",
+            "isAbstract": false,
+            "base": "FCO",
+            "attributeNames": [
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": [
+                "/-2/-3",
+                "/-2/-4"
+            ]
+        },
+        {
+            "name": "PetriNetMetaModel",
+            "ID": "/-2",
+            "GUID": "c0c3d063-a7fa-38ea-5e1f-eef0795be1df",
+            "Hash": "#4ecdb465ab303f40cf61a588e66a595e863ec033",
+            "isAbstract": false,
+            "base": "FCO",
+            "attributeNames": [
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": [
+                "/-1"
+            ]
+        },
+        {
+            "name": "Place",
+            "ID": "/-2/-5",
+            "GUID": "4aebb3ba-848b-7df6-0308-16171ff70328",
+            "Hash": "#5d350f6340880f6f8ca3a14bb4f271d7ddb437dc",
+            "isAbstract": false,
+            "base": "FCO",
+            "attributeNames": [
+                "Capacity",
+                "InitialMarking",
+                "TokenColor",
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": []
+        },
+        {
+            "name": "Place2Transition",
+            "ID": "/-2/-8",
+            "GUID": "3078ae42-9b25-2ddb-95ca-54539ad678eb",
+            "Hash": "#cf2608d49a458541e9a8b4bd7757a1fe2b418df1",
+            "isAbstract": false,
+            "base": "Arc",
+            "attributeNames": [
+                "Delay",
+                "Weight",
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": true,
+            "children": []
+        },
+        {
+            "name": "Transition",
+            "ID": "/-2/-7",
+            "GUID": "792dda22-33c4-f4e3-9088-c2e7c411541a",
+            "Hash": "#9a0fbd95b6452b414044b6acb40540a2df6b70d0",
+            "isAbstract": false,
+            "base": "FCO",
+            "attributeNames": [
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": false,
+            "children": []
+        },
+        {
+            "name": "Transition2Place",
+            "ID": "/-2/-9",
+            "GUID": "68379277-27c9-a1c6-8b97-ae0876bc4d78",
+            "Hash": "#98a181d560181f57fccb18d8b999e33b3d4a7e5d",
+            "isAbstract": false,
+            "base": "Arc",
+            "attributeNames": [
+                "Delay",
+                "Weight",
+                "name"
+            ],
+            "registryNames": [
+                "DisplayFormat",
+                "PortSVGIcon",
+                "SVGIcon",
+                "decorator",
+                "isAbstract",
+                "isPort",
+                "position"
+            ],
+            "isConnection": true,
+            "children": []
+        }
+    ]
+}
