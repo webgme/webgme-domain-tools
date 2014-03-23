@@ -1,4 +1,4 @@
-# Interpreters #
+# Plugins #
 
 ## Code Samples ##
 

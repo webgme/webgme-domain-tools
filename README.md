@@ -21,7 +21,7 @@ If the package.json changes then:
 
 * Run `npm list`
 * If there are any errors in the packages use `npm update`
-* If you still experiencing problems: delete the `node_modules` directory and run `npm install`
+* If you are still experiencing problems: delete the `node_modules` directory and run `npm install`
 
 ## Testing, coverage, style and documentation ##
 
