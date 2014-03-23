@@ -1,7 +1,7 @@
 /**
  * Created by pmeijer on 3/17/14.
  */
-require('blanket');
+//require('blanket');
 var fut = require('../../../src/examples/jsbasic/classes.js');
 var base = require('../../../src/examples/jsbasic/baseclass.js');
 var chai = require('chai'),

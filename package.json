@@ -11,23 +11,21 @@
         "requirejs": ">=2.0.0",
         "ejs": ">=0.8.5",
         "commander": ">=2.1.0",
+        "node-fs-extra": ">=0.8.1",
+        "walk": ">=2.3.1"
+    },
+    "devDependencies": {
         "mocha": ">=1.17.1",
         "chai": ">=1.9.0",
         "jslint": ">=0.3.0",
-        "blanket": ">=1.1.6",
         "istanbul": ">=0.2.6",
-        "beautiful-docs": ">=1.0.0",
-        "node-fs-extra": ">=0.8.1",
-        "walk": ">=2.3.1"
+        "jsdoc": ">=3.3.0-alpha1",
+        "beautiful-docs": ">=1.0.0"
     },
     "engines": {
         "node": ">=0.5.0"
     },
     "config": {
-        "blanket": {
-            "pattern": "/src",
-            "data-cover-never": "node_modules"
-        }
     },
     "scripts": {
         "start": "node app.js",

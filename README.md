@@ -16,11 +16,13 @@ Domain specific tools for WebGME.
 
 TODO - explain other packages and their purpose
 
+Updating `webgme` only use `npm update webgme`
+
 
 If the package.json changes then:
 
 * Run `npm list`
-* If there are any errors in the packages use `npm update`
+* If there are any errors in the packages use `npm prune` then `npm update`
 * If you are still experiencing problems: delete the `node_modules` directory and run `npm install`
 
 ## Testing, coverage, style and documentation ##
@@ -44,9 +46,6 @@ TODO ...
 
 
 ### Run same tests with coverage. ###
-
-* On Windows: `node_modules\.bin\mocha --require blanket -R html-cov > coverage.html test/examples/jsbasic/test_baseclass.js`
-* On Linux and Mac OSX: `node_modules/.bin/mocha --require blanket -R html-cov > coverage.html test/examples/jsbasic/test_baseclass.js`
 
 * On Windows: `node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/mocks/CoreMock.js`
 * On Linux and Mac OSX: `node_modules/.bin/istanbul --hook-run-in-context cover node_modules/.bin/_mocha -- -R spec test/mocks/CoreMock.js`
