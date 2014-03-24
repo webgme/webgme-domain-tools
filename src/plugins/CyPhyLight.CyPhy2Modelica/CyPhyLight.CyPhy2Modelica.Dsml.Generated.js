@@ -3,145 +3,74 @@
  */
 
 'use strict';
-define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
+define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
+        function (CyPhyLight, PluginConfig, PluginBase ) {
 
     var CyPhy2ModelicaPlugin = function () {};
 
-    CyPhy2ModelicaPlugin.prototype.doGUIConfig = function (preconfig, callback) {
-        callback({'dataSourcePath': './src/samples/modelica_components.json'});
+    CyPhy2ModelicaPlugin.prototype = Object.create(PluginBase.prototype);
+
+    CyPhy2ModelicaPlugin.getDefaultConfig = function () {
+        return new PluginConfig();
     };
+
+//    CyPhy2ModelicaPlugin.prototype.doGUIConfig = function (preconfig, callback) {
+//        callback({'dataSourcePath': './src/samples/modelica_components.json'});
+//    };
+
+    var DATACONFIG = require('src/samples/modelica_components');
 
     CyPhy2ModelicaPlugin.prototype.main = function (config, callback) {
         console.log('Run started..');
         var rootNode = config.rootNode,
             core = config.core,
             project = config.project,
-            dataConfig = config.dataConfig,
+            dataConfig = DATACONFIG,
             result,
             index,
             start = new Date(),
             execTime,
-            nbrOfComponents = dataConfig.length;
+            nbrOfComponents = dataConfig.length,
+            newCyPhyProjectObj,
+            componentsFolderObj,
+            componentsFolder,
+            component,
+            modelicaModel;
 
-        // initialize domain specific API
+        // initialize domain specific API.
         CyPhyLight.initialize(core, null, config.META);
 
-        var newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject.Type});
+        // This is still done through the core-API.
+        newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject.Type});
         core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
 
-        var componentsFolder = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components.Type});
-        core.setAttribute(componentsFolder, 'name', 'ImportedComponents');
+        componentsFolderObj = core.createNode({parent: newCyPhyProjectObj, base: CyPhyLight.Components.Type});
+        core.setAttribute(componentsFolderObj, 'name', 'ImportedComponents');
+
+        // No more core-API from this point and forward.
+        componentsFolder = new CyPhyLight.Components(componentsFolderObj);
 
         for (index = 0; index < nbrOfComponents; index += 1){
-            var componentConfig = dataConfig[index];
-            var componentObj = core.createNode({parent: componentsFolder, base: CyPhyLight.Component.Type});
-            var component = new CyPhyLight.Component(componentObj);
-            var uriPieces = componentConfig.exportedComponentClass.split('.');
-            var componentName = uriPieces[uriPieces.length - 1];
+            var componentConfig = dataConfig[index],
+                uriPieces = componentConfig.exportedComponentClass.split('.'),
+                componentName = uriPieces[uriPieces.length - 1];
+
+            component = componentsFolder.createComponent();
             component.attributes.setname(componentName);
 
-            var modelicaModel = component.createModelicaModel();
+            modelicaModel = component.createModelicaModel();
+            modelicaModel.attributes.setname(componentName.toLowerCase());
+            modelicaModel.attributes.setClass(componentConfig.exportedComponentClass);
             modelicaModel.registry.setposition({x: 300, y: 150});
 
-            var parameters = {},
-                connectors = {};
-            var getComponentContent = function getComponentContentRec (modelicaURI) {
-                console.log('Getting content for :: %j', modelicaURI);
-                var idxC, currComponent,
-                    idxP, currParameter,
-                    idxCn, currConnector,
-                    idxE, currExtends,
-                    idxEp, currExtendsParameter;
-
-                for (idxC = 0; idxC < componentConfig.components.length; idxC += 1) {
-                    currComponent = componentConfig.components[idxC];
-                    if (currComponent.fullName === modelicaURI) {
-                        for (idxP = 0; idxP < currComponent.parameters.length; idxP += 1) {
-                            currParameter = currComponent.parameters[idxP];
-                            parameters[currParameter.name] = parameters[currParameter.name] || currParameter;
-                        }
-                        for (idxCn = 0; idxCn < currComponent.connectors.length; idxCn += 1) {
-                            currConnector = currComponent.connectors[idxCn];
-                            connectors[currConnector.name] = connectors[currConnector.name] || currConnector;
-                        }
-                        for (idxE = 0; idxE < currComponent.extends.length; idxE += 1) {
-                            currExtends = currComponent.extends[idxE];
-                            for (idxEp = 0; idxEp < currExtends.parameters.length; idxEp += 1) {
-                                currExtendsParameter = currExtends.parameters[idxEp];
-                                parameters[currExtendsParameter.name] = parameters[currExtendsParameter.name] || currExtendsParameter;
-                            }
-                            // Recursive Call is made here
-                            getComponentContentRec(currExtends.fullName);
-                        }
-                        break;
-                    }
-                }
+            var flatData = {
+                parameters: {},
+                connectors: {}
             };
 
-            getComponentContent(componentConfig.exportedComponentClass);
-
-            var buildComponent = function () {
-                var property,
-                    modelicaParameter,
-                    param,
-                    valueFlow,
-                    key,
-                    connector,
-                    modelicaConnector,
-                    modelicaConnectorCon,
-                    conn,
-                    connectorComp,
-                    y = 70,
-                    dY = 70;
-
-                for (key in parameters) {
-                    if (parameters.hasOwnProperty(key)) {
-                        param = parameters[key];
-
-                        property = component.createProperty();
-                        property.attributes.setname(param.name);
-                        property.attributes.setValue(param.value);
-                        property.registry.setposition({x: 70, y: y});
-
-                        modelicaParameter = modelicaModel.createModelicaParameter();
-                        modelicaParameter.attributes.setname(param.name);
-                        modelicaParameter.attributes.setValue(param.value);
-                        modelicaParameter.registry.setposition({x: 70, y: y});
-
-                        y += dY;
-                        console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
-                        // Create connections
-                        CyPhyLight.ValueFlowComposition.createObj(component, property, modelicaParameter);
-                    }
-                }
-                y = 70;
-                for (key in connectors) {
-                    if (connectors.hasOwnProperty(key)) {
-                        conn = connectors[key];
-                         // Create a connector
-                        connector = component.createConnector();
-                        connector.attributes.setname(conn.name);
-                        connector.registry.setposition({x: 800, y: y});
-                        // Create a modelicaConnector in the connector,..
-                        modelicaConnectorCon = connector.createModelicaConnector();
-                        modelicaConnectorCon.attributes.setname(conn.name);
-                        modelicaConnectorCon.attributes.setClass(conn.fullName);
-                        modelicaConnectorCon.registry.setposition({x: 70, y: y});
-                        // ..and one in the modelicaModel.
-                        modelicaConnector = modelicaModel.createModelicaConnector();
-                        modelicaConnector.attributes.setname(conn.name);
-                        modelicaConnector.attributes.setClass(conn.fullName);
-                        modelicaConnectorCon.registry.setposition({x: 400, y: y});
-
-                        y += dY;
-                        console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
-
-                        CyPhyLight.ModelicaConnectorComposition.createObj(component, modelicaConnectorCon, modelicaConnector);
-                    }
-                }
-            };
-
-            buildComponent();
+            CyPhy2ModelicaPlugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            CyPhy2ModelicaPlugin.buildParameters(CyPhyLight, component, modelicaModel, flatData.parameters);
+            CyPhy2ModelicaPlugin.buildConnectors(CyPhyLight, component, modelicaModel, flatData.connectors);
         }
 
         core.persist(rootNode, function (err) {
@@ -188,7 +117,105 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
 //        });
     };
 
-    console.log('ssssss');
+    CyPhy2ModelicaPlugin.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
+        console.log('Getting content for :: %j', currentModelicaURI);
+        var idxC, currComponent,
+            idxP, currParameter,
+            idxCn, currConnector,
+            idxE, currExtends,
+            idxEp, currExtendsParameter,
+            parameters = flatData.parameters,
+            connectors = flatData.connectors;
+
+        for (idxC = 0; idxC < componentConfig.components.length; idxC += 1) {
+            currComponent = componentConfig.components[idxC];
+            if (currComponent.fullName === currentModelicaURI) {
+                for (idxP = 0; idxP < currComponent.parameters.length; idxP += 1) {
+                    currParameter = currComponent.parameters[idxP];
+                    parameters[currParameter.name] = parameters[currParameter.name] || currParameter;
+                }
+                for (idxCn = 0; idxCn < currComponent.connectors.length; idxCn += 1) {
+                    currConnector = currComponent.connectors[idxCn];
+                    connectors[currConnector.name] = connectors[currConnector.name] || currConnector;
+                }
+                for (idxE = 0; idxE < currComponent.extends.length; idxE += 1) {
+                    currExtends = currComponent.extends[idxE];
+                    for (idxEp = 0; idxEp < currExtends.parameters.length; idxEp += 1) {
+                        currExtendsParameter = currExtends.parameters[idxEp];
+                        parameters[currExtendsParameter.name] = parameters[currExtendsParameter.name] || currExtendsParameter;
+                    }
+                    // Recursive Call is made here
+                    getComponentContentRec(flatData, componentConfig, currExtends.fullName);
+                }
+                break;
+            }
+        }
+    };
+
+    CyPhy2ModelicaPlugin.buildParameters = function (CyPhyLight, component, modelicaModel, parameters) {
+        var property,
+            modelicaParameter,
+            param,
+            key,
+            y = 70,
+            dY = 70;
+
+        for (key in parameters) {
+            if (parameters.hasOwnProperty(key)) {
+                param = parameters[key];
+
+                property = component.createProperty();
+                property.attributes.setname(param.name);
+                property.attributes.setValue(param.value);
+                property.registry.setposition({x: 70, y: y});
+
+                modelicaParameter = modelicaModel.createModelicaParameter();
+                modelicaParameter.attributes.setname(param.name);
+                modelicaParameter.attributes.setValue(param.value);
+                modelicaParameter.registry.setposition({x: 70, y: y});
+
+                y += dY;
+                console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
+                // Create connections
+                CyPhyLight.ValueFlowComposition.createObj(component, property, modelicaParameter);
+            }
+        }
+    };
+
+    CyPhy2ModelicaPlugin.buildConnectors = function (CyPhyLight, component, modelicaModel, connectors) {
+        var key,
+            connector,
+            modelicaConnector,
+            modelicaConnectorCon,
+            conn,
+            y = 70,
+            dY = 70;
+
+        for (key in connectors) {
+            if (connectors.hasOwnProperty(key)) {
+                conn = connectors[key];
+                // Create a connector
+                connector = component.createConnector();
+                connector.attributes.setname(conn.name);
+                connector.registry.setposition({x: 800, y: y});
+                // Create a modelicaConnector in the connector,..
+                modelicaConnectorCon = connector.createModelicaConnector();
+                modelicaConnectorCon.attributes.setname(conn.name);
+                modelicaConnectorCon.attributes.setClass(conn.fullName);
+                modelicaConnectorCon.registry.setposition({x: 70, y: y});
+                // ..and one in the modelicaModel.
+                modelicaConnector = modelicaModel.createModelicaConnector();
+                modelicaConnector.attributes.setname(conn.name);
+                modelicaConnector.attributes.setClass(conn.fullName);
+                modelicaConnectorCon.registry.setposition({x: 400, y: y});
+
+                y += dY;
+                console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
+
+                CyPhyLight.ModelicaConnectorComposition.createObj(component, modelicaConnectorCon, modelicaConnector);
+            }
+        }
+    };
 
     return CyPhy2ModelicaPlugin;
 });
