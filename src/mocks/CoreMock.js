@@ -28,7 +28,7 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.addChild = function (node, child) {
-        node.children.push(core.getPath(child));
+        node.children.push(this.getPath(child));
     };
 
     CoreMock.prototype.getRootNode = function () {
@@ -56,11 +56,15 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.setPointer = function (node, name, target) {
-        node.pointers[name] = core.getPath(target);
+        node.pointers[name] = this.getPath(target);
     };
 
     CoreMock.prototype.getPointer = function (node, name) {
-        return this._nodes[this.getPath(node.pointers[name])];
+        return this._nodes[node.pointers[name]];
+    };
+
+    CoreMock.prototype.getBase = function (node) {
+        return this.getPointer(node, 'base');
     };
 
     return CoreMock;

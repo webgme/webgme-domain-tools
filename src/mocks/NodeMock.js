@@ -40,6 +40,10 @@ define([], function () {
         this.guid = null;
         this.parent = options.parent ? core.getPath(options.parent) : null;
         this.children = [];
+
+        if (options.parent) {
+            core.addChild(options.parent, this);
+        }
     };
 
     NodeMock._nodes = [];

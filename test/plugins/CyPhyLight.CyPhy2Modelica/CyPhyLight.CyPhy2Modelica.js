@@ -56,6 +56,28 @@ var SPRING_COMPONENT_CONFIG =  {
     ]
 };
 
+var FLAT_SPRING_COMPONENT = {
+    parameters: {
+        c: {
+            name: "c",
+            value: ""
+        },
+        s_rel0: {
+            name: "s_rel0",
+            value: 0
+        }
+    },
+    connectors: {
+        flange_a: {
+            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_a",
+            "name": "flange_a"
+        },
+        flange_b: {
+            "fullName": "Modelica.Mechanics.Translational.Interfaces.Flange_b",
+            "name": "flange_b"
+        }
+    }
+};
 
 describe('CyPhy2Modelica Helper Methods', function (){
     var plugin = requirejs('src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
@@ -98,13 +120,41 @@ describe('CyPhy2Modelica Helper Methods', function (){
     });
 
     describe('PopulateComponent', function() {
-//        var CoreMock = requirejs('../../src/mocks/CoreMock');
-//        var core = new CoreMock();
-//        var meta = core.createNode({parent: core.getRootNode()});
-//        var ModelicaModel = core.createNode({parent: meta});
-//        var Property = core.createNode({parent: meta});
-//        var CyPhyLight = {
-//            Component: core.createNode({parent: meta})
-//        };
+        var CoreMock = requirejs('src/mocks/CoreMock'),
+            CyPhyLight = requirejs('src/plugins/DSMLAPIGenerator/CyPhyLight.Dsml.js'),
+            core = new CoreMock(),
+            meta = CyPhyLight.createMETATypesTests(core),
+            component = core.createNode({base: meta.Component}),
+            modelicaModel = core.createNode({parent: component, base: meta.ModelicaModel}),
+            i,
+            key,
+            cnt,
+            node,
+            baseNode,
+            newProperties = {};
+
+        it ('should populate properties', function() {
+            plugin.buildParameters(core, meta, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
+            cnt = 0;
+            for (i = 0; i < component.children.length; i += 1){
+                key = component.children[i];
+                node = core._nodes[key];
+                baseNode = null;
+                baseNode = core.getBase(node);
+                if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {
+                    newProperties[core.getAttribute(node, 'name')] = {
+                        name: core.getAttribute(node, 'name'),
+                        Value: core.getAttribute(node, 'Value')
+                    };
+                    cnt += 1;
+                }
+            }
+
+            expect(cnt).to.equal(2);
+            expect("c" in newProperties).to.equal(true);
+            expect("s_rel0" in newProperties).to.equal(true);
+        });
+
+
     });
 });

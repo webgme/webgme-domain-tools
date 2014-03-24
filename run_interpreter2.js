@@ -28,8 +28,11 @@ var main = function() {
     program.option('-i, --pluginPath <name>', 'Path to given plugin.', './src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
     program.option('-s, --selectedObjID <webGMEID>', 'ID to selected component.', '/-1/-1/-3/-16');
     program.parse(process.argv);
-    var pluginName = program.pluginPath;
+
 //var pluginName = './plugins/DsmlApiGenerator/DsmlApiGenerator';
+    var projectName = program.project;
+    var branch = program.branch;
+    var pluginName = program.pluginPath;
     var selectedID = program.selectedObjID;
     console.log('Given plugin : %j', pluginName);
 
@@ -39,12 +42,12 @@ var main = function() {
         "host": CONFIG.mongoip,
         "port": CONFIG.mongoport,
         "database": "multi",
-        "project": program.project,
+        "project": projectName,
         "token": "",
         "selected": selectedID,
         "commit": null, //"#668b3babcdf2ddcd7ba38b51acb62d63da859d90",
         //"root": ""
-        "branchName": program.branch
+        "branchName": branch
     };
 
     var PluginManager = requirejs('src/PluginManager/PluginManagerBase');

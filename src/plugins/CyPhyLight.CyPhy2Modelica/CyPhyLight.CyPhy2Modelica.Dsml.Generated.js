@@ -11,7 +11,7 @@ define(['./CyPhyLight.Dsml'], function (CyPhyLight) {
         callback({'dataSourcePath': './src/samples/modelica_components.json'});
     };
 
-    CyPhy2ModelicaPlugin.prototype.run = function (config, callback) {
+    CyPhy2ModelicaPlugin.prototype.main = function (config, callback) {
         console.log('Run started..');
         var rootNode = config.rootNode,
             core = config.core,
