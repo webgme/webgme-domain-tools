@@ -36,6 +36,9 @@ If the package.json changes then:
 
 ### Windows ###
 
+* Run all tests under `test` folder: `npm run test_win`
+* Run all tests with coverage report under `test` folder: `npm run test_win --coverage`. The coverage report is generated to `./coverage/lcov-report/index.html`.
+
 TODO ...
 
 
