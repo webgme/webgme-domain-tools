@@ -38,8 +38,7 @@ If the package.json changes then:
 
 * Run all tests under `test` folder: `npm run test_win`
 * Run all tests with coverage report under `test` folder: `npm run test_win --coverage`. The coverage report is generated to `./coverage/lcov-report/index.html`.
-
-TODO ...
+* Generate documentation for all source files in src directory `npm run jsdoc`
 
 
 ### Run tests defined in java-script file. ###

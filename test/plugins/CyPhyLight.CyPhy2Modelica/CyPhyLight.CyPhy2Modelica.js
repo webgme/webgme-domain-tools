@@ -92,6 +92,7 @@ describe('CyPhy2Modelica Helper Methods', function (){
 
         it ('should be two parameters', function() {
             var cnt = 0;
+            // FIXME: why do not we use Object.keys(flatData.parameters).length
             for (var key in flatData.parameters){
                 cnt += 1;
             }
@@ -135,10 +136,12 @@ describe('CyPhy2Modelica Helper Methods', function (){
             newConnectors = {};
 
         it ('should populate properties', function() {
+            // FIXME: should we pass only meta and use core internally if needed.
             plugin.buildParameters(core, meta, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
             cnt = 0;
             for (i = 0; i < component.children.length; i += 1){
                 key = component.children[i];
+                // FIXME: _nodes is not the official API
                 node = core._nodes[key];
                 baseNode = null;
                 baseNode = core.getBase(node);
