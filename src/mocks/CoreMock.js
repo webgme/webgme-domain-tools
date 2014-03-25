@@ -31,9 +31,12 @@ define(['./NodeMock'], function (NodeMock) {
         node.children.push(this.getPath(child));
     };
 
+    // FIXME: this method does not exist on the core API! This should be moved to the StorageMock.
     CoreMock.prototype.getRootNode = function () {
         return this._rootNode;
     };
+
+    // TODO: add a method core.loadByPath(rootNode, pathToObject, function (err, nodeObj) {
 
     CoreMock.prototype.getPath = function (node) {
         return node.path;
