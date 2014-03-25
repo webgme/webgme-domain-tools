@@ -97,6 +97,11 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
 
     DsmlApiGenerator.prototype.generateFiles = function (domain) {
         var projectName = domain.projectName;
+
+        // TODO: augment domain with inheritance level for each object, put it into an array.
+        // inheritance = [["FCO"], ["C", "B"], ["A", "F", "G"] ...];
+        //    level       ---0---  -----1----  -------2------- ...
+
         var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
 
         var ret = ejs.render(DOMAIN_TEMPLATE, domain);
