@@ -2,6 +2,13 @@
 
 ## Plugin Manager ##
 
+## Analysis execution framework ##
+* Execution of generated artifacts.
+* On server and client.
+* Artifacts storage.
+
+## Result visualization ##
+* Like dashboard.
 
 ## Logging ##
 * Same API on server- and client side.
@@ -33,6 +40,14 @@
 * DSML help for creating valid connections (?)
 * Trace instance chain.
 * Parent.
+* Other languages?
 
+
+## Targeted Interpreters ##
+* CyPhy2Modelica
+* ModelicaImporter
+* FormulaEvaluator (Propagator) (client side)
+* MassCalc
+* PET
 
 
