@@ -1,84 +1,9 @@
-define([
-        './CyPhyLight.Component.Dsml',
-        './CyPhyLight.ComponentAssemblies.Dsml',
-        './CyPhyLight.ComponentAssembly.Dsml',
-        './CyPhyLight.ComponentType.Dsml',
-        './CyPhyLight.Components.Dsml',
-        './CyPhyLight.Connection.Dsml',
-        './CyPhyLight.Connector.Dsml',
-        './CyPhyLight.ConnectorComposition.Dsml',
-        './CyPhyLight.CyPhyLightModelicaLanguage.Dsml',
-        './CyPhyLight.CyPhyProject.Dsml',
-        './CyPhyLight.DesignEntity.Dsml',
-        './CyPhyLight.Environment.Dsml',
-        './CyPhyLight.FCO.Dsml',
-        './CyPhyLight.Folder.Dsml',
-        './CyPhyLight.Metric.Dsml',
-        './CyPhyLight.ModelicaConnector.Dsml',
-        './CyPhyLight.ModelicaConnectorComposition.Dsml',
-        './CyPhyLight.ModelicaModel.Dsml',
-        './CyPhyLight.ModelicaModelType.Dsml',
-        './CyPhyLight.ModelicaParameter.Dsml',
-        './CyPhyLight.ModelicaParameterRedeclare.Dsml',
-        './CyPhyLight.ModelicaTestBench.Dsml',
-        './CyPhyLight.Parameter.Dsml',
-        './CyPhyLight.PostProcessing.Dsml',
-        './CyPhyLight.Property.Dsml',
-        './CyPhyLight.PropertyType.Dsml',
-        './CyPhyLight.SolverSettings.Dsml',
-        './CyPhyLight.TestBenchType.Dsml',
-        './CyPhyLight.TestComponent.Dsml',
-        './CyPhyLight.TestComponents.Dsml',
-        './CyPhyLight.Testing.Dsml',
-        './CyPhyLight.TopLevelSystemUnderTest.Dsml',
-        './CyPhyLight.ValueFlowComposition.Dsml',
-        './CyPhyLight.ValueFlowTarget.Dsml'],
+/**
+ * Created by Zsolt on 3/18/14.
+ */
 
-    function (
-        Component,
-        ComponentAssemblies,
-        ComponentAssembly,
-        ComponentType,
-        Components,
-        Connection,
-        Connector,
-        ConnectorComposition,
-        CyPhyLightModelicaLanguage,
-        CyPhyProject,
-        DesignEntity,
-        Environment,
-        FCO,
-        Folder,
-        Metric,
-        ModelicaConnector,
-        ModelicaConnectorComposition,
-        ModelicaModel,
-        ModelicaModelType,
-        ModelicaParameter,
-        ModelicaParameterRedeclare,
-        ModelicaTestBench,
-        Parameter,
-        PostProcessing,
-        Property,
-        PropertyType,
-        SolverSettings,
-        TestBenchType,
-        TestComponent,
-        TestComponents,
-        Testing,
-        TopLevelSystemUnderTest,
-        ValueFlowComposition,
-        ValueFlowTarget) {
+define([], function() {
 
-
-    'use strict';
-    /**
-    * A module representing CyPhyLight domain specific API.
-    *
-    * Generated on Mon Mar 24 2014 19:36:42 GMT-0500 (Central Daylight Time) [2014-03-25T00:36:42.571Z]
-    * @exports CyPhyLight
-    * @version 1.0
-    */
     var CyPhyLight = function () {};
 
     CyPhyLight.initialize = function (core, storage, META) {
@@ -86,10 +11,10 @@ define([
         for (name in META) {
             if (META.hasOwnProperty(name)) {
                 if (CyPhyLight.hasOwnProperty(name)) {
-                CyPhyLight[name].Type = META[name];
-            } else {
-                CyPhyLight[name] = {};
-                CyPhyLight[name].Type = META[name];
+                    CyPhyLight[name].Type = META[name];
+                } else {
+                    CyPhyLight[name] = {};
+                    CyPhyLight[name].Type = META[name];
                 }
             }
         }
@@ -98,219 +23,340 @@ define([
         CyPhyLight._storage = storage;
     };
 
-    CyPhyLight.createMETATypesTests = function (core) {
-        var META = {},
-            options = {},
-            node;
+    /********************************************************
+     * Component
+     ********************************************************/
+    CyPhyLight.Component = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+    };
 
-    
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Component');
-        META.Component = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ComponentAssemblies');
-        META.ComponentAssemblies = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ComponentAssembly');
-        META.ComponentAssembly = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ComponentType');
-        META.ComponentType = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Components');
-        META.Components = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Connection');
-        META.Connection = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Connector');
-        META.Connector = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ConnectorComposition');
-        META.ConnectorComposition = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'CyPhyLightModelicaLanguage');
-        META.CyPhyLightModelicaLanguage = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'CyPhyProject');
-        META.CyPhyProject = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'DesignEntity');
-        META.DesignEntity = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Environment');
-        META.Environment = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'FCO');
-        META.FCO = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Folder');
-        META.Folder = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Metric');
-        META.Metric = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaConnector');
-        META.ModelicaConnector = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaConnectorComposition');
-        META.ModelicaConnectorComposition = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaModel');
-        META.ModelicaModel = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaModelType');
-        META.ModelicaModelType = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaParameter');
-        META.ModelicaParameter = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaParameterRedeclare');
-        META.ModelicaParameterRedeclare = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelicaTestBench');
-        META.ModelicaTestBench = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Parameter');
-        META.Parameter = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'PostProcessing');
-        META.PostProcessing = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Property');
-        META.Property = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'PropertyType');
-        META.PropertyType = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'SolverSettings');
-        META.SolverSettings = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'TestBenchType');
-        META.TestBenchType = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'TestComponent');
-        META.TestComponent = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'TestComponents');
-        META.TestComponents = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Testing');
-        META.Testing = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'TopLevelSystemUnderTest');
-        META.TopLevelSystemUnderTest = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ValueFlowComposition');
-        META.ValueFlowComposition = node;
-        
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ValueFlowTarget');
-        META.ValueFlowTarget = node;
-        
-        return META;
+    CyPhyLight.Component.Type = "/-2/-19";
+
+    CyPhyLight.Component.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.Component.Type});
+        return new CyPhyLight.Component(nodeObj);
+    };
+
+    CyPhyLight.Component.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.Component.prototype.Attributes = {};
+    CyPhyLight.Component.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.Component.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+
+    CyPhyLight.Component.prototype.createModelicaModel = function () {
+        return CyPhyLight.ModelicaModel.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createProperty = function () {
+        return CyPhyLight.Property.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createConnector = function () {
+        return CyPhyLight.Connector.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
+
+    CyPhyLight.Component.prototype.createValueFlowComposition = function (src, dst) {
+        return CyPhyLight.ValueFlowComposition.createObj(this, src, dst);
+    };
+
+    CyPhyLight.Component.prototype.createModelicaConnectorComposition = function (src, dst) {
+        return CyPhyLight.ModelicaConnectorComposition.createObj(this, src, dst);
+    };
+
+    /********************************************************
+     * ModelicaModel
+     ********************************************************/
+    CyPhyLight.ModelicaModel = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.ModelicaModel.Type = "/-2/-19";
+
+    CyPhyLight.ModelicaModel.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ModelicaModel.Type});
+        return new CyPhyLight.ModelicaModel(nodeObj);
+    };
+
+    CyPhyLight.ModelicaModel.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.ModelicaModel.prototype.Attributes = {};
+    CyPhyLight.ModelicaModel.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ModelicaModel.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+    CyPhyLight.ModelicaModel.prototype.Attributes.getClass = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'Class');
+    };
+    CyPhyLight.ModelicaModel.prototype.Attributes.setClass = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'Class', value);
+    };
+
+    CyPhyLight.ModelicaModel.prototype.Registry = {};
+    CyPhyLight.ModelicaModel.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+    CyPhyLight.ModelicaModel.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    CyPhyLight.ModelicaModel.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
+
+    CyPhyLight.ModelicaModel.prototype.createModelicaParameter = function () {
+        return CyPhyLight.ModelicaParameter.createObj(this);
+    };
+
+    /********************************************************
+     * Connector
+     ********************************************************/
+    CyPhyLight.Connector = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.Connector.Type = "/-2/-19";
+
+    CyPhyLight.Connector.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.Connector.Type});
+        return new CyPhyLight.Connector(nodeObj);
+    };
+
+    CyPhyLight.Connector.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.Connector.prototype.Attributes = {};
+    CyPhyLight.Connector.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.Connector.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+
+    CyPhyLight.Connector.prototype.Registry = {};
+    CyPhyLight.Connector.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+
+    CyPhyLight.Connector.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    CyPhyLight.Connector.prototype.createModelicaConnector = function () {
+        return CyPhyLight.ModelicaConnector.createObj(this);
+    };
+
+    /********************************************************
+     * ModelicaConnector
+     ********************************************************/
+    CyPhyLight.ModelicaConnector = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.ModelicaConnector.Type = "/-2/-19";
+
+    CyPhyLight.ModelicaConnector.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ModelicaConnector.Type});
+        return new CyPhyLight.ModelicaConnector(nodeObj);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.ModelicaConnector.prototype.Attributes = {};
+    CyPhyLight.ModelicaConnector.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.getClass = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'Class');
+    };
+    CyPhyLight.ModelicaConnector.prototype.Attributes.setClass = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'Class', value);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.Registry = {};
+    CyPhyLight.ModelicaConnector.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    CyPhyLight.ModelicaConnector.prototype.createModelicaParameter = function () {
+        return CyPhyLight.ModelicaParameter.createObj(this);
+    };
+
+    /********************************************************
+     * Property
+     ********************************************************/
+    CyPhyLight.Property = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.Property.Type = "/-2/-19";
+
+    CyPhyLight.Property.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.Property.Type});
+        return new CyPhyLight.Property(nodeObj);
+    };
+
+    CyPhyLight.Property.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.Property.prototype.Attributes = {};
+    CyPhyLight.Property.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.Property.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+    CyPhyLight.Property.prototype.Attributes.getValue = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'Value');
+    };
+    CyPhyLight.Property.prototype.Attributes.setValue = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'Value', value);
+    };
+
+    CyPhyLight.Property.prototype.Registry = {};
+    CyPhyLight.Property.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+    CyPhyLight.Property.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
+
+    /********************************************************
+     * ModelicaParameter
+     ********************************************************/
+    CyPhyLight.ModelicaParameter = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
+
+    CyPhyLight.ModelicaParameter.Type = "/-2/-19";
+
+    CyPhyLight.ModelicaParameter.createObj = function (parent) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ModelicaParameter.Type});
+        return new CyPhyLight.ModelicaParameter(nodeObj);
+    };
+
+    CyPhyLight.ModelicaParameter.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    CyPhyLight.ModelicaParameter.prototype.Attributes = {};
+    CyPhyLight.ModelicaParameter.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ModelicaParameter.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
+    CyPhyLight.ModelicaParameter.prototype.Attributes.getValue = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'Value');
+    };
+    CyPhyLight.ModelicaParameter.prototype.Attributes.setValue = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'Value', value);
+    };
+
+    CyPhyLight.ModelicaParameter.prototype.Registry = {};
+    CyPhyLight.ModelicaParameter.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+    CyPhyLight.ModelicaParameter.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
     };
 
 
-    CyPhyLight.Component = Component;
+    /********************************************************
+     * ValueFlowComposition
+     ********************************************************/
+    CyPhyLight.ValueFlowComposition = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
 
-    CyPhyLight.ComponentAssemblies = ComponentAssemblies;
+    CyPhyLight.ValueFlowComposition.Type = "/-2/-19";
 
-    CyPhyLight.ComponentAssembly = ComponentAssembly;
+    CyPhyLight.ValueFlowComposition.createObj = function (parent, src, dst) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ValueFlowComposition.Type});
+        CyPhyLight._core.setPointer(nodeObj, 'src', src.getNodeObj());
+        CyPhyLight._core.setPointer(nodeObj, 'dst', dst.getNodeObj());
+        return new CyPhyLight.ValueFlowComposition(nodeObj);
+    };
 
-    CyPhyLight.ComponentType = ComponentType;
+    CyPhyLight.ValueFlowComposition.prototype.getNodeObj = function () { return this._nodeObj; };
 
-    CyPhyLight.Components = Components;
+    CyPhyLight.ValueFlowComposition.prototype.Attributes = {};
+    CyPhyLight.ValueFlowComposition.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ValueFlowComposition.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
 
-    CyPhyLight.Connection = Connection;
+    CyPhyLight.ValueFlowComposition.prototype.Registry = {};
+    CyPhyLight.ValueFlowComposition.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+    CyPhyLight.ValueFlowComposition.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
 
-    CyPhyLight.Connector = Connector;
 
-    CyPhyLight.ConnectorComposition = ConnectorComposition;
+    /********************************************************
+     * ModelicaConnectorComposition
+     ********************************************************/
+    CyPhyLight.ModelicaConnectorComposition = function (nodeObj) {
+        this._nodeObj = nodeObj;
+        this.Attributes._nodeObj = this._nodeObj;
+        this.Registry._nodeObj = this._nodeObj;
+    };
 
-    CyPhyLight.CyPhyLightModelicaLanguage = CyPhyLightModelicaLanguage;
+    CyPhyLight.ModelicaConnectorComposition.Type = "/-2/-19";
 
-    CyPhyLight.CyPhyProject = CyPhyProject;
+    CyPhyLight.ModelicaConnectorComposition.createObj = function (parent, src, dst) {
+        var nodeObj = CyPhyLight._core.createNode({parent: parent.getNodeObj(), base: CyPhyLight.ModelicaConnectorComposition.Type});
+        CyPhyLight._core.setPointer(nodeObj, 'src', src.getNodeObj());
+        CyPhyLight._core.setPointer(nodeObj, 'dst', dst.getNodeObj());
+        return new CyPhyLight.ModelicaConnectorComposition(nodeObj);
+    };
 
-    CyPhyLight.DesignEntity = DesignEntity;
+    CyPhyLight.ModelicaConnectorComposition.prototype.getNodeObj = function () { return this._nodeObj; };
 
-    CyPhyLight.Environment = Environment;
+    CyPhyLight.ModelicaConnectorComposition.prototype.Attributes = {};
+    CyPhyLight.ModelicaConnectorComposition.prototype.Attributes.getname = function () {
+        return CyPhyLight._core.getAttribute(this._nodeObj, 'name');
+    };
+    CyPhyLight.ModelicaConnectorComposition.prototype.Attributes.setname = function (value) {
+        return CyPhyLight._core.setAttribute(this._nodeObj, 'name', value);
+    };
 
-    CyPhyLight.FCO = FCO;
-
-    CyPhyLight.Folder = Folder;
-
-    CyPhyLight.Metric = Metric;
-
-    CyPhyLight.ModelicaConnector = ModelicaConnector;
-
-    CyPhyLight.ModelicaConnectorComposition = ModelicaConnectorComposition;
-
-    CyPhyLight.ModelicaModel = ModelicaModel;
-
-    CyPhyLight.ModelicaModelType = ModelicaModelType;
-
-    CyPhyLight.ModelicaParameter = ModelicaParameter;
-
-    CyPhyLight.ModelicaParameterRedeclare = ModelicaParameterRedeclare;
-
-    CyPhyLight.ModelicaTestBench = ModelicaTestBench;
-
-    CyPhyLight.Parameter = Parameter;
-
-    CyPhyLight.PostProcessing = PostProcessing;
-
-    CyPhyLight.Property = Property;
-
-    CyPhyLight.PropertyType = PropertyType;
-
-    CyPhyLight.SolverSettings = SolverSettings;
-
-    CyPhyLight.TestBenchType = TestBenchType;
-
-    CyPhyLight.TestComponent = TestComponent;
-
-    CyPhyLight.TestComponents = TestComponents;
-
-    CyPhyLight.Testing = Testing;
-
-    CyPhyLight.TopLevelSystemUnderTest = TopLevelSystemUnderTest;
-
-    CyPhyLight.ValueFlowComposition = ValueFlowComposition;
-
-    CyPhyLight.ValueFlowTarget = ValueFlowTarget;
+    CyPhyLight.ModelicaConnectorComposition.prototype.Registry = {};
+    CyPhyLight.ModelicaConnectorComposition.prototype.Registry.getPosition = function () {
+        return CyPhyLight._core.getRegistry(this._nodeObj, 'position');
+    };
+    CyPhyLight.ModelicaConnectorComposition.prototype.Registry.setPosition = function (value) {
+        return CyPhyLight._core.setRegistry(this._nodeObj, 'position', value);
+    };
 
 
     return CyPhyLight;
