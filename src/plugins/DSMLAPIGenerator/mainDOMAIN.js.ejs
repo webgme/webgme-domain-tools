@@ -1,12 +1,11 @@
-define([
+define(['./<%- projectName %>.def',
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
-    var endSign = (metaTypeIndex === metaTypes.length - 1) ? '],' : ',';
+    var endSign = (metaTypeIndex === metaTypes.length - 1) ? ']' : ',';
 %>        './<%- projectName%>.<%- metaTypeName%>.Dsml'<%- endSign %>
 <%
 }
-%>
-    function (
+%>    ,function (<%- projectName %>,
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
     var endSign = (metaTypeIndex === metaTypes.length - 1) ? ') {' : ',';
@@ -14,48 +13,6 @@ define([
 <%}%>
 
     'use strict';
-    /**
-    * A module representing <%- projectName %> domain specific API.
-    *
-    * Generated on <%- new Date().toString() %> [<%- new Date().toISOString() %>]
-    * @exports <%- projectName %>
-    * @version 1.0
-    */
-    var <%- projectName %> = function () {};
-
-    <%- projectName %>.initialize = function (core, storage, META) {
-        var name;
-        for (name in META) {
-            if (META.hasOwnProperty(name)) {
-                if (<%- projectName %>.hasOwnProperty(name)) {
-                <%- projectName %>[name].Type = META[name];
-            } else {
-                <%- projectName %>[name] = {};
-                <%- projectName %>[name].Type = META[name];
-                }
-            }
-        }
-
-        <%- projectName %>._core = core;
-        <%- projectName %>._storage = storage;
-    };
-
-    <%- projectName %>.createMETATypesTests = function (core) {
-        var META = {},
-            options = {},
-            node;
-
-    <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
-        var metaTypeName = metaTypes[metaTypeIndex].name;
-    %>
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', '<%- metaTypeName %>');
-        META.<%- metaTypeName %> = node;
-        <%
-        }
-        %>
-        return META;
-    };
 
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;%>

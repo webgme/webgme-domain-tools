@@ -1,0 +1,73 @@
+define(['./<%- projectName %>.def'], function (<%- projectName %>) {
+
+    'use strict';
+
+    /**
+    * This file defines all constructors of the <%- projectName %> domain specific API types.
+    *
+    * Generated on <%- new Date().toString() %> [<%- new Date().toISOString() %>]
+    * @exports <%- projectName %>
+    * @version 1.0
+    */
+
+<% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
+    var metaTypeName = metaTypes[metaTypeIndex].name;
+    var base = metaTypes[metaTypeIndex].base%>
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.
+    *
+    * @class
+    <% if (base) { %>* @augments {<%- base %>}<% } %>
+    * @classdesc This class represents a(n) <%- metaTypeName %>.
+    * @property {<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
+    * @property {<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
+        <%
+        if (base) {
+        %>
+        // Call the constructor of the base-class as if it were acting on this.
+        // This call is probably only needed if we want to cache the attributes and registry
+        // while not defining them flat here.
+        //<%- base %>.call(this, nodeObj);
+        //<%
+        }
+        %>
+        this._nodeObj = nodeObj;
+        this.attributes = new <%- projectName %>.<%- metaTypeName %>.Attributes(this._nodeObj);
+        this.registry = new <%- projectName %>.<%- metaTypeName %>.Registry(this._nodeObj);
+    };
+
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Attributes
+    *
+    * @class
+    * @classdesc This class wraps the attributes of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %>.Attributes = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
+
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Registry
+    *
+    * @class
+    * @classdesc This class wraps the registry of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %>.Registry = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
+
+<%
+}
+%>
+
+    return <%- projectName %>;
+
+});

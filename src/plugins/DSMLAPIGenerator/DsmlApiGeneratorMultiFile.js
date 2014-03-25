@@ -36,20 +36,33 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
             var projectName = domain.projectName;
             var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/mainDOMAIN.js.ejs', 'utf8');
             var TYPE_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/typeDOMAIN.js.ejs', 'utf8');
+            var CONSTRUCTOR_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/constructorsDOMAIN.js.ejs', 'utf8');
+            var DEF_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/defDOMAIN.js.ejs', 'utf8');
             var ret = ejs.render(DOMAIN_TEMPLATE, domain);
             var idMap = this.getIDMap(domain);
             //console.log(ret);
 
-            var outputfileName = 'src/plugins/DsmlApiGenerator/generated/' + projectName + '.Dsml.js';
-
+            // Generate the main DSML file.
+            var outputfileName = 'src/plugins/CyPhyLight.CyPhy2Modelica/' + projectName + '.Dsml.js';
             fs.writeFileSync(outputfileName, ret, 'utf8');
-
             fs.writeFileSync('src/plugins/DsmlApiGenerator/generated/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
-
             console.info(outputfileName + ' was generated.');
 
+            // Generate the constructors file.
+            outputfileName = 'src/plugins/CyPhyLight.CyPhy2Modelica/' + projectName + '.constructors.js';
+            ret = ejs.render(CONSTRUCTOR_TEMPLATE, domain);
+            fs.writeFileSync(outputfileName, ret, 'utf8');
+            console.info(outputfileName + ' was generated.');
+
+            // Generate the defintion file.
+            outputfileName = 'src/plugins/CyPhyLight.CyPhy2Modelica/' + projectName + '.def.js';
+            ret = ejs.render(DEF_TEMPLATE, domain);
+            fs.writeFileSync(outputfileName, ret, 'utf8');
+            console.info(outputfileName + ' was generated.');
+
+            // Generate all meta-type files.
             for (var metaTypeIndex = 0; metaTypeIndex < domain.metaTypes.length; metaTypeIndex += 1) {
-                outputfileName = 'src/plugins/DsmlApiGenerator/generated/' + projectName + '.' +
+                outputfileName = 'src/plugins/CyPhyLight.CyPhy2Modelica/' + projectName + '.' +
                                  domain.metaTypes[metaTypeIndex].name + '.Dsml.js';
 
                 var typeData = {

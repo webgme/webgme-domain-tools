@@ -1,0 +1,42 @@
+define([], function () {
+
+    var <%- projectName %> = function () {};
+
+    <%- projectName %>.initialize = function (core, storage, META) {
+        var name;
+        for (name in META) {
+            if (META.hasOwnProperty(name)) {
+                if (<%- projectName %>.hasOwnProperty(name)) {
+                    <%- projectName %>[name].Type = META[name];
+                } else {
+                    <%- projectName %>[name] = {};
+                    <%- projectName %>[name].Type = META[name];
+                }
+            }
+        }
+
+        <%- projectName %>._core = core;
+        <%- projectName %>._storage = storage;
+    };
+
+
+    <%- projectName %>.createMETATypesTests = function (core) {
+        var META = {},
+        options = {},
+        node;
+
+        <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
+            var metaTypeName = metaTypes[metaTypeIndex].name;
+        %>
+        node = core.createNode(options);
+        core.setAttribute(node, 'name', '<%- metaTypeName %>');
+        META.<%- metaTypeName %> = node;
+        <%
+        }
+        %>
+
+        return META;
+    };
+
+    return CyPhyLight;
+});
