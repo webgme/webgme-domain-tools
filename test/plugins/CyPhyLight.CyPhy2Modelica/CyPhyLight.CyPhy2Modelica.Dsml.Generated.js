@@ -91,21 +91,12 @@ describe('CyPhy2Modelica.Dsml.Generated Helper Methods', function (){
         plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
 
         it ('should be two parameters', function() {
-            var cnt = 0;
-            for (var key in flatData.parameters){
-                cnt += 1;
-            }
 
-            expect(cnt).to.equal(2);
+            expect(Object.keys(flatData.parameters).length).to.equal(2);
         });
 
         it ('should be two connectors', function() {
-            var cnt = 0;
-            for (var key in flatData.connectors){
-                cnt += 1;
-            }
-
-            expect(cnt).to.equal(2);
+            expect(Object.keys(flatData.connectors).length).to.equal(2);
         });
 
         it ('names of parameters correct', function() {
@@ -165,7 +156,7 @@ describe('CyPhy2Modelica.Dsml.Generated Helper Methods', function (){
             cnt = 0;
             for (i = 0; i < modelicaModel.getNodeObj().children.length; i += 1){
                 key = modelicaModel.getNodeObj().children[i];
-                node = core._nodes[key];
+                node = core.loadByPath(null, key);
                 baseNode = null;
                 baseNode = core.getBase(node);
                 if (baseNode && core.getPath(baseNode) === core.getPath(meta.ModelicaConnector)) {

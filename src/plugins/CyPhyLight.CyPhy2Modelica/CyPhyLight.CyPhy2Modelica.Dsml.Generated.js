@@ -156,64 +156,67 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
         var property,
             modelicaParameter,
             param,
-            key,
+            i,
+            keys,
+            len,
             y = 70,
             dY = 70;
 
-        for (key in parameters) {
-            if (parameters.hasOwnProperty(key)) {
-                param = parameters[key];
+        keys = Object.keys(parameters);
+        len = keys.length;
+        for (i = 0; i < len; i += 1){
+            param = parameters[keys[i]];
+            property = component.createProperty();
+            property.attributes.setname(param.name);
+            property.attributes.setValue(param.value);
+            property.registry.setposition({x: 70, y: y});
 
-                property = component.createProperty();
-                property.attributes.setname(param.name);
-                property.attributes.setValue(param.value);
-                property.registry.setposition({x: 70, y: y});
+            modelicaParameter = modelicaModel.createModelicaParameter();
+            modelicaParameter.attributes.setname(param.name);
+            modelicaParameter.attributes.setValue(param.value);
+            modelicaParameter.registry.setposition({x: 70, y: y});
 
-                modelicaParameter = modelicaModel.createModelicaParameter();
-                modelicaParameter.attributes.setname(param.name);
-                modelicaParameter.attributes.setValue(param.value);
-                modelicaParameter.registry.setposition({x: 70, y: y});
-
-                y += dY;
-                console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
-                // Create connections
-                CyPhyLight.ValueFlowComposition.createObj(component, property, modelicaParameter);
-            }
+            y += dY;
+            console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
+            // Create connections
+            CyPhyLight.ValueFlowComposition.createObj(component, property, modelicaParameter);
         }
     };
 
     CyPhy2ModelicaPlugin.buildConnectors = function (CyPhyLight, component, modelicaModel, connectors) {
-        var key,
-            connector,
+        var connector,
             modelicaConnector,
             modelicaConnectorCon,
             conn,
+            i,
+            keys,
+            len,
             y = 70,
             dY = 70;
 
-        for (key in connectors) {
-            if (connectors.hasOwnProperty(key)) {
-                conn = connectors[key];
-                // Create a connector
-                connector = component.createConnector();
-                connector.attributes.setname(conn.name);
-                connector.registry.setposition({x: 800, y: y});
-                // Create a modelicaConnector in the connector,..
-                modelicaConnectorCon = connector.createModelicaConnector();
-                modelicaConnectorCon.attributes.setname(conn.name);
-                modelicaConnectorCon.attributes.setClass(conn.fullName);
-                modelicaConnectorCon.registry.setposition({x: 70, y: y});
-                // ..and one in the modelicaModel.
-                modelicaConnector = modelicaModel.createModelicaConnector();
-                modelicaConnector.attributes.setname(conn.name);
-                modelicaConnector.attributes.setClass(conn.fullName);
-                modelicaConnectorCon.registry.setposition({x: 400, y: y});
+        keys = Object.keys(connectors);
+        len = keys.length;
+        for (i = 0; i < len; i += 1){
+            conn = connectors[keys[i]];
+            // Create a connector
+            connector = component.createConnector();
+            connector.attributes.setname(conn.name);
+            connector.registry.setposition({x: 800, y: y});
+            // Create a modelicaConnector in the connector,..
+            modelicaConnectorCon = connector.createModelicaConnector();
+            modelicaConnectorCon.attributes.setname(conn.name);
+            modelicaConnectorCon.attributes.setClass(conn.fullName);
+            modelicaConnectorCon.registry.setposition({x: 70, y: y});
+            // ..and one in the modelicaModel.
+            modelicaConnector = modelicaModel.createModelicaConnector();
+            modelicaConnector.attributes.setname(conn.name);
+            modelicaConnector.attributes.setClass(conn.fullName);
+            modelicaConnectorCon.registry.setposition({x: 400, y: y});
 
-                y += dY;
-                console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
+            y += dY;
+            console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
 
-                CyPhyLight.ModelicaConnectorComposition.createObj(component, modelicaConnectorCon, modelicaConnector);
-            }
+            CyPhyLight.ModelicaConnectorComposition.createObj(component, modelicaConnectorCon, modelicaConnector);
         }
     };
 

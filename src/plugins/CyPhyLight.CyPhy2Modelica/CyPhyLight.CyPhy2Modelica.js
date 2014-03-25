@@ -227,65 +227,69 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
             modelicaParameter,
             param,
             valueFlow,
-            key,
+            i,
+            keys,
+            len,
             y = 70,
             dY = 70;
 
-        for (key in parameters) {
-            if (parameters.hasOwnProperty(key)) {
-                param = parameters[key];
-                property = core.createNode({parent: component, base: CyPhyLight.Property});
-                core.setAttribute(property, 'name', param.name);
-                core.setAttribute(property, 'Value', param.value);
-                core.setRegistry(property, 'position', {x: 70, y: y});
+        keys = Object.keys(parameters);
+        len = keys.length;
+        for (i = 0; i < len; i += 1){
+            param = parameters[keys[i]];
+            property = core.createNode({parent: component, base: CyPhyLight.Property});
+            core.setAttribute(property, 'name', param.name);
+            core.setAttribute(property, 'Value', param.value);
+            core.setRegistry(property, 'position', {x: 70, y: y});
 
-                modelicaParameter = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaParameter});
-                core.setAttribute(modelicaParameter, 'name', param.name);
-                core.setAttribute(modelicaParameter, 'Value', param.value);
-                core.setRegistry(modelicaParameter, 'position', {x: 70, y: y});
-                y += dY;
-                console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
-                // Create connections
-                valueFlow = core.createNode({parent: component, base: CyPhyLight.ValueFlowComposition});
-                core.setPointer(valueFlow, 'src', property);
-                core.setPointer(valueFlow, 'dst', modelicaParameter);
-            }
+            modelicaParameter = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaParameter});
+            core.setAttribute(modelicaParameter, 'name', param.name);
+            core.setAttribute(modelicaParameter, 'Value', param.value);
+            core.setRegistry(modelicaParameter, 'position', {x: 70, y: y});
+            y += dY;
+            console.log('Created Parameter : %j, with Value : %j',  param.name, param.value);
+            // Create connections.
+            valueFlow = core.createNode({parent: component, base: CyPhyLight.ValueFlowComposition});
+            core.setPointer(valueFlow, 'src', property);
+            core.setPointer(valueFlow, 'dst', modelicaParameter);
         }
     };
 
     CyPhy2ModelicaPlugin.buildConnectors = function (core, CyPhyLight, component, modelicaModel, connectors) {
-        var key,
-            connector,
+        var connector,
             modelicaConnector,
             modelicaConnectorCon,
             conn,
             connectorComp,
+            i,
+            keys,
+            len,
             y = 70,
             dY = 70;
 
-        for (key in connectors) {
-            if (connectors.hasOwnProperty(key)) {
-                conn = connectors[key];
-                connector = core.createNode({parent: component, base: CyPhyLight.Connector});
-                core.setAttribute(connector, 'name', conn.name);
-                core.setRegistry(connector, 'position', {x: 800, y: y});
-                // Create a modelicaConnector in the connector,..
-                modelicaConnectorCon = core.createNode({parent: connector, base: CyPhyLight.ModelicaConnector});
-                core.setAttribute(modelicaConnectorCon, 'name', conn.name);
-                core.setAttribute(modelicaConnectorCon, 'Class', conn.fullName);
-                core.setRegistry(modelicaConnectorCon, 'position', {x: 70, y: y});
-                // ..and one in the modelicaModel.
-                modelicaConnector = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaConnector});
-                core.setAttribute(modelicaConnector, 'name', conn.name);
-                core.setAttribute(modelicaConnector, 'Class', conn.fullName);
-                core.setRegistry(modelicaConnector, 'position', {x: 400, y: y});
-                y += dY;
-                console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
-                // Create connections
-                connectorComp = core.createNode({parent: component, base: CyPhyLight.ModelicaConnectorComposition});
-                core.setPointer(connectorComp, 'src', modelicaConnectorCon);
-                core.setPointer(connectorComp, 'dst', modelicaConnector);
-            }
+        keys = Object.keys(connectors);
+        len = keys.length;
+        for (i = 0; i < len; i += 1){
+            conn = connectors[keys[i]];
+            connector = core.createNode({parent: component, base: CyPhyLight.Connector});
+            core.setAttribute(connector, 'name', conn.name);
+            core.setRegistry(connector, 'position', {x: 800, y: y});
+            // Create a modelicaConnector in the connector,..
+            modelicaConnectorCon = core.createNode({parent: connector, base: CyPhyLight.ModelicaConnector});
+            core.setAttribute(modelicaConnectorCon, 'name', conn.name);
+            core.setAttribute(modelicaConnectorCon, 'Class', conn.fullName);
+            core.setRegistry(modelicaConnectorCon, 'position', {x: 70, y: y});
+            // ..and one in the modelicaModel.
+            modelicaConnector = core.createNode({parent: modelicaModel, base: CyPhyLight.ModelicaConnector});
+            core.setAttribute(modelicaConnector, 'name', conn.name);
+            core.setAttribute(modelicaConnector, 'Class', conn.fullName);
+            core.setRegistry(modelicaConnector, 'position', {x: 400, y: y});
+            y += dY;
+            console.log('Created Connector : %j, with Class : %j',  conn.name, conn.fullName);
+            // Create connections.
+            connectorComp = core.createNode({parent: component, base: CyPhyLight.ModelicaConnectorComposition});
+            core.setPointer(connectorComp, 'src', modelicaConnectorCon);
+            core.setPointer(connectorComp, 'dst', modelicaConnector);
         }
     };
 

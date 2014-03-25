@@ -83,7 +83,7 @@ describe('CyPhy2Modelica Helper Methods', function (){
     var plugin = requirejs('src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
 
     describe('getComponentContent', function() {
-            var componentConfig,
+        var componentConfig,
             flatData = {parameters: {}, connectors: {}};
 
         componentConfig = SPRING_COMPONENT_CONFIG;
@@ -91,22 +91,11 @@ describe('CyPhy2Modelica Helper Methods', function (){
         plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
 
         it ('should be two parameters', function() {
-            var cnt = 0;
-            // FIXME: why do not we use Object.keys(flatData.parameters).length
-            for (var key in flatData.parameters){
-                cnt += 1;
-            }
-
-            expect(cnt).to.equal(2);
+            expect(Object.keys(flatData.parameters).length).to.equal(2);
         });
 
         it ('should be two connectors', function() {
-            var cnt = 0;
-            for (var key in flatData.connectors){
-                cnt += 1;
-            }
-
-            expect(cnt).to.equal(2);
+            expect(Object.keys(flatData.connectors).length).to.equal(2);
         });
 
         it ('names of parameters correct', function() {
@@ -137,12 +126,13 @@ describe('CyPhy2Modelica Helper Methods', function (){
 
         it ('should populate properties', function() {
             // FIXME: should we pass only meta and use core internally if needed.
+            // This is done for the dsml interpreter. Here the CyPhyLight is not initialized and meta is just a
+            // a map from Type names to ids.
             plugin.buildParameters(core, meta, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
             cnt = 0;
             for (i = 0; i < component.children.length; i += 1){
                 key = component.children[i];
-                // FIXME: _nodes is not the official API
-                node = core._nodes[key];
+                node = core.loadByPath(null, key);
                 baseNode = null;
                 baseNode = core.getBase(node);
                 if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {

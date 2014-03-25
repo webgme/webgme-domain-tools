@@ -174,6 +174,18 @@ if (require.main === module) {
     if (vfA instanceof Parameter === false) {
         console.log('vfA is not a Parameter.');
     }
+
+    // Summary
+    // The Object.keys() method returns an array of a given object's own enumerable properties,
+    // in the same order as that provided by a for...in loop (the difference being that a for-in
+    // loop enumerates properties in the prototype chain as well).
+    // It replaces "for(var key in myObject)...if (object.hasOwnProperty(key))"
+    // For speed comparison.
+    // http://jsperf.com/iterating-over-object-properties/6
+    var i, keys = Object.keys(vfA), len = keys.length;
+    for (i = 0; i < len; i += 1){
+        console.log('%j : %j', keys[i], vfA[keys[i]]);
+    }
 }
 
 module.exports.ValueFlowTarget = ValueFlowTarget;

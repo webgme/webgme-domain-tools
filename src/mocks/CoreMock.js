@@ -37,6 +37,11 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     // TODO: add a method core.loadByPath(rootNode, pathToObject, function (err, nodeObj) {
+    // webgme/core/coretree.js Line 783
+    CoreMock.prototype.loadByPath = function (node, pathToObject) {
+        // node is never used (pass null) since all nodes are accessable from _nodes.
+        return this._nodes[pathToObject];
+    };
 
     CoreMock.prototype.getPath = function (node) {
         return node.path;
