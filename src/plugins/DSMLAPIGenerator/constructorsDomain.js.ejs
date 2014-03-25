@@ -17,10 +17,10 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
     * Initializes a new instance of <%- metaTypeName %>.
     *
     * @class
-    <% if (base) { %>* @augments {<%- base %>}<% } %>
+    <% if (base) { %>* @augments {<%- projectName %>.<%- base %>}<% } %>
     * @classdesc This class represents a(n) <%- metaTypeName %>.
-    * @property {<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
-    * @property {<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
+    * @property {<%- projectName %>.<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
+    * @property {<%- projectName %>.<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
     * @param {object} nodeObj The wrapped WebGME object.
     * @constructor
     */
