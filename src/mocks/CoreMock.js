@@ -36,12 +36,23 @@ define(['./NodeMock'], function (NodeMock) {
         return this._rootNode;
     };
 
-    // TODO: add a method core.loadByPath(rootNode, pathToObject, function (err, nodeObj) {
-    // webgme/core/coretree.js Line 783
-    CoreMock.prototype.loadByPath = function (node, pathToObject) {
-        // node is never used (pass null) since all nodes are accessable from _nodes.
+    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject) {
         return this._nodes[pathToObject];
     };
+    // FIXME: How would this be called in a synchronous context?
+//    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
+//        // dummyNode is never used (pass null) since all nodes are accessable from this._nodes.
+//        var err,
+//            node;
+//
+//        if (pathToObject in this._nodes) {
+//            err = 'Given path : ' + pathToObject + 'does not exist!';
+//        } else {
+//            node = this._nodes[pathToObject];
+//        }
+//
+//        callback(err, node);
+//    };
 
     CoreMock.prototype.getPath = function (node) {
         return node.path;
