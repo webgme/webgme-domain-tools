@@ -18,15 +18,30 @@ A.prototype = Object.create(B.prototype);
 
 // these could be in separate files.
 A.prototype.initialize = function(node) {
-    //console.log('a');
+    this.a = 'a';
+    this.b = 'b';
+    this.c = 'c';
+};
+
+A.prototype.getA = function () {
+    return this.a;
 };
 
 B.prototype.initialize = function(node) {
-    //console.log('b');
+    this.b = 'b';
+    this.c = 'c';
+};
+
+B.prototype.getB = function () {
+    return this.b;
 };
 
 C.prototype.initialize = function(node) {
-    //console.log('c');
+    this.c = 'c';
+};
+
+C.prototype.getC = function () {
+    return this.c;
 };
 
 module.exports.A = A;
