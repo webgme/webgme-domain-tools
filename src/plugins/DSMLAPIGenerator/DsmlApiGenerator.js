@@ -24,7 +24,7 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
 
 
     // FIXME: this method was copied from webgme meta.js
-    function getMeta(_core, nodeObj){
+    DsmlApiGenerator.prototype.getMeta = function (_core, nodeObj){
         var meta = {children:{},attributes:{},pointers:{}};
         var node = nodeObj || null;
         if(node){
@@ -89,7 +89,7 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
         } else {
             return null;
         }
-    }
+    };
 
     DsmlApiGenerator.prototype.doGUIConfig = function (preconfig, callback) {
         callback({});
@@ -167,7 +167,7 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
 
 
 
-                var meta = getMeta(core, META[name]);
+                var meta = this.getMeta(core, META[name]);
 
                 metaType.isConnection = meta.pointers.hasOwnProperty('src') && meta.pointers.hasOwnProperty('dst');
 

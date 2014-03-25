@@ -1,0 +1,249 @@
+define (['./<%- projectName %>.Dsml'<%if(base){ %>, './<%- projectName %>.<%-base%>.Dsml'<%}%>], function (<%- projectName %><%if(base){ %>, <%-base%><%}%>) {
+
+    'use strict';
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.
+    *
+    * @class
+    <% if (base) { %>* @augments {<%- base %>}<% } %>
+    * @classdesc This class represents a(n) <%- metaTypeName %>.
+    * @property {<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
+    * @property {<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object.
+    * @constructor
+    */
+    function <%- metaTypeName %> (nodeObj) {
+        <%
+        if (base) {
+        %>
+        // Call the constructor of the base-class as if it were acting on this.
+        // This call is probably only needed if we want to cache the attributes and registry
+        // while not defining them flat here.
+        //<%- base %>.call(this, nodeObj);
+        //<%
+        }
+        %>
+        this._nodeObj = nodeObj;
+        this.attributes = new <%- metaTypeName %>.Attributes(this._nodeObj);
+        this.registry = new <%- metaTypeName %>.Registry(this._nodeObj);
+    }
+    <%
+    if (base) {
+    %>
+
+    // This will give inheritance when checking types
+    <%- metaTypeName %>.prototype = Object.create(<%- base %>.prototype);
+    <%- metaTypeName %>.prototype.constructor = <%- metaTypeName %>;
+<%  }%>
+
+    //<editor-fold desc="<%- metaTypeName %> static fields, properties and functions">
+
+    /**
+    * WebGME node object that represents <%- metaTypeName %> type.
+    * @type {nodeObj}
+    * @static
+    */
+    <%- metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
+
+    /**
+    * WebGME node object's meta type ID of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
+    <%- metaTypeName %>.ID = "<%- ID %>";
+
+    /**
+    * WebGME node object's meta type GUID of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
+    <%- metaTypeName %>.GUID = "<%- GUID %>";
+
+    /**
+    * WebGME node object's meta type hash value of <%- metaTypeName %>.
+    * @type {string}
+    * @static
+    */
+    <%- metaTypeName %>.Hash = "<%- Hash %>";
+
+    <%
+    if (isConnection) {
+    %>
+    <%- metaTypeName %>.createObj = function (parent, src, dst) {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
+        <%- projectName %>._core.setPointer(nodeObj, 'src', src.getNodeObj());
+        <%- projectName %>._core.setPointer(nodeObj, 'dst', dst.getNodeObj());
+        return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
+    };
+
+    <%
+    } else {
+    %>
+    /**
+    * Creates a new <%- metaTypeName %> inside given parent.
+    * @returns {<%- projectName %>.<%- metaTypeName %>} The newly created <%- metaTypeName %>.
+    * @param {<%- projectName %>.FCO} parent Instance where the new <%- metaTypeName %> should be created.
+    * @public
+    */
+    <%- metaTypeName %>.createObj = function (parent) {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
+        return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
+    };
+
+    <%
+    }
+    %>
+    //</editor-fold>
+
+
+    //<editor-fold desc="<%- metaTypeName %> create child objects">
+    <%
+for (var j = 0; j < children.length; j += 1) {
+    var child = idMap[children[j]];
+    %><%
+    if (child.isConnection) {
+        // FIXME: this is still buggy
+    %>
+    /**
+    * Creates a new <%- projectName %>.<%- child.name %> inside this <%- metaTypeName %> instance with src and dst connected.
+    * @param {<%- projectName %>.FCO} src The source of the new connection.
+    * @param {<%- projectName %>.FCO} dst The destination of the new connection.
+    * @returns {<%- projectName %>.<%- child.name %>} The newly created <%- child.name %>.
+    * @public
+    */
+    <%- metaTypeName %>.prototype.create<%- child.name %> = function (src, dst) {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>.<%- child.name %>.createObj(this, src, dst);
+    };
+    <%
+    } else {
+    %>
+    /**
+    * Creates a new <%- projectName %>.<%- child.name %> inside this <%- metaTypeName %> instance.
+    * @returns {<%- projectName %>.<%- child.name %>} The newly created <%- child.name %>.
+    * @public
+    */
+    <%- metaTypeName %>.prototype.create<%- child.name %> = function () {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>.<%- child.name %>.createObj(this);
+    };
+    <% } %>
+<%} %>
+    //</editor-fold>
+
+    <%- metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
+
+    // TODO: get Id
+    // TODO: get Guid
+
+    //<editor-fold desc="<%- metaTypeName %> attributes">
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Attributes
+    *
+    * @class
+    * @classdesc This class wraps the attributes of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- metaTypeName %>.Attributes = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
+
+    <%
+    for (var i = 0; i < attributeNames.length; i += 1) {
+        var attributeName = attributeNames[i];
+    %>
+    /**
+    * Gets the attribute <%- attributeName %> of the <%- metaTypeName %> instance.
+    * @returns {string|object} Currently set <%- attributeName %>.
+    * @public
+    */
+    <%- metaTypeName %>.Attributes.prototype.get<%- attributeName %> = function () {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>._core.getAttribute(this._nodeObj, '<%- attributeName %>');
+    };
+
+    /**
+    * Sets the attribute <%- attributeName %> of the <%- metaTypeName %> instance.
+    * @param {string|object} value New <%- attributeName %>.
+    * @public
+    */
+    <%- metaTypeName %>.Attributes.prototype.set<%- attributeName %> = function (value) {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>._core.setAttribute(this._nodeObj, '<%- attributeName %>', value);
+    };
+
+    <%
+    }
+    %>
+
+    //</editor-fold>
+
+
+    //<editor-fold desc="<%- metaTypeName %> registry entries">
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Registry
+    *
+    * @class
+    * @classdesc This class wraps the registry of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- metaTypeName %>.Registry = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
+    <%
+    for (var i = 0; i < registryNames.length; i += 1) {
+        var registryName = registryNames[i];
+    %>
+    /**
+    * Gets the registry value <%- registryName %> of the <%- metaTypeName %> instance.
+    * @returns {string|object} Currently set <%- registryName %>.
+    * @public
+    */
+    <%- metaTypeName %>.Registry.prototype.get<%- registryName %> = function () {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>._core.getRegistry(this._nodeObj, '<%- registryName %>');
+    };
+
+    /**
+    * Sets the registry value <%- registryName %> of the <%- metaTypeName %> instance.
+    * @param {string|object} value New registry value of <%- registryName %>.
+    * @public
+    */
+    <%- metaTypeName %>.Registry.prototype.set<%- registryName %> = function (value) {
+        if (!<%- projectName %>){
+            <%- projectName %> = require('./src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml');
+        }
+        return <%- projectName %>._core.setRegistry(this._nodeObj, '<%- registryName %>', value);
+    };
+
+    <%
+    }
+    %>
+
+    //</editor-fold>
+
+    // TODO: DSML connections
+    // TODO: DSML references
+    // TODO: DSML sets
+    // TODO: DSML pointers
+
+    return <%- metaTypeName %>;
+});
