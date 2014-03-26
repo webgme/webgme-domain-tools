@@ -40,29 +40,40 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
             var DEF_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLAPIGenerator/defDOMAIN.js.ejs', 'utf8');
             var ret = ejs.render(DOMAIN_TEMPLATE, domain);
             var idMap = this.getIDMap(domain);
-            //console.log(ret);
+            var outputDir = 'src/plugins/' + projectName + '/DSML/';
+
+            if (fs.existsSync(outputDir)) {
+                var oldFiles = fs.readdirSync(outputDir);
+                for (var i = 0; i < oldFiles.length; i += 1){
+                    fs.unlinkSync(outputDir + oldFiles[i]);
+                }
+
+                fs.rmdirSync(outputDir);
+            }
+            
+            fs.mkdirSync(outputDir); // Make sure the folder is not expanded in the WebStorm project tree.
 
             // Generate the main DSML file.
-            var outputfileName = 'src/plugins/' + projectName + '/DSML/' + projectName + '.Dsml.js';
+            var outputfileName = outputDir + projectName + '.Dsml.js';
             fs.writeFileSync(outputfileName, ret, 'utf8');
-            fs.writeFileSync('src/plugins/' + projectName + '/DSML/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
+            fs.writeFileSync(outputDir + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
             console.info(outputfileName + ' was generated.');
 
             // Generate the constructors file.
-            outputfileName = 'src/plugins/' + projectName + '/DSML/' + projectName + '.constructors.js';
+            outputfileName = outputDir + projectName + '.constructors.js';
             ret = ejs.render(CONSTRUCTOR_TEMPLATE, domain);
             fs.writeFileSync(outputfileName, ret, 'utf8');
             console.info(outputfileName + ' was generated.');
 
             // Generate the defintion file.
-            outputfileName = 'src/plugins/' + projectName + '/DSML/' + projectName + '.def.js';
+            outputfileName = outputDir + projectName + '.def.js';
             ret = ejs.render(DEF_TEMPLATE, domain);
             fs.writeFileSync(outputfileName, ret, 'utf8');
             console.info(outputfileName + ' was generated.');
 
             // Generate all meta-type files.
             for (var metaTypeIndex = 0; metaTypeIndex < domain.metaTypes.length; metaTypeIndex += 1) {
-                outputfileName = 'src/plugins/' + projectName + '/DSML/' + projectName + '.' +
+                outputfileName = outputDir + projectName + '.' +
                                  domain.metaTypes[metaTypeIndex].name + '.Dsml.js';
 
                 var typeData = {
