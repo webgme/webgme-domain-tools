@@ -3,24 +3,24 @@
  */
 
 'use strict';
-define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
+define(['src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
         function (CyPhyLight, PluginConfig, PluginBase ) {
 
-    var CyPhy2ModelicaPlugin = function () {};
+    var ModelicaImporterPlugin = function () {};
 
-    CyPhy2ModelicaPlugin.prototype = Object.create(PluginBase.prototype);
+    ModelicaImporterPlugin.prototype = Object.create(PluginBase.prototype);
 
-    CyPhy2ModelicaPlugin.getDefaultConfig = function () {
+    ModelicaImporterPlugin.getDefaultConfig = function () {
         return new PluginConfig();
     };
 
-//    CyPhy2ModelicaPlugin.prototype.doGUIConfig = function (preconfig, callback) {
+//    ModelicaImporterPlugin.prototype.doGUIConfig = function (preconfig, callback) {
 //        callback({'dataSourcePath': './src/samples/modelica_components.json'});
 //    };
 
     var DATACONFIG = require('src/samples/modelica_components');
 
-    CyPhy2ModelicaPlugin.prototype.main = function (config, callback) {
+    ModelicaImporterPlugin.prototype.main = function (config, callback) {
         console.log('Run started..');
         var rootNode = config.rootNode,
             core = config.core,
@@ -68,9 +68,9 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
                 connectors: {}
             };
 
-            CyPhy2ModelicaPlugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
-            CyPhy2ModelicaPlugin.buildParameters(CyPhyLight, component, modelicaModel, flatData.parameters);
-            CyPhy2ModelicaPlugin.buildConnectors(CyPhyLight, component, modelicaModel, flatData.connectors);
+            ModelicaImporterPlugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+            ModelicaImporterPlugin.buildParameters(CyPhyLight, component, modelicaModel, flatData.parameters);
+            ModelicaImporterPlugin.buildConnectors(CyPhyLight, component, modelicaModel, flatData.connectors);
         }
 
         core.persist(rootNode, function (err) {
@@ -117,7 +117,7 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
 //        });
     };
 
-    CyPhy2ModelicaPlugin.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
+    ModelicaImporterPlugin.getComponentContent = function getComponentContentRec (flatData, componentConfig, currentModelicaURI) {
         console.log('Getting content for :: %j', currentModelicaURI);
         var idxC, currComponent,
             idxP, currParameter,
@@ -152,7 +152,7 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
         }
     };
 
-    CyPhy2ModelicaPlugin.buildParameters = function (CyPhyLight, component, modelicaModel, parameters) {
+    ModelicaImporterPlugin.buildParameters = function (CyPhyLight, component, modelicaModel, parameters) {
         var property,
             modelicaParameter,
             param,
@@ -183,7 +183,7 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
         }
     };
 
-    CyPhy2ModelicaPlugin.buildConnectors = function (CyPhyLight, component, modelicaModel, connectors) {
+    ModelicaImporterPlugin.buildConnectors = function (CyPhyLight, component, modelicaModel, connectors) {
         var connector,
             modelicaConnector,
             modelicaConnectorCon,
@@ -220,5 +220,5 @@ define(['./CyPhyLight.Dsml','src/PluginManager/PluginConfig', 'src/PluginManager
         }
     };
 
-    return CyPhy2ModelicaPlugin;
+    return ModelicaImporterPlugin;
 });

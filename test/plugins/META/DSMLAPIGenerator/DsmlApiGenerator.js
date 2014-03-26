@@ -15,7 +15,7 @@ requirejs.config({
 });
 
 describe('Dsml Api Generator', function () {
-    var plugin = requirejs('src/plugins/DSMLAPIGenerator/DsmlApiGenerator');
+    var plugin = requirejs('src/plugins/META/DSMLAPIGenerator/DsmlApiGenerator');
 
     describe('Utility functions', function () {
         var utils = plugin.Utils;

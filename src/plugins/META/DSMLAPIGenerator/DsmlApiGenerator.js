@@ -102,17 +102,17 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
         // inheritance = [["FCO"], ["C", "B"], ["A", "F", "G"] ...];
         //    level       ---0---  -----1----  -------2------- ...
 
-        var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/DsmlApiGenerator/DOMAIN.js.ejs', 'utf8');
+        var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLAPIGenerator/DOMAIN.js.ejs', 'utf8');
 
         var ret = ejs.render(DOMAIN_TEMPLATE, domain);
 
         //console.log(ret);
 
-        var outputfileName = 'src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.js';
+        var outputfileName = 'src/plugins/META/DSMLAPIGenerator/' + projectName + '.Dsml.js';
 
         fs.writeFileSync(outputfileName, ret, 'utf8');
 
-        fs.writeFileSync('src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
+        fs.writeFileSync('src/plugins/META/DSMLAPIGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
 
         console.info(outputfileName + ' was generated.');
     }

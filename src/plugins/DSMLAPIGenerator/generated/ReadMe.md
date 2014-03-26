@@ -1,1 +1,0 @@
-# Copy these files over to ./src/plugins/CyPhyLight.CyPhy2Modelica/

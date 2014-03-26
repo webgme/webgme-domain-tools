@@ -1,6 +1,6 @@
 /**
  * Run Command :
- *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica.js
+ *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter.Dsml.Generated.js
  */
 
 'use strict';
@@ -79,8 +79,8 @@ var FLAT_SPRING_COMPONENT = {
     }
 };
 
-describe('CyPhy2Modelica Helper Methods', function (){
-    var plugin = requirejs('src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.CyPhy2Modelica');
+describe('ModelicaImporter.Dsml.Generated Helper Methods', function () {
+    var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter.Dsml');
 
     describe('getComponentContent', function() {
         var componentConfig,
@@ -91,6 +91,7 @@ describe('CyPhy2Modelica Helper Methods', function (){
         plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
 
         it ('should be two parameters', function() {
+
             expect(Object.keys(flatData.parameters).length).to.equal(2);
         });
 
@@ -111,11 +112,11 @@ describe('CyPhy2Modelica Helper Methods', function (){
 
     describe('PopulateComponent', function() {
         var CoreMock = requirejs('src/mocks/CoreMock'),
-            CyPhyLight = requirejs('src/plugins/CyPhyLight.CyPhy2Modelica/CyPhyLight.Dsml.js'),
+            CyPhyLight = requirejs('src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
             core = new CoreMock(),
             meta = CyPhyLight.createMETATypesTests(core),
-            component = core.createNode({base: meta.Component}),
-            modelicaModel = core.createNode({parent: component, base: meta.ModelicaModel}),
+            component,
+            modelicaModel,
             i,
             key,
             cnt,
@@ -124,25 +125,25 @@ describe('CyPhy2Modelica Helper Methods', function (){
             newProperties = {},
             newConnectors = {};
 
+        CyPhyLight.initialize(core, null, meta);
+        component = new CyPhyLight.Component(core.createNode({base: meta.Component}));
+        modelicaModel = component.createModelicaModel();
+
         it ('should populate properties', function() {
-            // FIXME: should we pass only meta and use core internally if needed.
-            // This is done for the dsml interpreter. Here the CyPhyLight is not initialized and meta is just a
-            // a map from Type names to ids.
-            plugin.buildParameters(core, meta, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
+            plugin.buildParameters(CyPhyLight, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
             cnt = 0;
-            for (i = 0; i < component.children.length; i += 1){
-                key = component.children[i];
-                node = core.loadByPath(null, key, function(err, node) {
-                    baseNode = null;
-                    baseNode = core.getBase(node);
-                    if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {
-                        newProperties[core.getAttribute(node, 'name')] = {
-                            name: core.getAttribute(node, 'name'),
-                            Value: core.getAttribute(node, 'Value')
-                        };
-                        cnt += 1;
-                    }
-                });
+            for (i = 0; i < component.getNodeObj().children.length; i += 1){
+                key = component.getNodeObj().children[i];
+                node = core._nodes[key];
+                baseNode = null;
+                baseNode = core.getBase(node);
+                if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {
+                    newProperties[core.getAttribute(node, 'name')] = {
+                        name: core.getAttribute(node, 'name'),
+                        Value: core.getAttribute(node, 'Value')
+                    };
+                    cnt += 1;
+                }
             }
 
             expect(cnt).to.equal(2);
@@ -151,20 +152,23 @@ describe('CyPhy2Modelica Helper Methods', function (){
         });
 
         it ('should populate connectors', function() {
-            plugin.buildConnectors(core, meta, component, modelicaModel, FLAT_SPRING_COMPONENT.connectors);
+            plugin.buildConnectors(CyPhyLight, component, modelicaModel, FLAT_SPRING_COMPONENT.connectors);
             cnt = 0;
-            for (i = 0; i < modelicaModel.children.length; i += 1){
-                key = modelicaModel.children[i];
-                node = core._nodes[key];
-                baseNode = null;
-                baseNode = core.getBase(node);
-                if (baseNode && core.getPath(baseNode) === core.getPath(meta.ModelicaConnector)) {
-                    newConnectors[core.getAttribute(node, 'name')] = {
-                        name: core.getAttribute(node, 'name'),
-                        Class: core.getAttribute(node, 'Class')
-                    };
-                    cnt += 1;
-                }
+            for (i = 0; i < modelicaModel.getNodeObj().children.length; i += 1){
+                key = modelicaModel.getNodeObj().children[i];
+                core.loadByPath(null, key, function(err, node) {
+                    baseNode = null;
+                    baseNode = core.getBase(node);
+                    if (baseNode && core.getPath(baseNode) === core.getPath(meta.ModelicaConnector)) {
+                        newConnectors[core.getAttribute(node, 'name')] = {
+                            name: core.getAttribute(node, 'name'),
+                            Class: core.getAttribute(node, 'Class')
+                        };
+                        cnt += 1;
+                    }
+
+                });
+
             }
 
             expect(cnt).to.equal(2);
