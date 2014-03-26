@@ -3,7 +3,6 @@
  */
 define(['plugin/PluginConfig',
         'plugin/PluginBase'], function (PluginConfig, PluginBase) {
-
     'use strict';
 
     var ChildrenPlugin = function () {};
@@ -30,8 +29,6 @@ define(['plugin/PluginConfig',
                 callback({'success': true});
             }
         });
-
-
     };
 
     ChildrenPlugin.prototype.doGUIConfig = function (preconfig, callback) {

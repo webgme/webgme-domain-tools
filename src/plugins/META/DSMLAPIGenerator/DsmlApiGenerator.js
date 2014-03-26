@@ -1,4 +1,4 @@
-define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','ejs'],
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs'],
     function (PluginConfig, PluginBase, fs, ejs) {
     "use strict";
 

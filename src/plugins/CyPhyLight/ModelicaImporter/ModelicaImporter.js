@@ -3,7 +3,7 @@
  */
 
 'use strict';
-define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
+define(['../../src/plugins/CyPhyLight/ModelicaImporter/CyPhyLight', 'plugin/PluginConfig', 'plugin/PluginBase'],
     function (METATypes, PluginConfig, PluginBase) {
 
     var ModelicaImporterPlugin = function () {};
@@ -14,7 +14,7 @@ define(['./CyPhyLight', 'src/PluginManager/PluginConfig', 'src/PluginManager/Plu
         return new PluginConfig();
     };
 
-    var DATACONFIG = require('src/samples/modelica_components');
+    var DATACONFIG = require('../../src/samples/modelica_components');
 
     ModelicaImporterPlugin.prototype.main = function (config, callback) {
         console.log('Inside main...');

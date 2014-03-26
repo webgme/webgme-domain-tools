@@ -3,7 +3,7 @@
  */
 
 'use strict';
-define(['src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase'],
+define(['../../src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml', 'plugin/PluginConfig', 'plugin/PluginBase'],
         function (CyPhyLight, PluginConfig, PluginBase ) {
 
     var ModelicaImporterPlugin = function () {};
@@ -18,7 +18,7 @@ define(['src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/PluginManager/Plugin
 //        callback({'dataSourcePath': './src/samples/modelica_components.json'});
 //    };
 
-    var DATACONFIG = require('src/samples/modelica_components');
+    var DATACONFIG = require('../../src/samples/modelica_components');
 
     ModelicaImporterPlugin.prototype.main = function (config, callback) {
         console.log('Run started..');

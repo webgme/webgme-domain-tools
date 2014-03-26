@@ -50,6 +50,13 @@ define(['./NodeMock'], function (NodeMock) {
         callback(err, node);
     };
 
+    CoreMock.prototype.loadChildren = function (node, callback) {
+        var err,
+            childNodes = node.children;
+
+        callback(err, childNodes);
+    };
+
     CoreMock.prototype.getPath = function (node) {
         return node.path;
     };

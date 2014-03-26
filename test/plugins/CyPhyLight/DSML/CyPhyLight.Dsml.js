@@ -3,7 +3,7 @@
  */
 /**
  * Run Command :
- *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter.Dsml.Generated.js
+ *  node_modules\.bin\istanbul.cmd --hook-run-in-context cover node_modules\mocha\bin\_mocha -- -R spec test/plugins/CyPhyLight/DSML/CyPhyLight.Dsml.js
  */
 
 'use strict';

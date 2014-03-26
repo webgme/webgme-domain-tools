@@ -19,5 +19,6 @@
     "basedir": "./node_modules/webgme",
     "clientbasedir": "./node_modules/webgme/client",
     "decoratorpaths": ["./src/decorators", "./node_modules/webgme/client/decorators"],
-    "interpreterpaths": ["./src/plugins"]
+    "interpreterpaths": ["./src/plugins"],
+    "plugindir": "node_modules/webgme/plugin"
 }

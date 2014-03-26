@@ -1,7 +1,8 @@
 /**
  * Created by pmeijer on 3/24/14.
  */
-define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','ejs', 'src/plugins/META/DSMLAPIGenerator/DsmlApiGenerator'],
+// TODO: resolve the last path in a better way
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', '../../src/plugins/META/DSMLAPIGenerator/DsmlApiGenerator'],
     function (PluginConfig, PluginBase, fs, ejs, DsmlApiGenerator) {
         "use strict";
 
