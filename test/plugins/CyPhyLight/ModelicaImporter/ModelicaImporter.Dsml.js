@@ -79,7 +79,7 @@ var FLAT_SPRING_COMPONENT = {
     }
 };
 
-describe('ModelicaImporter.Dsml.Generated Helper Methods', function () {
+describe('ModelicaImporter.Dsml', function () {
     var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter.Dsml');
 
     describe('getComponentContent', function() {
@@ -90,27 +90,27 @@ describe('ModelicaImporter.Dsml.Generated Helper Methods', function () {
 
         plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
 
-        it ('should be two parameters', function() {
+        it ('should extract two parameters.', function() {
 
             expect(Object.keys(flatData.parameters).length).to.equal(2);
         });
 
-        it ('should be two connectors', function() {
+        it ('should extract two connectors.', function() {
             expect(Object.keys(flatData.connectors).length).to.equal(2);
         });
 
-        it ('names of parameters correct', function() {
+        it ('should extract two parameters with correct names.', function() {
             expect("c" in flatData.parameters).to.equal(true);
             expect("s_rel0" in flatData.parameters).to.equal(true);
         });
 
-        it ('names of connectors correct', function() {
+        it ('should extract two connectors with correct names.', function() {
             expect("flange_a" in flatData.connectors).to.equal(true);
             expect("flange_b" in flatData.connectors).to.equal(true);
         });
     });
 
-    describe('PopulateComponent', function() {
+    describe('when populating the component', function() {
         var CoreMock = requirejs('src/mocks/CoreMock'),
             CyPhyLight = requirejs('src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
             core = new CoreMock(),
@@ -129,7 +129,7 @@ describe('ModelicaImporter.Dsml.Generated Helper Methods', function () {
         component = new CyPhyLight.Component(core.createNode({base: meta.Component}));
         modelicaModel = component.createModelicaModel();
 
-        it ('should populate properties', function() {
+        it ('buildParameters should create two Properties with correct names.', function() {
             plugin.buildParameters(CyPhyLight, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);
             cnt = 0;
             for (i = 0; i < component.getNodeObj().children.length; i += 1){
@@ -151,7 +151,7 @@ describe('ModelicaImporter.Dsml.Generated Helper Methods', function () {
             expect("s_rel0" in newProperties).to.equal(true);
         });
 
-        it ('should populate connectors', function() {
+        it ('buildConnectors should create two ModelicaConnectors in the ModelicaModel.', function() {
             plugin.buildConnectors(CyPhyLight, component, modelicaModel, FLAT_SPRING_COMPONENT.connectors);
             cnt = 0;
             for (i = 0; i < modelicaModel.getNodeObj().children.length; i += 1){
