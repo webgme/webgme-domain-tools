@@ -132,16 +132,17 @@ describe('CyPhy2Modelica Helper Methods', function (){
             cnt = 0;
             for (i = 0; i < component.children.length; i += 1){
                 key = component.children[i];
-                node = core.loadByPath(null, key);
-                baseNode = null;
-                baseNode = core.getBase(node);
-                if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {
-                    newProperties[core.getAttribute(node, 'name')] = {
-                        name: core.getAttribute(node, 'name'),
-                        Value: core.getAttribute(node, 'Value')
-                    };
-                    cnt += 1;
-                }
+                node = core.loadByPath(null, key, function(err, node) {
+                    baseNode = null;
+                    baseNode = core.getBase(node);
+                    if (baseNode && core.getPath(baseNode) === core.getPath(meta.Property)) {
+                        newProperties[core.getAttribute(node, 'name')] = {
+                            name: core.getAttribute(node, 'name'),
+                            Value: core.getAttribute(node, 'Value')
+                        };
+                        cnt += 1;
+                    }
+                });
             }
 
             expect(cnt).to.equal(2);

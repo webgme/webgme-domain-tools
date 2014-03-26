@@ -36,23 +36,19 @@ define(['./NodeMock'], function (NodeMock) {
         return this._rootNode;
     };
 
-    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject) {
-        return this._nodes[pathToObject];
+    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
+        // dummyNode is never used (pass null) since all nodes are accessable from this._nodes.
+        var err,
+            node;
+
+        if (this._nodes.hasOwnProperty(pathToObject)) {
+            node = this._nodes[pathToObject];
+        } else {
+            err = 'Given path : ' + pathToObject + 'does not exist!';
+        }
+
+        callback(err, node);
     };
-    // FIXME: How would this be called in a synchronous context?
-//    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
-//        // dummyNode is never used (pass null) since all nodes are accessable from this._nodes.
-//        var err,
-//            node;
-//
-//        if (pathToObject in this._nodes) {
-//            err = 'Given path : ' + pathToObject + 'does not exist!';
-//        } else {
-//            node = this._nodes[pathToObject];
-//        }
-//
-//        callback(err, node);
-//    };
 
     CoreMock.prototype.getPath = function (node) {
         return node.path;
