@@ -1,13 +1,11 @@
-//define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %>.<%-base%>.Dsml'<%}%>], function (<%- projectName %><%if(base){ %>, <%-base%><%}%>) {
-define (['./<%- projectName %>.constructors'], function (<%- projectName %>) {
-
+define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %>.<%-base%>.Dsml'<%}%>], function (<%- projectName %><%if(base){ %>, <%-base%><%}%>) {
     'use strict';
 
     <%
     if (base) {
     %>
     // This will give inheritance when checking types
-    <%- projectName %>.<%- metaTypeName %>.prototype = Object.create(<%- projectName %>.<%- base %>.prototype);
+    <%- projectName %>.<%- metaTypeName %>.prototype = Object.create(<%- base %>.prototype);
     <%- projectName %>.<%- metaTypeName %>.prototype.constructor = <%- projectName %>.<%- metaTypeName %>;
 <%  }%>
 

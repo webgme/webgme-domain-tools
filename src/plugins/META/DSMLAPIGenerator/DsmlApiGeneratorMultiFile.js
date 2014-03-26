@@ -50,7 +50,7 @@ define(['src/PluginManager/PluginConfig', 'src/PluginManager/PluginBase', 'fs','
 
                 fs.rmdirSync(outputDir);
             }
-            
+
             fs.mkdirSync(outputDir); // Make sure the folder is not expanded in the WebStorm project tree.
 
             // Generate the main DSML file.
