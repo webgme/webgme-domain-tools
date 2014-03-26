@@ -1,8 +1,8 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['src/PluginManager/PluginConfig',
-        'src/PluginManager/PluginBase'], function (PluginConfig, PluginBase) {
+define(['plugin/PluginConfig',
+        'plugin/PluginBase'], function (PluginConfig, PluginBase) {
 
     'use strict';
 
