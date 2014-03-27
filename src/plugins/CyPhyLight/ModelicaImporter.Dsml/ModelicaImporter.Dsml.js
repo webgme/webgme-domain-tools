@@ -6,7 +6,7 @@
 // TODO: DATACONIG should not be referencing outside of this plugin directory
 
 'use strict';
-define(['plugin/ModelicaImporter.Dsml/DSML/CyPhyLight.Dsml', 'plugin/PluginConfig', 'plugin/PluginBase', 'plugin/ModelicaImporter.Dsml/ModelicaImporter/samples/modelica_components'],
+define(['plugin/CyPhyLight/DSML/CyPhyLight.Dsml', 'plugin/PluginConfig', 'plugin/PluginBase', 'plugin/ModelicaImporter.Dsml/ModelicaImporter.Dsml/samples/modelica_components'],
         function (CyPhyLight, PluginConfig, PluginBase, DATACONFIG) {
 
     var ModelicaImporterPlugin = function () {};
