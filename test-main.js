@@ -11,7 +11,10 @@ requirejs.config({
 
     paths: {
         'plugin': 'node_modules/webgme/plugin',
-        'plugins': 'src/plugins'
+        'plugin/CyPhyLight': './src/plugins/CyPhyLight',
+        'plugin/ModelicaImporter.Dsml': './src/plugins/CyPhyLight',
+        'plugin/ModelicaImporter': './src/plugins/CyPhyLight',
+        'plugin/DSMLAPIGenerator': './src/plugins/META'
     },
 
     shim: {

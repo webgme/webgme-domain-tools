@@ -64,7 +64,7 @@ describe("A test suite 2", function() {
     var ModelicaImporter;
     before(function(done){
         // TODO: is there a way to load this synchronously on client side and server side as well???
-        requirejs(['plugins/CyPhyLight/ModelicaImporter/ModelicaImporter'], function(_File){
+        requirejs(['plugin/ModelicaImporter/ModelicaImporter/ModelicaImporter'], function(_File){
             ModelicaImporter = _File;
             done(); // #1 Other Suite will run after this is called
         });
