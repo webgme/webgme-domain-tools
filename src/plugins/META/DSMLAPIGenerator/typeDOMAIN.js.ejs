@@ -13,7 +13,7 @@ define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %
 
     /**
     * WebGME node object that represents <%- metaTypeName %> type.
-    * @type {nodeObj}
+    * @type {Object}
     * @static
     */
     <%- projectName %>.<%- metaTypeName %>.Type = null; // this is set by the <%- projectName %>.initialize function
@@ -38,7 +38,6 @@ define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %
     * @static
     */
     <%- projectName %>.<%- metaTypeName %>.Hash = "<%- Hash %>";
-
     <%
     if (isConnection) {
     %>
@@ -48,7 +47,6 @@ define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %
         <%- projectName %>._core.setPointer(nodeObj, 'dst', dst.getNodeObj());
         return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
     };
-
     <%
     } else {
     %>
@@ -62,18 +60,81 @@ define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %
         var nodeObj = <%- projectName %>._core.createNode({parent: parent.getNodeObj(), base: <%- projectName %>.<%- metaTypeName %>.Type});
         return new <%- projectName %>.<%- metaTypeName %>(nodeObj);
     };
-
     <%
     }
     %>
     //</editor-fold>
 
+    //<editor-fold desc="<%- metaTypeName %> instance properties and functions">
+    /**
+    * Gets the ID of the <%- metaTypeName %> instance.
+    * @returns {string} The ID.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.prototype.getID = function () {
+        return <%- projectName %>._core.getID(this._nodeObj);
+    };
 
-    //<editor-fold desc="<%- metaTypeName %> create child objects">
+    /**
+    * Gets the GUID of the <%- metaTypeName %> instance.
+    * @returns {string} The GUID.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.prototype.getGUID = function () {
+        return <%- projectName %>._core.getGuid(this._nodeObj);
+    };
+
+    /**
+    * Gets the core object of the <%- metaTypeName %> instance.
+    * @returns {Object} The core nodeObject.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.prototype.getNodeObj = function () {
+        return this._nodeObj;
+    };
+    //</editor-fold>
+
+    //<editor-fold desc="<%- metaTypeName %> Child objects">
     <%
 for (var j = 0; j < children.length; j += 1) {
     var child = idMap[children[j]];
-    %><%
+    %>
+    <% if (child.isAbstract) {
+        continue;
+    }%>
+    // TODO: Handle inheritance and abstract types.
+    /**
+    * Calls callback with an array of all children of type <%-child.name%> in the Component.
+    * @param {<%- projectName %>.<%- metaTypeName %>.Children.<%-child.name%>~callback} callback The callback that handles the response.
+    * @public
+    */
+    <%- projectName %>.<%- metaTypeName %>.Children.prototype.<%-child.name%> = function (callback) {
+        <%- projectName %>._core.loadChildren(this._nodeObj, function (err, childNodes) {
+            var i, nodeObj, orgChild,
+            dsmlChildren = [];
+            for (i = 0; i < childNodes.length; i += 1) {
+                orgChild = childNodes[i];
+                nodeObj = <%- projectName %>._core.getBase(orgChild);
+                while (nodeObj) {
+                    if (<%- projectName %>._core.getGuid(nodeObj) === <%- projectName %>.<%-child.name%>.GUID) {
+                        dsmlChildren.push(new <%- projectName %>.<%-child.name%>(orgChild));
+                        break;
+                    }
+                    nodeObj = <%- projectName %>._core.getBase(nodeObj);
+                }
+            }
+
+            callback(dsmlChildren);
+        });
+    };
+
+    /**
+    * This callback is displayed as part of the <%- projectName %>.<%- metaTypeName %>.Children.<%child.name%> class.
+    * @callback <%- metaTypeName %>.Children.<%child.name%>~callback
+    * @param {Array.<<%- projectName %>.<%- child.name %>>} dsmlChildren Gets populated with children of type <%child.name%>.
+    */
+
+    <%
     if (child.isConnection) {
         // FIXME: this is still buggy
     %>
@@ -102,12 +163,7 @@ for (var j = 0; j < children.length; j += 1) {
 <%} %>
     //</editor-fold>
 
-    <%- projectName %>.<%- metaTypeName %>.prototype.getNodeObj = function () { return this._nodeObj; };
-
-    // TODO: get Id
-    // TODO: get Guid
-
-    //<editor-fold desc="<%- metaTypeName %> attributes">
+    //<editor-fold desc="<%- metaTypeName %> Attributes">
 
     <%
     for (var i = 0; i < attributeNames.length; i += 1) {

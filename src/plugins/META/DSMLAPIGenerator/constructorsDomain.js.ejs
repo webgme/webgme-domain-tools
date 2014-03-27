@@ -12,7 +12,8 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
 
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
-    var base = metaTypes[metaTypeIndex].base%>
+    var base = metaTypes[metaTypeIndex].base
+    var hasChildren = metaTypes[metaTypeIndex].children.length > 0%>
     /**
     * Initializes a new instance of <%- metaTypeName %>.
     *
@@ -21,23 +22,15 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
     * @classdesc This class represents a(n) <%- metaTypeName %>.
     * @property {<%- projectName %>.<%- metaTypeName %>.Attributes} attributes The attributes of the <%- metaTypeName %>.
     * @property {<%- projectName %>.<%- metaTypeName %>.Registry} registry The registry of the <%- metaTypeName %>.
+    <%if (hasChildren) {%>* @property {<%- projectName %>.<%- metaTypeName %>.Children} childrenOfKind Holds the children of the <%- metaTypeName %>.<% } %>
     * @param {object} nodeObj The wrapped WebGME object.
     * @constructor
     */
     <%- projectName %>.<%- metaTypeName %> = function (nodeObj) {
-        <%
-        if (base) {
-        %>
-        // Call the constructor of the base-class as if it were acting on this.
-        // This call is probably only needed if we want to cache the attributes and registry
-        // while not defining them flat here.
-        //<%- base %>.call(this, nodeObj);
-        //<%
-        }
-        %>
         this._nodeObj = nodeObj;
         this.attributes = new <%- projectName %>.<%- metaTypeName %>.Attributes(this._nodeObj);
         this.registry = new <%- projectName %>.<%- metaTypeName %>.Registry(this._nodeObj);
+        <%if (hasChildren) {%>this.childrenOfType = new <%- projectName %>.<%- metaTypeName %>.Children(this._nodeObj);<%}%>
     };
 
     /**
@@ -63,6 +56,19 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
     <%- projectName %>.<%- metaTypeName %>.Registry = function (nodeObj) {
         this._nodeObj = nodeObj;
     };
+<%if (hasChildren) {%>
+    /**
+    * Initializes a new instance of <%- metaTypeName %>.Children
+    *
+    * @class
+    * @classdesc This class wraps the children of <%- metaTypeName %>.
+    * @param {object} nodeObj The wrapped WebGME object of <%- metaTypeName %>.
+    * @constructor
+    */
+    <%- projectName %>.<%- metaTypeName %>.Children = function (nodeObj) {
+        this._nodeObj = nodeObj;
+    };
+<%}%>
 
 <%
 }
