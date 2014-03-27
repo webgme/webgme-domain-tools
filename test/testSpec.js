@@ -9,7 +9,10 @@ if (typeof window === 'undefined') {
     var requirejs = require("requirejs");
     requirejs.config({
         baseUrl: '.',
-
+        paths: {
+            'plugin': 'node_modules/webgme/plugin',
+            'plugins': 'src/plugins'
+        },
         nodeRequire: require
     });
 
@@ -53,5 +56,39 @@ describe("A test suite", function() {
 
     });
 
+
+});
+
+describe("A test suite 2", function() {
+
+    var ModelicaImporter;
+    before(function(done){
+        // TODO: is there a way to load this synchronously on client side and server side as well???
+        requirejs(['plugins/CyPhyLight/ModelicaImporter/ModelicaImporter'], function(_File){
+            ModelicaImporter = _File;
+            done(); // #1 Other Suite will run after this is called
+        });
+    });
+
+    afterEach(function() {
+
+    });
+
+    it('should pass', function() {
+        expect(true).to.be.true;
+    });
+
+    it('should pass too', function() {
+        expect(false).to.be.false;
+    });
+
+    it('should instantiate', function() {
+        var plugin = new ModelicaImporter();
+        expect(plugin).to.not.be.undefined;
+    });
+
+    it('should have default config', function() {
+        expect(ModelicaImporter.getDefaultConfig()).to.not.be.undefined;
+    });
 
 });

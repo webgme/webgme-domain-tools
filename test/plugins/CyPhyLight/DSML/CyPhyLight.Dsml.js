@@ -24,7 +24,7 @@ requirejs.config({
 
 describe('CyPhyLight.Dsml', function () {
     var CoreMock = requirejs('src/mocks/CoreMock'),
-        CyPhyLight = requirejs('src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
+        CyPhyLight = requirejs('plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
         core = new CoreMock(),
         meta = CyPhyLight.createMETATypesTests(core);
 

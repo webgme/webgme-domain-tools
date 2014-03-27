@@ -10,6 +10,8 @@ requirejs.config({
     baseUrl: '/base',
 
     paths: {
+        'plugin': 'node_modules/webgme/plugin',
+        'plugins': 'src/plugins'
     },
 
     shim: {
