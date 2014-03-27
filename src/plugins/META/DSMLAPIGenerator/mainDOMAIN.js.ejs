@@ -1,8 +1,8 @@
-define(['./<%- projectName %>.def',
+define(['plugin/<%- projectName %>/DSML/<%- projectName %>.def',
 <% for (var metaTypeIndex = 0; metaTypeIndex < metaTypes.length; metaTypeIndex += 1) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
     var endSign = (metaTypeIndex === metaTypes.length - 1) ? ']' : ',';
-%>        './<%- projectName%>.<%- metaTypeName%>.Dsml'<%- endSign %>
+%>        'plugin/<%- projectName %>/DSML/<%- projectName%>.<%- metaTypeName%>.Dsml'<%- endSign %>
 <%
 }
 %>    ,function (<%- projectName %>,

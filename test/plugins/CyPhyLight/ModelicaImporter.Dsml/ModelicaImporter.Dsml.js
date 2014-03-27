@@ -14,7 +14,8 @@ requirejs.config({
     baseUrl: '.',
     paths: {
         'plugin': 'node_modules/webgme/plugin',
-        'plugins': './src/plugins'
+        'plugin/CyPhyLight': './src/plugins/CyPhyLight',
+        'plugin/ModelicaImporter.Dsml': './src/plugins/CyPhyLight'
     },
 
     nodeRequire: require
@@ -85,15 +86,25 @@ var FLAT_SPRING_COMPONENT = {
 };
 
 describe('ModelicaImporter.Dsml', function () {
-    var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter.Dsml/ModelicaImporter.Dsml');
 
     describe('getComponentContent', function() {
+
+        var plugin;
+
         var componentConfig,
             flatData = {parameters: {}, connectors: {}};
 
         componentConfig = SPRING_COMPONENT_CONFIG;
 
-        plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+        before(function(done){
+            // TODO: is there a way to load this synchronously on client side and server side as well???
+            requirejs(['plugin/ModelicaImporter.Dsml/ModelicaImporter.Dsml/ModelicaImporter.Dsml'], function(_plugin){
+                plugin = _plugin;
+                plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+
+                done(); // #1 Other Suite will run after this is called
+            });
+        });
 
         it ('should extract two parameters.', function() {
 
@@ -116,10 +127,11 @@ describe('ModelicaImporter.Dsml', function () {
     });
 
     describe('when populating the component', function() {
-        var CoreMock = requirejs('src/mocks/CoreMock'),
-            CyPhyLight = requirejs('src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
-            core = new CoreMock(),
-            meta = CyPhyLight.createMETATypesTests(core),
+        var plugin;
+        var CoreMock,
+            CyPhyLight,
+            core,
+            meta,
             component,
             modelicaModel,
             i,
@@ -130,9 +142,26 @@ describe('ModelicaImporter.Dsml', function () {
             newProperties = {},
             newConnectors = {};
 
-        CyPhyLight.initialize(core, null, meta);
-        component = new CyPhyLight.Component(core.createNode({base: meta.Component}));
-        modelicaModel = component.createModelicaModel();
+
+
+
+        before(function(done){
+            // TODO: is there a way to load this synchronously on client side and server side as well???
+            requirejs(['plugin/ModelicaImporter.Dsml/ModelicaImporter.Dsml/ModelicaImporter.Dsml', 'plugin/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/mocks/CoreMock'], function(_plugin, _CyPhyLight, _CoreMock){
+                plugin = _plugin;
+
+                CoreMock = _CoreMock;
+                core = new CoreMock();
+                CyPhyLight = _CyPhyLight;
+
+                meta = CyPhyLight.createMETATypesTests(core);
+                CyPhyLight.initialize(core, null, meta);
+                component = new CyPhyLight.Component(core.createNode({base: meta.Component}));
+                modelicaModel = component.createModelicaModel();
+
+                done(); // #1 Other Suite will run after this is called
+            });
+        });
 
         it ('buildParameters should create two Properties with correct names.', function() {
             plugin.buildParameters(CyPhyLight, component, modelicaModel, FLAT_SPRING_COMPONENT.parameters);

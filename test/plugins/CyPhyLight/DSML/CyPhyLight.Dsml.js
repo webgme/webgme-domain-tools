@@ -17,14 +17,14 @@ requirejs.config({
     baseUrl: '.',
     paths: {
         'plugin': 'node_modules/webgme/plugin',
-        'plugins': './src/plugins'
+        'plugin/CyPhyLight': './src/plugins/CyPhyLight'
     },
     nodeRequire: require
 });
 
 describe('CyPhyLight.Dsml', function () {
     var CoreMock = requirejs('src/mocks/CoreMock'),
-        CyPhyLight = requirejs('plugins/CyPhyLight/DSML/CyPhyLight.Dsml'),
+        CyPhyLight = requirejs('plugin/CyPhyLight/DSML/CyPhyLight.Dsml'),
         core = new CoreMock(),
         meta = CyPhyLight.createMETATypesTests(core);
 

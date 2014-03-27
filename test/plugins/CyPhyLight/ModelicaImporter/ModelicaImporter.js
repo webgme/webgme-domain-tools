@@ -14,7 +14,8 @@ requirejs.config({
     baseUrl: '.',
     paths: {
         'plugin': 'node_modules/webgme/plugin',
-        'plugins': './src/plugins'
+        'plugin/CyPhyLight': './src/plugins/CyPhyLight',
+        'plugin/ModelicaImporter': './src/plugins/CyPhyLight'
     },
 
     nodeRequire: require
@@ -85,7 +86,7 @@ var FLAT_SPRING_COMPONENT = {
 };
 
 describe('ModelicaImporter Helper Methods', function (){
-    var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter');
+    var plugin = requirejs('plugin/ModelicaImporter/ModelicaImporter/ModelicaImporter');
 
     describe('getComponentContent', function() {
         var componentConfig,
@@ -115,12 +116,13 @@ describe('ModelicaImporter Helper Methods', function (){
     });
 
     describe('PopulateComponent', function() {
-        var CoreMock = requirejs('src/mocks/CoreMock'),
-            CyPhyLight = requirejs('src/plugins/CyPhyLight/DSML/CyPhyLight.Dsml.js'),
-            core = new CoreMock(),
-            meta = CyPhyLight.createMETATypesTests(core),
-            component = core.createNode({base: meta.Component}),
-            modelicaModel = core.createNode({parent: component, base: meta.ModelicaModel}),
+        var CoreMock,
+            CyPhyLight,
+            core;
+
+        var meta,
+            component,
+            modelicaModel,
             i,
             key,
             cnt,
@@ -128,6 +130,21 @@ describe('ModelicaImporter Helper Methods', function (){
             baseNode,
             newProperties = {},
             newConnectors = {};
+
+        before(function(done){
+            // TODO: is there a way to load this synchronously on client side and server side as well???
+            requirejs(['plugin/ModelicaImporter/DSML/CyPhyLight.Dsml', 'src/mocks/CoreMock'], function(_CyPhyLight, _CoreMock){
+                CoreMock = _CoreMock;
+                core = new CoreMock();
+                CyPhyLight = _CyPhyLight;
+
+                meta = CyPhyLight.createMETATypesTests(core);
+                component = core.createNode({base: meta.Component});
+                modelicaModel = core.createNode({parent: component, base: meta.ModelicaModel});
+
+                done(); // #1 Other Suite will run after this is called
+            });
+        });
 
         it ('should populate properties', function() {
             // FIXME: should we pass only meta and use core internally if needed.

@@ -1,4 +1,4 @@
-define (['./<%- projectName %>.constructors'<%if(base){ %>, './<%- projectName %>.<%-base%>.Dsml'<%}%>], function (<%- projectName %><%if(base){ %>, <%-base%><%}%>) {
+define (['plugin/<%- projectName %>/DSML/<%- projectName %>.constructors'<%if(base){ %>, 'plugin/<%- projectName %>/DSML/<%- projectName %>.<%-base%>.Dsml'<%}%>], function (<%- projectName %><%if(base){ %>, <%-base%><%}%>) {
     'use strict';
 
     <%

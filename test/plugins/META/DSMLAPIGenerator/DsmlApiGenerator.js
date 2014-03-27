@@ -13,14 +13,14 @@ requirejs.config({
     baseUrl: '.',
     paths: {
         'plugin': 'node_modules/webgme/plugin',
-        'plugins': './src/plugins'
+        'plugin/DSMLAPIGenerator': './src/plugins/META'
     },
 
     nodeRequire: require
 });
 
 describe('Dsml Api Generator', function () {
-    var plugin = requirejs('src/plugins/META/DSMLAPIGenerator/DsmlApiGenerator');
+    var plugin = requirejs('plugin/DSMLAPIGenerator/DSMLAPIGenerator/DSMLAPIGenerator');
 
     describe('Utility functions', function () {
         var utils = plugin.Utils;
@@ -50,7 +50,7 @@ describe('Dsml Api Generator', function () {
         });
     });
 
-    describe('Templates', function () {
+    describe.skip('Templates', function () {
         var PETRI_NET_DOMAIN = require('./PetriNet.Dsml.json');
 
         it ('should generate JavaScript DSML for PetriNet meta model', function() {

@@ -26,7 +26,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
         };
 
         DsmlApiGeneratorMultiFile.Utils.isValidJavascriptIdentifier = function (identifier) {
-            DsmlApiGenerator.Utils.isValidJavascriptIdentifier(identifier);
+            return DsmlApiGenerator.Utils.isValidJavascriptIdentifier(identifier);
         };
 
         DsmlApiGeneratorMultiFile.prototype.getIDMap = function (domain) {
