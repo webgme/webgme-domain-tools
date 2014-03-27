@@ -2,14 +2,13 @@
  * Created by Zsolt on 3/17/14.
  *
  * N.B: selectedNode is null
- * This fails for me for some reason...
- * node node_modules/webgme/bin/run_plugin.js -c config.json -i src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter -p CyPhyLight
+ * node node_modules/webgme/bin/run_plugin.js -c config.json -i src\plugins\CyPhyLight\ModelicaImporter\ModelicaImporter.Dsml -p CyPhyLight
  */
 
 // TODO: DATACONIG should not be referencing outside of this plugin directory
 
 'use strict';
-define(['../DSML/CyPhyLight.Dsml', 'plugin/PluginConfig', 'plugin/PluginBase', '../../../samples/modelica_components'],
+define(['plugins/CyPhyLight/DSML/CyPhyLight.Dsml', 'plugin/PluginConfig', 'plugin/PluginBase', 'plugins/CyPhyLight/ModelicaImporter/samples/modelica_components'],
         function (CyPhyLight, PluginConfig, PluginBase, DATACONFIG) {
 
     var ModelicaImporterPlugin = function () {};

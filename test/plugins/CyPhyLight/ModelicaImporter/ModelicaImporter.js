@@ -13,8 +13,10 @@ var requirejs = require("requirejs"),
 requirejs.config({
     baseUrl: '.',
     paths: {
-        'plugin': 'node_modules/webgme/plugin'
+        'plugin': 'node_modules/webgme/plugin',
+        'plugins': './src/plugins'
     },
+
     nodeRequire: require
 });
 

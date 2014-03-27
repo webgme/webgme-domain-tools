@@ -7,7 +7,7 @@
  *
  */
 // TODO: resolve the last path in a better way
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', './DsmlApiGenerator'],
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugins/META/DSMLAPIGenerator/DsmlApiGenerator'],
     function (PluginConfig, PluginBase, fs, ejs, DsmlApiGenerator) {
         "use strict";
 

@@ -2,11 +2,11 @@
  * Created by Zsolt on 3/17/14.
  *
  *
- * node node_modules/webgme/bin/run_plugin.js -c config.json -i src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter -p CyPhyLight
+ * node node_modules/webgme/bin/run_plugin.js -c config.json -i src\plugins\CyPhyLight\ModelicaImporter\ModelicaImporter -p CyPhyLight
  */
 
 'use strict';
-define(['./CyPhyLight', 'plugin/PluginConfig', 'plugin/PluginBase', '../../../samples/modelica_components'],
+define(['plugins/CyPhyLight/ModelicaImporter/CyPhyLight', 'plugin/PluginConfig', 'plugin/PluginBase', 'plugins/CyPhyLight/ModelicaImporter/samples/modelica_components'],
     function (METATypes, PluginConfig, PluginBase, DATACONFIG) {
 
     var ModelicaImporterPlugin = function () {};
