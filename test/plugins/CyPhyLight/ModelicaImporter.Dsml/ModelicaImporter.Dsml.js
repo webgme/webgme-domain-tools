@@ -85,7 +85,7 @@ var FLAT_SPRING_COMPONENT = {
 };
 
 describe('ModelicaImporter.Dsml', function () {
-    var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter.Dsml');
+    var plugin = requirejs('src/plugins/CyPhyLight/ModelicaImporter.Dsml/ModelicaImporter.Dsml');
 
     describe('getComponentContent', function() {
         var componentConfig,
