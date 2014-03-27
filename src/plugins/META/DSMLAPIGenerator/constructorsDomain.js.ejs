@@ -14,6 +14,8 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
     var metaTypeName = metaTypes[metaTypeIndex].name;
     var base = metaTypes[metaTypeIndex].base
     var hasChildren = metaTypes[metaTypeIndex].children.length > 0%>
+/******************************************** <%- metaTypeName %> **********************************************/
+
     /**
     * Initializes a new instance of <%- metaTypeName %>.
     *
@@ -69,11 +71,6 @@ define(['./<%- projectName %>.def'], function (<%- projectName %>) {
         this._nodeObj = nodeObj;
     };
 <%}%>
-
-<%
-}
-%>
-
+<%}%>
     return <%- projectName %>;
-
 });

@@ -1,7 +1,7 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['plugins/CyPhyLight/DSML/CyPhyLight.Dsml',
+define(['plugin/Children.Dsml/DSML/CyPhyLight.Dsml',
         'plugin/PluginConfig',
         'plugin/PluginBase'], function (CyPhyLight, PluginConfig, PluginBase) {
     'use strict';
