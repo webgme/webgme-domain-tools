@@ -1,8 +1,13 @@
 /**
  * Created by pmeijer on 3/24/14.
+ *
+ * On Mac this worked for me
+ *
+ * node node_modules/webgme/bin/run_plugin.js -c config.json -i src/plugins/META/DSMLAPIGenerator/DsmlApiGeneratorMultiFile -p CyPhyLight
+ *
  */
 // TODO: resolve the last path in a better way
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', '../../src/plugins/META/DSMLAPIGenerator/DsmlApiGenerator'],
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', './DsmlApiGenerator'],
     function (PluginConfig, PluginBase, fs, ejs, DsmlApiGenerator) {
         "use strict";
 

@@ -18,7 +18,7 @@ module.exports = function(config) {
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*Spec.js', included: false},
 
-      'test/test-main.js'
+      'test-main.js'
     ],
 
 
@@ -60,7 +60,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: [],
 
 
     // Continuous Integration mode

@@ -1,10 +1,13 @@
 /**
  * Created by Zsolt on 3/17/14.
+ *
+ *
+ * node node_modules/webgme/bin/run_plugin.js -c config.json -i src/plugins/CyPhyLight/ModelicaImporter/ModelicaImporter -p CyPhyLight
  */
 
 'use strict';
-define(['../../src/plugins/CyPhyLight/ModelicaImporter/CyPhyLight', 'plugin/PluginConfig', 'plugin/PluginBase'],
-    function (METATypes, PluginConfig, PluginBase) {
+define(['./CyPhyLight', 'plugin/PluginConfig', 'plugin/PluginBase', '../../../samples/modelica_components'],
+    function (METATypes, PluginConfig, PluginBase, DATACONFIG) {
 
     var ModelicaImporterPlugin = function () {};
 
@@ -13,8 +16,8 @@ define(['../../src/plugins/CyPhyLight/ModelicaImporter/CyPhyLight', 'plugin/Plug
     ModelicaImporterPlugin.getDefaultConfig = function () {
         return new PluginConfig();
     };
-
-    var DATACONFIG = require('../../src/samples/modelica_components');
+//
+//    var DATACONFIG = require('../../../samples/modelica_components');
 
     ModelicaImporterPlugin.prototype.main = function (config, callback) {
         console.log('Inside main...');

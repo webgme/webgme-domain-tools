@@ -35,11 +35,11 @@ describe("A test suite", function() {
 
     });
 
-    it('should fail', function() {
-        expect(true).to.be.false;
+    it('should pass', function() {
+        expect(true).to.be.true;
     });
 
-    it('should pass', function() {
+    it('should pass too', function() {
         expect(false).to.be.false;
     });
 
