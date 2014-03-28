@@ -87,13 +87,15 @@ define(['js/NodePropertyNames',
                         if (svgPort.length > 0) {
                             svgPort = svgPort[0];
 					        var svgInfo = $(svgPort).find('#info');
-					        var title = $(svgPort).find('#name').text() + '\n'
-				        		+ $(svgPort).find('#type').text() + '\n'
-				        		+ $(svgPort).find('#desc').text() + '\n'
-				        		+ $(svgPort).find('#classDesc').text() + '\n';
-                        }
+					        if (svgInfo[0]) {
+						        var title = $(svgPort).find('#name').text() + '\n'
+					        		+ $(svgPort).find('#type').text() + '\n'
+					        		+ $(svgPort).find('#desc').text() + '\n'
+					        		+ $(svgPort).find('#classDesc').text() + '\n';
 
-                        connDec.attr('title', title);
+					        	connDec.attr('title', title);
+					        }
+                        }
 
                         if (this.hostDesignerItem) {
                             this.hostDesignerItem.registerConnectors(connDec, childrenIDs[i]);
