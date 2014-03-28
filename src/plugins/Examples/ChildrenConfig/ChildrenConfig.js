@@ -37,12 +37,12 @@ define(['plugin/PluginConfig',
 
         if (selectedNode) {
 
-            for (i = 0; i < childNodes.length; i += 1) {
-                self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
-            }
+            core.loadChildren(selectedNode, function (err, childNodes) {
+                var i;
+                self.logger.info(core.getAttribute(selectedNode, 'name') + ' has children');
 
                 for (i = 0; i < childNodes.length; i += 1) {
-                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+                    self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
                 }
 
                 if (callback) {
