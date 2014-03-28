@@ -5,7 +5,13 @@ define(['plugin/PluginConfig',
         'plugin/PluginBase'], function (PluginConfig, PluginBase) {
     'use strict';
 
-    var ChildrenConfigPlugin = function () {};
+    var ChildrenConfigPlugin = function (LogManager) {
+        if (LogManager) {
+            this.logger = LogManager.create('Plugin.ChildrenConfigPlugin');
+        } else {
+            this.logger = console;
+        }
+    };
 
     ChildrenConfigPlugin.prototype = Object.create(PluginBase.prototype);
 
@@ -26,13 +32,14 @@ define(['plugin/PluginConfig',
 
     ChildrenConfigPlugin.prototype.main = function (config, callback) {
         var core = config.core,
-            selectedNode = config.selectedNode;
+            selectedNode = config.selectedNode,
+            self = this;
 
         if (selectedNode) {
 
-            core.loadChildren(selectedNode, function (err, childNodes) {
-                var i;
-                console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
+            for (i = 0; i < childNodes.length; i += 1) {
+                self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
+            }
 
                 for (i = 0; i < childNodes.length; i += 1) {
                     console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
