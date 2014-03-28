@@ -3,9 +3,9 @@
 Domain specific tools for WebGME.
 
 * Install nodejs
-* Install mongodb if you use a local database
-* Clone the repository
-* Install dependent packages `npm install`
+* Install mongodb _if_ you use a local database (not always necessary)
+* Clone the repository (requires some git client)
+* Install dependencies `npm install` (requires nodejs)
 * Run webgme `npm start` or `node app.js`, goto localhost:8888
 * Run interpreter `node node_modules/webgme/bin/run_plugin.js -c config.json -i src\plugins\CyPhyLight\Children\Children`
 
