@@ -86,15 +86,25 @@ var FLAT_SPRING_COMPONENT = {
 };
 
 describe('ModelicaImporter Helper Methods', function (){
-    var plugin = requirejs('plugin/ModelicaImporter/ModelicaImporter/ModelicaImporter');
 
     describe('getComponentContent', function() {
+
+        var plugin;
+
         var componentConfig,
             flatData = {parameters: {}, connectors: {}};
 
         componentConfig = SPRING_COMPONENT_CONFIG;
 
-        plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+        before(function(done){
+            // TODO: is there a way to load this synchronously on client side and server side as well???
+            requirejs(['plugin/ModelicaImporter/ModelicaImporter/ModelicaImporter'], function(_plugin){
+                plugin = _plugin;
+                plugin.getComponentContent(flatData, componentConfig, componentConfig.exportedComponentClass);
+
+                done(); // #1 Other Suite will run after this is called
+            });
+        });
 
         it ('should be two parameters', function() {
             expect(Object.keys(flatData.parameters).length).to.equal(2);
@@ -118,7 +128,8 @@ describe('ModelicaImporter Helper Methods', function (){
     describe('PopulateComponent', function() {
         var CoreMock,
             CyPhyLight,
-            core;
+            core,
+            plugin;
 
         var meta,
             component,
@@ -133,10 +144,11 @@ describe('ModelicaImporter Helper Methods', function (){
 
         before(function(done){
             // TODO: is there a way to load this synchronously on client side and server side as well???
-            requirejs(['plugin/ModelicaImporter/DSML/CyPhyLight.Dsml', 'src/mocks/CoreMock'], function(_CyPhyLight, _CoreMock){
+            requirejs(['plugin/ModelicaImporter/ModelicaImporter/ModelicaImporter', 'plugin/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/mocks/CoreMock'], function(_plugin, _CyPhyLight, _CoreMock){
                 CoreMock = _CoreMock;
                 core = new CoreMock();
                 CyPhyLight = _CyPhyLight;
+                plugin = _plugin;
 
                 meta = CyPhyLight.createMETATypesTests(core);
                 component = core.createNode({base: meta.Component});
