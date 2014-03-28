@@ -28,18 +28,23 @@ define(['plugin/PluginConfig',
         var core = config.core,
             selectedNode = config.selectedNode;
 
-        core.loadChildren(selectedNode, function (err, childNodes) {
-            var i;
-            console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
+        if (selectedNode) {
 
-            for (i = 0; i < childNodes.length; i += 1) {
-                console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
-            }
+            core.loadChildren(selectedNode, function (err, childNodes) {
+                var i;
+                console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
 
-            if (callback) {
-                callback({'success': true});
-            }
-        });
+                for (i = 0; i < childNodes.length; i += 1) {
+                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+                }
+
+                if (callback) {
+                    callback(null, {'success': true});
+                }
+            });
+        } else {
+            callback('selectedNode is not defined', {'success': false});
+        }
     };
 
     ChildrenConfigPlugin.prototype.doGUIConfig = function (preconfig, callback) {
