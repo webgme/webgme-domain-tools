@@ -24,10 +24,15 @@ define(['plugin/PluginConfig',
         var configStructure = [
             {
                 "name": "logChildrenNames",
+                "displayName": "Log Children Names",
+                "description": '',
                 "value": true, // this is the 'default config'
-                "valueType": "boolean"
+                "valueType": "boolean",
+                "readOnly": true
             },{
                 "name": "logLevel",
+                "displayName": "Logger level",
+                "description": '',
                 "value": "info",
                 "valueType": "string",
                 "valueItems": [
@@ -35,14 +40,21 @@ define(['plugin/PluginConfig',
                     "info",
                     "warn",
                     "error"
-                ]
+                ],
+                "readOnly": false
             },{
                 "name": "maxChildrenToLog",
+                "displayName": "Maximum children to log",
+                "description": 'Set this parameter to blabla',
                 "value": 4,
                 "min": 1,
-                "valueType": "number"
+                "valueType": "number",
+                "readOnly": false
             },{
                 "name": "whatIsYourName",
+                "displayName": "Plugin owner",
+                "description": '',
+                "readOnly": true,
                 "value": 'Patrik',
                 "valueType": "string"
             }
@@ -75,8 +87,7 @@ define(['plugin/PluginConfig',
         return this._currentConfig;
     };
 
-    ChildrenConfigPlugin.prototype.setCurrentConfig = function (newConfig) {
-        this._currentConfig = newConfig;
+    ChildrenConfigPlugin.setCurrentConfig = function (newConfig) {
     };
 
     ChildrenConfigPlugin.prototype.main = function (config, callback) {
