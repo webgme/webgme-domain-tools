@@ -7,7 +7,7 @@ Domain specific tools for WebGME.
 * Clone the repository (requires some git client)
 * Install dependencies `npm install` (requires nodejs)
 * Run webgme `npm start` or `node app.js`, goto localhost:8888
-* Run interpreter `node node_modules/webgme/bin/run_plugin.js -c config.json -i src\plugins\CyPhyLight\Children\Children`
+* Run a plugin `node node_modules/webgme/bin/run_plugin.js -c config.json -p Test -n ChildrenConfig`
 
 ## npm packages ##
 
