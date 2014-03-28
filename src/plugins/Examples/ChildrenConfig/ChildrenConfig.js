@@ -14,8 +14,6 @@ define(['plugin/PluginConfig',
         } else {
             this.logger = console;
         }
-
-        this._currentConfig = ChildrenConfigPlugin.getDefaultConfig();
     };
 
     ChildrenConfigPlugin.prototype = Object.create(PluginBase.prototype);
@@ -83,12 +81,15 @@ define(['plugin/PluginConfig',
         return config;
     };
 
-    ChildrenConfigPlugin.prototype.getCurrentConfig = function () {
-        return this._currentConfig;
+    ChildrenConfigPlugin.getCurrentConfig = function () {
+        return ChildrenConfigPlugin._currentConfig;
     };
 
     ChildrenConfigPlugin.setCurrentConfig = function (newConfig) {
+        ChildrenConfigPlugin._currentConfig = newConfig;
     };
+
+    ChildrenConfigPlugin.setCurrentConfig(ChildrenConfigPlugin.getDefaultConfig());
 
     ChildrenConfigPlugin.prototype.main = function (config, callback) {
         var core = config.core,
@@ -101,7 +102,7 @@ define(['plugin/PluginConfig',
 
             self.logger.info('Current configuration');
 
-            var currentConfig = this.getCurrentConfig();
+            var currentConfig = ChildrenConfigPlugin.getCurrentConfig();
             self.logger.info(currentConfig.logChildrenNames);
             self.logger.info(currentConfig.logLevel);
             self.logger.info(currentConfig.maxChildrenToLog);
