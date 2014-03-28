@@ -11,7 +11,7 @@ if (typeof window === 'undefined') {
         baseUrl: '.',
         paths: {
             'plugin': 'node_modules/webgme/plugin',
-            'plugins': 'src/plugins'
+            'plugin/ModelicaImporter': './src/plugins/CyPhyLight'
         },
         nodeRequire: require
     });

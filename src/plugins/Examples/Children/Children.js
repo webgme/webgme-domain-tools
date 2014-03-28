@@ -17,6 +17,19 @@ define(['plugin/PluginConfig',
         var core = config.core,
             selectedNode = config.selectedNode;
 
+        // clear valid plugins
+//        core.setRegistry(config.rootNode, 'validPlugins', '');
+//        // Commit changes.
+//        core.persist(config.rootNode, function (err) {
+//        });
+//
+//        var newRootHash = core.getHash(config.rootNode);
+//        console.info(config.project.makeCommit);
+//        var result = {'commitHash': config.commitHash};
+//        result.commitHash = config.project.makeCommit([result.commitHash], newRootHash, 'Plugin updated the model.', function (err) {
+//
+        //});
+
         if (selectedNode) {
 
             core.loadChildren(selectedNode, function (err, childNodes) {
