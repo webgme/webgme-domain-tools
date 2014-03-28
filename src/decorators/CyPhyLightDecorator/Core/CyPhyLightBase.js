@@ -34,35 +34,6 @@ define(['js/NodePropertyNames',
 
     };
 
-
-    CyPhyLightBase.prototype._toolTipBase = $('<div class="port_info"> \
-            <span class="class_name">CLASS NAME</span> \
-            <span class="name">NAME</span> \
-            <span class="desc">DESCRIPTION</span> \
-            <span class="class_desc">CLASS DESCRIPTION</span> \
-        </div>');
-
-    CyPhyLightBase.prototype._buildToolTip = function (portConnector, svgPort) {
-
-        var tooltip = this._toolTipBase.clone(),
-            svgInfo = $(svgPort).find('#info');
-
-        if (svgInfo.length === 0) {
-            return;
-        }
-
-        svgInfo = $(svgInfo[0]);
-
-        tooltip.find('.name').text(svgInfo.find('#name').text());
-        tooltip.find('.class_name').text(svgInfo.find('#type').text());
-        tooltip.find('.desc').text(svgInfo.find('#desc').text());
-        tooltip.find('.class_desc').text(svgInfo.find('#classDesc').text());
-
-        svgInfo.remove();
-
-        portConnector.append(tooltip);
-    };
-
     /**
      * Renders and updates the ports for this object.
      * @private
@@ -102,12 +73,7 @@ define(['js/NodePropertyNames',
                         var portSvg = $(portsSvgs[j]);
                         var connDec = $('<div/>', {'class': DiagramDesignerWidgetConstants.CONNECTOR_CLASS});
                         
-                        svgPort = this.skinParts.$svg.find('#' + childName);
-                        if (svgPort.length > 0) {
-                            svgPort = svgPort[0];
-                        }
-                        this._buildToolTip(connDec, svgPort);
-
+                        
                         // N.B. it's using the x, y assuming rectangle! This is not always the case.
                         var bbox = {
                             'x': parseInt(($(portSvg.find('rect'))).attr('x')),
@@ -116,6 +82,19 @@ define(['js/NodePropertyNames',
                             'height': 20};
 
                         connDec.css({'left':bbox.x, 'top':bbox.y, 'width':bbox.width, 'height':bbox.height});
+
+						svgPort = this.skinParts.$svg.find('#' + childName);
+                        if (svgPort.length > 0) {
+                            svgPort = svgPort[0];
+					        var svgInfo = $(svgPort).find('#info');
+					        var title = $(svgPort).find('#name').text() + '\n'
+				        		+ $(svgPort).find('#type').text() + '\n'
+				        		+ $(svgPort).find('#desc').text() + '\n'
+				        		+ $(svgPort).find('#classDesc').text() + '\n';
+                        }
+
+                        connDec.attr('title', title);
+
                         if (this.hostDesignerItem) {
                             this.hostDesignerItem.registerConnectors(connDec, childrenIDs[i]);
                             this.hostDesignerItem.registerSubcomponent(childrenIDs[i], {"GME_ID": childrenIDs[i]});
@@ -126,10 +105,6 @@ define(['js/NodePropertyNames',
 
                         this.skinParts.$connectorContainer.append(connDec);
                     } 
-                    // else if ( // TODO: fill in here to render text ) {
-                    //     var value = client.getNode(childrenIDs[i]).getAttribute("Value");
-                    //     //this.skinParts.$svg[0].setAttribute(childName, value);
-                    // }
                 }
             }
 
