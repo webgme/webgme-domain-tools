@@ -2,7 +2,10 @@
  * Created by pmeijer on 3/26/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase'], function (PluginConfig, PluginBase) {
+        'plugin/PluginBase',
+        'plugin/PluginResult',
+        'plugin/PluginMessage',
+        'plugin/PluginNodeDescription'], function (PluginConfig, PluginBase, PluginResult, PluginMessage, PluginNodeDescription) {
     'use strict';
 
     var ChildrenSaveArtifacts = function () {};
@@ -38,9 +41,10 @@ define(['plugin/PluginConfig',
             core = config.core,
             selectedNode = config.selectedNode;
 
+        var pluginResult = new PluginResult();
 
         if (!config.fs) {
-            callback('FileSystem object is undefined or null.', {'success': false});
+            callback('FileSystem object is undefined or null.', pluginResult);
         }
 
         if (selectedNode) {
@@ -60,11 +64,12 @@ define(['plugin/PluginConfig',
                 config.fs.addFile('debug.txt', 'Here it comes some text');
 
                 if (callback) {
-                    callback(null, {'success': true});
+                    pluginResult.success = true;
+                    callback(null, pluginResult);
                 }
             });
         } else {
-            callback('selectedNode is not defined', {'success': false});
+            callback('selectedNode is not defined', pluginResult);
         }
     };
 
