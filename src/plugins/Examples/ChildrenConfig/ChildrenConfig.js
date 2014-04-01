@@ -14,11 +14,15 @@ define(['plugin/PluginConfig',
         } else {
             this.logger = console;
         }
+
+        this._currentConfig = null;
+        // initialize default configuration
+        this.setCurrentConfig(this.getDefaultConfig());
     };
 
     ChildrenConfigPlugin.prototype = Object.create(PluginBase.prototype);
 
-    ChildrenConfigPlugin.getConfigStructure = function () {
+    ChildrenConfigPlugin.prototype.getConfigStructure = function () {
         var configStructure = [
             {
                 "name": "logChildrenNames",
@@ -61,36 +65,6 @@ define(['plugin/PluginConfig',
         return configStructure;
     };
 
-    ChildrenConfigPlugin.getDefaultConfig = function () {
-        // TODO: infer default config from config structure.
-        // TODO: put this into the base class
-        var config = {};
-        config.logChildrenNames = true;
-        config.logLevel = 3;
-//        {
-//            debug: 1,
-//            info: 2,
-//            warn: 3,
-//            error: 4
-//        };
-
-        config.maxChildrenToLog = 4; // Should be greater than 0.
-        config.whatIsYourName = 'Patrik';
-        //config.additionalMessages = ['Hello', 'World'];
-
-        return config;
-    };
-
-    ChildrenConfigPlugin.getCurrentConfig = function () {
-        return ChildrenConfigPlugin._currentConfig;
-    };
-
-    ChildrenConfigPlugin.setCurrentConfig = function (newConfig) {
-        ChildrenConfigPlugin._currentConfig = newConfig;
-    };
-
-    ChildrenConfigPlugin.setCurrentConfig(ChildrenConfigPlugin.getDefaultConfig());
-
     ChildrenConfigPlugin.prototype.main = function (config, callback) {
         var core = config.core,
             selectedNode = config.selectedNode,
@@ -98,11 +72,16 @@ define(['plugin/PluginConfig',
 
         var pluginResult = new PluginResult();
 
+        console.log(config.FS);
+
+        config.FS.addFile('log.txt', 'hello');
+        config.FS.saveArtifact();
+
         if (selectedNode) {
 
             self.logger.info('Current configuration');
 
-            var currentConfig = ChildrenConfigPlugin.getCurrentConfig();
+            var currentConfig = this.getCurrentConfig();
             self.logger.info(currentConfig.logChildrenNames);
             self.logger.info(currentConfig.logLevel);
             self.logger.info(currentConfig.maxChildrenToLog);
