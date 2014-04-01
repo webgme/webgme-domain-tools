@@ -12,30 +12,6 @@ define(['plugin/PluginConfig',
 
     ChildrenSaveArtifacts.prototype = Object.create(PluginBase.prototype);
 
-    ChildrenSaveArtifacts.getConfigStructure = function () {
-        var configStructure = [
-        ];
-
-        return configStructure;
-    };
-
-    ChildrenSaveArtifacts.getDefaultConfig = function () {
-        // TODO: infer default config from config structure.
-        // TODO: put this into the base class
-        var config = {};
-        return config;
-    };
-
-    ChildrenSaveArtifacts.getCurrentConfig = function () {
-        return ChildrenSaveArtifacts._currentConfig;
-    };
-
-    ChildrenSaveArtifacts.setCurrentConfig = function (newConfig) {
-        ChildrenSaveArtifacts._currentConfig = newConfig;
-    };
-
-    ChildrenSaveArtifacts.setCurrentConfig(ChildrenSaveArtifacts.getDefaultConfig());
-
     ChildrenSaveArtifacts.prototype.main = function (config, callback) {
         var self = this,
             core = config.core,
@@ -43,34 +19,36 @@ define(['plugin/PluginConfig',
 
         var pluginResult = new PluginResult();
 
-        if (!config.fs) {
+        if (!config.FS) {
             callback('FileSystem object is undefined or null.', pluginResult);
         }
 
-        if (selectedNode) {
-
-            this.generateNodeInfo(config.fs, selectedNode, core);
-
-            core.loadChildren(selectedNode, function (err, childNodes) {
-                var i;
-                console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
-
-                for (i = 0; i < childNodes.length; i += 1) {
-                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
-
-                    self.generateNodeInfo(config.fs, childNodes[i], core);
-                }
-
-                config.fs.addFile('debug.txt', 'Here it comes some text');
-
-                if (callback) {
-                    pluginResult.success = true;
-                    callback(null, pluginResult);
-                }
-            });
-        } else {
+        if (!selectedNode) {
             callback('selectedNode is not defined', pluginResult);
+            return;
         }
+
+        this.generateNodeInfo(config.FS, selectedNode, core);
+
+        core.loadChildren(selectedNode, function (err, childNodes) {
+            var i;
+            console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
+
+            for (i = 0; i < childNodes.length; i += 1) {
+                console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+
+                self.generateNodeInfo(config.FS, childNodes[i], core);
+            }
+
+            config.FS.addFile('debug.txt', 'Here it comes some text');
+
+            config.FS.saveArtifact();
+
+            if (callback) {
+                pluginResult.success = true;
+                callback(null, pluginResult);
+            }
+        });
     };
 
     ChildrenSaveArtifacts.prototype.generateNodeInfo = function (fs, node, core) {

@@ -2,16 +2,15 @@
  * Created by pmeijer on 3/26/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase'], function (PluginConfig, PluginBase) {
+        'plugin/PluginBase',
+        'plugin/PluginResult',
+        'plugin/PluginMessage',
+        'plugin/PluginNodeDescription'], function (PluginConfig, PluginBase, PluginResult, PluginMessage, PluginNodeDescription) {
     'use strict';
 
     var ChildrenPlugin = function () {};
 
     ChildrenPlugin.prototype = Object.create(PluginBase.prototype);
-
-    ChildrenPlugin.getDefaultConfig = function () {
-        return new PluginConfig();
-    };
 
     ChildrenPlugin.prototype.main = function (config, callback) {
         var core = config.core,
@@ -30,29 +29,28 @@ define(['plugin/PluginConfig',
 //
         //});
 
-        if (selectedNode) {
+        var pluginResult = new PluginResult();
 
-            core.loadChildren(selectedNode, function (err, childNodes) {
-                var i;
-                console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
-
-                for (i = 0; i < childNodes.length; i += 1) {
-                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
-                }
-
-                if (callback) {
-                    callback(null, {'success': true});
-                }
-            });
-        } else {
-            callback('selectedNode is not defined', {'success': false});
+        if (!selectedNode) {
+            callback('selectedNode is not defined', pluginResult);
+            return;
         }
-    };
 
-    ChildrenPlugin.prototype.doGUIConfig = function (preconfig, callback) {
-        callback({});
-    };
+        core.loadChildren(selectedNode, function (err, childNodes) {
+            var i;
+            console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
 
+            for (i = 0; i < childNodes.length; i += 1) {
+                console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+            }
+
+            if (callback) {
+                // TODO: we need a function to set/update success
+                pluginResult.success = true;
+                callback(null, pluginResult);
+            }
+        });
+    };
 
     return ChildrenPlugin;
 });

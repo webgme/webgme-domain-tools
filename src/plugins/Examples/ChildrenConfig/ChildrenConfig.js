@@ -72,48 +72,51 @@ define(['plugin/PluginConfig',
 
         var pluginResult = new PluginResult();
 
-        console.log(config.FS);
+        // Example how to use FS
+        //console.log(config.FS);
 
         config.FS.addFile('log.txt', 'hello');
         config.FS.saveArtifact();
 
-        if (selectedNode) {
-
-            self.logger.info('Current configuration');
-
-            var currentConfig = this.getCurrentConfig();
-            self.logger.info(currentConfig.logChildrenNames);
-            self.logger.info(currentConfig.logLevel);
-            self.logger.info(currentConfig.maxChildrenToLog);
-            self.logger.info(currentConfig.whatIsYourName);
-
-
-            core.loadChildren(selectedNode, function (err, childNodes) {
-                var i;
-                self.logger.info(core.getAttribute(selectedNode, 'name') + ' has children');
-
-                var parentDescriptor = new PluginNodeDescription(core.getAttribute(selectedNode, 'name'), core.getPath(selectedNode));
-
-                for (i = 0; i < childNodes.length; i += 1) {
-
-                    var activeDescriptor = [new PluginNodeDescription(core.getAttribute(childNodes[i], 'name'), core.getPath(childNodes[i]))];
-                    var message = new PluginMessage(config.commitHash, parentDescriptor, activeDescriptor, 'Message text ' + i + ' element');
-
-                    pluginResult.addMessage(message);
-
-                    self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
-                }
-
-
-                if (callback) {
-                    // TODO: create a setter and update function
-                    pluginResult.success = true;
-                    callback(null, pluginResult);
-                }
-            });
-        } else {
+        if (!selectedNode) {
             callback('selectedNode is not defined', pluginResult);
+            return;
         }
+
+        // TODO: check model
+
+        self.logger.info('Current configuration');
+
+        var currentConfig = this.getCurrentConfig();
+        self.logger.info(currentConfig.logChildrenNames);
+        self.logger.info(currentConfig.logLevel);
+        self.logger.info(currentConfig.maxChildrenToLog);
+        self.logger.info(currentConfig.whatIsYourName);
+
+
+        core.loadChildren(selectedNode, function (err, childNodes) {
+            var i;
+            self.logger.info(core.getAttribute(selectedNode, 'name') + ' has children');
+
+            var parentDescriptor = new PluginNodeDescription(core.getAttribute(selectedNode, 'name'), core.getPath(selectedNode));
+
+            for (i = 0; i < childNodes.length; i += 1) {
+
+                var activeDescriptor = [new PluginNodeDescription(core.getAttribute(childNodes[i], 'name'), core.getPath(childNodes[i]))];
+                var message = new PluginMessage(config.commitHash, parentDescriptor, activeDescriptor, 'Message text ' + i + ' element');
+
+                pluginResult.addMessage(message);
+
+                self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
+            }
+
+
+            if (callback) {
+                // TODO: we need a function to set/update success
+                pluginResult.success = true;
+                callback(null, pluginResult);
+            }
+        });
     };
 
 
