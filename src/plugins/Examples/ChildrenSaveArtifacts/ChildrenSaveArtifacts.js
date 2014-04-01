@@ -21,6 +21,7 @@ define(['plugin/PluginConfig',
 
         if (!config.FS) {
             callback('FileSystem object is undefined or null.', pluginResult);
+            return;
         }
 
         if (!selectedNode) {
@@ -45,6 +46,7 @@ define(['plugin/PluginConfig',
             config.FS.saveArtifact();
 
             if (callback) {
+                // TODO: we need a function to set/update success
                 pluginResult.success = true;
                 callback(null, pluginResult);
             }
@@ -68,7 +70,8 @@ define(['plugin/PluginConfig',
         info += core.getGuid(node);
         info += '\r\n';
 
-        fs.addFile(core.getGuid(node) + '.txt', info);
+        // FIXME: check if name is safe as a directory name
+        fs.addFile(core.getAttribute(node, 'name') + '/' + core.getGuid(node) + '.txt', info);
     };
 
     return ChildrenSaveArtifacts;
