@@ -19,7 +19,7 @@ define(['plugin/PluginConfig',
 
         var pluginResult = new PluginResult();
 
-        if (!config.FS) {
+        if (!self.fs) {
             callback('FileSystem object is undefined or null.', pluginResult);
             return;
         }
@@ -29,7 +29,7 @@ define(['plugin/PluginConfig',
             return;
         }
 
-        this.generateNodeInfo(config.FS, selectedNode, core);
+        this.generateNodeInfo(self.fs, selectedNode, core);
 
         core.loadChildren(selectedNode, function (err, childNodes) {
             var i;
@@ -38,12 +38,12 @@ define(['plugin/PluginConfig',
             for (i = 0; i < childNodes.length; i += 1) {
                 console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
 
-                self.generateNodeInfo(config.FS, childNodes[i], core);
+                self.generateNodeInfo(self.fs, childNodes[i], core);
             }
 
-            config.FS.addFile('debug.txt', 'Here it comes some text');
+            self.fs.addFile('debug.txt', 'Here it comes some text');
 
-            config.FS.saveArtifact();
+            self.fs.saveArtifact();
 
             if (callback) {
                 // TODO: we need a function to set/update success

@@ -8,16 +8,7 @@ define(['plugin/PluginConfig',
         'plugin/PluginNodeDescription'], function (PluginConfig, PluginBase, PluginResult, PluginMessage, PluginNodeDescription) {
     'use strict';
 
-    var ChildrenConfigPlugin = function (LogManager) {
-        if (LogManager) {
-            this.logger = LogManager.create('Plugin.ChildrenConfigPlugin');
-        } else {
-            this.logger = console;
-        }
-
-        this._currentConfig = null;
-        // initialize default configuration
-        this.setCurrentConfig(this.getDefaultConfig());
+    var ChildrenConfigPlugin = function () {
     };
 
     ChildrenConfigPlugin.prototype = Object.create(PluginBase.prototype);
@@ -75,8 +66,8 @@ define(['plugin/PluginConfig',
         // Example how to use FS
         //console.log(config.FS);
 
-        config.FS.addFile('log.txt', 'hello');
-        config.FS.saveArtifact();
+        self.fs.addFile('log.txt', 'hello');
+
 
         if (!selectedNode) {
             callback('selectedNode is not defined', pluginResult);
@@ -114,6 +105,9 @@ define(['plugin/PluginConfig',
             if (callback) {
                 // TODO: we need a function to set/update success
                 pluginResult.success = true;
+
+                self.fs.addFile('pluginResult.json', JSON.stringify(pluginResult.serialize()));
+                self.fs.saveArtifact();
                 callback(null, pluginResult);
             }
         });
