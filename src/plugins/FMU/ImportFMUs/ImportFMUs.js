@@ -5,8 +5,8 @@
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/ImportFMUs/ImportFMUs/FMU',
-        'plugin/ImportFMUs/ImportFMUs/resources/modelica_components'],
-    function (PluginConfig, PluginBase, FMU, ComponentData) {
+        'plugin/ImportFMUs/ImportFMUs/resources/ModelicaBlocks'],
+    function (PluginConfig, PluginBase, FMU, FmuImportList) {
     'use strict';
 
     var ImportFMUsPlugin = function () {
@@ -29,7 +29,8 @@ define(['plugin/PluginConfig',
     ImportFMUsPlugin.prototype.main = function (callback) {
         var self = this,
             core = this.core,
-            rootNode = this.rootNode;
+            rootNode = this.rootNode,
+            fmuList = FmuImportList;
 
         // get all 'possible' object types from the MetaModel
         this.updateMETA(FMU);
@@ -39,6 +40,19 @@ define(['plugin/PluginConfig',
         // set the name attribute of the new FCO to 'NewImportedFMUs'
         core.setAttribute(newFmuLib, 'name', 'NewImportedFMUs');
 
+        var index;
+        var numberOfFmusToImport = fmuList.length;
+
+        for (index = 0; index < numberOfFmusToImport; index += 1){
+            var fmuData = fmuList[index],
+                modelicaClass = fmuData.ModelicaClass,
+                fmuName = modelicaClass.split('.').join('_');
+
+            // create an FCO within the the newFmuLib, which is an instance of FMU.FMU
+            var newFMU = core.createNode({parent: newFmuLib, base: FMU.FMU});
+            // set the name attribute of the new FCO to 'fmuName'
+            core.setAttribute(newFMU, 'name', fmuName);
+        }
 
 
         // Commit changes to the database.
