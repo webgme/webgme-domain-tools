@@ -2,16 +2,22 @@
  * Created by pmeijer on 3/26/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase',
-        'plugin/PluginResult',
-        'plugin/PluginMessage',
-        'plugin/PluginNodeDescription'], function (PluginConfig, PluginBase, PluginResult, PluginMessage, PluginNodeDescription) {
+        'plugin/PluginBase',],
+    function (PluginConfig, PluginBase) {
     'use strict';
 
     var ChildrenConfigPlugin = function () {
+        // Call base class's constructor
+        PluginBase.call(this);
     };
 
     ChildrenConfigPlugin.prototype = Object.create(PluginBase.prototype);
+
+    ChildrenConfigPlugin.prototype.constructor = ChildrenConfigPlugin;
+
+    ChildrenConfigPlugin.prototype.getName = function () {
+        return "Children Config";
+    };
 
     ChildrenConfigPlugin.prototype.getConfigStructure = function () {
         var configStructure = [
@@ -56,21 +62,17 @@ define(['plugin/PluginConfig',
         return configStructure;
     };
 
-    ChildrenConfigPlugin.prototype.main = function (config, callback) {
-        var core = config.core,
-            selectedNode = config.selectedNode,
+    ChildrenConfigPlugin.prototype.main = function (callback) {
+        var core = this.core,
+            activeNode = this.activeNode,
             self = this;
 
-        var pluginResult = new PluginResult();
-
         // Example how to use FS
-        //console.log(config.FS);
-
         self.fs.addFile('log.txt', 'hello');
 
 
-        if (!selectedNode) {
-            callback('selectedNode is not defined', pluginResult);
+        if (!activeNode) {
+            callback('activeNode is not defined', this.result);
             return;
         }
 
@@ -85,18 +87,13 @@ define(['plugin/PluginConfig',
         self.logger.info(currentConfig.whatIsYourName);
 
 
-        core.loadChildren(selectedNode, function (err, childNodes) {
+        core.loadChildren(activeNode, function (err, childNodes) {
             var i;
-            self.logger.info(core.getAttribute(selectedNode, 'name') + ' has children');
-
-            var parentDescriptor = new PluginNodeDescription(core.getAttribute(selectedNode, 'name'), core.getPath(selectedNode));
+            self.logger.info(core.getAttribute(activeNode, 'name') + ' has children');
 
             for (i = 0; i < childNodes.length; i += 1) {
 
-                var activeDescriptor = [new PluginNodeDescription(core.getAttribute(childNodes[i], 'name'), core.getPath(childNodes[i]))];
-                var message = new PluginMessage(config.commitHash, parentDescriptor, activeDescriptor, 'Message text ' + i + ' element');
-
-                pluginResult.addMessage(message);
+                self.createMessage(childNodes[i], 'Message text ' + i + ' element');
 
                 self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
             }
@@ -104,11 +101,11 @@ define(['plugin/PluginConfig',
 
             if (callback) {
                 // TODO: we need a function to set/update success
-                pluginResult.success = true;
+                self.result.success = true;
 
-                self.fs.addFile('pluginResult.json', JSON.stringify(pluginResult.serialize()));
+                self.fs.addFile('pluginResult.json', JSON.stringify(self.result.serialize()));
                 self.fs.saveArtifact();
-                callback(null, pluginResult);
+                callback(null, self.result);
             }
         });
     };

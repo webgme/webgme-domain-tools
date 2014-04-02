@@ -2,38 +2,43 @@
  * Created by pmeijer on 3/26/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase',
-        'plugin/PluginResult',
-        'plugin/PluginMessage',
-        'plugin/PluginNodeDescription'], function (PluginConfig, PluginBase, PluginResult, PluginMessage, PluginNodeDescription) {
+        'plugin/PluginBase'],
+    function (PluginConfig, PluginBase) {
     'use strict';
 
-    var ChildrenSaveArtifacts = function () {};
+    var ChildrenSaveArtifacts = function () {
+        // Call base class's constructor
+        PluginBase.call(this);
+    };
 
     ChildrenSaveArtifacts.prototype = Object.create(PluginBase.prototype);
 
+    ChildrenSaveArtifacts.prototype.constructor = ChildrenSaveArtifacts;
+
+    ChildrenSaveArtifacts.prototype.getName = function () {
+        return "Children Save Artifacts";
+    };
+
     ChildrenSaveArtifacts.prototype.main = function (config, callback) {
         var self = this,
-            core = config.core,
-            selectedNode = config.selectedNode;
+            core = this.core,
+            activeNode = this.activeNode;
 
-        var pluginResult = new PluginResult();
-
-        if (!self.fs) {
-            callback('FileSystem object is undefined or null.', pluginResult);
+        if (!this.fs) {
+            callback('FileSystem object is undefined or null.', this.result);
             return;
         }
 
-        if (!selectedNode) {
-            callback('selectedNode is not defined', pluginResult);
+        if (!activeNode) {
+            callback('activeNode is not defined', this.result);
             return;
         }
 
-        this.generateNodeInfo(self.fs, selectedNode, core);
+        this.generateNodeInfo(self.fs, activeNode, core);
 
-        core.loadChildren(selectedNode, function (err, childNodes) {
+        core.loadChildren(activeNode, function (err, childNodes) {
             var i;
-            console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
+            console.log('%j has children::', core.getAttribute(activeNode, 'name'));
 
             for (i = 0; i < childNodes.length; i += 1) {
                 console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
@@ -47,8 +52,8 @@ define(['plugin/PluginConfig',
 
             if (callback) {
                 // TODO: we need a function to set/update success
-                pluginResult.success = true;
-                callback(null, pluginResult);
+                self.result.success = true;
+                callback(null, self.result);
             }
         });
     };
