@@ -12,7 +12,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
         "use strict";
 
         var DsmlApiGeneratorMultiFile = function () {
-
+            PluginBase.call(this);
         };
 
         DsmlApiGeneratorMultiFile.prototype = Object.create(DsmlApiGenerator.prototype);
@@ -111,15 +111,15 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
 
             logger.info('Run started..');
 
-            var rootNode = config.rootNode,
-                selectedNode = config.selectedNode,
-                core = config.core,
-                project = config.project,
-                projectName = config.projectName,
-                META = config.META,
+            var rootNode = this.rootNode,
+                selectedNode = this.activeNode,
+                core = this.core,
+                project = this.project,
+                projectName = this.projectName,
+                META = this.META,
                 result;
 
-            result = {'commitHash': config.commitHash};
+            result = {'commitHash': this.commitHash};
 
             logger.info('Generating domain specific JavaScript API for ' + projectName);
 
@@ -188,7 +188,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
             this.generateFiles(domain);
 
             console.log('done');
-            callback(null, {success:true});
+            if (callback) {
+                callback(null, {success: true});
+            }
         };
 
 

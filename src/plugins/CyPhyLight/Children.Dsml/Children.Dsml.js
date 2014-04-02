@@ -6,7 +6,9 @@ define(['plugin/Children.Dsml/DSML/CyPhyLight.Dsml',
         'plugin/PluginBase'], function (CyPhyLight, PluginConfig, PluginBase) {
     'use strict';
 
-    var ChildrenPlugin = function () {};
+    var ChildrenPlugin = function () {
+        PluginBase.call(this);
+    };
 
     ChildrenPlugin.prototype = Object.create(PluginBase.prototype);
 
@@ -14,13 +16,18 @@ define(['plugin/Children.Dsml/DSML/CyPhyLight.Dsml',
         return new PluginConfig();
     };
 
+    ChildrenPlugin.prototype.getName = function () {
+        return "Children.Dsml";
+    };
+
     ChildrenPlugin.prototype.main = function (config, callback) {
-        var core = config.core,
-            selectedNode = config.selectedNode,
+        var core = this.core,
+            selectedNode = this.activeNode,
+            META = this.META,
             component;
 
         // initialize domain specific API.
-        CyPhyLight.initialize(core, null, config.META);
+        CyPhyLight.initialize(core, null, META);
         component = new CyPhyLight.Component(selectedNode);
 
         component.childrenOfType.Property(function (properties) {
