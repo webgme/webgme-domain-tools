@@ -4,8 +4,8 @@
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'ejs',
-    'plugin/UsingTemplates/UsingTemplates/Templates/sample.py'],
-    function (PluginConfig, PluginBase, ejs, SAMPLEPYTHONTEMPLATE) {
+    'plugin/UsingTemplates/UsingTemplates/Templates/Templates'],
+    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
         'use strict';
 
         var UsingTemplatesPlugin = function () {
@@ -34,9 +34,9 @@ define(['plugin/PluginConfig',
             self.logger.debug('Generating files...');
 
             var data = {'name': core.getAttribute(activeNode, 'name')};
-            var ret = ejs.render(SAMPLEPYTHONTEMPLATE, data);
+            var ret = ejs.render(TEMPLATES['sample.html.ejs'], data);
 
-            self.fs.addFile('output.py', ret);
+            self.fs.addFile('output.html', ret);
             self.fs.saveArtifact();
 
             self.logger.info('Files were generated...');

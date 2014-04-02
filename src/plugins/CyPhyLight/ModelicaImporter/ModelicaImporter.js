@@ -36,13 +36,7 @@ define(['plugin/ModelicaImporter/ModelicaImporter/CyPhyLight', 'plugin/PluginCon
             component,
             modelicaModel;
 
-        // FIXME: this is a hack to get intellisense
-        var name;
-        for (name in config.META) {
-            if (config.META.hasOwnProperty(name)) {
-                CyPhyLight[name] = config.META[name];
-            }
-        }
+        this.updateMETA(CyPhyLight);
 
         newCyPhyProjectObj = core.createNode({parent: rootNode, base: CyPhyLight.CyPhyProject});
         core.setAttribute(newCyPhyProjectObj, 'name', 'ProjectWithImported');
