@@ -19,7 +19,7 @@ define(['plugin/PluginConfig',
         return "Children Save Artifacts";
     };
 
-    ChildrenSaveArtifacts.prototype.main = function (config, callback) {
+    ChildrenSaveArtifacts.prototype.main = function (callback) {
         var self = this,
             core = this.core,
             activeNode = this.activeNode;

@@ -6,14 +6,20 @@ define(['plugin/PluginConfig',
     'plugin/PluginResult'], function (PluginConfig, PluginBase, PluginResult) {
     'use strict';
 
-    var PetriNetExporterPlugin = function () {};
+    var PetriNetExporterPlugin = function () {
+        PluginBase.call(this);
+    };
 
     PetriNetExporterPlugin.prototype = Object.create(PluginBase.prototype);
 
-    PetriNetExporterPlugin.prototype.main = function (config, callback) {
+    PetriNetExporterPlugin.prototype.getName = function () {
+        return 'PetriNetExporter';
+    };
+
+    PetriNetExporterPlugin.prototype.main = function (callback) {
         var self = this,
-            core = config.core,
-            selectedNode = config.selectedNode;
+            core = self.core,
+            selectedNode = self.activeNode;
 
         var pluginResult = new PluginResult();
 
@@ -60,7 +66,9 @@ define(['plugin/PluginConfig',
             // all objects have been visited
             var pluginResult = new PluginResult();
             pluginResult.success = true;
-            callback(null, pluginResult);
+            if (callback) {
+                callback(null, pluginResult);
+            }
         } else {
             // some objects still need to be visited
             this.logger.info('Visiting progress: ' + this.visitedObjects + '/' + this.objectToVisit);
