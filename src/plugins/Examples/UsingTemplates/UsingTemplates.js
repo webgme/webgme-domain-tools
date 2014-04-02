@@ -31,11 +31,15 @@ define(['plugin/PluginConfig',
                 return;
             }
 
+            self.logger.debug('Generating files...');
+
             var data = {'name': core.getAttribute(activeNode, 'name')};
             var ret = ejs.render(SAMPLEPYTHONTEMPLATE, data);
 
             self.fs.addFile('output.py', ret);
             self.fs.saveArtifact();
+
+            self.logger.info('Files were generated...');
 
             if (callback) {
                 // TODO: we need a function to set/update success
