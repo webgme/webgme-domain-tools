@@ -4,8 +4,8 @@
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'ejs',
-    'plugin/UsingTemplates/UsingTemplates/pythonTemplate.py'],
-    function (PluginConfig, PluginBase, ejs, PYTHONTEMPLATE) {
+    'plugin/UsingTemplates/UsingTemplates/Templates/sample.py'],
+    function (PluginConfig, PluginBase, ejs, SAMPLEPYTHONTEMPLATE) {
         'use strict';
 
         var UsingTemplatesPlugin = function () {
@@ -32,7 +32,7 @@ define(['plugin/PluginConfig',
             }
 
             var data = {'name': core.getAttribute(activeNode, 'name')};
-            var ret = ejs.render(PYTHONTEMPLATE, data);
+            var ret = ejs.render(SAMPLEPYTHONTEMPLATE, data);
 
             self.fs.addFile('output.py', ret);
             self.fs.saveArtifact();
