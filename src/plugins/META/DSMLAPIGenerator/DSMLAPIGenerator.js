@@ -6,9 +6,12 @@
  *
  */
 
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/DSMLAPIGenerator/DSMLAPIGenerator/Templates/Templates'],
-    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'plugin/DSMLAPIGenerator/DSMLAPIGenerator/Templates/Templates', 'ejs'],
+    function (PluginConfig, PluginBase, TEMPLATES, EJS) {
         "use strict";
+
+        // workaround
+        var ejs = EJS || window.ejs;
 
         var DsmlApiGeneratorMultiFile = function () {
             PluginBase.call(this);

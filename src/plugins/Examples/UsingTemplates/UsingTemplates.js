@@ -3,10 +3,13 @@
  */
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
-    'ejs',
-    'plugin/UsingTemplates/UsingTemplates/Templates/Templates'],
-    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
+    'plugin/UsingTemplates/UsingTemplates/Templates/Templates',
+    'ejs'],
+    function (PluginConfig, PluginBase, TEMPLATES, EJS) {
         'use strict';
+
+        // workaround
+        var ejs = EJS || window.ejs;
 
         var UsingTemplatesPlugin = function () {
             // Call base class's constructor
