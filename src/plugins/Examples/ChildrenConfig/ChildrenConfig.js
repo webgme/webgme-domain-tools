@@ -2,7 +2,7 @@
  * Created by pmeijer on 3/26/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase',],
+        'plugin/PluginBase'],
     function (PluginConfig, PluginBase) {
     'use strict';
 
@@ -27,7 +27,7 @@ define(['plugin/PluginConfig',
                 "description": '',
                 "value": true, // this is the 'default config'
                 "valueType": "boolean",
-                "readOnly": true
+                "readOnly": false
             },{
                 "name": "logLevel",
                 "displayName": "Logger level",
@@ -46,15 +46,22 @@ define(['plugin/PluginConfig',
                 "displayName": "Maximum children to log",
                 "description": 'Set this parameter to blabla',
                 "value": 4,
-                "min": 1,
+                "minValue": 1,
                 "valueType": "number",
                 "readOnly": false
             },{
                 "name": "whatIsYourName",
                 "displayName": "Plugin owner",
                 "description": '',
-                "readOnly": true,
+                "readOnly": false,
                 "value": 'Patrik',
+                "valueType": "string"
+            },{
+                "name": "itemColor",
+                "displayName": "Color",
+                "description": 'The color of the item on the screen',
+                "readOnly": false,
+                "value": '#FF0000',
                 "valueType": "string"
             }
         ];
