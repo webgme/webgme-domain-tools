@@ -18,7 +18,7 @@ define(['plugin/PluginConfig',
     ImportFMUsPlugin.prototype.constructor = ImportFMUsPlugin;
 
     ImportFMUsPlugin.prototype.getName = function () {
-        return "ImportFMUs";
+        return "Import FMUs";
     };
 
     ImportFMUsPlugin.getDefaultConfig = function () {
@@ -38,7 +38,7 @@ define(['plugin/PluginConfig',
 //            }
 //        }
 
-        this.updateMETA(FMU)
+        this.updateMETA(FMU);
 
         var newFmuLib = core.createNode({parent: rootNode, base: FMU.FMU_Library});
         core.setAttribute(newFmuLib, 'name', 'NewImportedFMUs');
@@ -56,23 +56,27 @@ define(['plugin/PluginConfig',
         // End Commit
 
 //        if (selectedNode && typeof selectedNode == FMU.FMU_Library) {
-        if (rootNode) {
 
-            core.loadChildren(rootNode, function (err, childNodes) {
-                var i;
-                console.log('%j has children::', core.getAttribute(rootNode, 'name'));
+        // NOTE: You should not have any code here!!! Your last executed branch is in the save. Must do everything before the save.
 
-                for (i = 0; i < childNodes.length; i += 1) {
-                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
-                }
-
-                if (callback) {
-                    callback(null, {'success': true});
-                }
-            });
-        } else {
-            callback('rootNode is not defined', {'success': false});
-        }
+//        if (rootNode) {
+//
+//            core.loadChildren(rootNode, function (err, childNodes) {
+//                var i;
+//                console.log('%j has children::', core.getAttribute(rootNode, 'name'));
+//
+//                for (i = 0; i < childNodes.length; i += 1) {
+//                    console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+//                }
+//
+//                if (callback) {
+//                    self.result.success = true;
+//                    callback(null, self.result);
+//                }
+//            });
+//        } else {
+//            callback('rootNode is not defined', this.result);
+//        }
     };
 
     return ImportFMUsPlugin;
