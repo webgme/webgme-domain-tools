@@ -3,7 +3,7 @@
  */
 
 define(['plugin/PluginConfig',
-    'plugin/PluginBase'], function (PluginConfig, PluginBase) {
+    'plugin/PluginBase', 'plugin/GetPrintAllObjects/GetPrintAllObjects/FMU'], function (PluginConfig, PluginBase, FMU) {
     'use strict';
 
     var GetPrintAllObjectsPlugin = function () {};
@@ -17,6 +17,16 @@ define(['plugin/PluginConfig',
     GetPrintAllObjectsPlugin.prototype.main = function (config, callback) {
         var core = config.core,
             selectedNode = config.selectedNode;
+
+        // FIXME: this is a hack to get intellisense
+        var name;
+        for (name in config.META) {
+            if (config.META.hasOwnProperty(name)) {
+                FMU[name] = config.META[name];
+            }
+        }
+
+        //FMU.ModelExchange
 
         if (selectedNode) {
 
