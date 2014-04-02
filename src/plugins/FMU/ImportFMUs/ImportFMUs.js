@@ -44,23 +44,23 @@ define(['plugin/PluginConfig',
         core.setAttribute(newFmuLib, 'name', 'NewImportedFMUs');
 
         // Commit changes.
-        core.persist(rootNode, function (err) {
+        this.save('Committing changes to database for ImportFMUs plugin', function (err) {
+            // FIXME: on error?
+
+            if (callback) {
+                // TODO: we need a function to set/update success
+                self.result.success = true;
+                callback(null, self.result);
+            }
         });
-
-        var newRootHash = core.getHash(rootNode);
-        console.info(config.project.makeCommit);
-
-        var result = {'commitHash': config.commitHash};
-        result.commitHash = config.project.makeCommit([result.commitHash], newRootHash, 'Plugin updated the model.', function (err) {});
-
         // End Commit
 
 //        if (selectedNode && typeof selectedNode == FMU.FMU_Library) {
-        if (selectedNode) {
+        if (rootNode) {
 
-            core.loadChildren(selectedNode, function (err, childNodes) {
+            core.loadChildren(rootNode, function (err, childNodes) {
                 var i;
-                console.log('%j has children::', core.getAttribute(selectedNode, 'name'));
+                console.log('%j has children::', core.getAttribute(rootNode, 'name'));
 
                 for (i = 0; i < childNodes.length; i += 1) {
                     console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
@@ -71,7 +71,7 @@ define(['plugin/PluginConfig',
                 }
             });
         } else {
-            callback('selectedNode is not defined', {'success': false});
+            callback('rootNode is not defined', {'success': false});
         }
     };
 
