@@ -1,14 +1,13 @@
 /**
  * Created by pmeijer on 3/24/14.
  *
- * On Mac this worked for me
- *
- * node node_modules/webgme/bin/run_plugin.js -c config.json -i src/plugins/META/DSMLAPIGenerator/DsmlApiGeneratorMultiFile -p CyPhyLight
+ * Regenerate Templates.js
+ * node src\tools\combine_templates.js -t src\plugins\META\DSMLAPIGenerator\Templates
  *
  */
 
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'fs'],
-    function (PluginConfig, PluginBase, ejs, fs) {
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/DSMLAPIGenerator/DSMLAPIGenerator/Templates/Templates'],
+    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
         "use strict";
 
         var DsmlApiGeneratorMultiFile = function () {
@@ -114,53 +113,33 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'fs'],
 
         DsmlApiGeneratorMultiFile.prototype.generateFiles = function (domain) {
             var projectName = domain.projectName;
-            var DOMAIN_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLAPIGenerator/mainDOMAIN.js.ejs', 'utf8');
-            var TYPE_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLAPIGenerator/typeDOMAIN.js.ejs', 'utf8');
-            var CONSTRUCTOR_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLApiGenerator/constructorsDOMAIN.js.ejs', 'utf8');
-            var DEF_TEMPLATE = fs.readFileSync('src/plugins/META/DSMLAPIGenerator/defDOMAIN.js.ejs', 'utf8');
+            var DOMAIN_TEMPLATE = TEMPLATES['mainDOMAIN.js.ejs'];
+            var TYPE_TEMPLATE = TEMPLATES['typeDOMAIN.js.ejs'];
+            var CONSTRUCTOR_TEMPLATE = TEMPLATES['constructorsDomain.js.ejs'];
+            var DEF_TEMPLATE = TEMPLATES['defDomain.js.ejs'];
             var ret = ejs.render(DOMAIN_TEMPLATE, domain);
             var idMap = this.getIDMap(domain);
-            var outputDir = 'src/plugins/' + projectName + '/DSML/';
             var outputDirZip = projectName + '/DSML/';
             var metaTypeFileName;
 
-            if (fs.existsSync(outputDir)) {
-                var oldFiles = fs.readdirSync(outputDir);
-                for (var i = 0; i < oldFiles.length; i += 1){
-                    fs.unlinkSync(outputDir + oldFiles[i]);
-                }
-
-                fs.rmdirSync(outputDir);
-            }
-
-            fs.mkdirSync(outputDir); // Make sure the folder is not expanded in the WebStorm project tree.
-
             // Generate the main DSML file.
-            var outputfileName = outputDir + projectName + '.Dsml.js';
-            fs.writeFileSync(outputfileName, ret, 'utf8');
             this.fs.addFile(outputDirZip + projectName + '.Dsml.js', ret);
-            fs.writeFileSync(outputDir + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
             this.fs.addFile(outputDirZip + projectName + '.Dsml.json', JSON.stringify(domain, null, 4));
-            this.logger.info(outputfileName + ' was generated.');
+            //this.logger.info(outputfileName + ' was generated.');
 
             // Generate the constructors file.
-            outputfileName = outputDir + projectName + '.constructors.js';
             ret = ejs.render(CONSTRUCTOR_TEMPLATE, domain);
-            fs.writeFileSync(outputfileName, ret, 'utf8');
             this.fs.addFile(outputDirZip + projectName + '.constructors.js', ret);
-            this.logger.info(outputfileName + ' was generated.');
+            //this.logger.info(outputfileName + ' was generated.');
 
-            // Generate the defintion file.
-            outputfileName = outputDir + projectName + '.def.js';
+            // Generate the definition file.
             ret = ejs.render(DEF_TEMPLATE, domain);
-            fs.writeFileSync(outputfileName, ret, 'utf8');
             this.fs.addFile(outputDirZip + projectName + '.def.js', ret);
-            this.logger.info(outputfileName + ' was generated.');
+            //this.logger.info(outputfileName + ' was generated.');
 
             // Generate all meta-type files.
             for (var metaTypeIndex = 0; metaTypeIndex < domain.metaTypes.length; metaTypeIndex += 1) {
                 metaTypeFileName = projectName + '.' + domain.metaTypes[metaTypeIndex].name + '.Dsml.js';
-                outputfileName = outputDir + metaTypeFileName;
 
                 var typeData = {
                     metaTypeName: domain.metaTypes[metaTypeIndex].name,
@@ -177,12 +156,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'fs'],
                 };
 
                 ret = ejs.render(TYPE_TEMPLATE, typeData);
-                fs.writeFileSync(outputfileName, ret, 'utf8');
+
                 this.fs.addFile(outputDirZip + metaTypeFileName, ret);
-                //fs.writeFileSync('src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
 
-                this.logger.info(outputfileName + ' was generated.');
-
+                //this.logger.info(outputfileName + ' was generated.');
             }
 
             this.fs.saveArtifact();
