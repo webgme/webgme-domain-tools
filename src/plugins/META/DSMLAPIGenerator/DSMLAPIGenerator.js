@@ -7,22 +7,90 @@
  *
  */
 
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIGenerator/DSMLAPIGenerator/DsmlApiGeneratorOld'],
-    function (PluginConfig, PluginBase, fs, ejs, DsmlApiGenerator) {
+define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'fs'],
+    function (PluginConfig, PluginBase, ejs, fs) {
         "use strict";
 
         var DsmlApiGeneratorMultiFile = function () {
             PluginBase.call(this);
         };
 
-        DsmlApiGeneratorMultiFile.prototype = Object.create(DsmlApiGenerator.prototype);
+        DsmlApiGeneratorMultiFile.prototype = Object.create(PluginBase.prototype);
 
         DsmlApiGeneratorMultiFile.prototype.getName = function () {
             return 'DSML API Generator Multiple files';
         };
 
         DsmlApiGeneratorMultiFile.getDefaultConfig = function () {
-            return DsmlApiGenerator.getDefaultConfig();
+            return new PluginConfig();
+        };
+
+        // FIXME: this method was copied from webgme meta.js
+        DsmlApiGeneratorMultiFile.prototype.getMeta = function (_core, nodeObj){
+            var meta = {children:{},attributes:{},pointers:{}};
+            var node = nodeObj || null;
+            if(node){
+                var metaNode = _core.getChild(node,"_meta");
+                var childrenNode = _core.getChild(metaNode,"children");
+                //children
+                meta.children = {};
+                meta.children.minItems = [];
+                meta.children.maxItems = [];
+                meta.children.items = _core.getMemberPaths(childrenNode,"items");
+                for(var i=0;i<meta.children.items.length;i++){
+                    meta.children.minItems.push(_core.getMemberAttribute(childrenNode,"items",meta.children.items[i],"min") || -1);
+                    meta.children.maxItems.push(_core.getMemberAttribute(childrenNode,"items",meta.children.items[i],"max") || -1);
+                    //meta.children.items[i] = pathToRefObject(meta.children.items[i]);
+                }
+                meta.children.min = _core.getAttribute(childrenNode,"min");
+                meta.children.max = _core.getAttribute(childrenNode,"max");
+
+                //attributes - they are simple json objects from our point of view
+                var atrNames = _core.getAttributeNames(metaNode);
+                for(var i=0;i<atrNames.length;i++){
+                    meta.attributes[atrNames[i]] = JSON.parse(JSON.stringify(_core.getAttribute(metaNode,atrNames[i])));
+                }
+
+                //pointers and pointer lists
+                var pointerNames = _core.getPointerNames(metaNode) || [];
+                for(var i=0;i<pointerNames.length;i++){
+                    var pointerNode = _core.getChild(metaNode,"_p_"+pointerNames[i]);
+                    var pointer = {};
+                    pointer.items = _core.getMemberPaths(pointerNode,"items");
+                    pointer.min = _core.getAttribute(pointerNode,"min");
+                    pointer.max = _core.getAttribute(pointerNode,"max");
+                    pointer.minItems = [];
+                    pointer.maxItems = [];
+
+                    for(var j=0;j<pointer.items.length;j++){
+                        pointer.minItems.push(_core.getMemberAttribute(pointerNode,"items",pointer.items[j],"min") || -1);
+                        pointer.maxItems.push(_core.getMemberAttribute(pointerNode,"items",pointer.items[j],"max") || -1);
+                        //pointer.items[j] = pathToRefObject(pointer.items[j]);
+
+                    }
+
+                    meta.pointers[pointerNames[i]] = pointer;
+                }
+
+                //aspects
+                var aspectsNode = _core.getChild(metaNode,"aspects");
+                var aspectNames = _core.getPointerNames(aspectsNode);
+                if (aspectNames.length > 0){
+                    meta.aspects = {};
+                    for(var i=0;i<aspectNames.length;i++){
+                        var aspectNode = _core.getChild(aspectsNode,"_a_"+aspectNames[i]);
+                        meta.aspects[aspectNames[i]] = {items:[]};
+                        var items = _core.getMemberPaths(aspectNode,"items");
+                        for(var j=0;j<items.length;j++){
+                            meta.aspects[aspectNames[i]].items.push(pathToRefObject(items[j]));
+                        }
+                    }
+                }
+
+                return meta;
+            } else {
+                return null;
+            }
         };
 
         DsmlApiGeneratorMultiFile.Utils = function () {
@@ -30,7 +98,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
         };
 
         DsmlApiGeneratorMultiFile.Utils.isValidJavascriptIdentifier = function (identifier) {
-            return DsmlApiGenerator.Utils.isValidJavascriptIdentifier(identifier);
+            // note: we do not allow unicode characters.
+            var pattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*/g;
+            return pattern.test(identifier);
         };
 
         DsmlApiGeneratorMultiFile.prototype.getIDMap = function (domain) {
