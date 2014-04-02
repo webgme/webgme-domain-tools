@@ -17,6 +17,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
 
         DsmlApiGeneratorMultiFile.prototype = Object.create(DsmlApiGenerator.prototype);
 
+        DsmlApiGeneratorMultiFile.prototype.getName = function () {
+            return 'DSML API Generator Multiple files';
+        };
+
         DsmlApiGeneratorMultiFile.getDefaultConfig = function () {
             return DsmlApiGenerator.getDefaultConfig();
         };
@@ -47,6 +51,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
             var ret = ejs.render(DOMAIN_TEMPLATE, domain);
             var idMap = this.getIDMap(domain);
             var outputDir = 'src/plugins/' + projectName + '/DSML/';
+            var outputDirZip = projectName + '/DSML/';
+            var metaTypeFileName;
 
             if (fs.existsSync(outputDir)) {
                 var oldFiles = fs.readdirSync(outputDir);
@@ -62,25 +68,29 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
             // Generate the main DSML file.
             var outputfileName = outputDir + projectName + '.Dsml.js';
             fs.writeFileSync(outputfileName, ret, 'utf8');
+            this.fs.addFile(outputDirZip + projectName + '.Dsml.js', ret);
             fs.writeFileSync(outputDir + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
-            console.info(outputfileName + ' was generated.');
+            this.fs.addFile(outputDirZip + projectName + '.Dsml.json', JSON.stringify(domain, null, 4));
+            this.logger.info(outputfileName + ' was generated.');
 
             // Generate the constructors file.
             outputfileName = outputDir + projectName + '.constructors.js';
             ret = ejs.render(CONSTRUCTOR_TEMPLATE, domain);
             fs.writeFileSync(outputfileName, ret, 'utf8');
-            console.info(outputfileName + ' was generated.');
+            this.fs.addFile(outputDirZip + projectName + '.constructors.js', ret);
+            this.logger.info(outputfileName + ' was generated.');
 
             // Generate the defintion file.
             outputfileName = outputDir + projectName + '.def.js';
             ret = ejs.render(DEF_TEMPLATE, domain);
             fs.writeFileSync(outputfileName, ret, 'utf8');
-            console.info(outputfileName + ' was generated.');
+            this.fs.addFile(outputDirZip + projectName + '.def.js', ret);
+            this.logger.info(outputfileName + ' was generated.');
 
             // Generate all meta-type files.
             for (var metaTypeIndex = 0; metaTypeIndex < domain.metaTypes.length; metaTypeIndex += 1) {
-                outputfileName = outputDir + projectName + '.' +
-                                 domain.metaTypes[metaTypeIndex].name + '.Dsml.js';
+                metaTypeFileName = projectName + '.' + domain.metaTypes[metaTypeIndex].name + '.Dsml.js';
+                outputfileName = outputDir + metaTypeFileName;
 
                 var typeData = {
                     metaTypeName: domain.metaTypes[metaTypeIndex].name,
@@ -98,30 +108,22 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
 
                 ret = ejs.render(TYPE_TEMPLATE, typeData);
                 fs.writeFileSync(outputfileName, ret, 'utf8');
-
+                this.fs.addFile(outputDirZip + metaTypeFileName, ret);
                 //fs.writeFileSync('src/plugins/DsmlApiGenerator/' + projectName + '.Dsml.json', JSON.stringify(domain, null, 4), 'utf8');
 
-                console.info(outputfileName + ' was generated.');
+                this.logger.info(outputfileName + ' was generated.');
 
             }
+
+            this.fs.saveArtifact();
         };
 
-        DsmlApiGeneratorMultiFile.prototype.main = function (config, callback) {
-            var logger = console;
-
-            logger.info('Run started..');
-
-            var rootNode = this.rootNode,
-                selectedNode = this.activeNode,
-                core = this.core,
-                project = this.project,
+        DsmlApiGeneratorMultiFile.prototype.main = function (callback) {
+            var core = this.core,
                 projectName = this.projectName,
-                META = this.META,
-                result;
+                META = this.META;
 
-            result = {'commitHash': this.commitHash};
-
-            logger.info('Generating domain specific JavaScript API for ' + projectName);
+            this.logger.info('Generating domain specific JavaScript API for ' + projectName);
 
             var metaTypes = [];
             var metaTypesByID = {};
@@ -164,7 +166,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
                     metaType.isConnection = meta.pointers.hasOwnProperty('src') && meta.pointers.hasOwnProperty('dst');
 
                     if (metaType.isConnection) {
-                        console.log('here');
+                        this.logger.info('here');
                     }
 
                     metaType.children = [];
@@ -187,9 +189,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'fs','ejs', 'plugin/DSMLAPIG
 
             this.generateFiles(domain);
 
-            console.log('done');
+            this.logger.info('done');
             if (callback) {
-                callback(null, {success: true});
+                this.result.success = true;
+                callback(null, this.result);
             }
         };
 
