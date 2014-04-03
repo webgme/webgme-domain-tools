@@ -67,6 +67,13 @@ describe("Test PluginBase API", function() {
             description = pluginBase.getDescription();
         expect(typeof description === 'string' || description instanceof String).to.be.true;
     });
+
+    it ('getName', function() {
+        var pluginBase = new PluginBase();
+        (function () {
+            pluginBase.getName()
+        }).should.throw(Error);
+    });
 });
 
 // TODO: Generate these on the fly based on pluginList.
