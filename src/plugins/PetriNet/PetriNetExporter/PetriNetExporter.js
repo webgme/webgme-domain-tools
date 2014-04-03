@@ -1,10 +1,14 @@
 /**
  * Created by Dana Zhang on 3/31/2014.
  */
+
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
-    'plugin/PluginResult'], function (PluginConfig, PluginBase, PluginResult) {
+    'plugin/PluginResult',
+    'plugin/PetriNetExporter/PetriNetExporter/XMLWriter'], function (PluginConfig, PluginBase, PluginResult, XMLWriter) {
     'use strict';
+
+    // TODO: to modify the base dir path in config.json to allow dependencies from other dirs
 
     var PetriNetExporterPlugin = function () {
         PluginBase.call(this);
@@ -37,6 +41,19 @@ define(['plugin/PluginConfig',
         core.loadChildren(selectedNode, function(err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
         });
+
+
+        // TODO: extend XML writer to accept n numbers of attributes
+
+        var xw = new XMLWriter;
+        xw.startDocument();
+        xw.startElement('root').writeAttribute('foo', 'value');
+
+        xw.writeElement('bar', 'barbar').writeAttribute('foobar', 'value');
+        xw.text('Some content');
+        xw.endDocument();
+
+        console.log(xw.toString());
     };
 
     PetriNetExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
@@ -46,10 +63,47 @@ define(['plugin/PluginConfig',
 
         var i;
         for (i = 0; i < childNodes.length; ++i) {
-            var name = core.getAttribute(childNodes[i], 'name');
-            this.logger.info('Visiting: ' + name);
+//            var name = core.getAttribute(childNodes[i], 'name');
+//            this.logger.info('Visiting: ' + name);
 
-            // TODO: do something here with this object
+
+
+            // TODO: get its META Type
+            // Get position, Capacity, Initial Marking
+            var child = childNodes[i];
+
+            // get its base META Type
+            var baseClass = core.getBase(child);
+            if (baseClass) {
+                var metaType = core.getAttribute(baseClass, 'name');
+            }
+
+            if (metaType === 'Place') {
+
+
+            } else if (metaType === 'Transition') {
+
+
+            } else if (metaType === 'Arc') {
+
+
+            }
+
+
+            var name = core.getAttribute(child, 'name'),
+                capacity = core.getAttribute(child, 'Capacity'),
+                marking = core.getAttribute(child, 'InitialMarking'),
+                xPos = child.data.reg.position.x,
+                yPos = child.data.reg.position.y;
+
+            //    HEIGHT = isTypePlace ? 30 : 20; can we use META Aspect
+//            var XMLS = new XMLSerializer();
+//            var xw = new XMLWriter();
+
+            // TODO: create JSON for each component, e.g. Place, Transition, Arc
+            // TODO: convert JSON to xml
+
+            // var js = document.createElement("place");
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
                 self.visitObject(err, childNodes, core, callback);
