@@ -49,21 +49,6 @@ define(['plugin/PluginConfig',
                 self.result.success = true;
                 callback(null, self.result);
             }
-
-//            core.loadChildren(activeNode, function (err, childNodes) {
-//                var i;
-//                self.logger.info(core.getAttribute(activeNode, 'name') + ' has children');
-//
-//                for (i = 0; i < childNodes.length; i += 1) {
-//                    self.logger.info('  - ' + core.getAttribute(childNodes[i], 'name'));
-//                }
-//
-//                if (callback) {
-//                    // TODO: we need a function to set/update success
-//                    self.result.success = true;
-//                    callback(null, self.result);
-//                }
-//            });
         };
 
         return UsingTemplatesPlugin;
