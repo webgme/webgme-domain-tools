@@ -8,6 +8,7 @@ if (typeof window === 'undefined') {
     var requirejs = require("requirejs");
     requirejs.config({
         baseUrl: '.',
+        // TODO: populate plugin list dynamically based on config.json
         paths: {
             "logManager": "common/LogManager",
             'plugin': 'node_modules/webgme/plugin',
@@ -34,6 +35,9 @@ if (typeof window === 'undefined') {
         expect = chai.expect;
 }
 
+// /^v?((\d+)\.(\d+)\.(\d+))(?:-([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?(?:\+([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?$/
+var semanticVersionPattern = /^\d+\.\d+\.\d+$/;
+
 var pluginList = [
     'plugin/Children/Children/Children',
     'plugin/ChildrenConfig/ChildrenConfig/ChildrenConfig'];
@@ -54,9 +58,8 @@ describe("Test PluginBase API", function() {
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase(),
-            pattern = /^\d+\.\d+\.\d+$/;
-        expect(pattern.test(pluginBase.getVersion())).to.be.true;
+        var pluginBase = new PluginBase();
+        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
@@ -82,9 +85,8 @@ describe("Test PluginBase API on instances 0", function() {
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase(),
-            pattern = /^\d+\.\d+\.\d+$/;
-        expect(pattern.test(pluginBase.getVersion())).to.be.true;
+        var pluginBase = new PluginBase();
+        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
@@ -114,9 +116,8 @@ describe("Test PluginBase API on instances 1", function() {
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase(),
-            pattern = /^\d+\.\d+\.\d+$/;
-        expect(pattern.test(pluginBase.getVersion())).to.be.true;
+        var pluginBase = new PluginBase();
+        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
