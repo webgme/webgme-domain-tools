@@ -124,7 +124,14 @@ define(['plugin/PluginConfig',
         var parameters = fmuData.Parameters,
             inputs = fmuData.Inputs,
             outputs = fmuData.Outputs,
-            index;
+            index,
+            paramX = 400,
+            paramY = 100,
+            inputX = 100,
+            inputY = 100,
+            outputX = 700,
+            outputY = 100,
+            offsetY = 60;
 
         core.setAttribute(newFmuObject, 'fmu_path', fmuData.FMU_package);
 
@@ -142,7 +149,10 @@ define(['plugin/PluginConfig',
                 core.setAttribute(newParamObject, 'value', paramData.startValue);
                 core.setAttribute(newParamObject, 'default_value', paramData.startValue);
             }
+
             // TODO: put the parameters in the middle of the canvas
+            core.setRegistry(newParamObject, 'position', {x: paramX, y: paramY});
+            paramY += offsetY;
         }
 
         for (index = 0; index < inputs.length; index += 1){
@@ -156,18 +166,23 @@ define(['plugin/PluginConfig',
             }
 
             // TODO: put the inputs on the left-hand side of the canvas
+            core.setRegistry(newInputPortObject, 'position', {x: inputX, y: inputY});
+            inputY += offsetY;
         }
 
         for (index = 0; index < outputs.length; index += 1){
             var outputData = outputs[index];
 
-            var newInputPortObject = core.createNode({parent: newFmuObject, base: FmuTypes.Input});
-            core.setAttribute(newInputPortObject, 'name', outputData.name);
+            var newOutputPortObject = core.createNode({parent: newFmuObject, base: FmuTypes.Input});
+            core.setAttribute(newOutputPortObject, 'name', outputData.name);
 
             if (outputData.description) {
-                core.setAttribute(newInputPortObject, 'description', outputData.description);
+                core.setAttribute(newOutputPortObject, 'description', outputData.description);
             }
+
             // TODO: put the outputs on the righthand side of the canvas
+            core.setRegistry(newOutputPortObject, 'position', {x: outputX, y: outputY});
+            outputY += offsetY;
         }
     };
 
