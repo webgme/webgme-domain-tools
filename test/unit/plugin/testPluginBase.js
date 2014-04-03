@@ -9,7 +9,21 @@ if (typeof window === 'undefined') {
     requirejs.config({
         baseUrl: '.',
         paths: {
-            'plugin': 'node_modules/webgme/plugin'
+            "logManager": "common/LogManager",
+            'plugin': 'node_modules/webgme/plugin',
+            "plugin/Children.Dsml": "./src/plugins/CyPhyLight",
+            "plugin/CyPhyLight": "./src/plugins/CyPhyLight",
+            "plugin/ModelicaImporter": "./src/plugins/CyPhyLight",
+            "plugin/ModelicaImporter.Dsml": "./src/plugins/CyPhyLight",
+            "plugin/Children": "./src/plugins/Examples",
+            "plugin/ChildrenConfig": "./src/plugins/Examples",
+            "plugin/ChildrenSaveArtifacts": "./src/plugins/Examples",
+            "plugin/DuplicateActiveNode": "./src/plugins/Examples",
+            "plugin/UsingTemplates": "./src/plugins/Examples",
+            "plugin/DSMLAPIGenerator": "./src/plugins/META",
+            "plugin/GetPrintAllObjects": "./src/plugins/FMU",
+            "plugin/ImportFMUs": "./src/plugins/FMU",
+            "plugin/PetriNetExporter": "./src/plugins/PetriNet"
         },
         nodeRequire: require
     });
@@ -21,8 +35,8 @@ if (typeof window === 'undefined') {
 }
 
 var pluginList = [
-    'src/plugins/Examples/Children/Children',
-    'src/plugins/Examples/ChildrenConfig/ChildrenConfig'];
+    'plugin/Children/Children/Children',
+    'plugin/ChildrenConfig/ChildrenConfig/ChildrenConfig'];
 
 describe("Test PluginBase API", function() {
 

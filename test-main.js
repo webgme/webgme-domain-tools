@@ -9,12 +9,23 @@ requirejs.config({
     // Karma serves files from '/base'
     baseUrl: '/base',
 
+    // TODO: populate plugin list dynamically based on config.json
     paths: {
+        "logManager": "common/LogManager",
         'plugin': 'node_modules/webgme/plugin',
-        'plugin/CyPhyLight': './src/plugins/CyPhyLight',
-        'plugin/ModelicaImporter.Dsml': './src/plugins/CyPhyLight',
-        'plugin/ModelicaImporter': './src/plugins/CyPhyLight',
-        'plugin/DSMLAPIGenerator': './src/plugins/META'
+        "plugin/Children.Dsml": "./src/plugins/CyPhyLight",
+        "plugin/CyPhyLight": "./src/plugins/CyPhyLight",
+        "plugin/ModelicaImporter": "./src/plugins/CyPhyLight",
+        "plugin/ModelicaImporter.Dsml": "./src/plugins/CyPhyLight",
+        "plugin/Children": "./src/plugins/Examples",
+        "plugin/ChildrenConfig": "./src/plugins/Examples",
+        "plugin/ChildrenSaveArtifacts": "./src/plugins/Examples",
+        "plugin/DuplicateActiveNode": "./src/plugins/Examples",
+        "plugin/UsingTemplates": "./src/plugins/Examples",
+        "plugin/DSMLAPIGenerator": "./src/plugins/META",
+        "plugin/GetPrintAllObjects": "./src/plugins/FMU",
+        "plugin/ImportFMUs": "./src/plugins/FMU",
+        "plugin/PetriNetExporter": "./src/plugins/PetriNet"
     },
 
     shim: {
