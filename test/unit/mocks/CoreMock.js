@@ -33,7 +33,7 @@ var chai = require('chai'),
 //};
 
 describe('attribute getter and setter', function() {
-    var CoreMock = requirejs('../../src/mocks/CoreMock');
+    var CoreMock = requirejs('../../../src/mocks/CoreMock');
     var core = new CoreMock();
 
     it ('should pass', function() {

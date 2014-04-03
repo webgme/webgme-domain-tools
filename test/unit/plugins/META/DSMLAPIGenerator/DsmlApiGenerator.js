@@ -50,15 +50,15 @@ describe('Dsml Api Generator', function () {
         });
     });
 
-    describe.skip('Templates', function () {
-        var PETRI_NET_DOMAIN = require('./PetriNet.Dsml.json');
-
-        it ('should generate JavaScript DSML for PetriNet meta model', function() {
-            var generator = new plugin();
-            // TODO: if file exists remove
-            generator.generateFiles(PETRI_NET_DOMAIN);
-            // TODO: expect file exists
-
-        });
-    });
+//    describe.skip('Templates', function () {
+//        var PETRI_NET_DOMAIN = require('./PetriNet.Dsml.json');
+//
+//        it ('should generate JavaScript DSML for PetriNet meta model', function() {
+//            var generator = new plugin();
+//            // TODO: if file exists remove
+//            generator.generateFiles(PETRI_NET_DOMAIN);
+//            // TODO: expect file exists
+//
+//        });
+//    });
 });
