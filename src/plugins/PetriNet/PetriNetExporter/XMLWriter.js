@@ -106,6 +106,47 @@ define([], function () {
         return this;
     };
 
+    XMLWriter.prototype.endElement = function () {
+        if (!this.tags) return this;
+        var t = this.stack.pop();
+        if (this.attributes > 0) {
+            if (this.attribute) {
+                if (this.texts) this.endAttribute();
+                this.endAttribute();
+            }
+            this.write('/');
+            this.endAttributes();
+        } else {
+            if (t.containsTag) this.indenter();
+            this.write('</', t.name, '>');
+        }
+        --this.tags;
+        this.texts = 0;
+        return this;
+    };
+
+    XMLWriter.prototype.writeElement = function (name, content) {
+        return this.startElement(name).text(content).endElement();
+    };
+
+    XMLWriter.prototype.startAttribute = function (name) {
+        name = strval(name);
+        if (!name.match(this.name_regex)) throw Error('Invalid Parameter');
+        if (!this.attributes && !this.pi) return this;
+        if (this.attribute) return this;
+        this.attribute = 1;
+        this.write(' ', name, '="');
+        return this;
+    };
+
+    XMLWriter.prototype.endAttribute = function () {
+        if (!this.attribute) return this;
+        this.attribute = 0;
+        this.texts = 0;
+        this.write('"');
+        return this;
+    };
+
     XMLWriter.prototype.writeAttribute = function (name, content) {
         return this.startAttribute(name).text(content).endAttribute();
     };
@@ -113,6 +154,27 @@ define([], function () {
     XMLWriter.prototype.toString = function () {
         this.flush();
         return this.output;
+    };
+
+    XMLWriter.prototype.text = function (content) {
+        content = strval(content);
+        if (!this.tags && !this.comment && !this.pi && !this.cdata) return this;
+        if (this.attributes && this.attribute) {
+            ++this.texts;
+            this.write(content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
+            return this;
+        } else if (this.attributes && !this.attribute) {
+            this.endAttributes();
+        }
+        if (this.comment) {
+            this.write(content);
+        }
+        else {
+            this.write(content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+        }
+        ++this.texts;
+        this.started_write = true;
+        return this;
     };
 
     XMLWriter.prototype.indenter = function () {
@@ -149,54 +211,11 @@ define([], function () {
         return this;
     };
 
-    XMLWriter.prototype.startAttribute = function (name) {
-        name = strval(name);
-        if (!name.match(this.name_regex)) throw Error('Invalid Parameter');
-        if (!this.attributes && !this.pi) return this;
-        if (this.attribute) return this;
-        this.attribute = 1;
-        this.write(' ', name, '="');
-        return this;
-    };
-
-    XMLWriter.prototype.text = function (content) {
-        content = strval(content);
-        if (!this.tags && !this.comment && !this.pi && !this.cdata) return this;
-        if (this.attributes && this.attribute) {
-            ++this.texts;
-            this.write(content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
-            return this;
-        } else if (this.attributes && !this.attribute) {
-            this.endAttributes();
-        }
-        if (this.comment) {
-            this.write(content);
-        }
-        else {
-            this.write(content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-        }
-        ++this.texts;
-        this.started_write = true;
-        return this;
-    };
-
-    XMLWriter.prototype.endAttribute = function () {
-        if (!this.attribute) return this;
-        this.attribute = 0;
-        this.texts = 0;
-        this.write('"');
-        return this;
-    };
-
     XMLWriter.prototype.endPI = function () {
         if (!this.pi) return this;
         this.write('?>');
         this.pi = 0;
         return this;
-    };
-
-    XMLWriter.prototype.writeElement = function (name, content) {
-        return this.startElement(name).text(content).endElement();
     };
 
     XMLWriter.prototype.writeElementNS = function (prefix, name, uri, content) {
@@ -226,25 +245,6 @@ define([], function () {
         this.write('<', prefix + ':' + name);
         this.startAttributes();
         this.started_write = true;
-        return this;
-    };
-
-    XMLWriter.prototype.endElement = function () {
-        if (!this.tags) return this;
-        var t = this.stack.pop();
-        if (this.attributes > 0) {
-            if (this.attribute) {
-                if (this.texts) this.endAttribute();
-                this.endAttribute();
-            }
-            this.write('/');
-            this.endAttributes();
-        } else {
-            if (t.containsTag) this.indenter();
-            this.write('</', t.name, '>');
-        }
-        --this.tags;
-        this.texts = 0;
         return this;
     };
 
