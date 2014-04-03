@@ -22,10 +22,6 @@ define(['plugin/PluginConfig',
         return "Import FMUs";
     };
 
-    ImportFMUsPlugin.getDefaultConfig = function () {
-        return new PluginConfig();
-    };
-
     ImportFMUsPlugin.prototype.main = function (callback) {
         var self = this,
             core = this.core,
@@ -35,10 +31,14 @@ define(['plugin/PluginConfig',
         // get all 'possible' object types from the MetaModel
         this.updateMETA(FMU);
 
+        var flatFolderMap = {};
+
         // create an FCO within the rootNode, which is an instance of FMU.FMU_Library
         var newFmuLib = core.createNode({parent: rootNode, base: FMU.FMU_Library});
         // set the name attribute of the new FCO to 'NewImportedFMUs'
         core.setAttribute(newFmuLib, 'name', 'NewImportedFMUs');
+
+        flatFolderMap['NewImportedFMUs'] = '/' + newFmuLib.relid;
 
         var index;
         var numberOfFmusToImport = fmuList.length;
@@ -46,7 +46,10 @@ define(['plugin/PluginConfig',
         for (index = 0; index < numberOfFmusToImport; index += 1){
             var fmuData = fmuList[index],
                 modelicaClass = fmuData.ModelicaClass,
-                fmuName = modelicaClass.split('.').join('_');
+                fmuPathWithinProject = modelicaClass.split('.'),
+                folders = fmuPathWithinProject.slice(0, -1).join('.'),      // get the folder structure
+                fmuName = fmuPathWithinProject.slice(-1)[0];                // get the new FMU name
+
 
             // create an FCO within the the newFmuLib, which is an instance of FMU.FMU
             var newFMU = core.createNode({parent: newFmuLib, base: FMU.FMU});
@@ -59,6 +62,7 @@ define(['plugin/PluginConfig',
         this.save('Committing changes to database for ImportFMUs plugin', function (err) {
             // FIXME: on error?
 
+
             if (callback) {
                 // TODO: we need a function to set/update success
                 self.result.success = true;
@@ -67,6 +71,15 @@ define(['plugin/PluginConfig',
         });
         // End Commit NOTE: You should not have any code here!!!
         // this.save(commit_msg, ______) should be the last statement
+    };
+
+    // This should check if a folder (fco?) exists and create it (recursively) if necessary
+    ImportFMUsPlugin.makeFolders = function (modelicaPackagePath, existingFolderMap, core, FMU) {
+
+        var existingFolderId = existingFolderMap[modelicaPackagePath];
+
+        if (existingFolder) {return;};
+
     };
 
     return ImportFMUsPlugin;
