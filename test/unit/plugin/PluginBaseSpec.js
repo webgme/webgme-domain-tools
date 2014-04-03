@@ -75,6 +75,13 @@ describe("Test PluginBase API", function() {
         }).should.throw(Error);
     });
 
+    it ('main', function() {
+        var plugin = new Plugin();
+        (function () {
+            plugin.getName()
+        }).should.throw(Error);
+    });
+
     it ('getDefaultConfig matches getConfigStructure', function() {
         var plugin = new Plugin(),
             configStructure = plugin.getConfigStructure(),
@@ -160,6 +167,12 @@ describe("Test PluginBase API on instances 0", function() {
                 typeof value === 'boolean' || value instanceof Boolean).to.be.true;
         }
     });
+
+    it ('main should be implemented', function() {
+        var plugin = new Plugin(),
+            proto = Object.getPrototypeOf(plugin);
+        expect(proto.hasOwnProperty('main')).to.be.true;
+    });
 });
 
 describe("Test PluginBase API on instances 1", function() {
@@ -217,5 +230,11 @@ describe("Test PluginBase API on instances 1", function() {
                 typeof value === 'number' || value instanceof Number ||
                 typeof value === 'boolean' || value instanceof Boolean).to.be.true;
         }
+    });
+
+    it ('main should be implemented', function() {
+        var plugin = new Plugin(),
+            proto = Object.getPrototypeOf(plugin);
+        expect(proto.hasOwnProperty('main')).to.be.true;
     });
 });

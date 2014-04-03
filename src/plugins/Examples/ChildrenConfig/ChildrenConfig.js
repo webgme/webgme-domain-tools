@@ -108,7 +108,7 @@ define(['plugin/PluginConfig',
 
             if (callback) {
                 // TODO: we need a function to set/update success
-                self.result.success = true;
+                self.result.setSuccess(true);
 
                 self.fs.addFile('pluginResult.json', JSON.stringify(self.result.serialize()));
                 self.fs.saveArtifact();
