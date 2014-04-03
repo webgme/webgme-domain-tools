@@ -35,12 +35,17 @@ if (typeof window === 'undefined') {
         expect = chai.expect;
 }
 
-describe("Test PluginResult", function() {
+describe("Test PluginResult/Message", function() {
 
-    var PluginResult;
+    var PluginResult,
+        PluginMessage;
+
     before(function(done){
-        requirejs(['plugin/PluginResult'], function(PluginResult_){
+        requirejs(['plugin/PluginResult',
+                   'plugin/PluginMessage'],
+                function(PluginResult_, PluginMessage_){
             PluginResult = PluginResult_;
+            PluginMessage = PluginMessage_;
             done();
         });
     });
@@ -51,8 +56,7 @@ describe("Test PluginResult", function() {
 
     it ('getSuccess after initialize', function() {
         var result = new PluginResult();
-
-        expect(result.getSuccess()).to.be.false;
+        expect(result.getSuccess()).to.equal(false);
     });
 
     it ('serialize/deserialize after initialize', function() {
@@ -62,9 +66,63 @@ describe("Test PluginResult", function() {
         serialized = result.serialize();
         serializedPostDeserialized = new PluginResult(serialized);
 
-        expect(serialized.success === serializedPostDeserialized.success).to.be.true;
-        expect(serialized.pluginName === serializedPostDeserialized.pluginName).to.be.true;
-        expect(serialized.finishTime === serializedPostDeserialized.finishTime).to.be.true;
-        expect(serialized.messages.length === serializedPostDeserialized.messages.length).to.be.true;
+        expect(serialized.success === serializedPostDeserialized.success).to.equal(true);
+        expect(serialized.pluginName === serializedPostDeserialized.pluginName).to.equal(true);
+        expect(serialized.finishTime === serializedPostDeserialized.finishTime).to.equal(true);
+        expect(serialized.messages.length === serializedPostDeserialized.messages.length).to.equal(true);
+    });
+
+    it ('serialize/deserialize with messages', function() {
+        var result = new PluginResult(),
+            serialized,
+            serializedPostDeserialized,
+            i,
+            msg1,
+            msg2;
+
+        result.addMessage(new PluginMessage({
+            "commitHash": "#bffc5c877a2c7689c46e6519dc567a215b2ebcf3",
+            "activeNode": {
+                "name": "ROOT",
+                "id": ""
+            },
+            "activeSelection": [
+                {
+                    "name": "FCO",
+                    "id": "/1"
+                }
+            ],
+            "message": "Message text 0 element"
+        }));
+
+        result.addMessage(new PluginMessage({
+            "commitHash": "#bffc5c877a2c7689c46e6519dc567a215b2ebcf3",
+            "activeNode": {
+                "name": "ROOT",
+                "id": ""
+            },
+            "activeSelection": [
+                {
+                    "name": "Run it here Copy",
+                    "id": "/243941094"
+                }
+            ],
+            "message": "Message text 4 element"
+        }));
+
+        serialized = result.serialize();
+        serializedPostDeserialized = (new PluginResult(serialized)).serialize();
+        expect(serialized.success === serializedPostDeserialized.success).to.equal(true);
+        expect(serialized.pluginName === serializedPostDeserialized.pluginName).to.equal(true);
+        expect(serialized.finishTime === serializedPostDeserialized.finishTime).to.equal(true);
+        expect(serialized.messages.length === serializedPostDeserialized.messages.length).to.equal(true);
+
+        for (i = 0; i < serialized.messages.length; i += 1){
+            msg1 = serialized.messages[i];
+            msg2 = serializedPostDeserialized.messages[i];
+            expect(msg1.commitHash === msg2.commitHash).to.equal(true);
+            expect(msg1.message === msg2.message).to.equal(true);
+        }
+
     });
 });
