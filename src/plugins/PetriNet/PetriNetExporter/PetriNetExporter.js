@@ -10,6 +10,7 @@ define(['plugin/PluginConfig',
 
     // TODO: to modify the base dir path in config.json to allow dependencies from other dirs
 
+
     var PetriNetExporterPlugin = function () {
         PluginBase.call(this);
     };
@@ -38,22 +39,26 @@ define(['plugin/PluginConfig',
 
         this.objectToVisit += 1; // we need to visit the selected node
 
+        this.diagram = 0;
+
+        // only when node is diagram folder then traverse
         core.loadChildren(selectedNode, function(err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
         });
 
 
-        // TODO: extend XML writer to accept n numbers of attributes
+        // TODO: extend XML writer to accept n attributes
 
-        var xw = new XMLWriter;
-        xw.startDocument();
-        xw.startElement('root').writeAttribute('foo', 'value');
+        this.xml = new XMLWriter;
 
-        xw.writeElement('bar', 'barbar').writeAttribute('foobar', 'value');
-        xw.text('Some content');
-        xw.endDocument();
+        this.xml.startDocument();
+        this.xml.startElement('root').writeAttribute('foo', 'value');
 
-        console.log(xw.toString());
+        this.xml.writeElement('bar', 'barbar').writeAttribute('foobar', 'value');
+        this.xml.text('Some content');
+        this.xml.endDocument();
+
+        console.log(this.xml.toString());
     };
 
     PetriNetExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
@@ -81,7 +86,15 @@ define(['plugin/PluginConfig',
             } else if (metaType === 'Arc') {
 
 
+            } else if (metaType === 'PetriNetDiagram') {
+
+                this.diagram += 1;
+                this.xml.startDocument('1.0', 'utf-8');
+
             }
+
+            console.log(core.getAttribute(child, 'name'));
+            console.log(core.getAttribute(child.parent, 'name'));
 
             var name = core.getAttribute(child, 'name'),
                 capacity = core.getAttribute(child, 'Capacity'),
@@ -109,10 +122,12 @@ define(['plugin/PluginConfig',
             if (callback) {
                 callback(null, pluginResult);
             }
-        } else {
-            // some objects still need to be visited
-            this.logger.info('Visiting progress: ' + this.visitedObjects + '/' + this.objectToVisit);
         }
+
+//        else {
+//            some objects still need to be visited
+//            this.logger.info('Visiting progress: ' + this.visitedObjects + '/' + this.objectToVisit);
+//        }
     };
 
     return PetriNetExporterPlugin;
