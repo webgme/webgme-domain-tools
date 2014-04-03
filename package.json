@@ -8,7 +8,7 @@
     "license": "MIT",
     "dependencies": {
         "webgme": "https://github.com/webgme/webgme/tarball/master",
-        "requirejs": ">=2.0.0",
+        "requirejs": "=2.1.11",
         "ejs": ">=0.8.5",
         "commander": ">=2.1.0",
         "node-fs-extra": ">=0.8.1",
