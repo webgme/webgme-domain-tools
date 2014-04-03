@@ -46,7 +46,7 @@ describe('Dsml Api Generator', function () {
         });
 
         it ('Empty string is invalid identifier', function() {
-            expect(utils.isValidJavascriptIdentifier('function')).to.equal(false);
+            expect(utils.isValidJavascriptIdentifier('')).to.equal(false);
         });
     });
 
