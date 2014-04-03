@@ -44,11 +44,11 @@ var pluginList = [
 
 describe("Test PluginBase API", function() {
 
-    var PluginBase;
+    var Plugin;
     before(function(done){
 
-        requirejs(['plugin/PluginBase'], function(PluginBase_){
-            PluginBase = PluginBase_;
+        requirejs(['plugin/PluginBase'], function(Plugin_){
+            Plugin = Plugin_;
             done();
         });
     });
@@ -58,31 +58,58 @@ describe("Test PluginBase API", function() {
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase();
-        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
+        var plugin = new Plugin();
+        expect(semanticVersionPattern.test(plugin.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
-        var pluginBase = new PluginBase(),
-            description = pluginBase.getDescription();
+        var plugin = new Plugin(),
+            description = plugin.getDescription();
         expect(typeof description === 'string' || description instanceof String).to.be.true;
     });
 
     it ('getName', function() {
-        var pluginBase = new PluginBase();
+        var plugin = new Plugin();
         (function () {
-            pluginBase.getName()
+            plugin.getName()
         }).should.throw(Error);
+    });
+
+    it ('getDefaultConfig matches getConfigStructure', function() {
+        var plugin = new Plugin(),
+            configStructure = plugin.getConfigStructure(),
+            defaultConfig = plugin.getDefaultConfig(),
+            lenCS = configStructure.length,
+            lenDC = Object.keys(defaultConfig).length;
+        console.log('lenCS: %j, lenDC: %j', lenCS, lenDC);
+        expect(lenCS === lenDC).to.be.true;
+    });
+
+    it ('getDefaultConfig has valid values', function() {
+        var plugin = new Plugin(),
+            defaultConfig = plugin.getDefaultConfig(),
+            keys = Object.keys(defaultConfig),
+            i,
+            value;
+        console.log('values ::');
+        for (i = 0; i < keys.length; i += 1){
+            value = defaultConfig[keys[i]];
+            console.log(' - %j', value);
+            expect(typeof value === 'string' || value instanceof String ||
+                typeof value === 'number' || value instanceof Number ||
+                typeof value === 'boolean' || value instanceof Boolean).to.be.true;
+        }
     });
 });
 
 // TODO: Generate these on the fly based on pluginList.
 
 describe("Test PluginBase API on instances 0", function() {
-    var PluginBase;
+    var Plugin;
+
     before(function(done){
-        requirejs([pluginList[0]], function(Plugin){
-            PluginBase = Plugin;
+        requirejs([pluginList[0]], function(Plugin_){
+            Plugin = Plugin_;
             done();
         });
     });
@@ -92,50 +119,103 @@ describe("Test PluginBase API on instances 0", function() {
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase();
-        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
+        var plugin = new Plugin();
+        expect(semanticVersionPattern.test(plugin.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
-        var pluginBase = new PluginBase(),
-            description = pluginBase.getDescription();
+        var plugin = new Plugin(),
+            description = plugin.getDescription();
         expect(typeof description === 'string' || description instanceof String).to.be.true;
     });
 
     it ('getName', function() {
-        var pluginBase = new PluginBase(),
-            name = pluginBase.getName();
+        var plugin = new Plugin(),
+            name = plugin.getName();
         expect(typeof name === 'string' || name instanceof String).to.be.true;
+    });
+
+    it ('getDefaultConfig matches getConfigStructure', function() {
+        var plugin = new Plugin(),
+            configStructure = plugin.getConfigStructure(),
+            defaultConfig = plugin.getDefaultConfig(),
+            lenCS = configStructure.length,
+            lenDC = Object.keys(defaultConfig).length;
+        console.log('lenCS: %j, lenDC: %j', lenCS, lenDC);
+        expect(lenCS === lenDC).to.be.true;
+    });
+
+    it ('getDefaultConfig has valid values', function() {
+        var plugin = new Plugin(),
+            defaultConfig = plugin.getDefaultConfig(),
+            keys = Object.keys(defaultConfig),
+            i,
+            value;
+        console.log('values ::');
+        for (i = 0; i < keys.length; i += 1){
+            value = defaultConfig[keys[i]];
+            console.log(' - %j', value);
+            expect(typeof value === 'string' || value instanceof String ||
+                typeof value === 'number' || value instanceof Number ||
+                typeof value === 'boolean' || value instanceof Boolean).to.be.true;
+        }
     });
 });
 
 describe("Test PluginBase API on instances 1", function() {
-    var PluginBase;
-        before(function(done){
-            requirejs([pluginList[1]], function(Plugin){
-                PluginBase = Plugin;
-                done();
-            });
+    var Plugin;
+
+    before(function(done){
+        requirejs([pluginList[1]], function(Plugin_){
+            Plugin = Plugin_;
+            done();
         });
+    });
 
     afterEach(function() {
 
     });
 
     it ('getVersion', function() {
-        var pluginBase = new PluginBase();
-        expect(semanticVersionPattern.test(pluginBase.getVersion())).to.be.true;
+        var plugin = new Plugin();
+        expect(semanticVersionPattern.test(plugin.getVersion())).to.be.true;
     });
 
     it ('getDescription', function() {
-        var pluginBase = new PluginBase(),
-            description = pluginBase.getDescription();
+        var plugin = new Plugin(),
+            description = plugin.getDescription();
         expect(typeof description === 'string' || description instanceof String).to.be.true;
     });
 
     it ('getName', function() {
-        var pluginBase = new PluginBase(),
-            name = pluginBase.getName();
+        var plugin = new Plugin(),
+            name = plugin.getName();
         expect(typeof name === 'string' || name instanceof String).to.be.true;
+    });
+
+    it ('getDefaultConfig matches getConfigStructure', function() {
+        var plugin = new Plugin(),
+            configStructure = plugin.getConfigStructure(),
+            defaultConfig = plugin.getDefaultConfig(),
+            lenCS = configStructure.length,
+            lenDC = Object.keys(defaultConfig).length;
+        console.log('lenCS: %j, lenDC: %j', lenCS, lenDC);
+        expect(lenCS === lenDC).to.be.true;
+    });
+
+    it ('getDefaultConfig has valid values', function() {
+        var plugin = new Plugin(),
+            defaultConfig = plugin.getDefaultConfig(),
+            keys = Object.keys(defaultConfig),
+            i,
+            value;
+        console.log('values ::');
+        for (i = 0; i < keys.length; i += 1){
+            value = defaultConfig[keys[i]];
+            console.log(' - %j', value);
+            expect(typeof value === 'string' || value instanceof String ||
+                typeof value === 'number' || value instanceof Number ||
+                typeof value === 'boolean' || value instanceof Boolean).to.be.true;
+        }
     });
 });
