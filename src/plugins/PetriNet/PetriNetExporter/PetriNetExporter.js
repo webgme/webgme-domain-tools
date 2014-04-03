@@ -63,13 +63,7 @@ define(['plugin/PluginConfig',
 
         var i;
         for (i = 0; i < childNodes.length; ++i) {
-//            var name = core.getAttribute(childNodes[i], 'name');
-//            this.logger.info('Visiting: ' + name);
 
-
-
-            // TODO: get its META Type
-            // Get position, Capacity, Initial Marking
             var child = childNodes[i];
 
             // get its base META Type
@@ -89,7 +83,6 @@ define(['plugin/PluginConfig',
 
             }
 
-
             var name = core.getAttribute(child, 'name'),
                 capacity = core.getAttribute(child, 'Capacity'),
                 marking = core.getAttribute(child, 'InitialMarking'),
@@ -97,13 +90,6 @@ define(['plugin/PluginConfig',
                 yPos = child.data.reg.position.y;
 
             //    HEIGHT = isTypePlace ? 30 : 20; can we use META Aspect
-//            var XMLS = new XMLSerializer();
-//            var xw = new XMLWriter();
-
-            // TODO: create JSON for each component, e.g. Place, Transition, Arc
-            // TODO: convert JSON to xml
-
-            // var js = document.createElement("place");
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
                 self.visitObject(err, childNodes, core, callback);
