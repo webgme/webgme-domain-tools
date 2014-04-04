@@ -46,7 +46,53 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         */
         <%= pluginID %>.prototype.getVersion = function () {
             return "0.1.0";
-        };<%}%>
+        };<%} if (configStructure) {%>
+
+        /**
+        * Gets the configuration structure for the <%= pluginID %>.
+        * The ConfigurationStructure defines the configuration for the plugin
+        * and will be used to populate the GUI when invoking the plugin from webGME.
+        * @returns {object} The version of the plugin.
+        * @public
+        */
+        <%= pluginID %>.prototype.getConfigStructure = function () {
+            return [
+                {
+                    "name": 'species',
+                    'displayName': 'Animal Species',
+                    'description': 'Which species does the animal belong to.',
+                    'value': 'Horse',
+                    'valueType': 'string',
+                    'readOnly': false
+                }, {
+                    'name': 'age',
+                    'displayName': 'Age',
+                    'description': 'How old is the animal. (>0)',
+                    'value': 3,
+                    'valueType': 'number',
+                    'readOnly': false
+                }, {
+                    'name': 'carnivor',
+                    'displayName': 'Carnivor',
+                    'description': 'Does the animal eat other animals?',
+                    'value': false,
+                    'valueType': 'boolean',
+                    'readOnly': false
+                }, {
+                    'name': 'classification',
+                    'displayName': 'Classification',
+                    'description': '',
+                    'value': 'Vertebrates',
+                    'valueType': 'string',
+                    'valueItems': [
+                        'Vertebrates',
+                        'Invertebrates',
+                        'Unknown'
+                    ]
+                }
+            ];
+        };
+<%}%>
         /**
         * Main function for the plugin to execute. This will perform the execution.
         * Notes:
@@ -60,10 +106,41 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             // Use self to access core, project, result, logger etc from PluginBase.
             // These are all instantiated at this point.
             var self = this;
-
-            if (callback) {
+            self.result.setSuccess(true);
+<% if (core) {%>
+            // Using core to create an object.
+            var newNode = self.core.createNode({parent: self.rootNode, base: self.META['FCO']});
+            self.core.setAttribute(newNode, 'name', 'My new obj');
+            self.core.setRegistry(newNode, 'position', {x: 70, y: 70});
+<%}
+if (logger) {%>
+            // Using the logger.
+            self.logger.info('This is a debug message.');
+            self.logger.info('This is an info message.');
+            self.logger.warning('This is a warning message.');
+            self.logger.error('This is an error message.');
+<%}
+if (fs) {%>
+            // self.fs works on both client and server side.
+            self.fs.addFile('dir/subdir/file.txt', 'This is a text file.');
+<%}
+if (configStructure) {%>
+            // Obtain the current user configuration.
+            currentConfig = this.getCurrentConfig();
+            self.logger.info('Current configuration %j', JSON.stringify(currentConfig, null, 4));
+<%}
+if (core) { %>
+            // This will save the changes. If you don't want to save;
+            // exclude self.save and call callback directly from this scope.
+            self.save('added obj', function (err) {
                 callback(null, self.result);
-            }
+            });
+<%} else {%>
+            // Uncomment to save changes.
+            //self.save('added obj', function (err) {
+                callback(null, self.result);
+            //});
+<%}%>
         };
 
         return <%= pluginID %>;

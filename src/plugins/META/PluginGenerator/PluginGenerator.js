@@ -70,6 +70,41 @@ define(['plugin/PluginConfig',
                         "C#"
                     ],
                     "readOnly": false
+                }, {
+                    "name": "configStructure",
+                    "displayName": "Include Configuration Structure.",
+                    "description": 'Configuration structure will populate this GUI with controls.',
+                    "value": false,
+                    "valueType": "boolean",
+                    "readOnly": false
+                }, {
+                    "name": "core",
+                    "displayName": "Include core example",
+                    "description": '',
+                    "value": false,
+                    "valueType": "boolean",
+                    "readOnly": false
+                }, {
+                    "name": "logger",
+                    "displayName": "Include logger example.",
+                    "description": '',
+                    "value": false,
+                    "valueType": "boolean",
+                    "readOnly": false
+                }, {
+                    "name": "fs",
+                    "displayName": "Include file-system example.",
+                    "description": '',
+                    "value": false,
+                    "valueType": "boolean",
+                    "readOnly": false
+                }, {
+                    "name": "fs",
+                    "displayName": "Include file-system example.",
+                    "description": '',
+                    "value": false,
+                    "valueType": "boolean",
+                    "readOnly": false
                 }
             ];
         };
@@ -81,7 +116,6 @@ define(['plugin/PluginConfig',
                 fileName;
 
             // Assume everything is ok.
-            self.result.setSuccess(true);
 
             currentConfig = this.getCurrentConfig();
             self.logger.info('Current configuration');
@@ -100,15 +134,13 @@ define(['plugin/PluginConfig',
             fileName = 'src/plugins/' + this.projectName + '/' + currentConfig.pluginID + '/' + currentConfig.pluginID + '.js';
 
             self.fs.addFile(fileName, pluginJS);
+            self.updateSuccess(true, null);
+            self.fs.saveArtifact();
 
-
-            if (callback) {
-                self.updateSuccess(true, null);
-
-                self.fs.saveArtifact();
-
+            self.save('added obj', function (err) {
                 callback(null, self.result);
-            }
+            });
+
         };
 
 
