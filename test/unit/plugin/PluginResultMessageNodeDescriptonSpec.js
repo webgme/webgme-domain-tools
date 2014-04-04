@@ -1,33 +1,14 @@
 /**
  * Created by pmeijer on 4/3/2014.
  */
+
 'use strict';
 if (typeof window === 'undefined') {
 
     // server-side setup
     var requirejs = require("requirejs");
-    requirejs.config({
-        baseUrl: '.',
-        // TODO: populate plugin list dynamically based on config.json
-        paths: {
-            "logManager": "common/LogManager",
-            'plugin': 'node_modules/webgme/plugin',
-            "plugin/Children.Dsml": "./src/plugins/CyPhyLight",
-            "plugin/CyPhyLight": "./src/plugins/CyPhyLight",
-            "plugin/ModelicaImporter": "./src/plugins/CyPhyLight",
-            "plugin/ModelicaImporter.Dsml": "./src/plugins/CyPhyLight",
-            "plugin/Children": "./src/plugins/Examples",
-            "plugin/ChildrenConfig": "./src/plugins/Examples",
-            "plugin/ChildrenSaveArtifacts": "./src/plugins/Examples",
-            "plugin/DuplicateActiveNode": "./src/plugins/Examples",
-            "plugin/UsingTemplates": "./src/plugins/Examples",
-            "plugin/DSMLAPIGenerator": "./src/plugins/META",
-            "plugin/GetPrintAllObjects": "./src/plugins/FMU",
-            "plugin/ImportFMUs": "./src/plugins/FMU",
-            "plugin/PetriNetExporter": "./src/plugins/PetriNet"
-        },
-        nodeRequire: require
-    });
+    var testConfig = require("../../../test-conf.js").testConfig;
+    requirejs.config(testConfig.requirejs);
 
     var chai = require('chai'),
         should = chai.should(),

@@ -4,22 +4,18 @@
  */
 
 'use strict';
-var requirejs = require("requirejs"),
-    chai = require('chai'),
-    should = chai.should(),
-    assert = chai.assert,
-    expect = chai.expect;
+if (typeof window === 'undefined') {
 
-requirejs.config({
-    baseUrl: '.',
-    paths: {
-        'plugin': 'node_modules/webgme/plugin',
-        'plugin/CyPhyLight': './src/plugins/CyPhyLight',
-        'plugin/ModelicaImporter.Dsml': './src/plugins/CyPhyLight'
-    },
+    // server-side setup
+    var requirejs = require("requirejs");
+    var testConfig = require("../../../../../test-conf.js").testConfig;
+    requirejs.config(testConfig.requirejs);
 
-    nodeRequire: require
-});
+    var chai = require('chai'),
+        should = chai.should(),
+        assert = chai.assert,
+        expect = chai.expect;
+}
 
 var SPRING_COMPONENT_CONFIG =  {
     "exportedComponentClass": "Modelica.Mechanics.Translational.Components.Spring",

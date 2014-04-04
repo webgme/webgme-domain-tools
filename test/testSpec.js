@@ -7,14 +7,8 @@ if (typeof window === 'undefined') {
 
     // server-side setup
     var requirejs = require("requirejs");
-    requirejs.config({
-        baseUrl: '.',
-        paths: {
-            'plugin': 'node_modules/webgme/plugin',
-            'plugin/ModelicaImporter': './src/plugins/CyPhyLight'
-        },
-        nodeRequire: require
-    });
+    var testConfig = require("../test-conf").testConfig;
+    requirejs.config(testConfig.requirejs);
 
     var chai = require('chai'),
         should = chai.should(),

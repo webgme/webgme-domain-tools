@@ -1,20 +1,17 @@
 
 'use strict';
-var requirejs = require("requirejs");
+if (typeof window === 'undefined') {
 
-//require('blanket');
+    // server-side setup
+    var requirejs = require("requirejs");
+    var testConfig = require("../../../test-conf.js").testConfig;
+    requirejs.config(testConfig.requirejs);
 
-requirejs.config({
-    baseUrl: __dirname,
-    nodeRequire: require
-});
-
-
-
-var chai = require('chai'),
-    should = chai.should(),
-    assert = chai.assert,
-    expect = chai.expect;
+    var chai = require('chai'),
+        should = chai.should(),
+        assert = chai.assert,
+        expect = chai.expect;
+}
 
 
 //exports.testSomething = function(test){
@@ -33,7 +30,7 @@ var chai = require('chai'),
 //};
 
 describe('attribute getter and setter', function() {
-    var CoreMock = requirejs('../../../src/mocks/CoreMock');
+    var CoreMock = requirejs('src/mocks/CoreMock');
     var core = new CoreMock();
 
     it ('should pass', function() {

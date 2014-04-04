@@ -7,20 +7,18 @@
  */
 
 'use strict';
-var requirejs = require("requirejs"),
-    chai = require('chai'),
-    should = chai.should(),
-    assert = chai.assert,
-    expect = chai.expect;
+if (typeof window === 'undefined') {
 
-requirejs.config({
-    baseUrl: '.',
-    paths: {
-        'plugin': 'node_modules/webgme/plugin',
-        'plugin/CyPhyLight': './src/plugins/CyPhyLight'
-    },
-    nodeRequire: require
-});
+    // server-side setup
+    var requirejs = require("requirejs");
+    var testConfig = require("../../../../../test-conf.js").testConfig;
+    requirejs.config(testConfig.requirejs);
+
+    var chai = require('chai'),
+        should = chai.should(),
+        assert = chai.assert,
+        expect = chai.expect;
+}
 
 describe('CyPhyLight.Dsml', function () {
 
