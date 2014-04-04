@@ -29,7 +29,7 @@ define(['plugin/PluginConfig',
         };
 
         PluginGeneratorPlugin.prototype.getConfigStructure = function () {
-            var configStructure = [
+            return [
                 {
                     "name": "pluginID",
                     "displayName": "Unique plugin identifier",
@@ -37,63 +37,69 @@ define(['plugin/PluginConfig',
                     "value": 'MyNewExporterPlugin',
                     "valueType": "string",
                     "readOnly": false
-                },{
+                }, {
                     "name": "pluginName",
                     "displayName": "Name",
                     "description": 'Short readable plugin name; spaces are allowed',
                     "value": 'My New Exporter',
                     "valueType": "string",
                     "readOnly": false
-                },{
+                }, {
                     "name": "hasVersion",
                     "displayName": "Use version string",
-                    "description": '',
+                    "description": 'Enable to generate version method.',
                     "value": false,
                     "valueType": "boolean",
                     "readOnly": false
-                },{
+                }, {
                     "name": "description",
                     "displayName": "Description",
-                    "description": '',
+                    "description": 'Optional description of the plugin.',
                     "value": '',
                     "valueType": "string",
                     "readOnly": false
-                },{
+                }, {
                     "name": "templateType",
                     "displayName": "Example template",
                     "description": '',
-                    "value": 'None',
+                    "value": 'Javascript',
                     "valueType": "string",
                     "valueItems": [
-                        "None",
-                        "Python",
                         "Javascript",
+                        "Python",
                         "C#"
                     ],
                     "readOnly": false
                 }
             ];
-
-            return configStructure;
         };
 
         PluginGeneratorPlugin.prototype.main = function (callback) {
-            var core = this.core,
-                self = this;
+            var self = this,
+                currentConfig,
+                pluginJS,
+                fileName;
 
             // Assume everything is ok.
             self.result.setSuccess(true);
 
-            var currentConfig = this.getCurrentConfig();
+            currentConfig = this.getCurrentConfig();
             self.logger.info('Current configuration');
             self.logger.info(JSON.stringify(currentConfig, null, 4));
 
+            if (currentConfig.templateType === 'Python' || currentConfig.templateType === 'C#') {
+                self.result.setSuccess(false);
+                self.logger.warning('Python and C# are currently not supported, aborting...');
+                callback('Python and C# are currently not supported!', self.result);
+                return;
+            }
+
             currentConfig.date = new Date();
 
-            var pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
-            var filename = 'src/plugins/' + this.projectName + '/' + currentConfig.pluginID + '/' + currentConfig.pluginID + '.js';
+            pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
+            fileName = 'src/plugins/' + this.projectName + '/' + currentConfig.pluginID + '/' + currentConfig.pluginID + '.js';
 
-            self.fs.addFile(filename, pluginJS);
+            self.fs.addFile(fileName, pluginJS);
 
 
             if (callback) {
