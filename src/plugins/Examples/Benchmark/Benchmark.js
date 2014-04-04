@@ -60,30 +60,43 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             {
                 'name': 'n',
                 'displayName': 'Number of Objects',
-                'description': 'How many objects should created (>0).',
+                'description': 'How many objects should be created.',
                 'value': 10,
+                "minValue": 1,
+                "maxValue": 10000,
                 'valueType': 'number',
                 'readOnly': false
-            }, {
+            },
+            {
+                "name": 'metaType',
+                'displayName': 'META Type',
+                'description': 'Must be allowed to contain itself.',
+                'value': 'FCO',
+                'valueType': 'string',
+                'readOnly': false
+            },
+            {
                 'name': 'save',
                 'displayName': 'Save after completion.',
-                'description': 'Does the animal eat other animals?',
+                'description': '',
                 'value': false,
                 'valueType': 'boolean',
                 'readOnly': false
-            }, {
-                'name': 'quiet',
-                'displayName': 'Quiet',
-                'description': 'Log or not.',
+            },
+            {
+                'name': 'create',
+                'displayName': 'Create Children',
+                'description': '',
                 'value': true,
                 'valueType': 'boolean',
                 'readOnly': false
-            }, {
-                "name": 'metaType',
-                'displayName': 'META Type',
-                'description': 'META Type of Object to create.',
-                'value': 'FCO',
-                'valueType': 'string',
+            },
+            {
+                'name': 'quiet',
+                'displayName': 'Quiet',
+                'description': 'To log or not to log.',
+                'value': false,
+                'valueType': 'boolean',
                 'readOnly': false
             }
         ];
@@ -106,39 +119,71 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             newNode,
             stats = {config: config},
             i,
-            t_stamp = new Date();
+            t_stamp = new Date(),
+            parent = self.activeNode;
 
-        // Create n objects.
-        for (i = 0; i < config.n; i += 1) {
-            newNode = self.core.createNode({parent: self.rootNode, base: self.META[config.metaType]});
-            self.core.setAttribute(newNode, 'name', 'My new obj');
-            self.core.setRegistry(newNode, 'position', {x: 70 + 10 * i, y: 70 + 10 * i});
-            if (config.quiet === false) {
-                self.logger.info('Created new object!');
-            }
+
+        if (!self.activeNode) {
+            callback('Active node not selected.', self.result);
+            return;
         }
-
-        stats.createObjects = (new Date() - t_stamp) / 1000;
-
-        t_stamp = new Date();
-        self.core.loadChildren(self.rootNode, function (err, childNodes) {
-            var attrName,
-                position;
-
-            for (i = 0; i < childNodes.length; i += 1) {
-                attrName = self.core.getAttribute(childNodes[i], 'name');
-                position = self.core.getRegistry(newNode, 'position');
+        self.logger.info(JSON.stringify(config, null, 4));
+        // Create n objects.
+        if (config.create) {
+            for (i = 0; i < config.n; i += 1) {
+                newNode = self.core.createNode({parent: parent, base: self.META[config.metaType]});
+                self.core.setAttribute(newNode, 'name', 'My new obj');
+                self.core.setRegistry(newNode, 'position', {x: 70 + 10 * i, y: 70 + 10 * i});
+                if ((i + 1) % 25 === 0) {
+                    parent = newNode;
+                }
                 if (config.quiet === false) {
-                    self.logger.info('Found object named ' + newNode + ' at pos:' + position.toString());
+                    self.logger.info('Created new object!');
                 }
             }
 
-            stats.getObjects = (new Date() - t_stamp) / 1000;
+            stats.createObjects = (new Date() - t_stamp) / 1000;
+        }
 
+        t_stamp = new Date();
+        this.objectToVisit = 1; // number of objects that have to be visited
+        this.visitedObjects = 0; // number of already visited
+        self.core.loadChildren(self.activeNode, function (err, childNodes) {
+            self.visitAllChildren(self, childNodes, callback, t_stamp, stats);
+        });
+
+    };
+
+    Benchmark.prototype.visitAllChildren = function (self, children, callback, t_stamp, stats) {
+        var attrName,
+            position,
+            i,
+            childNode;
+
+        this.objectToVisit += children.length; // all child objects have to be visited
+
+        for (i = 0; i < children.length; i += 1) {
+            childNode = children[i];
+            attrName = self.core.getAttribute(childNode, 'name');
+            position = self.core.getRegistry(childNode, 'position');
+            if (!self.getCurrentConfig().quiet) {
+                self.logger.info('Found Child ' + attrName + ' : ' + position.toString());
+            }
+            self.core.loadChildren(childNode, function (err, childNodes) {
+                self.visitAllChildren(self, childNodes, callback, t_stamp, stats);
+            });
+        }
+
+        this.visitedObjects += 1; // another object was just visited
+
+        if (this.objectToVisit === this.visitedObjects) {
+            stats.getObjects = (new Date() - t_stamp) / 1000;
+            stats.visistedObjects = this.objectToVisit;
+            self.logger.info(JSON.stringify(stats, null, 4));
             self.fs.addFile('stat.json', JSON.stringify(stats, null, 4));
             self.fs.saveArtifact();
             self.result.setSuccess(true);
-            if (config.save) {
+            if (self.getCurrentConfig().save) {
                 self.logger.info('Saving project.');
                 self.save('added obj', function (err) {
                     callback(null, self.result);
@@ -147,8 +192,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 self.logger.info('Closing project without saving.');
                 callback(null, self.result);
             }
-        });
-
+        }
     };
 
     return Benchmark;

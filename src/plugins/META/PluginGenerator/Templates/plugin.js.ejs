@@ -58,7 +58,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     <%= pluginID %>.prototype.getConfigStructure = function () {
         return [
             {
-                "name": 'species',
+                'name': 'species',
                 'displayName': 'Animal Species',
                 'description': 'Which species does the animal belong to.',
                 'value': 'Horse',
@@ -67,9 +67,11 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             }, {
                 'name': 'age',
                 'displayName': 'Age',
-                'description': 'How old is the animal. (>0)',
+                'description': 'How old is the animal.',
                 'value': 3,
                 'valueType': 'number',
+                'minValue': 0,
+                'maxValue': 10000,
                 'readOnly': false
             }, {
                 'name': 'carnivor',
