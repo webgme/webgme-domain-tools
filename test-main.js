@@ -11,6 +11,7 @@ requirejs.config({
 
     // TODO: populate plugin list dynamically based on config.json
     paths: {
+        "ejs": "./lib/ejs/ejs.min",
         "logManager": "common/LogManager",
         'plugin': 'node_modules/webgme/plugin',
         "plugin/Children.Dsml": "./src/plugins/CyPhyLight",

@@ -17,10 +17,19 @@ if (typeof window === 'undefined') {
 }
 
 describe('Dsml Api Generator', function () {
-    var plugin = requirejs('plugin/DSMLAPIGenerator/DSMLAPIGenerator/DSMLAPIGenerator');
+    var plugin;
+    var utils;
+
+    before(function(done){
+        // TODO: is there a way to load this synchronously on client side and server side as well???
+        requirejs(['plugin/DSMLAPIGenerator/DSMLAPIGenerator/DSMLAPIGenerator'], function(_plugin){
+            plugin = _plugin;
+            utils = plugin.Utils;
+            done(); // #1 Other Suite will run after this is called
+        });
+    });
 
     describe('Utility functions', function () {
-        var utils = plugin.Utils;
 
         it ('foo is valid identifier', function() {
             expect(utils.isValidJavascriptIdentifier('foo')).to.equal(true);

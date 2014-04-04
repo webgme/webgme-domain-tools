@@ -29,9 +29,18 @@ if (typeof window === 'undefined') {
 //    test.done();
 //};
 
-describe('attribute getter and setter', function() {
-    var CoreMock = requirejs('src/mocks/CoreMock');
-    var core = new CoreMock();
+describe('Core Mock attribute getter and setter', function() {
+    var CoreMock;
+    var core;
+
+    before(function(done){
+        requirejs(['src/mocks/CoreMock'],
+            function(CoreMock_) {
+                CoreMock = CoreMock_;
+                core = new CoreMock();
+                done();
+            });
+    });
 
     it ('should pass', function() {
         var n = core.createNode({parent: core.getRootNode()});

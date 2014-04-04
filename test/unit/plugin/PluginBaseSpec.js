@@ -23,7 +23,7 @@ var pluginList = [
     'plugin/Children/Children/Children',
     'plugin/ChildrenConfig/ChildrenConfig/ChildrenConfig'];
 
-describe("Test PluginBase API", function() {
+describe("PluginBase API", function() {
 
     var Plugin;
     before(function(done){
@@ -92,7 +92,7 @@ describe("Test PluginBase API", function() {
 
 // TODO: Generate these on the fly based on pluginList.
 
-describe("Test PluginBase API on instances 0", function() {
+describe("PluginBase API on instances 0", function() {
     var Plugin;
 
     before(function(done){
@@ -156,7 +156,7 @@ describe("Test PluginBase API on instances 0", function() {
     });
 });
 
-describe("Test PluginBase API on instances 1", function() {
+describe("PluginBase API on instances 1", function() {
     var Plugin;
 
     before(function(done){
