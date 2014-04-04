@@ -116,7 +116,7 @@ define(['plugin/PluginConfig',
                 fileName;
 
             // Assume everything is ok.
-
+            self.result.setSuccess(true);
             currentConfig = this.getCurrentConfig();
             self.logger.info('Current configuration');
             self.logger.info(JSON.stringify(currentConfig, null, 4));
@@ -136,10 +136,7 @@ define(['plugin/PluginConfig',
             self.fs.addFile(fileName, pluginJS);
             self.updateSuccess(true, null);
             self.fs.saveArtifact();
-
-            self.save('added obj', function (err) {
-                callback(null, self.result);
-            });
+            callback(null, self.result);
 
         };
 
