@@ -39,7 +39,7 @@ define(['plugin/PluginConfig',
 
         this.objectToVisit += 1; // we need to visit the selected node
 
-        this.diagramName = "";
+        this.diagramPath = "";
 
         this.modelID = 0;
 
@@ -59,31 +59,30 @@ define(['plugin/PluginConfig',
         core.loadChildren(selectedNode, function(err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
         });
-//
-//        var o = {"e": { "#text": "text",
-//            "a": [
-//                {
-//                    "#text": "I'm a",
-//                    "c": "i am tag c",
-//                    "@name": "I'm an attribute",
-//                    "@last": "i'm another one"
-//                },
-//                {
-//                    "c": "tag"
-//                }
-//            ],
-//            "b": "dana"}};
+
+        var o = {"e": { "#text": "text",
+            "a": [
+                {
+                    "#text": "I'm a",
+                    "c": "i am tag c",
+                    "@name": "I'm an attribute",
+                    "@last": "i'm another one",
+                    "abc": {
+                        "does": "this work",
+                        "@or": "not"
+                    }
+                },
+                {
+                    "c": "tag"
+                }
+            ],
+            "b": "dana"}};
 
         var j2x = new json2xml;
 
-        for (var o in this.diagrams) {
+        console.log(j2x.convert(o));
 
-
-            console.log(j2x.convert(o));
-
-        }
-
-//        console.log(o.e["#text"]);
+        console.log("should've printed here");
 
     };
 
@@ -97,7 +96,9 @@ define(['plugin/PluginConfig',
 
             var child = childNodes[i],
                 metaType,
-                parentName = child.parent ? core.getAttribute(child.parent, 'name') : "";
+                parentPath = child.parent ? core.getPath(child.parent) : "",
+                parentBaseClass = parentPath ? core.getBase(child.parent) : "",
+                parentMetaType = parentBaseClass ? core.getAttribute(parentBaseClass, 'name') : "";
 
             // get its base META Type
             var baseClass = core.getBase(child);
@@ -106,11 +107,24 @@ define(['plugin/PluginConfig',
             }
 
             // if visiting a new diagram, reset global values
-            if ((this.diagramName && parentName !== this.diagramName) || (!this.diagramName && metaType === 'PetriNetDiagram')) {
+            if ((this.diagramPath && parentPath !== this.diagramPath) || (!this.diagramPath && parentMetaType === 'PetriNetDiagram')) {
 
-                this.diagram["place"] = this.places;
-                this.diagram["transition"] = this.transitions;
-                this.diagram["arc"] = this.arcs;
+
+                this.diagram = {"petrinet":
+                {
+                    "@Name": "untitiled",
+                    "page" :
+                        {
+
+                            "@id" : "page0",
+                            "@name" : "page0"
+                        }
+                    }
+                };
+
+                this.diagram.petrinet.page["place"] = this.places;
+                this.diagram.petrinet.page["transition"] = this.transitions;
+                this.diagram.petrinet.page["arc"] = this.arcs;
 
                 this.diagrams.push(this.diagram);
 
@@ -120,11 +134,12 @@ define(['plugin/PluginConfig',
                 this.diagram = {};
                 this.modelID = 0;
 
-                this.diagramName = parentName;
+                this.diagramPath = parentPath;
             }
 
 
-//            console.log(core.getAttribute(child, 'name'));
+            console.log(core.getAttribute(child, 'name'));
+            console.log(core.getPath(child));
 //            console.log(core.getAttribute(child.parent, 'name'));
 
             var name = core.getAttribute(child, 'name'),
@@ -241,8 +256,34 @@ define(['plugin/PluginConfig',
         this.visitedObjects += 1; // another object was just visited
 
         if (this.objectToVisit === this.visitedObjects) {
-            this.fs.addFile('generatedFile.json', JSON.stringify({'name':'some content'}));
-            this.fs.addFile('generatedFile.html', '<html><body>Hello world from an xml</body></html>');
+
+            this.diagram = {"petrinet":
+            {
+                "@Name": "untitiled",
+                "page" :
+                {
+
+                    "@id" : "page0",
+                    "@name" : "page0"
+                }
+            }
+            };
+
+            this.diagram.petrinet.page["place"] = this.places;
+            this.diagram.petrinet.page["transition"] = this.transitions;
+            this.diagram.petrinet.page["arc"] = this.arcs;
+
+            this.diagrams.push(this.diagram);
+
+            var j2x = new json2xml;
+
+            for (var j = 1; j < this.diagrams.length; ++j) {
+
+                var output = j2x.convert(this.diagrams[j]);
+                // this.fs.addFile("output" + j + ".json", output);
+                this.fs.addFile("output" + j + ".xml", output);
+            }
+
             this.fs.saveArtifact();
 
             // all objects have been visited
