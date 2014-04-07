@@ -28,6 +28,8 @@ define(['plugin/PluginConfig',
             rootNode = this.rootNode,
             fmuList = FmuImportList;
 
+        self.logger.info('Running ImportFMUs Plugin using ');
+
         // get all 'possible' object types from the MetaModel
         this.updateMETA(FmuMetaTypes);
 
