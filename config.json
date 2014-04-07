@@ -16,7 +16,14 @@
     "clientbasedir": "./node_modules/webgme/client",
 
     "decoratorpaths": ["./src/decorators", "./node_modules/webgme/client/decorators"],
-    "pluginBasePaths": ["./src/plugins/CyPhyLight", "./src/plugins/Examples", "./src/plugins/META", "./src/plugins/FMU", "./src/plugins/PetriNet"],
+    "pluginBasePaths": [
+        "./src/plugins/CyPhyLight",
+        "./src/plugins/Examples",
+        "./src/plugins/META",
+        "./src/plugins/FMU",
+        "./src/plugins/PetriNet",
+        "./src/plugins/TestCore"
+    ],
 
     "paths": {
         "ejs": "./lib/ejs/ejs.min"
