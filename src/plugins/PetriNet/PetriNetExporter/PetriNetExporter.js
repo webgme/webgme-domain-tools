@@ -60,30 +60,6 @@ define(['plugin/PluginConfig',
             self.visitObject(err, childNodes, core, callback);
         });
 
-        var o = {"e": { "#text": "text",
-            "a": [
-                {
-                    "#text": "I'm a",
-                    "c": "i am tag c",
-                    "@name": "I'm an attribute",
-                    "@last": "i'm another one",
-                    "abc": {
-                        "does": "this work",
-                        "@or": "not"
-                    }
-                },
-                {
-                    "c": "tag"
-                }
-            ],
-            "b": "dana"}};
-
-        var j2x = new json2xml;
-
-        console.log(j2x.convert(o));
-
-        console.log("should've printed here");
-
     };
 
     PetriNetExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
@@ -154,14 +130,13 @@ define(['plugin/PluginConfig',
                 // foreach eligible component, add its unique id and modelID to the LUT
 
                 if (metaType === 'Place') {
+                    // TODO: if key not exist already, add key; otherwise ignore
 
                     var gmeID = core.getPath(child);
-                    if (gmeID) {
+                    this.ID_LUT[gmeID] = this.modelID;
+                    this.XPOS_LUT[gmeID] = xPos;
+                    this.YPOS_LUT[gmeID] = yPos;
 
-                        this.ID_LUT[gmeID] = this.modelID;
-                        this.XPOS_LUT[gmeID] = xPos;
-                        this.YPOS_LUT[gmeID] = yPos;
-                    }
 
                     // Place component's attrs: id, name, portdir, initialmarking, capacity
                     //                   elements: location (attrs: x, y), size (attrs: width, height)
@@ -193,7 +168,12 @@ define(['plugin/PluginConfig',
                     // Transition component's attrs: id, name, portdir
                     //                        elements: location (attrs: x, y), size (attrs: width, height)
 
-                    this.ID_LUT[core.getPath(child)] = this.modelID;
+                    // TODO: if key not exist already, add key; otherwise ignore
+
+                    var gmeID = core.getPath(child);
+                    this.ID_LUT[gmeID] = this.modelID;
+                    this.XPOS_LUT[gmeID] = xPos;
+                    this.YPOS_LUT[gmeID] = yPos;
 
                     var transition = {
                         "@id": this.modelID,
@@ -221,6 +201,12 @@ define(['plugin/PluginConfig',
                         dst = core.getPointerPath(child, "dst"),
                         delay = core.getAttribute(child, 'Delay'),
                         weight = core.getAttribute(child, 'Weight');
+
+                    // TODO: if src or dst hasn't existed, add them to dictionary here
+
+//                    if (!this.modelID.hasOwnProperty(src)) {
+//                        this.modelID[src] =
+//                    }
 
                     var arc = {
                         "@id": this.modelID,
