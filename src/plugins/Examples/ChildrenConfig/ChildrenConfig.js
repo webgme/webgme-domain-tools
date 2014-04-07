@@ -57,6 +57,15 @@ define(['plugin/PluginConfig',
                 "value": 'Patrik',
                 "valueType": "string"
             },{
+            // /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*/g
+                "name": "jsClassName",
+                "displayName": "Plugin class name",
+                "description": 'Name of the plugin\'s class',
+                "readOnly": false,
+                "regex": '^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[A-Z_$][0-9a-zA-Z_$]*',
+                "value": 'MyNewClassName',
+                "valueType": "string"
+            },{
                 "name": "itemColor",
                 "displayName": "Color",
                 "description": 'The color of the item on the screen',
