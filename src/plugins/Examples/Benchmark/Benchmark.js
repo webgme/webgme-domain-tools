@@ -87,7 +87,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 'name': 'create',
                 'displayName': 'Create Children',
                 'description': '',
-                'value': true,
+                'value': false,
                 'valueType': 'boolean',
                 'readOnly': false
             },
@@ -129,6 +129,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         }
         self.logger.info(JSON.stringify(config, null, 4));
         // Create n objects.
+        stats.createObjects = null;
         if (config.create) {
             for (i = 0; i < config.n; i += 1) {
                 newNode = self.core.createNode({parent: parent, base: self.META[config.metaType]});
@@ -146,13 +147,16 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         }
 
         t_stamp = new Date();
-        this.objectToVisit = 1; // number of objects that have to be visited
-        this.visitedObjects = 0; // number of already visited
+
         self.core.loadChildren(self.activeNode, function (err, childNodes) {
+
             self.visitAllChildren(self, childNodes, callback, t_stamp, stats);
         });
 
     };
+
+    var objectsToVisit = 1,  // number of objects that have to be visited
+        visitedObjects = 0; // number of already visited
 
     Benchmark.prototype.visitAllChildren = function (self, children, callback, t_stamp, stats) {
         var attrName,
@@ -160,8 +164,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             i,
             childNode;
 
-        this.objectToVisit += children.length; // all child objects have to be visited
-
+        objectsToVisit += children.length; // all child objects have to be visited
+        visitedObjects += 1; // another object was just visited
         for (i = 0; i < children.length; i += 1) {
             childNode = children[i];
             attrName = self.core.getAttribute(childNode, 'name');
@@ -174,25 +178,32 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             });
         }
 
-        this.visitedObjects += 1; // another object was just visited
-
-        if (this.objectToVisit === this.visitedObjects) {
+        if (objectsToVisit === visitedObjects) {
             stats.getObjects = (new Date() - t_stamp) / 1000;
-            stats.visistedObjects = this.objectToVisit;
-            self.logger.info(JSON.stringify(stats, null, 4));
-            self.fs.addFile('stat.json', JSON.stringify(stats, null, 4));
-            self.fs.saveArtifact();
+            stats.visistedObjects = visitedObjects;
             self.result.setSuccess(true);
+            stats.saveProject = null;
             if (self.getCurrentConfig().save) {
+                t_stamp = new Date();
                 self.logger.info('Saving project.');
                 self.save('added obj', function (err) {
+                    self.stats.saveProject = (new Date() - t_stamp) / 1000;
+                    Benchmark.saveStats(self, stats);
                     callback(null, self.result);
                 });
             } else {
-                self.logger.info('Closing project without saving.');
+                self.logger.info('Closing project without saving project.');
+                Benchmark.saveStats(self, stats);
                 callback(null, self.result);
             }
         }
+    };
+
+    Benchmark.saveStats = function (self, stats) {
+        var jString = JSON.stringify(stats, null, 4);
+        self.logger.info(jString);
+        self.fs.addFile('stat.json', jString);
+        self.fs.saveArtifact();
     };
 
     return Benchmark;
