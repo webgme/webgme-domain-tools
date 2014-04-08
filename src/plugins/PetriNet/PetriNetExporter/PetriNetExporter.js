@@ -88,7 +88,7 @@ define(['plugin/PluginConfig',
 
                 this.diagram = {"petrinet":
                 {
-                    "@Name": "untitiled",
+                    "@Name": "untitled",
                     "page" :
                         {
 
@@ -131,37 +131,40 @@ define(['plugin/PluginConfig',
 
                 if (metaType === 'Place') {
                     // TODO: if key not exist already, add key; otherwise ignore
-
                     var gmeID = core.getPath(child);
-                    this.ID_LUT[gmeID] = this.modelID;
-                    this.XPOS_LUT[gmeID] = xPos;
-                    this.YPOS_LUT[gmeID] = yPos;
 
+                    if (!this.ID_LUT.hasOwnProperty(gmeID)) {
+
+                        this.ID_LUT[gmeID] = this.modelID;
+                        this.XPOS_LUT[gmeID] = xPos;
+                        this.YPOS_LUT[gmeID] = yPos;
+                        var capacity = core.getAttribute(child, 'Capacity'),
+                            marking = core.getAttribute(child, 'InitialMarking');
+
+                        // create a new json object for each place
+                        var place = {
+                            "@id": this.modelID,
+                            "@name": name,
+                            "@portdir": "None",
+                            "@initialmarking": marking,
+                            "@capacity": capacity,
+                            "location": {
+                                "@x": xPos,
+                                "@y": yPos
+                            },
+                            "size": {
+                                "@width": 50,
+                                "@height": 30
+                            }
+                        };
+
+                        this.places.push(place);
+                    }
 
                     // Place component's attrs: id, name, portdir, initialmarking, capacity
                     //                   elements: location (attrs: x, y), size (attrs: width, height)
 
-                    var capacity = core.getAttribute(child, 'Capacity'),
-                        marking = core.getAttribute(child, 'InitialMarking');
 
-                    // create a new json object for each place
-                    var place = {
-                        "@id": this.modelID,
-                        "@name": name,
-                        "@portdir": "None",
-                        "@initialmarking": marking,
-                        "@capacity": capacity,
-                        "location": {
-                            "@x": xPos,
-                            "@y": yPos
-                        },
-                        "size": {
-                            "@width": 50,
-                            "@height": 30
-                        }
-                    };
-
-                    this.places.push(place);
 
                 } else if (metaType === 'Transition') {
 
@@ -171,25 +174,30 @@ define(['plugin/PluginConfig',
                     // TODO: if key not exist already, add key; otherwise ignore
 
                     var gmeID = core.getPath(child);
-                    this.ID_LUT[gmeID] = this.modelID;
-                    this.XPOS_LUT[gmeID] = xPos;
-                    this.YPOS_LUT[gmeID] = yPos;
 
-                    var transition = {
-                        "@id": this.modelID,
-                        "@name": name,
-                        "@portdir": "None",
-                        "location": {
-                            "@x": xPos,
-                            "@y": yPos
-                        },
-                        "size": {
-                            "@width": 50,
-                            "@height": 20
-                        }
-                    };
+                    if (!this.ID_LUT.hasOwnProperty(gmeID)) {
 
-                    this.transitions.push(transition);
+                        this.ID_LUT[gmeID] = this.modelID;
+                        this.XPOS_LUT[gmeID] = xPos;
+                        this.YPOS_LUT[gmeID] = yPos;
+
+                        var transition = {
+                            "@id": this.modelID,
+                            "@name": name,
+                            "@portdir": "None",
+                            "location": {
+                                "@x": xPos,
+                                "@y": yPos
+                            },
+                            "size": {
+                                "@width": 50,
+                                "@height": 20
+                            }
+                        };
+
+                        this.transitions.push(transition);
+                    }
+
 
                 } else if (metaType === 'Place2Transition' || metaType === 'Transition2Place') {
                     // Arc component's attrs: id, source, target, delay, weight
@@ -203,10 +211,130 @@ define(['plugin/PluginConfig',
                         weight = core.getAttribute(child, 'Weight');
 
                     // TODO: if src or dst hasn't existed, add them to dictionary here
+                    // TODO: and also get src and dst positions from nodeobj somehow
+                    // TODO: how to get attributes given a gmeid
+                    // TODO: get a node from path (gmeid)
 
-//                    if (!this.modelID.hasOwnProperty(src)) {
-//                        this.modelID[src] =
-//                    }
+                    var srcMetaType,
+                        dstMetaType,
+                        capacity,
+                        marking;
+                    self.core.loadByPath(self.rootNode, src, function (err, nodeObj) {
+                        if (!err) {
+                            // nodeObj is available to use and it is loaded.
+                                xPos = nodeObj.data.reg.position.x;
+                                yPos = nodeObj.data.reg.position.y;
+                                capacity = core.getAttribute(nodeObj, 'Capacity');
+                                marking = core.getAttribute(nodeObj, 'InitialMarking');
+                                srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
+
+                                console.log("type is " + srcMetaType);
+                        }
+                    });
+
+                    if (!this.ID_LUT.hasOwnProperty(src)) {
+
+                        this.ID_LUT[src] = this.modelID;
+                        this.XPOS_LUT[src] = xPos;
+                        this.YPOS_LUT[src] = yPos;
+
+                        if (srcMetaType === 'Transition') {
+
+                            var transition = {
+                                "@id": this.modelID,
+                                "@name": name,
+                                "@portdir": "None",
+                                "location": {
+                                    "@x": xPos,
+                                    "@y": yPos
+                                },
+                                "size": {
+                                    "@width": 50,
+                                    "@height": 20
+                                }
+                            };
+
+                            this.transitions.push(transition);
+                        } else {
+
+                            var place = {
+                                "@id": this.modelID,
+                                "@name": name,
+                                "@portdir": "None",
+                                "@initialmarking": marking,
+                                "@capacity": capacity,
+                                "location": {
+                                    "@x": xPos,
+                                    "@y": yPos
+                                },
+                                "size": {
+                                    "@width": 50,
+                                    "@height": 30
+                                }
+                            };
+
+                            this.places.push(place);
+                        }
+                        this.modelID++;
+                    }
+
+                    self.core.loadByPath(self.rootNode, dst, function (err, nodeObj) {
+                        if (!err) {
+                            // nodeObj is available to use and it is loaded.
+                                xPos = nodeObj.data.reg.position.x;
+                                yPos = nodeObj.data.reg.position.y;
+                                dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
+                                console.log("type is " + dstMetaType);
+
+                        }
+                    });
+
+                    if (!this.ID_LUT.hasOwnProperty(dst)) {
+
+                        this.ID_LUT[dst] = this.modelID;
+                        this.XPOS_LUT[dst] = xPos;
+                        this.YPOS_LUT[dst] = yPos;
+
+                        if (dstMetaType === 'Transition') {
+
+                            var transition = {
+                                "@id": this.modelID,
+                                "@name": name,
+                                "@portdir": "None",
+                                "location": {
+                                    "@x": xPos,
+                                    "@y": yPos
+                                },
+                                "size": {
+                                    "@width": 50,
+                                    "@height": 20
+                                }
+                            };
+
+                            this.transitions.push(transition);
+
+                        } else if (dstMetaType === 'Place') {
+
+                            var place = {
+                                "@id": this.modelID,
+                                "@name": name,
+                                "@portdir": "None",
+                                "@initialmarking": marking,
+                                "@capacity": capacity,
+                                "location": {
+                                    "@x": xPos,
+                                    "@y": yPos
+                                },
+                                "size": {
+                                    "@width": 50,
+                                    "@height": 30
+                                }
+                            };
+
+                            this.places.push(place);
+                        }
+                        this.modelID++;
+                    }
 
                     var arc = {
                         "@id": this.modelID,
@@ -243,17 +371,27 @@ define(['plugin/PluginConfig',
 
         if (this.objectToVisit === this.visitedObjects) {
 
-            this.diagram = {"petrinet":
-            {
-                "@Name": "untitiled",
-                "page" :
+                this.diagram = {"petrinet":
                 {
+                    "@Name": "untitled",
+                    "page" :
+                    {
 
-                    "@id" : "page0",
-                    "@name" : "page0"
+                        "@id" : "page0",
+                        "@name" : "page0"
+                    }
                 }
-            }
             };
+
+            // TODO: need to fix this. Not a good way to do
+
+//            for (var k = 0; k < this.arcs.length; ++k) {
+//
+//                if (!this.arcs[k]["@source"]) {
+//
+//
+//                }
+//            }
 
             this.diagram.petrinet.page["place"] = this.places;
             this.diagram.petrinet.page["transition"] = this.transitions;
