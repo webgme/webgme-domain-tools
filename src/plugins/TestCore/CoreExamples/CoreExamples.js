@@ -74,10 +74,11 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         self.core.loadChildren(self.activeNode, function (err, children) {
 
             // count how many elements we handled
-            var done = 0;
+            var done = 0,
+                i;
 
-            for (var i = 0; i < children.length; i += 1) {
-                (function(element) {
+            for (i = 0; i < children.length; i += 1) {
+                (function (element) {
                     // function is needed to get a reference for each element in the array
 
                     self.core.loadChildren(element, function (err1, children1) {
@@ -87,12 +88,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
                         if (name === 'ConnectionExample') {
                             self.connectionExample(self, children1, callback);
-
                         } else if (name === 'ReferenceExample') {
 
-
                         } else if (name === 'ParentExample') {
-
 
                         } else {
                             self.logger('Found unexpected child, ' + name + ', inside Models.');
@@ -125,17 +123,21 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 //    };
 
     CoreExamples.prototype.connectionExample = function (self, children, callback) {
-        var i,
+        var i, j,
             childNode,
             port,
-            baseNode;
+            collectionNames,
+            conPointer;
+
         for (i = 0; i < children.length; i += 1) {
-            childNode = children[i];
             if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
                 port = childNode;
-                var nn = self.core.getCollectionNames(port);
-
-                self.logger.info(nn.toString());
+                collectionNames = self.core.getCollectionNames(port);
+//                for (j = 0; j < collectionNames.length; j += 1) {
+//                      This is async!
+//                    conPointer = self.core.loadCollection(port, collectionNames[j]);
+//                    self.logger.info(conPointer.toString());
+//                }
             }
         }
         //callback(null, self.result);
