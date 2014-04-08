@@ -22,6 +22,7 @@
         "./src/plugins/META",
         "./src/plugins/FMU",
         "./src/plugins/PetriNet",
+        "./src/plugins/LogicGates",
         "./src/plugins/TestCore"
     ],
 
