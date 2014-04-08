@@ -71,73 +71,45 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             return;
         }
 
-        function asyncLoop(iterations, func, callback) {
-            var index = 0;
-            var done = false;
-            var loop = {
-                next: function() {
-                    if (done) {
-                        return;
-                    }
-
-                    if (index < iterations) {
-                        index++;
-                        func(loop);
-
-                    } else {
-                        done = true;
-                        callback();
-                    }
-                },
-
-                iteration: function() {
-                    return index - 1;
-                },
-
-                break: function() {
-                    done = true;
-                    callback();
-                }
-            };
-            loop.next();
-            return loop;
-        }
-
-
         self.core.loadChildren(self.activeNode, function (err, children) {
 
-            asyncLoop(children.length, function (loop) {
+            // count how many elements we handled
+            var done = 0;
 
-                var exampleNode = children[loop.iteration()];
+            for (var i = 0; i < children.length; i += 1) {
+                (function(element) {
+                    // function is needed to get a reference for each element in the array
 
-                self.core.loadChildren(exampleNode, function (err1, children1) {
+                    self.core.loadChildren(element, function (err1, children1) {
 
-                    var name = self.core.getAttribute(exampleNode, 'name');
-                    self.logger.debug(name);
+                        var name = self.core.getAttribute(element, 'name');
+                        self.logger.debug(name);
 
-                    if (name === 'ConnectionExample') {
-                        self.connectionExample(self, children1, callback);
+                        if (name === 'ConnectionExample') {
+                            self.connectionExample(self, children1, callback);
 
-                    } else if (name === 'ReferenceExample') {
-
-
-                    } else if (name === 'ParentExample') {
-
-
-                    } else {
-                        self.logger('Found unexpected child, ' + name + ', inside Models.');
-
-                    }
-
-                    // Okay, for cycle could continue
-                    loop.next();
-                });
+                        } else if (name === 'ReferenceExample') {
 
 
-            }, function () {
-                self.logger.info('cycle ended - we are done');
-                callback(null, self.result);
-            });
+                        } else if (name === 'ParentExample') {
+
+
+                        } else {
+                            self.logger('Found unexpected child, ' + name + ', inside Models.');
+
+                        }
+
+                        done += 1;
+
+                        if (done === children.length) {
+                            // end of iteration if all elements are handled
+                            callback(null, self.result);
+                        }
+
+                    });
+                })(children[i]);
+
+            }
         });
 
 
