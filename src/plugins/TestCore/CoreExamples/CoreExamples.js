@@ -82,13 +82,14 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             }
 
             for (i = 0; i < children.length; i += 1) {
+                // function is needed to save the reference to the specific element i child.
                 (function (element) {
-                    // function is needed to get a reference for each element in the array
                     self.core.loadChildren(element, function (err1, children1) {
                         var name = self.core.getAttribute(element, 'name');
-                        self.logger.debug(name);
+                        self.logger.info('Starting work on ' + name + '...');
                         if (name === 'ConnectionExample') {
                             self.connectionExample(self, children1, function (err) {
+                                self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
                                 if (runningExamples === 0) {
                                     self.result.setSuccess(true);
@@ -103,12 +104,14 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                                 callback(err, self.result);
                             }
                         } else if (name === 'ParentExample') {
-                            self.logger.debug('ParentExample to be done...');
-                            runningExamples -= 1;
-                            if (runningExamples === 0) {
-                                self.result.setSuccess(true);
-                                callback(err, self.result);
-                            }
+                            self.parentExample(self, children1, function (err) {
+                                self.logger.info('Done with ' + name + '!');
+                                runningExamples -= 1;
+                                if (runningExamples === 0) {
+                                    self.result.setSuccess(true);
+                                    callback(err, self.result);
+                                }
+                            });
                         } else {
                             self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
                             runningExamples -= 1;
@@ -123,11 +126,66 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         });
     };
 
+// --------------------------------- Parent Example -------------------------------------
+    CoreExamples.prototype.parentExample = function (self, children, callback) {
+        var i,
+            childrenVisits = children.length,
+            err;
+
+        if (childrenVisits === 0) {
+            callback('The starting node in ParentExample did not have any children!?');
+        }
+
+        for (i = 0; i < children.length; i += 1) {
+            (function (childNode) {
+                var name = self.core.getAttribute(childNode, 'name');
+                if (name === 'm_parent') {
+                    self.compareParentAndChildsParent(self, childNode, function (err) {
+                        childrenVisits -= 1;
+                        if (childrenVisits === 0) {
+                            callback(err);
+                        }
+                    });
+                } else {
+                    childrenVisits -= 1;
+                    if (childrenVisits === 0) {
+                        callback(err);
+                    }
+                }
+            })(children[i]);
+        }
+    };
+
+    CoreExamples.prototype.compareParentAndChildsParent = function (self, parentNode, callback) {
+        self.core.loadChildren(parentNode, function (err, children) {
+            var returnedParent,
+                guid1, guid2,
+                error = '';
+            if (children.length === 0) {
+                callback('m_parent did not have any children!?');
+            } else {
+                returnedParent = self.core.getParent(children[0]);
+                guid1 = self.core.getGuid(parentNode);
+                guid2 = self.core.getGuid(returnedParent);
+                if (guid1 === guid2) {
+                    self.logger.info("Parent och its child's parent had the same GUID (as expected).");
+                } else {
+                    error += "Parent och its child's parent had the same GUID (very weird indeed).";
+                }
+                callback(error);
+            }
+        });
+    };
+
+// --------------------------------- Connection Example ---------------------------------
     CoreExamples.prototype.connectionExample = function (self, children, callback) {
         var i,
             childrenVisits = children.length,
             err = '';
 
+        if (childrenVisits === 0) {
+            callback('The starting node in ConnectionExample did not have any children!?');
+        }
         for (i = 0; i < children.length; i += 1) {
             (function (childNode) {
                 if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
@@ -147,7 +205,6 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 }
             })(children[i]);
         }
-        //callback(null, self.result);
     };
 
     CoreExamples.prototype.visitPorts = function (self, portNode, callback) {
