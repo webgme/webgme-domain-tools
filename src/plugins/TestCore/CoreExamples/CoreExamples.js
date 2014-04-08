@@ -72,86 +72,121 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         }
 
         self.core.loadChildren(self.activeNode, function (err, children) {
-            var i;
-            // count how many elements we handled
-            objectsToVisit += children.length;
+            var i,
+                runningExamples = children.length;
+
+            if (runningExamples === 0) {
+                self.result.setSuccess(false);
+                callback('The active node does not have any children. Are you using the right model?', self.result);
+                return;
+            }
+
             for (i = 0; i < children.length; i += 1) {
-                visitedObjects += 1;
                 (function (element) {
                     // function is needed to get a reference for each element in the array
-
                     self.core.loadChildren(element, function (err1, children1) {
                         var name = self.core.getAttribute(element, 'name');
                         self.logger.debug(name);
-
                         if (name === 'ConnectionExample') {
-                            self.connectionExample(self, children1, callback);
+                            self.connectionExample(self, children1, function (err) {
+                                runningExamples -= 1;
+                                if (runningExamples === 0) {
+                                    self.result.setSuccess(true);
+                                    callback(err, self.result);
+                                }
+                            });
                         } else if (name === 'ReferenceExample') {
                             self.logger.debug('ReferenceExample to be done...');
+                            runningExamples -= 1;
+                            if (runningExamples === 0) {
+                                self.result.setSuccess(true);
+                                callback(err, self.result);
+                            }
                         } else if (name === 'ParentExample') {
                             self.logger.debug('ParentExample to be done...');
+                            runningExamples -= 1;
+                            if (runningExamples === 0) {
+                                self.result.setSuccess(true);
+                                callback(err, self.result);
+                            }
                         } else {
                             self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
+                            runningExamples -= 1;
+                            if (runningExamples === 0) {
+                                self.result.setSuccess(true);
+                                callback(err, self.result);
+                            }
                         }
-
-                        visitedObjects += 1;
-
-                        if (visitedObjects === objectsToVisit) {
-                            // end of iteration if all elements are handled
-                            self.logger.info('Calling callback!');
-                            callback(null, self.result);
-                        }
-
                     });
                 })(children[i]);
-
             }
         });
-
-
-        // Uncomment to save changes.
-        //self.save('added obj', function (err) {
-
-        //});
-
     };
-    var objectsToVisit = 0,  // number of objects that have to be visited
-        visitedObjects = 0; // number of already visited
-//    CoreExamples.prototype.executeExampleOnChild = function (self, children, callback) {
-//
-//    };
 
     CoreExamples.prototype.connectionExample = function (self, children, callback) {
-        var i, j,
-            collectionNames;
-        objectsToVisit += children.length;
+        var i,
+            childrenVisits = children.length,
+            err = '';
+
         for (i = 0; i < children.length; i += 1) {
-            visitedObjects += 1;
             (function (childNode) {
                 if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
-                    collectionNames = self.core.getCollectionNames(childNode);
-                    if (collectionNames.indexOf('src') !== -1) {
-                        self.core.loadCollection(childNode, 'src', function (err, connections) {
-                            for (j = 0; j < connections.length; j += 1) {
-                                (function (connection) {
-                                    self.core.loadPointer(connection, 'dst', function (err, dst) {
-                                        var srcName = self.core.getAttribute(childNode, 'name'),
-                                            dstName = self.core.getAttribute(dst, 'name'),
-                                            connName = self.core.getAttribute(connection, 'name');
-                                        self.logger.info(connName + ' connects "' + srcName + '" and "' + dstName + '".');
 
-                                    });
-                                })(connections[j]);
-                            }
-                        });
+                    self.visitPorts(self, childNode, function (err) {
+                        err += err;
+                        childrenVisits -= 1;
+                        if (childrenVisits === 0) {
+                            callback(err);
+                        }
+                    });
+                } else {
+                    childrenVisits -= 1;
+                    if (childrenVisits === 0) {
+                        callback(err);
                     }
                 }
             })(children[i]);
         }
         //callback(null, self.result);
     };
-//    /1023960100/425093889
-//    /1023960100/425093889/187731387
+
+    CoreExamples.prototype.visitPorts = function (self, portNode, callback) {
+        var j,
+            collectionNames = self.core.getCollectionNames(portNode),
+            err = '';
+
+        if (collectionNames.indexOf('src') === -1) {
+            callback(err);
+        } else {
+            self.core.loadCollection(portNode, 'src', function (err, connections) {
+                var connectionVisits = connections.length;
+                for (j = 0; j < connections.length; j += 1) {
+                    (function (connection) {
+                        if (self.core.hasPointer(connection, 'dst') === false) {
+                            // TODO: This error does not seem to happen.
+                            err += ' connection with src but without dst exists in model!';
+                            connectionVisits -= 1;
+                            if (connectionVisits === 0) {
+                                callback(err);
+                            }
+                        } else {
+                            self.core.loadPointer(connection, 'dst', function (err, dst) {
+                                var srcName = self.core.getAttribute(portNode, 'name'),
+                                    dstName = self.core.getAttribute(dst, 'name'),
+                                    connName = self.core.getAttribute(connection, 'name');
+                                self.logger.info(connName + ' connects "' + srcName + '" and "' + dstName + '".');
+                                connectionVisits -= 1;
+                                if (connectionVisits === 0) {
+                                    callback(err);
+                                }
+                            });
+                        }
+                    })(connections[j]);
+                }
+            });
+        }
+    };
+
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {
         while (nodeObj) {
             if (self.core.getGuid(nodeObj) === self.core.getGuid(metaTypeObj)) {

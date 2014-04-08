@@ -81,8 +81,11 @@ define(['./NodeMock'], function (NodeMock) {
         node.pointers[name] = this.getPath(target);
     };
 
-    CoreMock.prototype.getPointer = function (node, name) {
-        return this._nodes[node.pointers[name]];
+    CoreMock.prototype.loadPointer = function (node, name, callback) {
+        var err,
+            pointer = this._nodes[node.pointers[name]];
+
+        callback(err, pointer);
     };
 
     CoreMock.prototype.getBase = function (node) {
