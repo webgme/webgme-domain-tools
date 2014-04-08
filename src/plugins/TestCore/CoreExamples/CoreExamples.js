@@ -36,7 +36,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     * @returns {string} The description of the plugin.
     * @public
     */
-    CoreExamples.prototype.getVersion = function () {
+    CoreExamples.prototype.getDescription = function () {
         return "Description for Core Examples";
     };
 
@@ -71,27 +71,73 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             return;
         }
 
-        self.core.loadChildren(self.activeNode, function (err, children) {
-            var exampleNode,
-                name,
-                i;
+        function asyncLoop(iterations, func, callback) {
+            var index = 0;
+            var done = false;
+            var loop = {
+                next: function() {
+                    if (done) {
+                        return;
+                    }
 
-            for (i = 0; i < children.length; i += 1) {
-                exampleNode = children[i];
+                    if (index < iterations) {
+                        index++;
+                        func(loop);
+
+                    } else {
+                        done = true;
+                        callback();
+                    }
+                },
+
+                iteration: function() {
+                    return index - 1;
+                },
+
+                break: function() {
+                    done = true;
+                    callback();
+                }
+            };
+            loop.next();
+            return loop;
+        }
+
+
+        self.core.loadChildren(self.activeNode, function (err, children) {
+
+            asyncLoop(children.length, function (loop) {
+
+                var exampleNode = children[loop.iteration()];
+
                 self.core.loadChildren(exampleNode, function (err1, children1) {
-                    name = self.core.getAttribute(exampleNode, 'name');
+
+                    var name = self.core.getAttribute(exampleNode, 'name');
+                    self.logger.debug(name);
+
                     if (name === 'ConnectionExample') {
                         self.connectionExample(self, children1, callback);
+
                     } else if (name === 'ReferenceExample') {
+
 
                     } else if (name === 'ParentExample') {
 
+
                     } else {
                         self.logger('Found unexpected child, ' + name + ', inside Models.');
+
                     }
+
+                    // Okay, for cycle could continue
+                    loop.next();
                 });
 
-            }
+
+            }, function () {
+                self.logger.info('cycle ended - we are done');
+                callback(null, self.result);
+            });
         });
 
 
@@ -120,7 +166,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 self.logger.info(nn.toString());
             }
         }
-        callback(null, self.result);
+        //callback(null, self.result);
     };
 
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {

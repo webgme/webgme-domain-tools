@@ -35,7 +35,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     * @returns {string} The description of the plugin.
     * @public
     */
-    <%= pluginID %>.prototype.getVersion = function () {
+    <%= pluginID %>.prototype.getDescription = function () {
         return "Description for <%= pluginName %>";
     };<%} if (hasVersion) {%>
 
