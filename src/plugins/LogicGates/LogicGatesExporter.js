@@ -45,9 +45,8 @@ define(['plugin/PluginConfig',
 
         this.diagrams = [];
         this.diagram = {};
-        this.places = [];
-        this.transitions = [];
-        this.arcs = [];
+        this.gates = [];
+        this.wires = [];
 
         this.ID_LUT = {};
 
@@ -74,25 +73,9 @@ define(['plugin/PluginConfig',
 
 
             // if visiting a new diagram, reset global values
-            if ((this.diagramPath && parentPath !== this.diagramPath) || (!this.diagramPath && parentMetaType === 'LogicGatesDiagram')) {
+            if ((this.diagramPath && parentPath !== this.diagramPath) || (!this.diagramPath && parentMetaType === 'LogicCircuit')) {
 
-                this.diagram = {"LogicGates":
-                    {
-                        "@Name": "untitled",
-                        "page" :
-                        {
-
-                            "@id" : "page0",
-                            "@name" : "page0"
-                        }
-                    }
-                };
-
-                this.diagram.LogicGates.page["place"] = this.places;
-                this.diagram.LogicGates.page["transition"] = this.transitions;
-                this.diagram.LogicGates.page["arc"] = this.arcs;
-
-                this.diagrams.push(this.diagram);
+                this.createObjectFromDiagram();
 
                 // reset values
                 this.ID_LUT = {};
@@ -105,14 +88,8 @@ define(['plugin/PluginConfig',
                 this.diagramPath = parentPath;
             }
 
-
             var baseClass = core.getBase(child),
-                metaType = baseClass ? core.getAttribute(baseClass, 'name') : "", // get child's base META Type
-                visitType = metaType === 'Place' || metaType === 'Transition' || metaType === 'Place2Transition' || metaType === 'Transition2Place';
-
-            if (visitType) {
-
-                ++ this.modelID;
+                metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
 
                 if (metaType === 'Place' || metaType === 'Transition') {
 
@@ -128,7 +105,6 @@ define(['plugin/PluginConfig',
 
                     this.addConnection(child);
                 }
-            }
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
                 self.visitObject(err, childNodes, core, callback);
@@ -139,24 +115,7 @@ define(['plugin/PluginConfig',
 
         if (this.objectToVisit === this.visitedObjects) {
 
-            this.diagram = {"LogicGates":
-                {
-                    "@Name": "untitled",
-                    "page" :
-                    {
-                        "@id" : "page0",
-                        "@name" : "page0"
-                    }
-                }
-            };
-
-            // TODO: need to fix this. Not a good way to do
-
-            this.diagram.LogicGates.page["place"] = this.places;
-            this.diagram.LogicGates.page["transition"] = this.transitions;
-            this.diagram.LogicGates.page["arc"] = this.arcs;
-
-            this.diagrams.push(this.diagram);
+            this.createObjectFromDiagram();
 
             var j2x = new json2xml;
 
@@ -176,93 +135,81 @@ define(['plugin/PluginConfig',
                 callback(null, pluginResult);
             }
         }
-
     };
 
-    LogicGatesExporterPlugin.prototype.addComponent = function(nodeObj, metaType) {
+    LogicGatesExporterPlugin.prototype.addGate = function(nodeObj, metaType, isComplex) {
 
         var core = this.core,
+            self = this,
             gmeID = core.getPath(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
+            numInputs, // number of children
             xPos = nodeObj.data.reg.position.x,
-            yPos = nodeObj.data.reg.position.y;
+            yPos = nodeObj.data.reg.position.y,
+            angle;
 
         this.ID_LUT[gmeID] = this.modelID;
 
-        if (metaType === 'Place') {
+        // all logic gates component have attrs: Type, Name, ID
+        //                                 element: Point (attrs: X, Y, Angle)
 
-            // Place component's attrs: id, name, portdir, initialmarking, capacity
-            //                   elements: location (attrs: x, y), size (attrs: width, height)
-            var capacity = core.getAttribute(nodeObj, 'Capacity'),
-                marking = core.getAttribute(nodeObj, 'InitialMarking');
+        var gate = {
+            "@Type": metaType,
+            "@Name": name,
+            "@ID": self.modelID,
+            "Point": {
+                "@X": xPos,
+                "@Y": yPos,
+                "@Angle": angle
+            }
+        };
 
-            var place = {
-                "@id": this.modelID,
-                "@name": name,
-                "@portdir": "None",
-                "@initialmarking": marking,
-                "@capacity": capacity,
-                "location": {
-                    "@x": xPos,
-                    "@y": yPos
-                },
-                "size": {
-                    "@width": 50,
-                    "@height": 30
-                }
-            };
-            this.places.push(place);
+        // add domain specific attributes
+        if (isComplex) {
+            gate["@NumInputs"] = numInputs;
 
-        } else {
+        } else if (metaType === "Clock") {
+            var ms = core.getAttribute(nodeObj, 'Milliseconds');
+            gate["@Milliseconds"] = ms;
 
-            // Transition component's attrs: id, name, portdir
-            //                        elements: location (attrs: x, y), size (attrs: width, height)
-            var transition = {
-                "@id": this.modelID,
-                "@name": name,
-                "@portdir": "None",
-                "location": {
-                    "@x": xPos,
-                    "@y": yPos
-                },
-                "size": {
-                    "@width": 50,
-                    "@height": 20
-                }
-            };
-
-            this.transitions.push(transition);
+        } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
+            var bits = core.getAttribute(nodeObj, 'Bits');
+            var selRep = core.getAttribute(nodeObj, 'SelRep');
+            var value = core.getAttribute(nodeObj, 'Value');
+            gate["@Bits"] = bits;
+            gate["@SelRep"] = selRep;
+            gate["@Value"] = value;
         }
+        this.gates.push(gate);
+        ++this.modelID;
     };
 
-    LogicGatesExporterPlugin.prototype.addConnection = function(nodeObj) {
+    LogicGatesExporterPlugin.prototype.addWire = function(nodeObj) {
 
         var core = this.core,
             self = this,
             src = core.getPointerPath(nodeObj, "src"),
-            dst = core.getPointerPath(nodeObj, "dst"),
-            delay = core.getAttribute(nodeObj, 'Delay'),
-            weight = core.getAttribute(nodeObj, 'Weight');
+            dst = core.getPointerPath(nodeObj, "dst");
 
         var srcMetaType,
             dstMetaType,
-            srcX,
-            srcY,
-            dstX,
-            dstY;
+            srcPort,
+            dstPort,
+            srcID,
+            dstID;
 
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.ID_LUT.hasOwnProperty(src)) {
-                    srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
-                    self.addComponent(nodeObj, srcMetaType);
+                    var baseClass = core.getBase(nodeObj);
+                    var parentClass = core.getParent(baseClass);
+                    var isComplex = core.getAttribute(parentClass, 'name') === "ComplexLogicGate";
+                    srcMetaType = core.getAttribute(baseClass, 'name');
+                    self.addGate(nodeObj, srcMetaType, isComplex);
 
                     self.modelID++;
                 }
-
-                srcX = nodeObj.data.reg.position.x;
-                srcY = nodeObj.data.reg.position.y;
             }
         });
 
@@ -270,40 +217,50 @@ define(['plugin/PluginConfig',
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.ID_LUT.hasOwnProperty(dst)) {
-                    srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
-                    self.addComponent(nodeObj, dstMetaType);
+                    var baseClass = core.getBase(nodeObj);
+                    var parentClass = core.getParent(baseClass);
+                    var isComplex = core.getAttribute(parentClass, 'name') === "ComplexLogicGate";
+                    dstMetaType = core.getAttribute(baseClass, 'name');
+                    self.addGate(nodeObj, dstMetaType, isComplex);
+
                     self.modelID++;
                 }
-
-                dstX = nodeObj.data.reg.position.x;
-                dstY = nodeObj.data.reg.position.y;
             }
         });
 
-        // Arc component's attrs: id, source, target, delay, weight
-        //                 elements: points (element: point (attrs: x, y))
+        // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
 
-        var arc = {
-            "@id": this.modelID,
-            "@source": this.ID_LUT[src],
-            "@target": this.ID_LUT[dst],
-            "@delay": delay,
-            "@weight": weight,
-            "points": {
-                "point": [
-                    {
-                        "@x": srcX,
-                        "@y": srcY
-                    },
-                    {
-                        "@x": dstX,
-                        "@y": dstY
-                    }
-                ]
+        var wire = {
+            "From": {
+                "@ID": srcID,
+                "@Port": srcPort
+            },
+            "To": {
+                "@ID": dstID,
+                "@Port": dstPort
             }
         };
-        this.arcs.push(arc);
+
+        this.wires.push(wire);
     };
+
+    LogicGatesExporterPlugin.prototype.createObjectFromDiagram = function () {
+        this.diagram = {"CircuitGroup":
+        {
+            "@Version": 1.2,
+            "Circuit" :
+            {
+                "Gates": {},
+                "wires": {}
+            }
+        }
+        };
+
+        this.diagram.CircuitGroup.Circuit.Gates["Gate"] = this.gates;
+        this.diagram.CircuitGroup.Circuit.Gates["Wire"] = this.wires;
+
+        this.diagrams.push(this.diagram);
+    }
 
     return LogicGatesExporterPlugin;
 });
