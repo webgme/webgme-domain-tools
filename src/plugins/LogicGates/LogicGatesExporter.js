@@ -91,20 +91,25 @@ define(['plugin/PluginConfig',
             var baseClass = core.getBase(child),
                 metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
 
-                if (metaType === 'Place' || metaType === 'Transition') {
+            var parentClass = core.getBase(child.parent);
+            var parentMeta = core.getAttribute(parentClass, 'name');
+            var isComplex = parentMeta === "ComplexLogicGate";
+            var isGate = parentMeta === 'ComplexLogicGate' || parentMeta === 'SimpleLogicGate' || parentMeta === 'NumericIOBase' || parentMeta === 'UserInputBase' || parentMeta === 'UserOutput';
 
-                    // if key not exist already, add key; otherwise ignore
-                    var gmeID = core.getPath(child);
+            if (isGate) {
 
-                    if (!this.ID_LUT.hasOwnProperty(gmeID)) {
+                // if key not exist already, add key; otherwise ignore
+                var gmeID = core.getPath(child);
 
-                        this.addComponent(child, metaType);
-                    }
+                if (!this.ID_LUT.hasOwnProperty(gmeID)) {
 
-                } else if (metaType === 'Place2Transition' || metaType === 'Transition2Place') {
-
-                    this.addConnection(child);
+                    this.addGate(child, metaType, isComplex);
                 }
+
+            } else if (metaType === 'PortConnection') {
+
+                this.addWire(child);
+            }
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
                 self.visitObject(err, childNodes, core, callback);
@@ -217,10 +222,9 @@ define(['plugin/PluginConfig',
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.ID_LUT.hasOwnProperty(dst)) {
-                    var baseClass = core.getBase(nodeObj);
-                    var parentClass = core.getParent(baseClass);
+                    var parentClass = core.getBase(nodeObj.parent);
                     var isComplex = core.getAttribute(parentClass, 'name') === "ComplexLogicGate";
-                    dstMetaType = core.getAttribute(baseClass, 'name');
+                    dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
                     self.addGate(nodeObj, dstMetaType, isComplex);
 
                     self.modelID++;
