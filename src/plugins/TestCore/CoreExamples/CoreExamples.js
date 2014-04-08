@@ -63,44 +63,42 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         // These are all instantiated at this point.
         var self = this;
 
-        if (self.core.getRelid(self.activeNode) !== '1023960100') {
+        if (self.core.getPath(self.activeNode) !== '/1023960100') {
             self.logger.error('Run this interpreter on "/1023960100" (models in the root) as activeNode.');
-            self.logger.error('Current activeNode was : ' + self.core.getRelid(self.activeNode));
+            self.logger.error('Current activeNode was : ' + self.core.getPath(self.activeNode));
             self.result.setSuccess(false);
             callback('Run this interpreter on "/1023960100" as activeNode.', self.result);
             return;
         }
 
         self.core.loadChildren(self.activeNode, function (err, children) {
-
+            var i;
             // count how many elements we handled
-            var done = 0,
-                i;
-
+            objectsToVisit += children.length;
             for (i = 0; i < children.length; i += 1) {
+                visitedObjects += 1;
                 (function (element) {
                     // function is needed to get a reference for each element in the array
 
                     self.core.loadChildren(element, function (err1, children1) {
-
                         var name = self.core.getAttribute(element, 'name');
                         self.logger.debug(name);
 
                         if (name === 'ConnectionExample') {
                             self.connectionExample(self, children1, callback);
                         } else if (name === 'ReferenceExample') {
-
+                            self.logger.debug('ReferenceExample to be done...');
                         } else if (name === 'ParentExample') {
-
+                            self.logger.debug('ParentExample to be done...');
                         } else {
-                            self.logger('Found unexpected child, ' + name + ', inside Models.');
-
+                            self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
                         }
 
-                        done += 1;
+                        visitedObjects += 1;
 
-                        if (done === children.length) {
+                        if (visitedObjects === objectsToVisit) {
                             // end of iteration if all elements are handled
+                            self.logger.info('Calling callback!');
                             callback(null, self.result);
                         }
 
@@ -117,32 +115,43 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         //});
 
     };
-
+    var objectsToVisit = 0,  // number of objects that have to be visited
+        visitedObjects = 0; // number of already visited
 //    CoreExamples.prototype.executeExampleOnChild = function (self, children, callback) {
 //
 //    };
 
     CoreExamples.prototype.connectionExample = function (self, children, callback) {
         var i, j,
-            childNode,
-            port,
-            collectionNames,
-            conPointer;
-
+            collectionNames;
+        objectsToVisit += children.length;
         for (i = 0; i < children.length; i += 1) {
-            if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
-                port = childNode;
-                collectionNames = self.core.getCollectionNames(port);
-//                for (j = 0; j < collectionNames.length; j += 1) {
-//                      This is async!
-//                    conPointer = self.core.loadCollection(port, collectionNames[j]);
-//                    self.logger.info(conPointer.toString());
-//                }
-            }
+            visitedObjects += 1;
+            (function (childNode) {
+                if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
+                    collectionNames = self.core.getCollectionNames(childNode);
+                    if (collectionNames.indexOf('src') !== -1) {
+                        self.core.loadCollection(childNode, 'src', function (err, connections) {
+                            for (j = 0; j < connections.length; j += 1) {
+                                (function (connection) {
+                                    self.core.loadPointer(connection, 'dst', function (err, dst) {
+                                        var srcName = self.core.getAttribute(childNode, 'name'),
+                                            dstName = self.core.getAttribute(dst, 'name'),
+                                            connName = self.core.getAttribute(connection, 'name');
+                                        self.logger.info(connName + ' connects "' + srcName + '" and "' + dstName + '".');
+
+                                    });
+                                })(connections[j]);
+                            }
+                        });
+                    }
+                }
+            })(children[i]);
         }
         //callback(null, self.result);
     };
-
+//    /1023960100/425093889
+//    /1023960100/425093889/187731387
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {
         while (nodeObj) {
             if (self.core.getGuid(nodeObj) === self.core.getGuid(metaTypeObj)) {
