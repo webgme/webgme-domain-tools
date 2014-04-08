@@ -7,7 +7,7 @@
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/PluginResult',
-        'plugin/LogicGatesExporter/LogicGatesExporter/json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
+        './json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
 
     // TODO: to modify the base dir path in config.json? to allow dependencies from other dirs
 
@@ -77,6 +77,9 @@ define(['plugin/PluginConfig',
 
                 this.createObjectFromDiagram();
 
+                console.log(parentPath);
+                console.log(this.diagramPath);
+
                 // reset values
                 this.ID_LUT = {};
                 this.places = [];
@@ -92,7 +95,7 @@ define(['plugin/PluginConfig',
                 metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
 
             var parentClass = core.getBase(child.parent);
-            var parentMeta = core.getAttribute(parentClass, 'name');
+            var parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
             var isComplex = parentMeta === "ComplexLogicGate";
             var isGate = parentMeta === 'ComplexLogicGate' || parentMeta === 'SimpleLogicGate' || parentMeta === 'NumericIOBase' || parentMeta === 'UserInputBase' || parentMeta === 'UserOutput';
 
@@ -127,7 +130,6 @@ define(['plugin/PluginConfig',
             for (var j = 1; j < this.diagrams.length; ++j) {
 
                 var output = j2x.convert(this.diagrams[j]);
-                // this.fs.addFile("output" + j + ".json", output);
                 this.fs.addFile("output" + j + ".xml", output);
             }
 
