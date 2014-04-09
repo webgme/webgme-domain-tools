@@ -25,6 +25,6 @@
         "ejs": "./lib/ejs/ejs.min",
         "panels": "./src/panels",
         "widgets": "./src/widgets",
-        "json2xml": "./utils/json2xml"
+        "json2xml": "./util/json2xml"
     }
 }
