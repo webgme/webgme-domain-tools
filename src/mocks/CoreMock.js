@@ -52,7 +52,11 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.loadChildren = function (node, callback) {
         var err,
-            childNodes = node.children;
+            childNodes = [],
+            i;
+        for (i = 0; i < node.children.length; i += 1) {
+            childNodes.push(this._nodes[node.children[i]]);
+        }
 
         callback(err, childNodes);
     };
@@ -91,6 +95,14 @@ define(['./NodeMock'], function (NodeMock) {
     CoreMock.prototype.getBase = function (node) {
         // FIXME: temporary change to fix tests, please review it.
         return this._nodes[node.pointers['base']];
+    };
+
+    CoreMock.prototype.getParent = function (node) {
+        return this._nodes[node.parent];
+    };
+
+    CoreMock.prototype.getGuid = function (node) {
+        return node.guid;
     };
 
     return CoreMock;

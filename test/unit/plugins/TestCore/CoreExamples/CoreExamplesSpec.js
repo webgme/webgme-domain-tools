@@ -21,13 +21,27 @@ var semanticVersionPattern = /^\d+\.\d+\.\d+$/;
 describe('CoreExamples', function () {
     var plugin,
         core,
-        meta;
+        meta,
+        mParent;
 
     before(function (done) {
         requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock'], function (CoreExamples, Core) {
+            var rootNode,
+                modelsNode,
+                parentExample,
+                mChild;
             plugin = new CoreExamples();
             core = new Core();
             meta = createMETATypesTests(core);
+            rootNode = core.getRootNode();
+            modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
+            core.setAttribute(modelsNode, 'name', 'Models');
+            parentExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
+            core.setAttribute(parentExample, 'name', 'ParentExample');
+            mParent = core.createNode({base: meta.ModelElement, parent: parentExample});
+            core.setAttribute(mParent, 'name', 'm_parent');
+            mChild = core.createNode({base: meta.ModelElement, parent: mParent});
+            core.setAttribute(mChild, 'name', 'm_child');
             done();
         });
     });
@@ -49,6 +63,16 @@ describe('CoreExamples', function () {
     it('main should be implemented', function () {
         var proto = Object.getPrototypeOf(plugin);
         expect(proto.hasOwnProperty('main')).to.equal(true);
+    });
+
+    it('compareParentAndChildsParent', function () {
+        var self = {};
+        self.core = core;
+        self.logger = console;
+
+        plugin.compareParentAndChildsParent(self, mParent, function (err) {
+            expect(err).to.equal('');
+        });
     });
 
 });
