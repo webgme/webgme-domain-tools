@@ -146,8 +146,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                             self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
                             runningExamples -= 1;
                             if (runningExamples === 0) {
-                                self.result.setSuccess(true);
-                                callback(null, self.result);
+                                if (error) {
+                                    self.result.setSuccess(false);
+                                    callback(error, self.result);
+                                } else {
+                                    self.result.setSuccess(true);
+                                    callback(null, self.result);
+                                }
                             }
                         }
                     });
