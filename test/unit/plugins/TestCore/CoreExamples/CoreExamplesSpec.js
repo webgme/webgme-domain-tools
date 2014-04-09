@@ -22,26 +22,40 @@ describe('CoreExamples', function () {
     var plugin,
         core,
         meta,
-        mParent;
+        mParent,
+        orgNode,
+        refNode;
 
     before(function (done) {
         requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock'], function (CoreExamples, Core) {
             var rootNode,
                 modelsNode,
                 parentExample,
-                mChild;
+                mChild,
+                referenceExample;
             plugin = new CoreExamples();
             core = new Core();
             meta = createMETATypesTests(core);
             rootNode = core.getRootNode();
             modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
             core.setAttribute(modelsNode, 'name', 'Models');
+
+            // Parent Example
             parentExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
             core.setAttribute(parentExample, 'name', 'ParentExample');
             mParent = core.createNode({base: meta.ModelElement, parent: parentExample});
             core.setAttribute(mParent, 'name', 'm_parent');
             mChild = core.createNode({base: meta.ModelElement, parent: mParent});
             core.setAttribute(mChild, 'name', 'm_child');
+
+            //Reference Example
+            referenceExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
+            core.setAttribute(referenceExample, 'name', 'ReferenceExample');
+            orgNode = core.createNode({base: meta.ModelElement, parent: referenceExample});
+            core.setAttribute(orgNode, 'name', 'm');
+            refNode = core.createNode({base: meta.ModelRef, parent: referenceExample});
+            core.setAttribute(refNode, 'name', 'm-ref');
+            core.setPointer(refNode, 'ref', orgNode);
             done();
         });
     });
@@ -65,19 +79,45 @@ describe('CoreExamples', function () {
         expect(proto.hasOwnProperty('main')).to.equal(true);
     });
 
-    it('compareParentAndChildsParent', function () {
+    it('compareParentAndChildsParent', function (done) {
         var self = {};
         self.core = core;
         self.logger = console;
 
         plugin.compareParentAndChildsParent(self, mParent, function (err) {
             expect(err).to.equal('');
+            done();
         });
     });
 
+    it('parentExample', function (done) {
+        var self = {},
+            children = [mParent];
+        self.core = core;
+        self.logger = console;
+        self.META = meta;
+        self.compareParentAndChildsParent = plugin.compareParentAndChildsParent;
+        plugin.parentExample(self, children, function (err) {
+            expect(err).to.equal('');
+            done();
+        });
+    });
+
+    it('referenceExample', function (done) {
+        var self = {},
+            children = [orgNode, refNode];
+        self.core = core;
+        self.logger = console;
+        self.META = meta;
+        self.isMetaTypeOf = plugin.isMetaTypeOf;
+        plugin.referenceExample(self, children, function (err) {
+            expect(err).to.equal('');
+            done();
+        });
+    });
 });
 
-
+// Helper Functions
 var createMETATypesTests = function (core) {
     var META = {},
         options = {},

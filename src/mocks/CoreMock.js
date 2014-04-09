@@ -85,10 +85,18 @@ define(['./NodeMock'], function (NodeMock) {
         node.pointers[name] = this.getPath(target);
     };
 
+    CoreMock.prototype.hasPointer = function (node, name) {
+        return node.pointers.hasOwnProperty(name);
+    };
+
     CoreMock.prototype.loadPointer = function (node, name, callback) {
         var err,
+            pointer;
+        if (this.hasPointer(node, name)) {
             pointer = this._nodes[node.pointers[name]];
-
+        } else {
+            err = this.getAttribute(node, 'name') + ' does not have a pointer ' + name;
+        }
         callback(err, pointer);
     };
 
