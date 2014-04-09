@@ -7,7 +7,7 @@
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/PluginResult',
-        './json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
+        'json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
 
     // TODO: to modify the base dir path in config.json? to allow dependencies from other dirs
 
