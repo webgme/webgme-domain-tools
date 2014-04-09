@@ -22,9 +22,22 @@ describe("Plugin tests", function() {
             projectName: 'Test',
             pluginName: 'ChildrenConfig',
             activeNode: ''
-        }, function (err) {
+        }, function (err, result) {
             expect(err).to.equal(null);
+            // TODO: expect result is a PluginResult type
+            expect(result.getSuccess()).to.equal(true);
             done();
         });
     });
+
+    it('should ChildrenConfig fail if no active node', function(done) {
+        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+            projectName: 'Test',
+            pluginName: 'ChildrenConfig'
+        }, function (err, result) {
+            expect(err).to.not.equal(null);
+            done();
+        });
+    });
+
 });
