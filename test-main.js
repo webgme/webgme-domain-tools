@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Zsolt Lattmann
+ */
+
+// TODO: implement a tool that generates this file since it has dynamic content
+
 var tests = [];
 for (var file in window.__karma__.files) {
     if (/Spec\.js$/.test(file)) {

@@ -1,9 +1,10 @@
-/**
- * Created by Zsolt on 4/2/14.
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  *
+ * Author: Zsolt Lattmann
  * node src\tools\combine_templates.js -t src\plugins\Examples\UsingTemplates\Templates
- *
  */
+
 var main = function () {
     var fs = require('fs');
     var path = require('path');

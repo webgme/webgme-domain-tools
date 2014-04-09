@@ -20,7 +20,6 @@
         "jslint": ">=0.3.0",
         "istanbul": ">=0.2.6",
         "jsdoc": ">=3.3.0-alpha1",
-        "beautiful-docs": ">=1.0.0",
         "karma": "~0.12",
         "karma-mocha": "~0.1",
         "karma-chai": "~0.1",

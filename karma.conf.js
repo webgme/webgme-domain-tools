@@ -1,5 +1,12 @@
-// Karma configuration
-// Generated on Wed Mar 26 2014 12:22:22 GMT-0500 (Central Daylight Time)
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Zsolt Lattmann
+ *
+ * Karma configuration
+ * Generated on Wed Mar 26 2014 12:22:22 GMT-0500 (Central Daylight Time)
+ *
+ */
 
 module.exports = function(config) {
   config.set({

@@ -1,8 +1,8 @@
-/**
- * Created by Zsolt on 3/20/14.
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Zsolt Lattmann
  */
-
-
 
 'use strict';
 define(['./NodeMock'], function (NodeMock) {

@@ -13,6 +13,8 @@ var webgme = require('webgme');
 webGMEGlobal.setConfig(CONFIG);
 var requirejsBase = webGMEGlobal.baseDir;
 
+// specifies all test specific requirejs paths for server side tests
+// TODO: read it from the config file
 var testConfig = {
     requirejs: {
         paths: {
@@ -20,29 +22,6 @@ var testConfig = {
         }
     }
 };
-
-//if (CONFIG.hasOwnProperty('pluginBasePaths')) {
-//
-//    // resolve plugin base paths for requirejs
-//
-//    if (CONFIG.pluginBasePaths && CONFIG.pluginBasePaths.length) {
-//
-//
-//        for (var i = 0; i < CONFIG.pluginBasePaths.length; i++) {
-//            var baseDir = CONFIG.pluginBasePaths[i];
-//
-//            var subDirs = fs.readdirSync(CONFIG.pluginBasePaths[i]);
-//            for (var j = 0; j < subDirs.length; j++) {
-//                var subDir = subDirs[j];
-//                var fileName = path.join(baseDir, subDir, subDir + '.js');
-//                if (fs.existsSync(fileName)) {
-//                    //console.log('plugin/' + subDir + " : " + baseDir);
-//                    testConfig.requirejs.paths['plugin/' + subDir] = baseDir;
-//                }
-//            }
-//        }
-//    }
-//}
 
 module.exports.testConfig = testConfig;
 

@@ -1,3 +1,9 @@
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Robert Kereskenyi
+ */
+
 "use strict";
 
 define(['js/Widgets/ModelEditor/ModelEditorWidget',
