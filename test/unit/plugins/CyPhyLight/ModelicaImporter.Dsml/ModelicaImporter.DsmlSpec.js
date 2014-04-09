@@ -143,7 +143,7 @@ describe('ModelicaImporter.Dsml', function () {
 
         before(function(done){
             // TODO: is there a way to load this synchronously on client side and server side as well???
-            requirejs(['plugin/ModelicaImporter.Dsml/ModelicaImporter.Dsml/ModelicaImporter.Dsml', 'plugin/CyPhyLight/DSML/CyPhyLight.Dsml', 'src/mocks/CoreMock'], function(_plugin, _CyPhyLight, _CoreMock){
+            requirejs(['plugin/ModelicaImporter.Dsml/ModelicaImporter.Dsml/ModelicaImporter.Dsml', 'plugin/CyPhyLight/DSML/CyPhyLight.Dsml', 'mocks/CoreMock'], function(_plugin, _CyPhyLight, _CoreMock){
                 plugin = _plugin;
 
                 CoreMock = _CoreMock;

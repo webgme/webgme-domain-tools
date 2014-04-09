@@ -22,7 +22,7 @@ describe("A test suite", function() {
     var CoreMock;
     before(function(done){
         // TODO: is there a way to load this synchronously on client side and server side as well???
-        requirejs(['src/mocks/CoreMock'], function(_File){
+        requirejs(['mocks/CoreMock'], function(_File){
             CoreMock = _File;
             done(); // #1 Other Suite will run after this is called
         });

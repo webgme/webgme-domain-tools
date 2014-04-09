@@ -34,7 +34,7 @@ describe('Core Mock attribute getter and setter', function() {
     var core;
 
     before(function(done){
-        requirejs(['src/mocks/CoreMock'],
+        requirejs(['mocks/CoreMock'],
             function(CoreMock_) {
                 CoreMock = CoreMock_;
                 core = new CoreMock();

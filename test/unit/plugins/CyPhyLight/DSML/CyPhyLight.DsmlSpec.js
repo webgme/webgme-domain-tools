@@ -28,7 +28,7 @@ describe('CyPhyLight.Dsml', function () {
         meta;
 
     before(function(done){
-        requirejs(['src/mocks/CoreMock',
+        requirejs(['mocks/CoreMock',
                    'plugin/CyPhyLight/DSML/CyPhyLight.Dsml'],
             function(CoreMock_, CyPhyLight_) {
                 CoreMock = CoreMock_;
