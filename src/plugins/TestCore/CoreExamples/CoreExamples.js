@@ -61,7 +61,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     CoreExamples.prototype.main = function (callback) {
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
-        var self = this;
+        var self = this,
+            error = '';
 
         if (self.core.getPath(self.activeNode) !== '/1023960100') {
             self.logger.error('Run this interpreter on "/1023960100" (models in the root) as activeNode.');
@@ -86,32 +87,59 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                     // Load children here since all examples require this.
                     self.core.loadChildren(element, function (err1, children1) {
                         var name = self.core.getAttribute(element, 'name');
-                        self.logger.info('Starting work on ' + name + '...');
-                        if (name === 'ParentExample') {
+                        if (err1) {
+                            runningExamples -= 1;
+                            error += ' LoadChildren failed for ' + name + ' with error : ' + err1;
+                            if (runningExamples === 0) {
+                                self.result.setSuccess(false);
+                                callback(error, self.result);
+                            }
+                        } else if (name === 'ParentExample') {
+                            self.logger.info('Starting work on ' + name + '...');
                             self.parentExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
+                                error = err ? error += err : error;
                                 if (runningExamples === 0) {
-                                    self.result.setSuccess(true);
-                                    callback(err, self.result);
+                                    if (error) {
+                                        self.result.setSuccess(false);
+                                        callback(error, self.result);
+                                    } else {
+                                        self.result.setSuccess(true);
+                                        callback(null, self.result);
+                                    }
                                 }
                             });
                         } else if (name === 'ConnectionExample') {
+                            self.logger.info('Starting work on ' + name + '...');
                             self.connectionExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
+                                error = err ? error += err : error;
                                 if (runningExamples === 0) {
-                                    self.result.setSuccess(true);
-                                    callback(err, self.result);
+                                    if (error) {
+                                        self.result.setSuccess(false);
+                                        callback(error, self.result);
+                                    } else {
+                                        self.result.setSuccess(true);
+                                        callback(null, self.result);
+                                    }
                                 }
                             });
                         } else if (name === 'ReferenceExample') {
+                            self.logger.info('Starting work on ' + name + '...');
                             self.referenceExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
+                                error = err ? error += err : error;
                                 if (runningExamples === 0) {
-                                    self.result.setSuccess(true);
-                                    callback(err, self.result);
+                                    if (error) {
+                                        self.result.setSuccess(false);
+                                        callback(error, self.result);
+                                    } else {
+                                        self.result.setSuccess(true);
+                                        callback(null, self.result);
+                                    }
                                 }
                             });
                         } else {
@@ -132,7 +160,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     CoreExamples.prototype.parentExample = function (self, children, callback) {
         var i,
             childrenVisits = children.length,
-            err;
+            error = '';
 
         if (childrenVisits === 0) {
             callback('The starting node in ParentExample did not have any children!?');
@@ -143,15 +171,16 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 var name = self.core.getAttribute(childNode, 'name');
                 if (name === 'm_parent') {
                     self.compareParentAndChildsParent(self, childNode, function (err) {
+                        error = err ? error += err : error;
                         childrenVisits -= 1;
                         if (childrenVisits === 0) {
-                            callback(err);
+                            callback(error);
                         }
                     });
                 } else {
                     childrenVisits -= 1;
                     if (childrenVisits === 0) {
-                        callback(err);
+                        callback(error);
                     }
                 }
             })(children[i]);
@@ -163,7 +192,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             var returnedParent,
                 guid1, guid2,
                 error = '';
-            if (children.length === 0) {
+            if (err) {
+                callback(err);
+            } else if (children.length === 0) {
                 callback('m_parent did not have any children!?');
             } else {
                 returnedParent = self.core.getParent(children[0]);
@@ -183,7 +214,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     CoreExamples.prototype.connectionExample = function (self, children, callback) {
         var i,
             childrenVisits = children.length,
-            err = '';
+            error = '';
 
         if (childrenVisits === 0) {
             callback('The starting node in ConnectionExample did not have any children!?');
@@ -193,16 +224,16 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
 
                     self.visitPorts(self, childNode, function (err) {
-                        err += err;
+                        error += err;
                         childrenVisits -= 1;
                         if (childrenVisits === 0) {
-                            callback(err);
+                            callback(error);
                         }
                     });
                 } else {
                     childrenVisits -= 1;
                     if (childrenVisits === 0) {
-                        callback(err);
+                        callback(error);
                     }
                 }
             })(children[i]);
@@ -212,31 +243,43 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     CoreExamples.prototype.visitPorts = function (self, portNode, callback) {
         var j,
             collectionNames = self.core.getCollectionNames(portNode),
-            err = '';
+            error = '';
 
         if (collectionNames.indexOf('src') === -1) {
-            callback(err);
+            callback(error);
         } else {
             self.core.loadCollection(portNode, 'src', function (err, connections) {
-                var connectionVisits = connections.length;
+                var connectionVisits,
+                    portName = self.core.getAttribute(portNode, 'name');
+                if (err) {
+                    error += ' loadCollection failed for ' + portName + ' with error : ' + err;
+                    callback(error);
+                    return;
+                }
+                connectionVisits = connections.length;
                 for (j = 0; j < connections.length; j += 1) {
                     (function (connection) {
                         if (self.core.hasPointer(connection, 'dst') === false) {
                             // This error does not seem to happen.
-                            err += ' A connection with src but without dst exists in model!';
+                            error += ' A connection with src but without dst exists in model!';
                             connectionVisits -= 1;
                             if (connectionVisits === 0) {
-                                callback(err);
+                                callback(error);
                             }
                         } else {
                             self.core.loadPointer(connection, 'dst', function (err, dst) {
-                                var srcName = self.core.getAttribute(portNode, 'name'),
-                                    dstName = self.core.getAttribute(dst, 'name'),
+                                var dstName,
+                                    connName;
+                                if (err) {
+                                    error += ' loadPointer failed for ' + portName + ' with error : ' + err;
+                                } else {
+                                    dstName = self.core.getAttribute(dst, 'name');
                                     connName = self.core.getAttribute(connection, 'name');
-                                self.logger.info(connName + ' connects "' + srcName + '" and "' + dstName + '".');
+                                    self.logger.info(connName + ' connects "' + portName + '" and "' + dstName + '".');
+                                }
                                 connectionVisits -= 1;
                                 if (connectionVisits === 0) {
-                                    callback(err);
+                                    callback(error);
                                 }
                             });
                         }
@@ -251,7 +294,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         var i,
             childNode,
             reference,
-            original;
+            original,
+            error = '';
         for (i = 0; i < children.length; i += 1) {
             childNode = children[i];
             if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
@@ -264,20 +308,19 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         if (self.core.hasPointer(reference, 'ref')) {
             self.core.loadPointer(reference, 'ref', function (err, referredNode) {
                 var guid1,
-                    guid2,
-                    err = '';
+                    guid2;
                 guid1 = self.core.getGuid(original);
                 guid2 = self.core.getGuid(referredNode);
                 if (guid1 === guid2) {
                     self.logger.info('Reference and original node had the same GUID (as expected).');
                 } else {
-                    err += " Reference and original node did not have the same GUID!";
+                    error = 'Reference and original node did not have the same GUID!';
                 }
-                callback(err);
             });
         } else {
-            callback('Reference did not have a ref pointer!');
+            error = 'Reference did not have a ref pointer!';
         }
+        callback(error);
     };
 
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {
