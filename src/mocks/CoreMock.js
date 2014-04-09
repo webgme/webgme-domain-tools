@@ -83,6 +83,11 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.setPointer = function (node, name, target) {
         node.pointers[name] = this.getPath(target);
+        if (target.collection[name]) {
+            target.collection[name].push(node.path);
+        } else {
+            target.collection[name] = [node.path];
+        }
     };
 
     CoreMock.prototype.hasPointer = function (node, name) {
@@ -111,6 +116,25 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.getGuid = function (node) {
         return node.guid;
+    };
+
+    CoreMock.prototype.getCollectionNames = function (node) {
+        return Object.keys(node.collection);
+    };
+
+    CoreMock.prototype.loadCollection = function (node, name, callback) {
+        var colNodes = [],
+            err,
+            i,
+            nodeIds = node.collection[name];
+        if (nodeIds) {
+            for (i = 0; i < nodeIds.length; i += 1) {
+                colNodes.push(this._nodes[nodeIds[i]]);
+            }
+        } else {
+            err = this.getAttribute(node, 'name') + ' does not have a collection ' + name;
+        }
+        callback(err, colNodes);
     };
 
     return CoreMock;

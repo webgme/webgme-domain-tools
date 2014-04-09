@@ -37,6 +37,7 @@ define([], function () {
             this.pointers.base = core.getPath(options.base);
         }
 
+        this.collection = {};
         this.path = options.parent ? core.getPath(options.parent) + '/' + this.ID : '/' + this.ID;
         this.guid = generateGUID();
         this.parent = options.parent ? core.getPath(options.parent) : null;
