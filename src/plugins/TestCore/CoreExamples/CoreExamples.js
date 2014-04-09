@@ -64,6 +64,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         var self = this,
             error = '';
 
+
         if (self.core.getPath(self.activeNode) !== '/1023960100') {
             self.logger.error('Run this interpreter on "/1023960100" (models in the root) as activeNode.');
             self.logger.error('Current activeNode was : ' + self.core.getPath(self.activeNode));
@@ -129,6 +130,22 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                         } else if (name === 'ReferenceExample') {
                             self.logger.info('Starting work on ' + name + '...');
                             self.referenceExample(self, children1, function (err) {
+                                self.logger.info('Done with ' + name + '!');
+                                runningExamples -= 1;
+                                error = err ? error += err : error;
+                                if (runningExamples === 0) {
+                                    if (error) {
+                                        self.result.setSuccess(false);
+                                        callback(error, self.result);
+                                    } else {
+                                        self.result.setSuccess(true);
+                                        callback(null, self.result);
+                                    }
+                                }
+                            });
+                        } else if (name === 'RecursiveChildrenExample') {
+                            self.logger.info('Starting work on ' + name + '...');
+                            self.recursiveChildrenExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
                                 error = err ? error += err : error;
@@ -326,6 +343,35 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             error = 'Reference did not have a ref pointer!';
         }
         callback(error);
+    };
+
+    var ChildrenVisits = 0;
+// --------------------------------- Reference Example ---------------------------------
+    CoreExamples.prototype.recursiveChildrenExample = function (self, children, callback) {
+        var i,
+            error = '';
+        ChildrenVisits += children.length;
+        for (i = 0; i < children.length; i += 1) {
+            (function (childNode) {
+                self.logger.info('At ' + self.core.getAttribute(childNode, 'name'));
+                if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
+
+                    self.core.loadChildren(childNode, function (err, subChildren) {
+                        ChildrenVisits -= 1;
+                        self.recursiveChildrenExample(self, subChildren, function (err1) {
+                            if (ChildrenVisits === 0) {
+                                callback(error);
+                            }
+                        });
+                    });
+                } else {
+                    ChildrenVisits -= 1;
+                    if (ChildrenVisits === 0) {
+                        callback(error);
+                    }
+                }
+            })(children[i]);
+        }
     };
 
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {
