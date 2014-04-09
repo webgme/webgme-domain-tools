@@ -17,6 +17,7 @@ module.exports = function(config) {
     files: [
       {pattern: 'node_modules/webgme/plugin/**/*.js', included: false},
       {pattern: 'lib/**/*.js', included: false},
+      {pattern: 'util/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*Spec.js', included: false},
 

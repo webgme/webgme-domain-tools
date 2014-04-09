@@ -26,7 +26,8 @@ requirejs.config({
         "plugin/DSMLAPIGenerator": "./src/plugins/META",
         "plugin/GetPrintAllObjects": "./src/plugins/FMU",
         "plugin/ImportFMUs": "./src/plugins/FMU",
-        "plugin/PetriNetExporter": "./src/plugins/PetriNet"
+        "plugin/PetriNetExporter": "./src/plugins/PetriNet",
+        "mocks": "./src/mocks"
     },
 
     shim: {

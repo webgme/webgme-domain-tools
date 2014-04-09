@@ -10,8 +10,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'plugin/DSMLAPIGenerator/DSM
     function (PluginConfig, PluginBase, TEMPLATES, EJS) {
         "use strict";
 
-        // workaround
-        var ejs = EJS || window.ejs;
+        // FIXME: workaround
+        // ejs is defined in tests
+        // EJS is defined when plugin runs server side
+        // window.ejs is deinfed when plugin runs in client
+        if (!ejs) {
+            ejs = EJS || window.ejs;
+        }
 
         var DsmlApiGeneratorMultiFile = function () {
             PluginBase.call(this);

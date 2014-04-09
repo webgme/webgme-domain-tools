@@ -89,7 +89,8 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.getBase = function (node) {
-        return this.getPointer(node, 'base');
+        // FIXME: temporary change to fix tests, please review it.
+        return this._nodes[node.pointers['base']];
     };
 
     return CoreMock;
