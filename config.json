@@ -1,21 +1,15 @@
 {
     "port": 8888,
 
-    "loglevel": 2,
-    "logfile": "server.log",
-
     "mongoip": "zsolt-ws.isis.vanderbilt.edu",
-    "mongoport": 27017,
-    "mongodatabase": "multi",
 
-    "sessioncookiesecret": "meWebGMEez",
     "debug": false,
 
 
-    "basedir": "./node_modules/webgme",
-    "clientbasedir": "./node_modules/webgme/client",
+    "decoratorpaths": ["./src/decorators"],
 
-    "decoratorpaths": ["./src/decorators", "./node_modules/webgme/client/decorators"],
+    "visualizerDescriptors": ["./Visualizers.json"],
+
     "pluginBasePaths": [
         "./src/plugins/CyPhyLight",
         "./src/plugins/Examples",
@@ -26,10 +20,11 @@
         "./src/plugins/TestCore"
     ],
 
+
     "paths": {
         "ejs": "./lib/ejs/ejs.min",
         "panels": "./src/panels",
         "widgets": "./src/widgets",
-        "json2xml": "./utils/json2xml.js"
+        "json2xml": "./utils/json2xml"
     }
 }

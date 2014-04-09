@@ -1,0 +1,8 @@
+[
+    {
+        "id": "NetLabelPanel",
+        "title": "NetLabelPanel",
+        "panel": "panels/NetLabel/NetLabelPanel",
+        "DEBUG_ONLY": true
+    }
+]

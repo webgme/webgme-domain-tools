@@ -5,5 +5,8 @@
 var config = require('./config.json'),
     webgme = require('webgme');
 
-var myServer = new webgme.standaloneServer(config);
+// this one sets up only the paths
+webGMEGlobal.setConfig(config);
+
+var myServer = new webgme.standaloneServer();
 myServer.start();
