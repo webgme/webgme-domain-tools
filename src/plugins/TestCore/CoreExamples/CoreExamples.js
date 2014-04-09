@@ -37,7 +37,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     * @public
     */
     CoreExamples.prototype.getDescription = function () {
-        return "Description for Core Examples";
+        return "Run on TestCore project to illustrate common CoreAPI functions.";
     };
 
     /**
@@ -82,12 +82,21 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             }
 
             for (i = 0; i < children.length; i += 1) {
-                // function is needed to save the reference to the specific element i child.
                 (function (element) {
+                    // Load children here since all examples require this.
                     self.core.loadChildren(element, function (err1, children1) {
                         var name = self.core.getAttribute(element, 'name');
                         self.logger.info('Starting work on ' + name + '...');
-                        if (name === 'ConnectionExample') {
+                        if (name === 'ParentExample') {
+                            self.parentExample(self, children1, function (err) {
+                                self.logger.info('Done with ' + name + '!');
+                                runningExamples -= 1;
+                                if (runningExamples === 0) {
+                                    self.result.setSuccess(true);
+                                    callback(err, self.result);
+                                }
+                            });
+                        } else if (name === 'ConnectionExample') {
                             self.connectionExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
@@ -97,14 +106,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                                 }
                             });
                         } else if (name === 'ReferenceExample') {
-                            self.logger.debug('ReferenceExample to be done...');
-                            runningExamples -= 1;
-                            if (runningExamples === 0) {
-                                self.result.setSuccess(true);
-                                callback(err, self.result);
-                            }
-                        } else if (name === 'ParentExample') {
-                            self.parentExample(self, children1, function (err) {
+                            self.referenceExample(self, children1, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
                                 if (runningExamples === 0) {
@@ -117,7 +119,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                             runningExamples -= 1;
                             if (runningExamples === 0) {
                                 self.result.setSuccess(true);
-                                callback(err, self.result);
+                                callback(null, self.result);
                             }
                         }
                     });
@@ -220,8 +222,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 for (j = 0; j < connections.length; j += 1) {
                     (function (connection) {
                         if (self.core.hasPointer(connection, 'dst') === false) {
-                            // TODO: This error does not seem to happen.
-                            err += ' connection with src but without dst exists in model!';
+                            // This error does not seem to happen.
+                            err += ' A connection with src but without dst exists in model!';
                             connectionVisits -= 1;
                             if (connectionVisits === 0) {
                                 callback(err);
@@ -241,6 +243,40 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                     })(connections[j]);
                 }
             });
+        }
+    };
+
+// --------------------------------- Reference Example ---------------------------------
+    CoreExamples.prototype.referenceExample = function (self, children, callback) {
+        var i,
+            childNode,
+            reference,
+            original;
+        for (i = 0; i < children.length; i += 1) {
+            childNode = children[i];
+            if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
+                original = childNode;
+            } else if (self.isMetaTypeOf(self, childNode, self.META['ModelRef'])) {
+                reference = childNode;
+            }
+        }
+
+        if (self.core.hasPointer(reference, 'ref')) {
+            self.core.loadPointer(reference, 'ref', function (err, referredNode) {
+                var guid1,
+                    guid2,
+                    err = '';
+                guid1 = self.core.getGuid(original);
+                guid2 = self.core.getGuid(referredNode);
+                if (guid1 === guid2) {
+                    self.logger.info('Reference and original node had the same GUID (as expected).');
+                } else {
+                    err += " Reference and original node did not have the same GUID!";
+                }
+                callback(err);
+            });
+        } else {
+            callback('Reference did not have a ref pointer!');
         }
     };
 
