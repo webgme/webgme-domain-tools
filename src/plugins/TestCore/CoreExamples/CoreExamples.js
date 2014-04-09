@@ -145,7 +145,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                             });
                         } else if (name === 'RecursiveChildrenExample') {
                             self.logger.info('Starting work on ' + name + '...');
-                            self.recursiveChildrenExample(self, children1, function (err) {
+                            self.recursiveChildrenExample(self, children1, {visits: 0}, function (err) {
                                 self.logger.info('Done with ' + name + '!');
                                 runningExamples -= 1;
                                 error = err ? error += err : error;
@@ -311,7 +311,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         }
     };
 
-// --------------------------------- Reference Example ---------------------------------
+// --------------------------------- Reference Example ----------------------------------
     CoreExamples.prototype.referenceExample = function (self, children, callback) {
         var i,
             childNode,
@@ -345,28 +345,26 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         callback(error);
     };
 
-    var ChildrenVisits = 0;
-// --------------------------------- Reference Example ---------------------------------
-    CoreExamples.prototype.recursiveChildrenExample = function (self, children, callback) {
+// ------------------------------ Recursive Children Example ----------------------------
+    CoreExamples.prototype.recursiveChildrenExample = function (self, children, counter, callback) {
         var i,
             error = '';
-        ChildrenVisits += children.length;
+        counter.visits += children.length;
         for (i = 0; i < children.length; i += 1) {
             (function (childNode) {
-                self.logger.info('At ' + self.core.getAttribute(childNode, 'name'));
+                self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(childNode, 'name'));
                 if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
-
                     self.core.loadChildren(childNode, function (err, subChildren) {
-                        ChildrenVisits -= 1;
-                        self.recursiveChildrenExample(self, subChildren, function (err1) {
-                            if (ChildrenVisits === 0) {
+                        counter.visits -= 1;
+                        self.recursiveChildrenExample(self, subChildren, counter, function (err1) {
+                            if (counter.visits === 0) {
                                 callback(error);
                             }
                         });
                     });
                 } else {
-                    ChildrenVisits -= 1;
-                    if (ChildrenVisits === 0) {
+                    counter.visits -= 1;
+                    if (counter.visits === 0) {
                         callback(error);
                     }
                 }
