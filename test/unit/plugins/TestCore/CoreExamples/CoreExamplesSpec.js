@@ -120,86 +120,76 @@ describe('CoreExamples', function () {
     });
 
     it('compareParentAndChildsParent', function (done) {
-        var self = {};
-        self.core = core;
-        self.logger = new TestLogger();
+        plugin.core = core;
+        plugin.logger = new TestLogger();
 
-        plugin.compareParentAndChildsParent(self, mParent, function (err) {
+        plugin.compareParentAndChildsParent(mParent, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages[0]).
+            expect(plugin.logger.info_messages[0]).
                 to.equal("Parent och its child's parent had the same GUID (as expected).");
             done();
         });
     });
 
     it('parentExample', function (done) {
-        var self = {},
-            children = [mParent];
-        self.core = core;
-        self.logger = new TestLogger();
-        self.META = meta;
-        self.compareParentAndChildsParent = plugin.compareParentAndChildsParent;
-        plugin.parentExample(self, children, function (err) {
+        var children = [mParent];
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.parentExample(children, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages[0]).
+            expect(plugin.logger.info_messages[0]).
                 to.equal("Parent och its child's parent had the same GUID (as expected).");
             done();
         });
     });
 
     it('referenceExample', function (done) {
-        var self = {},
-            children = [orgNode, refNode];
-        self.core = core;
-        self.logger = new TestLogger();
-        self.META = meta;
-        self.isMetaTypeOf = plugin.isMetaTypeOf;
-        plugin.referenceExample(self, children, function (err) {
+        var children = [orgNode, refNode];
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.referenceExample(children, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages[0]).
+            expect(plugin.logger.info_messages[0]).
                 to.equal("Reference and original node had the same GUID (as expected).");
             done();
         });
     });
 
     it('visitPorts1', function (done) {
-        var self = {};
-        self.core = core;
-        self.logger = new TestLogger();
+        plugin.core = core;
+        plugin.logger = new TestLogger();
 
-        plugin.visitPorts(self, port1, function (err) {
+        plugin.visitPorts(port1, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages[0]).
+            expect(plugin.logger.info_messages[0]).
                 to.equal('ConnectionElement connects "Port1" and "p1".');
             done();
         });
     });
 
     it('visitPorts3', function (done) {
-        var self = {};
-        self.core = core;
-        self.logger = new TestLogger();
+        plugin.core = core;
+        plugin.logger = new TestLogger();
 
-        plugin.visitPorts(self, port3, function (err) {
+        plugin.visitPorts(port3, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages[0]).
+            expect(plugin.logger.info_messages[0]).
                 to.equal('ConnectionElement connects "Port3" and "Port3".');
             done();
         });
     });
 
     it('connectionExample', function (done) {
-        var self = {},
-            children = [port1, port2, port3, conn11, conn21, conn33, m1];
-        self.core = core;
-        self.logger = new TestLogger();
-        self.isMetaTypeOf = plugin.isMetaTypeOf;
-        self.META = meta;
-        self.visitPorts = plugin.visitPorts;
+        var children = [port1, port2, port3, conn11, conn21, conn33, m1];
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
 
-        plugin.connectionExample(self, children, function (err) {
+        plugin.connectionExample(children, function (err) {
             expect(err).to.equal('');
-            expect(self.logger.info_messages.length).to.equal(3);
+            expect(plugin.logger.info_messages.length).to.equal(3);
             done();
         });
     });

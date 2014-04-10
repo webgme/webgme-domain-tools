@@ -75,7 +75,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
         self.core.loadChildren(self.activeNode, function (err, children) {
             var i,
-                runningExamples = children.length;
+                runningExamples = children.length,
+                itrCallback;
 
             if (runningExamples === 0) {
                 self.result.setSuccess(false);
@@ -83,237 +84,218 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 return;
             }
 
+            if (err) {
+                self.result.setSuccess(false);
+                callback('LoadChildren failed for the activeNode with error : ' + err, self.result);
+                return;
+            }
+
+            itrCallback = function (err) {
+                runningExamples -= 1;
+                error = err ? error += err : error;
+                if (runningExamples === 0) {
+                    if (error) {
+                        self.result.setSuccess(false);
+                        callback(error, self.result);
+                    } else {
+                        self.result.setSuccess(true);
+                        callback(null, self.result);
+                    }
+                }
+            };
+
             for (i = 0; i < children.length; i += 1) {
-                (function (element) {
-                    // Load children here since all examples require this.
-                    self.core.loadChildren(element, function (err1, children1) {
-                        var name = self.core.getAttribute(element, 'name');
-                        if (err1) {
-                            runningExamples -= 1;
-                            error += ' LoadChildren failed for ' + name + ' with error : ' + err1;
-                            if (runningExamples === 0) {
-                                self.result.setSuccess(false);
-                                callback(error, self.result);
-                            }
-                        } else if (name === 'ParentExample') {
-                            self.logger.info('Starting work on ' + name + '...');
-                            self.parentExample(self, children1, function (err) {
-                                self.logger.info('Done with ' + name + '!');
-                                runningExamples -= 1;
-                                error = err ? error += err : error;
-                                if (runningExamples === 0) {
-                                    if (error) {
-                                        self.result.setSuccess(false);
-                                        callback(error, self.result);
-                                    } else {
-                                        self.result.setSuccess(true);
-                                        callback(null, self.result);
-                                    }
-                                }
-                            });
-                        } else if (name === 'ConnectionExample') {
-                            self.logger.info('Starting work on ' + name + '...');
-                            self.connectionExample(self, children1, function (err) {
-                                self.logger.info('Done with ' + name + '!');
-                                runningExamples -= 1;
-                                error = err ? error += err : error;
-                                if (runningExamples === 0) {
-                                    if (error) {
-                                        self.result.setSuccess(false);
-                                        callback(error, self.result);
-                                    } else {
-                                        self.result.setSuccess(true);
-                                        callback(null, self.result);
-                                    }
-                                }
-                            });
-                        } else if (name === 'ReferenceExample') {
-                            self.logger.info('Starting work on ' + name + '...');
-                            self.referenceExample(self, children1, function (err) {
-                                self.logger.info('Done with ' + name + '!');
-                                runningExamples -= 1;
-                                error = err ? error += err : error;
-                                if (runningExamples === 0) {
-                                    if (error) {
-                                        self.result.setSuccess(false);
-                                        callback(error, self.result);
-                                    } else {
-                                        self.result.setSuccess(true);
-                                        callback(null, self.result);
-                                    }
-                                }
-                            });
-                        } else if (name === 'RecursiveChildrenExample') {
-                            self.logger.info('Starting work on ' + name + '...');
-                            self.recursiveChildrenExample(self, children1, {visits: 0}, function (err) {
-                                self.logger.info('Done with ' + name + '!');
-                                runningExamples -= 1;
-                                error = err ? error += err : error;
-                                if (runningExamples === 0) {
-                                    if (error) {
-                                        self.result.setSuccess(false);
-                                        callback(error, self.result);
-                                    } else {
-                                        self.result.setSuccess(true);
-                                        callback(null, self.result);
-                                    }
-                                }
-                            });
-                        } else {
-                            self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
-                            runningExamples -= 1;
-                            if (runningExamples === 0) {
-                                if (error) {
-                                    self.result.setSuccess(false);
-                                    callback(error, self.result);
-                                } else {
-                                    self.result.setSuccess(true);
-                                    callback(null, self.result);
-                                }
-                            }
-                        }
-                    });
-                })(children[i]);
+                self.runExamples(children[i], itrCallback);
+            }
+        });
+    };
+
+    CoreExamples.prototype.runExamples = function (node, callback) {
+        var self = this;
+        // Load children here since all examples require this.
+        self.core.loadChildren(node, function (err, children) {
+            var name = self.core.getAttribute(node, 'name');
+            if (err) {
+                callback(' LoadChildren failed for ' + name + ' with error : ' + err);
+            } else if (name === 'ParentExample') {
+                self.logger.info('Starting work on ' + name + '...');
+                self.parentExample(children, function (err) {
+                    self.logger.info('Done with ' + name + '!');
+                    callback(err);
+                });
+            } else if (name === 'ConnectionExample') {
+                self.logger.info('Starting work on ' + name + '...');
+                self.connectionExample(children, function (err) {
+                    self.logger.info('Done with ' + name + '!');
+                    callback(err);
+                });
+            } else if (name === 'ReferenceExample') {
+                self.logger.info('Starting work on ' + name + '...');
+                self.referenceExample(children, function (err) {
+                    self.logger.info('Done with ' + name + '!');
+                    callback(err);
+                });
+            } else if (name === 'RecursiveChildrenExample') {
+                self.logger.info('Starting work on ' + name + '...');
+                self.recursiveChildrenExample(children, {visits: 0}, function (err) {
+                    self.logger.info('Done with ' + name + '!');
+                    callback(err);
+                });
+            } else {
+                self.logger.debug('Found unexpected child, ' + name + ', inside Models.');
+                callback(null);
             }
         });
     };
 
 // --------------------------------- Parent Example -------------------------------------
-    CoreExamples.prototype.parentExample = function (self, children, callback) {
-        var i,
+    CoreExamples.prototype.parentExample = function (children, callback) {
+        var self = this,
+            i,
             childrenVisits = children.length,
-            error = '';
+            error = '',
+            itrCallback;
 
         if (childrenVisits === 0) {
             callback('The starting node in ParentExample did not have any children!?');
         }
 
+        itrCallback = function (err) {
+            error = err ? error += err : error;
+            childrenVisits -= 1;
+            if (childrenVisits === 0) {
+                callback(error);
+            }
+        };
+
         for (i = 0; i < children.length; i += 1) {
-            (function (childNode) {
-                var name = self.core.getAttribute(childNode, 'name');
-                if (name === 'm_parent') {
-                    self.compareParentAndChildsParent(self, childNode, function (err) {
-                        error = err ? error += err : error;
-                        childrenVisits -= 1;
-                        if (childrenVisits === 0) {
-                            callback(error);
-                        }
-                    });
-                } else {
-                    childrenVisits -= 1;
-                    if (childrenVisits === 0) {
-                        callback(error);
-                    }
-                }
-            })(children[i]);
+            self.compareParentAndChildsParent(children[i], itrCallback);
         }
     };
 
-    CoreExamples.prototype.compareParentAndChildsParent = function (self, parentNode, callback) {
-        self.core.loadChildren(parentNode, function (err, children) {
-            var returnedParent,
-                guid1, guid2,
-                error = '';
-            if (err) {
-                callback(err);
-            } else if (children.length === 0) {
-                callback('m_parent did not have any children!?');
-            } else {
-                returnedParent = self.core.getParent(children[0]);
-                guid1 = self.core.getGuid(parentNode);
-                guid2 = self.core.getGuid(returnedParent);
-                if (guid1 === guid2) {
-                    self.logger.info("Parent och its child's parent had the same GUID (as expected).");
+    CoreExamples.prototype.compareParentAndChildsParent = function (node, callback) {
+        var self = this,
+            name = self.core.getAttribute(node, 'name');
+        if (name === 'm_parent') {
+            self.core.loadChildren(node, function (err, children) {
+                var returnedParent,
+                    guid1,
+                    guid2,
+                    error = '';
+                if (err) {
+                    callback(err);
+                } else if (children.length === 0) {
+                    callback('m_parent did not have any children!?');
                 } else {
-                    error += "Parent och its child's parent had the same GUID (very weird indeed).";
+                    returnedParent = self.core.getParent(children[0]);
+                    guid1 = self.core.getGuid(node);
+                    guid2 = self.core.getGuid(returnedParent);
+                    if (guid1 === guid2) {
+                        self.logger.info("Parent och its child's parent had the same GUID (as expected).");
+                    } else {
+                        error += "Parent och its child's parent had the same GUID (very weird indeed).";
+                    }
+                    callback(error);
                 }
-                callback(error);
-            }
-        });
+            });
+        } else {
+            callback(null);
+        }
     };
 
 // --------------------------------- Connection Example ---------------------------------
-    CoreExamples.prototype.connectionExample = function (self, children, callback) {
-        var i,
+    CoreExamples.prototype.connectionExample = function (children, callback) {
+        var self = this,
+            i,
             childrenVisits = children.length,
-            error = '';
+            error = '',
+            itrCallback;
 
         if (childrenVisits === 0) {
             callback('The starting node in ConnectionExample did not have any children!?');
+            return;
         }
-        for (i = 0; i < children.length; i += 1) {
-            (function (childNode) {
-                if (self.isMetaTypeOf(self, childNode, self.META['PortElement'])) {
 
-                    self.visitPorts(self, childNode, function (err) {
-                        error += err;
-                        childrenVisits -= 1;
-                        if (childrenVisits === 0) {
-                            callback(error);
-                        }
-                    });
-                } else {
-                    childrenVisits -= 1;
-                    if (childrenVisits === 0) {
-                        callback(error);
-                    }
-                }
-            })(children[i]);
+        itrCallback = function (err) {
+            error = err ? error += err : error;
+            childrenVisits -= 1;
+            if (childrenVisits === 0) {
+                callback(error);
+            }
+        };
+
+        for (i = 0; i < children.length; i += 1) {
+            if (self.isMetaTypeOf(self, children[i], self.META['PortElement'])) {
+                self.visitPorts(children[i], itrCallback);
+            } else {
+                itrCallback(null);
+            }
         }
     };
 
-    CoreExamples.prototype.visitPorts = function (self, portNode, callback) {
-        var j,
+    CoreExamples.prototype.visitPorts = function (portNode, callback) {
+        var self = this,
+            j,
             collectionNames = self.core.getCollectionNames(portNode),
             error = '';
 
         if (collectionNames.indexOf('src') === -1) {
-            callback(error);
-        } else {
-            self.core.loadCollection(portNode, 'src', function (err, connections) {
-                var connectionVisits,
-                    portName = self.core.getAttribute(portNode, 'name');
-                if (err) {
-                    error += ' loadCollection failed for ' + portName + ' with error : ' + err;
+            callback(null);
+            return;
+        }
+
+        self.core.loadCollection(portNode, 'src', function (err, connections) {
+            var connectionVisits,
+                portName = self.core.getAttribute(portNode, 'name'),
+                itrCallback;
+            if (err) {
+                error += ' loadCollection failed for ' + portName + ' with error : ' + err;
+                callback(error);
+                return;
+            }
+
+            itrCallback = function (err) {
+                error = err ? error += err : error;
+                connectionVisits -= 1;
+                if (connectionVisits === 0) {
                     callback(error);
-                    return;
                 }
-                connectionVisits = connections.length;
-                for (j = 0; j < connections.length; j += 1) {
-                    (function (connection) {
-                        if (self.core.hasPointer(connection, 'dst') === false) {
-                            // This error does not seem to happen.
-                            error += ' A connection with src but without dst exists in model!';
-                            connectionVisits -= 1;
-                            if (connectionVisits === 0) {
-                                callback(error);
-                            }
-                        } else {
-                            self.core.loadPointer(connection, 'dst', function (err, dst) {
-                                var dstName,
-                                    connName;
-                                if (err) {
-                                    error += ' loadPointer failed for ' + portName + ' with error : ' + err;
-                                } else {
-                                    dstName = self.core.getAttribute(dst, 'name');
-                                    connName = self.core.getAttribute(connection, 'name');
-                                    self.logger.info(connName + ' connects "' + portName + '" and "' + dstName + '".');
-                                }
-                                connectionVisits -= 1;
-                                if (connectionVisits === 0) {
-                                    callback(error);
-                                }
-                            });
-                        }
-                    })(connections[j]);
+            };
+
+            connectionVisits = connections.length;
+            for (j = 0; j < connections.length; j += 1) {
+                self.visitConnection(connections[j], portName, itrCallback);
+            }
+        });
+    };
+
+    CoreExamples.prototype.visitConnection = function (connectionNode, portName, callback) {
+        var self = this,
+            error = '';
+
+        if (self.core.hasPointer(connectionNode, 'dst')) {
+            self.core.loadPointer(connectionNode, 'dst', function (err, dst) {
+                var dstName,
+                    connName;
+                if (err) {
+                    error += ' loadPointer failed for ' + portName + ' with error : ' + err;
+                } else {
+                    dstName = self.core.getAttribute(dst, 'name');
+                    connName = self.core.getAttribute(connectionNode, 'name');
+                    self.logger.info(connName + ' connects "' + portName + '" and "' + dstName + '".');
                 }
+
+                callback(error);
             });
+        } else {
+            callback('A connection with src but without dst exists in model!');
         }
     };
 
 // --------------------------------- Reference Example ----------------------------------
-    CoreExamples.prototype.referenceExample = function (self, children, callback) {
-        var i,
+    CoreExamples.prototype.referenceExample = function (children, callback) {
+        var self = this,
+            i,
             childNode,
             reference,
             original,
@@ -346,8 +328,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     };
 
 // ------------------------------ Recursive Children Example ----------------------------
-    CoreExamples.prototype.recursiveChildrenExample = function (self, children, counter, callback) {
-        var i,
+    CoreExamples.prototype.recursiveChildrenExample = function (children, counter, callback) {
+        var self = this,
+            i,
             error = '';
         counter.visits += children.length;
         for (i = 0; i < children.length; i += 1) {
@@ -363,7 +346,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                                 callback(error);
                             }
                         } else {
-                            self.recursiveChildrenExample(self, subChildren, counter, function (err1) {
+                            self.recursiveChildrenExample(subChildren, counter, function (err1) {
                                 error += err1;
                                 if (counter.visits === 0) {
                                     callback(error);
