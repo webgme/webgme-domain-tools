@@ -19,17 +19,17 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
     Logger.prototype.main = function (callback) {
         var self = this;
-        self.logger.debug('Interpreter started');
-        //self.logger.log('Interpreter started'); N.B. log is not allowed
-        self.logger.info('Interpreter started');
-        self.logger.warning('Interpreter started');
-        self.logger.error('Interpreter started');
-
-        if (self.activeNode) {
-            self.createMessage(self.activeNode, 'This will be in result.');
+        if (!self.activeNode) {
+            self.setSuccess(false);
+            callback('no activeNode given', self.result);
+            return;
         }
 
-        self.result.setSuccess(true);
+        self.logger.info('name : ' + self.core.getAttribute(self.activeNode, 'name'));
+        self.logger.info('path : ' + self.core.getPath(self.activeNode));
+        self.logger.info('GUID : ' + self.core.getGuid(self.activeNode));
+        self.createMessage(self.activeNode, 'This will be in result.');
+        self.setSuccess(true);
         callback(null, self.result);
     };
 
