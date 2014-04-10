@@ -352,15 +352,24 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         counter.visits += children.length;
         for (i = 0; i < children.length; i += 1) {
             (function (childNode) {
-                self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(childNode, 'name'));
+                var name = self.core.getAttribute(childNode, 'name');
+                self.logger.info(':: RecursiveChildrenExample :: at ' + name);
                 if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
                     self.core.loadChildren(childNode, function (err, subChildren) {
                         counter.visits -= 1;
-                        self.recursiveChildrenExample(self, subChildren, counter, function (err1) {
+                        if (err) {
+                            error += ' loadChildren failed for ' + name + ' with error : ' + err;
                             if (counter.visits === 0) {
                                 callback(error);
                             }
-                        });
+                        } else {
+                            self.recursiveChildrenExample(self, subChildren, counter, function (err1) {
+                                error += err1;
+                                if (counter.visits === 0) {
+                                    callback(error);
+                                }
+                            });
+                        }
                     });
                 } else {
                     counter.visits -= 1;
