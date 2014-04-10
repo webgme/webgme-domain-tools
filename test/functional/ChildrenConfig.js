@@ -16,7 +16,7 @@ if (typeof window === 'undefined') {
         expect = chai.expect;
 }
 
-describe("Plugin tests", function() {
+describe("Functional plugin tests", function() {
     it('should run ChildrenConfig on Test', function(done) {
         webgme.runPlugin.main(webGMEGlobal.getConfig(), {
             projectName: 'Test',
@@ -40,4 +40,29 @@ describe("Plugin tests", function() {
         });
     });
 
+    it('should run CoreExamples on TestCore project', function(done) {
+        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+            projectName: 'TestCore',
+            pluginName: 'CoreExamples',
+            activeNode: '/1023960100'
+        }, function (err, result) {
+            expect(err).to.equal(null);
+            // TODO: expect result is a PluginResult type
+            expect(result.getSuccess()).to.equal(true);
+            done();
+        });
+    });
+
+    it('should fail CoreExamples on wrong active node', function(done) {
+        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+            projectName: 'TestCore',
+            pluginName: 'CoreExamples',
+            activeNode: '/1583045286'
+        }, function (err, result) {
+            expect(err).to.equal("Run this interpreter on \"/1023960100\" as activeNode.");
+            // TODO: expect result is a PluginResult type
+            expect(result.getSuccess()).to.equal(false);
+            done();
+        });
+    });
 });
