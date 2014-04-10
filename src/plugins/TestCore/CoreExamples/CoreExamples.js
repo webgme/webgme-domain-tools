@@ -137,7 +137,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 });
             } else if (name === 'RecursiveChildrenExample') {
                 self.logger.info('Starting work on ' + name + '...');
-                self.recursiveChildrenExample(children, {visits: 0}, function (err) {
+                self.recursiveChildrenExample(children, function (err) {
                     self.logger.info('Done with ' + name + '!');
                     callback(err);
                 });
@@ -328,40 +328,58 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     };
 
 // ------------------------------ Recursive Children Example ----------------------------
-    CoreExamples.prototype.recursiveChildrenExample = function (children, counter, callback) {
+    CoreExamples.prototype.recursiveChildrenExample = function (children, callback) {
         var self = this,
             i,
-            error = '';
-        counter.visits += children.length;
+            error = '',
+            counter = {visits: children.length},
+            itrCallback;
+
+        itrCallback = function (err) {
+            error = err ? error += err : error;
+            counter.visits -= 1;
+            if (counter.visits === 0) {
+                callback(error);
+            }
+        };
+
         for (i = 0; i < children.length; i += 1) {
-            (function (childNode) {
-                var name = self.core.getAttribute(childNode, 'name');
-                self.logger.info(':: RecursiveChildrenExample :: at ' + name);
-                if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
-                    self.core.loadChildren(childNode, function (err, subChildren) {
-                        counter.visits -= 1;
-                        if (err) {
-                            error += ' loadChildren failed for ' + name + ' with error : ' + err;
-                            if (counter.visits === 0) {
-                                callback(error);
-                            }
-                        } else {
-                            self.recursiveChildrenExample(subChildren, counter, function (err1) {
-                                error += err1;
-                                if (counter.visits === 0) {
-                                    callback(error);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    counter.visits -= 1;
-                    if (counter.visits === 0) {
-                        callback(error);
-                    }
-                }
-            })(children[i]);
+            if (self.isMetaTypeOf(self, children[i], self.META['ModelElement'])) {
+                self.recurseOverChildren(children[i], counter, itrCallback);
+            } else {
+                self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(children[i], 'name'));
+                itrCallback(null);
+            }
         }
+    };
+
+    CoreExamples.prototype.recurseOverChildren = function (node, counter, callback) {
+        var self = this,
+            name = self.core.getAttribute(node, 'name');
+        self.logger.info(':: RecursiveChildrenExample :: at ' + name);
+
+        self.core.loadChildren(node, function (err, children) {
+            var i;
+            if (err) {
+                callback(' loadChildren failed for ' + name + ' with error : ' + err);
+            }
+            counter.visits += children.length;
+
+            if (children.length === 0) {
+                callback(null);
+            } else {
+                // The node needs to be accounted for.
+                counter.visits -= 1;
+            }
+            for (i = 0; i < children.length; i += 1) {
+                if (self.isMetaTypeOf(self, children[i], self.META['ModelElement'])) {
+                    self.recurseOverChildren(children[i], counter, callback);
+                } else {
+                    self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(children[i], 'name'));
+                    callback(null);
+                }
+            }
+        });
     };
 
     CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {

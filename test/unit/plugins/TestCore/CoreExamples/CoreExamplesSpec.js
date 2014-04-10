@@ -31,13 +31,13 @@ describe('CoreExamples', function () {
         conn11,
         conn21,
         conn33,
+        parentExample,
         m1;
 
     before(function (done) {
         requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock'], function (CoreExamples, Core) {
             var rootNode,
                 modelsNode,
-                parentExample,
                 mChild,
                 referenceExample,
                 connectionExample,
@@ -188,6 +188,18 @@ describe('CoreExamples', function () {
         plugin.META = meta;
 
         plugin.connectionExample(children, function (err) {
+            expect(err).to.equal('');
+            expect(plugin.logger.info_messages.length).to.equal(3);
+            done();
+        });
+    });
+
+    it('recursiveChildrenExample', function (done) {
+        var children = [parentExample];
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.recursiveChildrenExample(children, function (err) {
             expect(err).to.equal('');
             expect(plugin.logger.info_messages.length).to.equal(3);
             done();
