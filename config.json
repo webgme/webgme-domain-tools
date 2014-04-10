@@ -26,5 +26,9 @@
         "panels": "./src/panels",
         "widgets": "./src/widgets",
         "json2xml": "./util/json2xml"
+    },
+
+    "test_paths": {
+        "mocks": "./src/mocks"
     }
 }

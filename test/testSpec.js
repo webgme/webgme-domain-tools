@@ -7,8 +7,7 @@ if (typeof window === 'undefined') {
 
     // server-side setup
     var requirejs = require("requirejs");
-    var testConfig = require("../test-conf").testConfig;
-    requirejs.config(testConfig.requirejs);
+    require("../test-conf");
 
     var chai = require('chai'),
         should = chai.should(),
