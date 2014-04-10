@@ -366,6 +366,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             counter.visits += children.length;
 
             if (children.length === 0) {
+                // The only chance for callback to be called.
                 callback(null);
             } else {
                 // The node needs to be accounted for.

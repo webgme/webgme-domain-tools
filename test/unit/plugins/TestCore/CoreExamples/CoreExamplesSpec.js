@@ -32,15 +32,15 @@ describe('CoreExamples', function () {
         conn21,
         conn33,
         parentExample,
-        m1;
+        connectionExample,
+        referenceExample,
+        m1,
+        modelsNode;
 
     before(function (done) {
         requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock'], function (CoreExamples, Core) {
             var rootNode,
-                modelsNode,
                 mChild,
-                referenceExample,
-                connectionExample,
                 p1;
 
             plugin = new CoreExamples();
@@ -194,7 +194,7 @@ describe('CoreExamples', function () {
         });
     });
 
-    it('recursiveChildrenExample', function (done) {
+    it('recursiveChildrenExample1', function (done) {
         var children = [parentExample];
         plugin.core = core;
         plugin.logger = new TestLogger();
@@ -202,6 +202,40 @@ describe('CoreExamples', function () {
         plugin.recursiveChildrenExample(children, function (err) {
             expect(err).to.equal('');
             expect(plugin.logger.info_messages.length).to.equal(3);
+            done();
+        });
+    });
+
+    it('recursiveChildrenExample2', function (done) {
+        var children = [connectionExample];
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.recursiveChildrenExample(children, function (err) {
+            expect(err).to.equal('');
+            expect(plugin.logger.info_messages.length).to.equal(9);
+            done();
+        });
+    });
+
+    it('runExamples1', function (done) {
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.runExamples(connectionExample, function (err) {
+            expect(err).to.equal('');
+            expect(plugin.logger.info_messages.length).to.equal(5);
+            done();
+        });
+    });
+
+    it('runExamplesEmpty', function (done) {
+        plugin.core = core;
+        plugin.logger = new TestLogger();
+        plugin.META = meta;
+        plugin.runExamples(modelsNode, function (err) {
+            expect(err).to.equal(null);
+            expect(plugin.logger.debug_messages[0]).to.equal('Found unexpected child, Models, inside Models.');
             done();
         });
     });
