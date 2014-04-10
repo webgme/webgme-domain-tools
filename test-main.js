@@ -13,15 +13,20 @@ for (var file in window.__karma__.files) {
     }
 }
 
+//var CONFIG = requirejs('./config.json');
+//console.log(CONFIG);
+
 requirejs.config({
     // Karma serves files from '/base'
     baseUrl: '/base',
 
-    // TODO: populate plugin list dynamically based on config.json
+
     paths: {
-        "ejs": "./lib/ejs/ejs.min",
-        "logManager": "common/LogManager",
-        'plugin': 'node_modules/webgme/plugin',
+        // plugin base classes
+        "plugin": "node_modules/webgme/plugin",
+
+        // plugins
+        // TODO: populate plugin list dynamically based on config.json
         "plugin/Children.Dsml": "./src/plugins/CyPhyLight",
         "plugin/CyPhyLight": "./src/plugins/CyPhyLight",
         "plugin/ModelicaImporter": "./src/plugins/CyPhyLight",
@@ -36,6 +41,11 @@ requirejs.config({
         "plugin/ImportFMUs": "./src/plugins/FMU",
         "plugin/PetriNetExporter": "./src/plugins/PetriNet",
         "plugin/CoreExamples": "./src/plugins/TestCore",
+
+        // external libraries used by plugins
+        "ejs": "./lib/ejs/ejs.min",
+
+        // modules used by test cases
         "mocks": "./src/mocks"
     },
 
