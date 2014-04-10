@@ -35,6 +35,7 @@ requirejs.config({
         "plugin/GetPrintAllObjects": "./src/plugins/FMU",
         "plugin/ImportFMUs": "./src/plugins/FMU",
         "plugin/PetriNetExporter": "./src/plugins/PetriNet",
+        "plugin/CoreExamples": "./src/plugins/TestCore",
         "mocks": "./src/mocks"
     },
 
