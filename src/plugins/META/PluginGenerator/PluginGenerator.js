@@ -34,6 +34,10 @@ define(['plugin/PluginConfig',
             return "Plugin Generator";
         };
 
+        PluginGeneratorPlugin.prototype.getVersion = function () {
+            return "0.1.1";
+        };
+
         PluginGeneratorPlugin.prototype.getConfigStructure = function () {
             return [
                 {
@@ -43,68 +47,70 @@ define(['plugin/PluginConfig',
                     "value": 'MyNewExporterPlugin',
                     "valueType": "string",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "pluginName",
                     "displayName": "Name",
                     "description": 'Short readable plugin name; spaces are allowed',
                     "value": 'My New Exporter',
                     "valueType": "string",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "hasVersion",
                     "displayName": "Use version string",
                     "description": 'Enable to generate version method.',
                     "value": false,
                     "valueType": "boolean",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "description",
                     "displayName": "Description",
                     "description": 'Optional description of the plugin.',
                     "value": '',
                     "valueType": "string",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "templateType",
                     "displayName": "Example template",
-                    "description": '',
-                    "value": 'Javascript',
+                    "description": 'Ejs template for code generation.',
+                    "value": 'None',
                     "valueType": "string",
                     "valueItems": [
-                        "Javascript",
+                        "None",
+                        "JavaScript",
                         "Python",
-                        "C#"
+                        "CSharp"
                     ],
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "configStructure",
                     "displayName": "Include Configuration Structure.",
                     "description": 'Configuration structure will populate this GUI with controls.',
                     "value": false,
                     "valueType": "boolean",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "core",
                     "displayName": "Include core example",
                     "description": '',
                     "value": false,
                     "valueType": "boolean",
                     "readOnly": false
-                }, {
+                },
+                {
                     "name": "logger",
                     "displayName": "Include logger example.",
                     "description": '',
                     "value": false,
                     "valueType": "boolean",
                     "readOnly": false
-                }, {
-                    "name": "fs",
-                    "displayName": "Include file-system example.",
-                    "description": '',
-                    "value": false,
-                    "valueType": "boolean",
-                    "readOnly": false
-                }, {
+                },
+                {
                     "name": "fs",
                     "displayName": "Include file-system example.",
                     "description": '',
@@ -119,29 +125,43 @@ define(['plugin/PluginConfig',
             var self = this,
                 currentConfig,
                 pluginJS,
-                fileName;
+                pluginFileName,
+                templateFileName,
+                outputDir;
 
             // Assume everything is ok.
             self.result.setSuccess(true);
-            currentConfig = this.getCurrentConfig();
+            currentConfig = self.getCurrentConfig();
             self.logger.info('Current configuration');
             self.logger.info(JSON.stringify(currentConfig, null, 4));
 
-            if (currentConfig.templateType === 'Python' || currentConfig.templateType === 'C#') {
-                self.result.setSuccess(false);
-                self.logger.warning('Python and C# are currently not supported, aborting...');
-                callback('Python and C# are currently not supported!', self.result);
-                return;
+            currentConfig.date = new Date();
+            currentConfig.projectName = self.projectName;
+            outputDir = 'src/plugins/' + self.projectName + '/' + currentConfig.pluginID + '/';
+
+            if (currentConfig.templateType === 'Python') {
+                currentConfig.templateExt = 'py';
+                templateFileName = outputDir + 'Templates/Python.py.ejs';
+                self.fs.addFile(templateFileName, 'print "<%=a%> and <%=b%> provided."');
+            } else if (currentConfig.templateType === 'CSharp') {
+                currentConfig.templateExt = 'cs';
+                templateFileName = outputDir + 'Templates/CSharp.cs.ejs';
+                self.fs.addFile(templateFileName, 'using System;\nnamespace Hey {\n\tclass Hi {\n\t\tstatic void Main()' +
+                    ' {\n\t\t\tConsole.WriteLine("<%=a%> and <%=b%> provided.");\n\t\t}\n\t}\n}');
+            } else if (currentConfig.templateType === 'JavaScript') {
+                currentConfig.templateExt = 'js';
+                templateFileName = outputDir + 'Templates/JavaScript.js.ejs';
+                self.fs.addFile(templateFileName, 'console.info("<%=a%> and <%=b%> provided.);"');
+            } else {
+                currentConfig.templateType = null;
             }
 
-            currentConfig.date = new Date();
-
             pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
-            fileName = 'src/plugins/' + this.projectName + '/' + currentConfig.pluginID + '/' + currentConfig.pluginID + '.js';
-
-            self.fs.addFile(fileName, pluginJS);
-            self.updateSuccess(true, null);
+            pluginFileName = outputDir + currentConfig.pluginID + '.js';
+            self.fs.addFile(pluginFileName, pluginJS);
             self.fs.saveArtifact();
+            self.updateSuccess(true, null);
+
             callback(null, self.result);
 
         };
