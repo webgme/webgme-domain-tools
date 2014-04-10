@@ -82,22 +82,17 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     ChildrenConfigPlugin.prototype.main = function (callback) {
         var core = this.core,
             activeNode = this.activeNode,
-            self = this;
-
-        // Example how to use FS
-        self.fs.addFile('log.txt', 'hello');
-
+            self = this,
+            currentConfig;
 
         if (!activeNode) {
             callback('activeNode is not defined', this.result);
             return;
         }
 
-        // TODO: check model
-
         self.logger.info('Current configuration');
 
-        var currentConfig = this.getCurrentConfig();
+        currentConfig = this.getCurrentConfig();
         self.logger.info(currentConfig.logChildrenNames);
         self.logger.info(currentConfig.logLevel);
         self.logger.info(currentConfig.maxChildrenToLog);
@@ -117,11 +112,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
 
             if (callback) {
-                // TODO: we need a function to set/update success
                 self.result.setSuccess(true);
-
-                self.fs.addFile('pluginResult.json', JSON.stringify(self.result.serialize()));
-                self.fs.saveArtifact();
+                self.logger.info(JSON.stringify(self.result.serialize()));
                 callback(null, self.result);
             }
         });

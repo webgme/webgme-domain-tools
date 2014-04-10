@@ -8,6 +8,11 @@ define(['plugin/PluginConfig',
     function (PluginConfig, PluginBase, TEMPLATES, EJS) {
         'use strict';
 
+        var UsingTemplatesPlugin = function () {
+            // Call base class's constructor
+            PluginBase.call(this);
+        };
+
         // FIXME: workaround
         // ejs is defined in tests
         // EJS is defined when plugin runs server side
@@ -15,11 +20,6 @@ define(['plugin/PluginConfig',
         if (!ejs) {
             ejs = EJS || window.ejs;
         }
-
-        var UsingTemplatesPlugin = function () {
-            // Call base class's constructor
-            PluginBase.call(this);
-        };
 
         UsingTemplatesPlugin.prototype = Object.create(PluginBase.prototype);
 
@@ -31,8 +31,9 @@ define(['plugin/PluginConfig',
 
         UsingTemplatesPlugin.prototype.main = function (callback) {
             var self = this,
-                core = this.core,
-                activeNode = this.activeNode;
+                activeNode = this.activeNode,
+                data,
+                ret;
 
             if (!activeNode) {
                 callback('activeNode is not defined', this.result);
@@ -41,8 +42,8 @@ define(['plugin/PluginConfig',
 
             self.logger.debug('Generating files...');
 
-            var data = {'name': core.getAttribute(activeNode, 'name')};
-            var ret = ejs.render(TEMPLATES['sample.html.ejs'], data);
+            data = {'name': self.core.getAttribute(activeNode, 'name')};
+            ret = ejs.render(TEMPLATES['sample.html.ejs'], data);
 
             self.fs.addFile('output.html', ret);
             self.fs.saveArtifact();
@@ -50,8 +51,7 @@ define(['plugin/PluginConfig',
             self.logger.info('Files were generated...');
 
             if (callback) {
-                // TODO: we need a function to set/update success
-                self.result.success = true;
+                self.result.setSuccess(true);
                 callback(null, self.result);
             }
         };

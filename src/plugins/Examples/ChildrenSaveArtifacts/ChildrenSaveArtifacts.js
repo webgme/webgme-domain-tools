@@ -1,9 +1,7 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['plugin/PluginConfig',
-        'plugin/PluginBase'],
-    function (PluginConfig, PluginBase) {
+define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, PluginBase) {
     'use strict';
 
     var ChildrenSaveArtifacts = function () {
@@ -21,62 +19,61 @@ define(['plugin/PluginConfig',
 
     ChildrenSaveArtifacts.prototype.main = function (callback) {
         var self = this,
-            core = this.core,
             activeNode = this.activeNode;
 
-        if (!this.fs) {
-            callback('FileSystem object is undefined or null.', this.result);
+        if (!self.fs) {
+            callback('FileSystem object is undefined or null.', self.result);
             return;
         }
 
         if (!activeNode) {
-            callback('activeNode is not defined', this.result);
+            callback('activeNode is not defined', self.result);
             return;
         }
 
-        this.generateNodeInfo(self.fs, activeNode, core);
+        this.generateNodeInfo(self.fs, activeNode, self.core);
 
-        core.loadChildren(activeNode, function (err, childNodes) {
+        self.core.loadChildren(activeNode, function (err, childNodes) {
             var i;
-            console.log('%j has children::', core.getAttribute(activeNode, 'name'));
+            self.logger.log('%j has children::', self.core.getAttribute(activeNode, 'name'));
 
             for (i = 0; i < childNodes.length; i += 1) {
-                console.log('  - %j', core.getAttribute(childNodes[i], 'name'));
+                self.logger.log('  - %j', self.core.getAttribute(childNodes[i], 'name'));
 
-                self.generateNodeInfo(self.fs, childNodes[i], core);
+                self.generateNodeInfo(childNodes[i]);
             }
 
-            self.fs.addFile('debug.txt', 'Here it comes some text');
+            self.fs.addFile('debug.txt', 'Here comes some text');
 
             self.fs.saveArtifact();
 
             if (callback) {
-                // TODO: we need a function to set/update success
-                self.result.success = true;
+                self.result.setSuccess(true);
                 callback(null, self.result);
             }
         });
     };
 
-    ChildrenSaveArtifacts.prototype.generateNodeInfo = function (fs, node, core) {
-        var info = '';
+    ChildrenSaveArtifacts.prototype.generateNodeInfo = function (node) {
+        var self = this,
+            info = '';
 
         info += 'Name: ';
-        info += core.getAttribute(node, 'name');
+        info += self.core.getAttribute(node, 'name');
         info += '\r\n';
 
 
         info += 'Path: ';
-        info += core.getPath(node);
+        info += self.core.getPath(node);
         info += '\r\n';
 
 
         info += 'Guid: ';
-        info += core.getGuid(node);
+        info += self.core.getGuid(node);
         info += '\r\n';
 
         // FIXME: check if name is safe as a directory name
-        fs.addFile(core.getAttribute(node, 'name') + '/' + core.getGuid(node) + '.txt', info);
+        self.fs.addFile(self.core.getAttribute(node, 'name') + '/' + self.core.getGuid(node) + '.txt', info);
     };
 
     return ChildrenSaveArtifacts;

@@ -1,9 +1,7 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['plugin/PluginConfig',
-        'plugin/PluginBase'],
-    function (PluginConfig, PluginBase) {
+define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, PluginBase) {
     'use strict';
 
     var ChildrenPlugin = function () {
@@ -20,26 +18,24 @@ define(['plugin/PluginConfig',
     };
 
     ChildrenPlugin.prototype.main = function (callback) {
-        var self = this,
-            core = this.core,
-            activeNode = this.activeNode;
+        var self = this;
 
-        if (!activeNode) {
-            callback('activeNode is not defined', this.result);
+        if (!self.activeNode) {
+            self.result.setSuccess(false);
+            callback('activeNode is not defined', self.result);
             return;
         }
 
-        core.loadChildren(activeNode, function (err, childNodes) {
+        self.core.loadChildren(self.activeNode, function (err, childNodes) {
             var i;
-            self.logger.info(core.getAttribute(activeNode, 'name') + ' has children');
+            self.logger.info(self.core.getAttribute(self.activeNode, 'name') + ' has children');
 
             for (i = 0; i < childNodes.length; i += 1) {
-                self.logger.info('  - ' + core.getAttribute(childNodes[i], 'name'));
+                self.logger.info('  - ' + self.core.getAttribute(childNodes[i], 'name'));
             }
 
             if (callback) {
-                // TODO: we need a function to set/update success
-                self.result.success = true;
+                self.result.setSuccess(true);
                 callback(null, self.result);
             }
         });

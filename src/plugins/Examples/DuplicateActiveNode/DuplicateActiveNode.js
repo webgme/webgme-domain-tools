@@ -21,27 +21,28 @@ define(['plugin/PluginConfig',
 
         DuplicateActiveNodePlugin.prototype.main = function (callback) {
             var self = this,
-                activeNode = this.activeNode;
+                activeNode = this.activeNode,
+                activeNodeName,
+                newNode;
 
             if (!activeNode) {
                 callback('activeNode is not defined', this.result);
                 return;
             }
 
-            var activeNodeName = this.core.getAttribute(activeNode, 'name');
-            this.logger.info('Copying node: ' + activeNodeName);
-            var newNode = this.core.copyNode(activeNode, this.core.getParent(activeNode));
+            activeNodeName = self.core.getAttribute(activeNode, 'name');
+            self.logger.info('Copying node: ' + activeNodeName);
+            newNode = self.core.copyNode(activeNode, self.core.getParent(activeNode));
 
-            this.core.setAttribute(newNode, 'name', activeNodeName + ' Copy');
-            this.logger.info('Copied node: ' + this.core.getAttribute(newNode, 'name'));
+            self.core.setAttribute(newNode, 'name', activeNodeName + ' Copy');
+            self.logger.info('Copied node: ' + self.core.getAttribute(newNode, 'name'));
 
-
-            this.save('Copy ' + activeNodeName, function (err) {
-                // FIXME: on error?
-
-                if (callback) {
-                    // TODO: we need a function to set/update success
-                    self.result.success = true;
+            self.save('Copy ' + activeNodeName, function (err) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    callback(err, self.result);
+                } else {
+                    self.result.setSuccess(true);
                     callback(null, self.result);
                 }
             });
