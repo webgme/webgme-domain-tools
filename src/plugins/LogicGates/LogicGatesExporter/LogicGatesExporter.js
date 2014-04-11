@@ -191,8 +191,8 @@ define(['plugin/PluginConfig',
             dstMetaType,
             srcPort,
             dstPort,
-            srcID,
-            dstID;
+            srcID = this.ID_LUT[src],
+            dstID = this.ID_LUT[dst];
 
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
             if (!err) {
@@ -202,7 +202,10 @@ define(['plugin/PluginConfig',
                     var parentPath = core.getPath(nodeObj.parent);
                     srcMetaType = core.getAttribute(baseClass, 'name');
                     var isComplex = self.COMPLEX.indexOf(srcMetaType) > -1;
-                    self.addGate(nodeObj, srcMetaType, isComplex, parentPath);
+                    var isGate = self.META_TYPES.indexOf(srcMetaType) > -1;
+                    if (isGate) {
+                        self.addGate(nodeObj, srcMetaType, isComplex, parentPath);
+                    }
 
                     self.modelID++;
                 }
@@ -216,7 +219,11 @@ define(['plugin/PluginConfig',
                     var parentPath = core.getPath(nodeObj.parent);
                     dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
                     var isComplex = self.COMPLEX.indexOf(dstMetaType) > -1;
-                    self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
+                    var isGate = self.META_TYPES.indexOf(dstMetaType) > -1;
+                    if (isGate)
+                    {
+                        self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
+                    }
 
                     self.modelID++;
                 }
@@ -236,6 +243,7 @@ define(['plugin/PluginConfig',
                 "@Port": dstPort
             }
         };
+
         if (!this.components.hasOwnProperty(parentPath)) {
             this.components[parentPath] = {
                 "Gate": [],
@@ -273,8 +281,6 @@ define(['plugin/PluginConfig',
             }
             ++i;
         }
-
-
         this.fs.saveArtifact();
     };
 
