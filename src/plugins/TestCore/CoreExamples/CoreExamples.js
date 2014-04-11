@@ -62,7 +62,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
         var self = this,
-            error = '';
+            error = '',
+            activeMetaTypeNode;
 
 
         if (self.core.getPath(self.activeNode) !== '/1023960100') {
@@ -72,6 +73,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             callback('Run this interpreter on "/1023960100" as activeNode.', self.result);
             return;
         }
+
+        activeMetaTypeNode = self.getMetaType(self.activeNode);
+        self.logger.info('activeNode is of meta-type : ' + self.core.getAttribute(activeMetaTypeNode, 'name'));
 
         self.core.loadChildren(self.activeNode, function (err, children) {
             var i,
@@ -225,7 +229,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         };
 
         for (i = 0; i < children.length; i += 1) {
-            if (self.isMetaTypeOf(self, children[i], self.META['PortElement'])) {
+            if (self.isMetaTypeOf(children[i], self.META['PortElement'])) {
                 self.visitPorts(children[i], itrCallback);
             } else {
                 itrCallback(null);
@@ -302,9 +306,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             error = '';
         for (i = 0; i < children.length; i += 1) {
             childNode = children[i];
-            if (self.isMetaTypeOf(self, childNode, self.META['ModelElement'])) {
+            if (self.isMetaTypeOf(childNode, self.META['ModelElement'])) {
                 original = childNode;
-            } else if (self.isMetaTypeOf(self, childNode, self.META['ModelRef'])) {
+            } else if (self.isMetaTypeOf(childNode, self.META['ModelRef'])) {
                 reference = childNode;
             }
         }
@@ -344,7 +348,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         };
 
         for (i = 0; i < children.length; i += 1) {
-            if (self.isMetaTypeOf(self, children[i], self.META['ModelElement'])) {
+            if (self.isMetaTypeOf(children[i], self.META['ModelElement'])) {
                 self.recurseOverChildren(children[i], counter, itrCallback);
             } else {
                 self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(children[i], 'name'));
@@ -373,7 +377,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 counter.visits -= 1;
             }
             for (i = 0; i < children.length; i += 1) {
-                if (self.isMetaTypeOf(self, children[i], self.META['ModelElement'])) {
+                if (self.isMetaTypeOf(children[i], self.META['ModelElement'])) {
                     self.recurseOverChildren(children[i], counter, callback);
                 } else {
                     self.logger.info(':: RecursiveChildrenExample :: at ' + self.core.getAttribute(children[i], 'name'));
@@ -383,14 +387,40 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         });
     };
 
-    CoreExamples.prototype.isMetaTypeOf = function (self, nodeObj, metaTypeObj) {
-        while (nodeObj) {
-            if (self.core.getGuid(nodeObj) === self.core.getGuid(metaTypeObj)) {
+    /**
+     * Checks if the given node is of the given meta-type.
+     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
+     * @param node - Node to be check for type.
+     * @param metaTypeObj - Node object defining the meta type.
+     * @returns {boolean} - True if the given object was of the META type.
+     */
+    CoreExamples.prototype.isMetaTypeOf = function (node, metaTypeObj) {
+        var self = this;
+        while (node) {
+            if (self.core.getGuid(node) === self.core.getGuid(metaTypeObj)) {
                 return true;
             }
-            nodeObj = self.core.getBase(nodeObj);
+            node = self.core.getBase(node);
         }
         return false;
+    };
+
+    /**
+     * Finds and returns the node object defining the meta type for node.
+     * @param node - Node to be check for type.
+     * @returns {Object} - Node object defining the meta type of node.
+     */
+    CoreExamples.prototype.getMetaType = function (node) {
+        var self = this,
+            name;
+        while (node) {
+            name = self.core.getAttribute(node, 'name');
+            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
+                break;
+            }
+            node = self.core.getBase(node);
+        }
+        return node;
     };
 
     return CoreExamples;
