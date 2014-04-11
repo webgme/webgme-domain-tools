@@ -45,13 +45,12 @@ define(['plugin/PluginConfig',
         this.circuits = [];
         this.ID_LUT = {};
         this.CHILDREN_LUT = {};
+        this.PORTID_LUT = {};
 
         this.META_TYPES = ["Not", "Buffer", "And", "Or", "Nand", "Nor", "Xor", "Xnor", "NumericInput", "NumericOutput", "UserOutput", "UserInput", "Clock"];
         this.COMPLEX = ["And", "Or", "Nand", "Nor", "Xor", "Xnor"];
         this.CONNECTION_TYPES = ["OutputPort2InputPort", "UserInput2InputPort", "OutputPort2UserOutput", "UserInputBase2UserOutput", "PortBase2UserIOBase", "UserIOBase2PortBase", "UserIOBase2UserIOBase"];
 
-        this.SRC_PORT_LUT = [];
-        this.DST_PORT_LUT = [];
         // debugging
         this.gates = [];
         this.wires = [];
@@ -70,9 +69,9 @@ define(['plugin/PluginConfig',
         var i;
         for (i = 0; i < childNodes.length; ++i) {
 
-            var child = childNodes[i];
-
-            var parentPath = core.getPath(child.parent);
+            var child = childNodes[i],
+                gmeID = core.getPath(child),
+                parentPath = core.getPath(child.parent);
 
             var baseClass = core.getBase(child),
                 metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
@@ -86,7 +85,6 @@ define(['plugin/PluginConfig',
             if (isGate) {
 
                 // if key not exist already, add key; otherwise ignore
-                var gmeID = core.getPath(child);
 
                 if (!this.ID_LUT.hasOwnProperty(gmeID)) {
 
@@ -94,10 +92,17 @@ define(['plugin/PluginConfig',
                 }
 
             } else if (isWire) {
-                  this.wires_to_add.push(child);
+
+                this.wires_to_add.push(child);
 
             } else if (metaType === 'InputPort' || metaType === 'OutputPort') {
-                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
+//                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
+
+                if (!this.CHILDREN_LUT.hasOwnProperty(parentPath)) {
+
+                    this.CHILDREN_LUT[parentPath] = [];
+                }
+                this.CHILDREN_LUT[parentPath].push(gmeID);
             }
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
@@ -113,6 +118,9 @@ define(['plugin/PluginConfig',
             for (var l = 0; l < this.wires_to_add.length; ++l) {
                 this.addWire(this.wires_to_add[l]);
             }
+
+            // TODO: add number of inputs to all the gates here
+
             this.createObjectFromDiagram();
 
             // all objects have been visited
@@ -218,12 +226,14 @@ define(['plugin/PluginConfig',
                     srcNodeObj = node;
                 } else if (isPort) {
                     var srcObj = core.getParent(node);
+                    var portGMEId = core.getPath(node);
                     src = core.getPath(srcObj);
                     srcMetaType = core.getAttribute(srcObj, 'name');
                     srcNodeObj = srcObj;
-                    parentPath = core.getPath(srcObj.parent);
+                    //parentPath = core.getPath(srcObj.parent);
+                    parentPath = core.getPath(srcObj);
                     node = srcObj;
-//                    srcPort =
+                    srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
                 }
 
                 if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
@@ -247,11 +257,16 @@ define(['plugin/PluginConfig',
                     dstNodeObj = node;
                 } else if (isPort) {
                     var dstObj = core.getParent(node);
+                    var portGMEId = core.getPath(node);
                     dst = core.getPath(dstObj);
                     dstMetaType = core.getAttribute(dstObj, 'name');
                     dstNodeObj = dstObj;
-                    parentPath = core.getPath(dstObj.parent);
+//                    parentPath = core.getPath(dstObj.parent);
+                    parentPath = core.getPath(dstObj);
+
                     node = dstObj;
+
+                    dstPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
                 }
 
                 if (!self.ID_LUT.hasOwnProperty(dst) && (isPort || isGate)) {
@@ -265,6 +280,7 @@ define(['plugin/PluginConfig',
         var parentCircuitPath = core.getPath(nodeObj.parent);
         var srcID = self.ID_LUT[src],
             dstID = self.ID_LUT[dst];
+
         var wire = {
             "From": {
                 "@ID": srcID,
