@@ -2,62 +2,91 @@
  * Created by zsolt on 4/10/14.
  */
 
-
 var fs = require('fs');
 var path = require('path');
+var crypto = require('crypto');
 
-// setup storage
-var blobDir = 'blob-storage';
+var BlobFS = function() {
+    this.blobDir = 'blob-local-storage';
+    this.indexFile = path.join(this.blobDir, 'index.json');
+    this.shaMethod = 'sha1';
 
-if (fs.existsSync(blobDir) === false) {
-    fs.mkdirSync(blobDir);
-}
+    if (fs.existsSync(this.blobDir) === false) {
+        fs.mkdirSync(this.blobDir);
+    }
 
-var addFile = function (filename, callback) {
-    var crypto = require('crypto');
-    var shasum = crypto.createHash('sha1');
+    this.indexedFiles = {};
 
-    var tempFilename = blobDir + '/tmp' + crypto.randomBytes(4).readUInt32LE(0); // TODO: make this unique
-
-    var s = fs.ReadStream(filename);
-    var ws = fs.createWriteStream(tempFilename);
-    s.on('data', function (d) {
-        shasum.update(d);
-        ws.write(d);
-    });
-
-    s.on('end', function () {
-        var d = shasum.digest('hex');
-        console.log(d + '  ' + filename);
-        ws.end();
-        ws.on('finish', function () {
-            fs.renameSync(tempFilename, blobDir + '/' + d);
-            callback(d, filename);
-        });
-
-    });
+    if (fs.existsSync(this.indexFile)) {
+        this.indexedFiles = require('./' + this.indexFile);
+    }
 };
 
-var sourceFiles = fs.readdirSync('source_files');
-var indexedFiles = {};
+BlobFS.prototype.addBlob = function(name, content) {
+    var shasum = crypto.createHash(this.shaMethod);
 
-if (fs.existsSync(blobDir + '/index.json')) {
-    indexedFiles = require('./' + blobDir + '/index.json');
+    shasum.update(content);
+
+    var hash = shasum.digest('hex');
+
+    var objectFilename = path.join(this.blobDir, this._getObjectRelativeLocation(hash));
+
+    if (fs.existsSync(path.dirname(objectFilename)) === false) {
+        fs.mkdirSync(path.dirname(objectFilename));
+    }
+
+    fs.writeFileSync(objectFilename, content);
+
+    this.indexedFiles[hash] = {
+        fullPath: name,
+        filename: path.basename(name),
+        type: path.extname(name),
+        created: (new Date()).toISOString()
+    };
+
+    fs.writeFileSync(this.indexFile, JSON.stringify(this.indexedFiles, null, 4));
+};
+
+BlobFS.prototype._getObjectRelativeLocation = function (hash) {
+    return hash.slice(0, 2) + '/' + hash.slice(2);
+};
+
+BlobFS.prototype.getInfo = function(hash) {
+    return this.indexedFiles[hash];
+};
+
+BlobFS.prototype.getHashes = function() {
+    return Object.keys(this.indexedFiles);
+};
+
+BlobFS.prototype.getContent = function(hash) {
+    return fs.readFileSync(path.join(this.blobDir, this._getObjectRelativeLocation(hash)));
+};
+
+module.exports = BlobFS;
+
+if (require.main === module) {
+    // Example for usage
+    var sourceFiles = fs.readdirSync('source_files');
+
+    var blobFS = new BlobFS();
+
+    for (var i = 0; i < sourceFiles.length; i += 1) {
+        var filename = path.join('source_files', sourceFiles[i]);
+        blobFS.addBlob(filename, fs.readFileSync(filename));
+    }
+
+    var hashes = blobFS.getHashes();
+
+    console.log(hashes);
+
+    for (var i = 0; i < hashes.length; i += 1) {
+        var info = blobFS.getInfo(hashes[i]);
+        var buffer = blobFS.getContent(hashes[i]);
+        console.log("====== INFO ========");
+        console.log(info);
+        console.log("----- CONTENT ------");
+        console.log(buffer.toString());
+    }
 }
 
-var remainingFiles = sourceFiles.length;
-
-for (var i = 0; i < sourceFiles.length; i += 1) {
-    addFile('source_files/' + sourceFiles[i], function (hash, filename) {
-        indexedFiles[hash] = {
-            filename: filename,
-            type: path.extname(filename),
-            created: (new Date()).toISOString()
-        };
-
-        remainingFiles -= 1;
-        if (remainingFiles === 0) {
-            fs.writeFileSync(blobDir + '/index.json', JSON.stringify(indexedFiles, null, 4));
-        }
-    });
-}
