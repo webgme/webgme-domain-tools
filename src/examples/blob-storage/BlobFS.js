@@ -45,6 +45,8 @@ BlobFS.prototype.addBlob = function(name, content) {
     };
 
     fs.writeFileSync(this.indexFile, JSON.stringify(this.indexedFiles, null, 4));
+
+    return hash;
 };
 
 BlobFS.prototype._getObjectRelativeLocation = function (hash) {
