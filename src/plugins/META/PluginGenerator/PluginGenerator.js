@@ -159,6 +159,12 @@ define(['plugin/PluginConfig',
             pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
             pluginFileName = outputDir + currentConfig.pluginID + '.js';
             self.fs.addFile(pluginFileName, pluginJS);
+
+            if (currentConfig.templateType) {
+                self.fs.addFile(outputDir + 'Templates/combine_templates.js',
+                    ejs.render(TEMPLATES['combine_templates.js.ejs']));
+            }
+
             self.fs.saveArtifact();
             self.updateSuccess(true, null);
 
