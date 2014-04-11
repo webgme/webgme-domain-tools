@@ -20,7 +20,7 @@ app.get('/', function(req, res){
 
 
 app.get('/rest/blob/index.json', function(req, res){
-    res.sendfile('./blob-storage/index.json');
+    res.sendfile('./blob-local-storage/index.json');
 });
 
 app.post('/rest/blob/create', function(req, res) {
