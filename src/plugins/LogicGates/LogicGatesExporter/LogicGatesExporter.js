@@ -188,11 +188,7 @@ define(['plugin/PluginConfig',
             dst = core.getPointerPath(nodeObj, "dst");
 
         var srcMetaType,
-            dstMetaType,
-            srcPort,
-            dstPort,
-            srcID = this.ID_LUT[src],
-            dstID = this.ID_LUT[dst];
+            dstMetaType;
 
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
             if (!err) {
@@ -204,10 +200,9 @@ define(['plugin/PluginConfig',
                     var isComplex = self.COMPLEX.indexOf(srcMetaType) > -1;
                     var isGate = self.META_TYPES.indexOf(srcMetaType) > -1;
                     if (isGate) {
+                        self.ID_LUT[src] = self.modelID;
                         self.addGate(nodeObj, srcMetaType, isComplex, parentPath);
                     }
-
-                    self.modelID++;
                 }
             }
         });
@@ -222,17 +217,21 @@ define(['plugin/PluginConfig',
                     var isGate = self.META_TYPES.indexOf(dstMetaType) > -1;
                     if (isGate)
                     {
+                        self.ID_LUT[dst] = self.modelID;
                         self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
                     }
-
-                    self.modelID++;
                 }
             }
         });
 
         // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
 
-        var parentPath = core.getPath(nodeObj.parent);
+        var parentPath = core.getPath(nodeObj.parent),
+            srcPort,
+            dstPort,
+            srcID = this.ID_LUT[src],
+            dstID = this.ID_LUT[dst];
+
         var wire = {
             "From": {
                 "@ID": srcID,
