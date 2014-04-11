@@ -199,8 +199,8 @@ define(['plugin/PluginConfig',
             dstPort;
 
         core.loadByPath(self.rootNode, src, function (err, node) {
+
             if (!err) {
-                srcNodeObj = node;
                 var baseObj = core.getBase(node),
                     metaType = core.getAttribute(baseObj, 'name'),
                     isComplex = self.COMPLEX.indexOf(metaType) > -1,
@@ -212,24 +212,25 @@ define(['plugin/PluginConfig',
                     parentPath = core.getPath(node.parent);
                     srcMetaType = metaType;
                     srcPort = 0;
+                    srcNodeObj = node;
                 } else if (isPort) {
                     var srcObj = core.getParent(node);
                     src = core.getPath(srcObj);
                     srcMetaType = core.getAttribute(srcObj, 'name');
+                    srcNodeObj = srcObj;
                     parentPath = core.getPath(srcObj.parent);
                     node = srcObj;
                 }
 
                 if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
-                    console.log(srcMetaType);
                     self.addGate(node, srcMetaType, isComplex, parentPath);
                 }
             }
         });
 
         core.loadByPath(self.rootNode, dst, function (err, node) {
+
             if (!err) {
-                dstNodeObj = node;
                 var metaType = core.getAttribute(core.getBase(node), 'name'),
                     isComplex = self.COMPLEX.indexOf(metaType) > -1,
                     isGate = self.META_TYPES.indexOf(metaType) > -1,
@@ -240,10 +241,12 @@ define(['plugin/PluginConfig',
                     parentPath = core.getPath(node.parent);
                     dstMetaType = metaType;
                     dstPort = 0;
+                    dstNodeObj = node;
                 } else if (isPort) {
                     var dstObj = core.getParent(node);
                     dst = core.getPath(dstObj);
                     dstMetaType = core.getAttribute(dstObj, 'name');
+                    dstNodeObj = dstObj;
                     parentPath = core.getPath(dstObj.parent);
                     node = dstObj;
                 }
@@ -253,24 +256,6 @@ define(['plugin/PluginConfig',
                 }
             }
         });
-
-//        core.loadByPath(self.rootNode, dst, function (err, nodeObj) {
-//            if (!err) {
-//                // nodeObj is available to use and it is loaded.
-//                if (!self.ID_LUT.hasOwnProperty(dst)) {
-//                    var parentPath = core.getPath(nodeObj.parent);
-//                    dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
-//                    var isComplex = self.COMPLEX.indexOf(dstMetaType) > -1;
-//                    var isGate = self.META_TYPES.indexOf(dstMetaType) > -1;
-//                    if (isGate)
-//                    {
-//                        self.ID_LUT[dst] = self.modelID;
-//                        console.log("src: " + dstMetaType);
-//                        self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
-//                    }
-//                }
-//            }
-//        });
 
         // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
 
