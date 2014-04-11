@@ -51,6 +51,10 @@ BlobFS.prototype._getObjectRelativeLocation = function (hash) {
     return hash.slice(0, 2) + '/' + hash.slice(2);
 };
 
+BlobFS.prototype.getObjectLocation = function (hash) {
+    return path.join(this.blobDir, this._getObjectRelativeLocation(hash));
+};
+
 BlobFS.prototype.getInfo = function(hash) {
     return this.indexedFiles[hash];
 };

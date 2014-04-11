@@ -15,6 +15,17 @@ app.get('/blob/index.json', function(req, res){
     res.sendfile('./blob-storage/index.json');
 });
 
+app.get('/blob/:shaHash/download', function(req, res) {
+    res.download(blobStorage.getObjectLocation(req.params.shaHash), blobStorage.getInfo(req.params.shaHash).filename, function (err) {
+        if (err) {
+            // handle error, keep in mind the response may be partially-sent
+            // so check res.headerSent
+        } else {
+            // decrement a download credit etc
+        }
+    });
+});
+
 app.get('/blob/:shaHash', function(req, res){
     //res.sendfile('./blob-storage/' + req.params.file);
 
