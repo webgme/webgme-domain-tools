@@ -9,8 +9,6 @@ define(['plugin/PluginConfig',
         'plugin/PluginResult',
         'json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
 
-    // TODO: to modify the base dir path in config.json? to allow dependencies from other dirs
-
     var LogicGatesExporterPlugin = function () {
         PluginBase.call(this);
     };
@@ -43,15 +41,22 @@ define(['plugin/PluginConfig',
 
         this.modelID = 0;
 
-        this.diagrams = {};
+        this.components = {};
         this.circuits = [];
         this.ID_LUT = {};
+        this.CHILDREN_LUT = {};
 
-        // only when node is diagram folder then traverse
+        this.META_TYPES = ["Not", "Buffer", "And", "Or", "Nand", "Nor", "Xor", "Xnor", "NumericInput", "NumericOutput", "UserOutput", "UserInput", "Clock"];
+        this.COMPLEX = ["And", "Or", "Nand", "Nor", "Xor", "Xnor"];
+        this.CONNECTION_TYPES = ["OutputPort2InputPort", "UserInput2InputPort", "OutputPort2UserOutput", "UserInputBase2UserOutput", "PortBase2UserIOBase", "UserIOBase2PortBase", "UserIOBase2UserIOBase"];
+
+        // debugging
+        this.gates = [];
+        this.wires = [];
+
         core.loadChildren(selectedNode, function(err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
         });
-
     };
 
     LogicGatesExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
@@ -64,15 +69,16 @@ define(['plugin/PluginConfig',
 
             var child = childNodes[i];
 
-            var parentPath = child.parent ? core.getPath(child.parent) : "";
+            var parentPath = core.getPath(child.parent);
 
             var baseClass = core.getBase(child),
                 metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
 
             var parentClass = core.getBase(child.parent);
             var parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
-            var isComplex = parentMeta === "ComplexLogicGate";
-            var isGate = parentMeta === 'ComplexLogicGate' || parentMeta === 'SimpleLogicGate' || parentMeta === 'NumericIOBase' || parentMeta === 'UserInputBase' || parentMeta === 'UserOutput';
+            var isComplex = this.COMPLEX.indexOf(metaType) > -1;
+            var isGate = this.META_TYPES.indexOf(metaType) > -1 && parentMeta === "LogicCircuit";
+            var isWire = this.CONNECTION_TYPES.indexOf(metaType) > -1 && parentMeta === "LogicCircuit";
 
             if (isGate) {
 
@@ -84,9 +90,11 @@ define(['plugin/PluginConfig',
                     this.addGate(child, metaType, isComplex, parentPath);
                 }
 
-            } else if (metaType === 'PortConnection') {
-
+            } else if (isWire) {
                 this.addWire(child);
+
+            } else if (metaType === 'InputPort') {
+                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
             }
 
             core.loadChildren(childNodes[i], function(err, childNodes) {
@@ -99,6 +107,7 @@ define(['plugin/PluginConfig',
         if (this.objectToVisit === this.visitedObjects) {
 
             this.createObjectFromDiagram();
+            console.log(this.modelID);
 
             // all objects have been visited
             var pluginResult = new PluginResult();
@@ -116,9 +125,14 @@ define(['plugin/PluginConfig',
             gmeID = core.getPath(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
             numInputs, // number of children
-            xPos = nodeObj.data.reg.position.x,
-            yPos = nodeObj.data.reg.position.y,
-            angle;
+            xPos = parseInt(nodeObj.data.reg.position.x, 10),
+            yPos = parseInt(nodeObj.data.reg.position.y, 10),
+            angle = 0;
+
+        // TODO: fix this... this doesn't return the right number of children
+        core.loadChildren(nodeObj, function(err, childNodes) {
+            numInputs = childNodes.length;
+        });
 
         this.ID_LUT[gmeID] = this.modelID;
 
@@ -141,8 +155,7 @@ define(['plugin/PluginConfig',
             gate["@NumInputs"] = numInputs;
 
         } else if (metaType === "Clock") {
-            var ms = core.getAttribute(nodeObj, 'Milliseconds');
-            gate["@Milliseconds"] = ms;
+            gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
 
         } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
             var bits = core.getAttribute(nodeObj, 'Bits');
@@ -152,17 +165,19 @@ define(['plugin/PluginConfig',
             gate["@SelRep"] = selRep;
             gate["@Value"] = value;
         }
-        if (!this.diagrams.hasOwnProperty(parentPath)) {
-            this.diagrams[parentPath] = {
+        if (!this.components.hasOwnProperty(parentPath)) {
+            this.components[parentPath] = {
                 "Gate": [],
                 "Wire": []
             };
         }
         if (parentPath) {
 
-            this.diagrams[parentPath]["Gate"].push(gate);
+            this.components[parentPath]["Gate"].push(gate);
         }
         ++this.modelID;
+
+        this.gates.push(gate);
     };
 
     LogicGatesExporterPlugin.prototype.addWire = function(nodeObj) {
@@ -184,10 +199,9 @@ define(['plugin/PluginConfig',
                 // nodeObj is available to use and it is loaded.
                 if (!self.ID_LUT.hasOwnProperty(src)) {
                     var baseClass = core.getBase(nodeObj);
-                    var parentClass = core.getParent(baseClass);
                     var parentPath = core.getPath(nodeObj.parent);
-                    var isComplex = core.getAttribute(parentClass, 'name') === "ComplexLogicGate";
                     srcMetaType = core.getAttribute(baseClass, 'name');
+                    var isComplex = self.COMPLEX.indexOf(srcMetaType) > -1;
                     self.addGate(nodeObj, srcMetaType, isComplex, parentPath);
 
                     self.modelID++;
@@ -199,10 +213,9 @@ define(['plugin/PluginConfig',
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.ID_LUT.hasOwnProperty(dst)) {
-                    var parentClass = core.getBase(nodeObj.parent);
                     var parentPath = core.getPath(nodeObj.parent);
-                    var isComplex = core.getAttribute(parentClass, 'name') === "ComplexLogicGate";
                     dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
+                    var isComplex = self.COMPLEX.indexOf(dstMetaType) > -1;
                     self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
 
                     self.modelID++;
@@ -223,47 +236,42 @@ define(['plugin/PluginConfig',
                 "@Port": dstPort
             }
         };
-        if (!this.diagrams.hasOwnProperty(parentPath)) {
-            this.diagrams[parentPath] = {
+        if (!this.components.hasOwnProperty(parentPath)) {
+            this.components[parentPath] = {
                 "Gate": [],
                 "Wire": []
             };
         }
-//
-//        var name;
-//        core.loadByPath(self.rootNode, parentPath, function (err, parent) {
-//            if (!err) {
-//                // nodeObj is available to use and it is loaded.
-//                name = core.getAttribute(parent, 'name');
-//            }
-//        });
+
         if (parentPath) {
-            this.diagrams[parentPath]["Wire"].push(wire);
+            this.components[parentPath]["Wire"].push(wire);
+            this.wires.push(wire);
         }
     };
 
     LogicGatesExporterPlugin.prototype.createObjectFromDiagram = function () {
 
         var i = 0;
-        for (var parentPath in this.diagrams) {
-            if (this.diagrams.hasOwnProperty(parentPath)) {
+        for (var parentPath in this.components) {
+            if (this.components.hasOwnProperty(parentPath)) {
                 var diagram = {"CircuitGroup":
                     {
                         "@Version": 1.2,
                         "Circuit" :
                         {
                             "Gates": {},
-                            "wires": {}
+                            "Wires": {}
                         }
                     }
                 };
-                diagram.CircuitGroup.Circuit.Gates["Gate"] = this.diagrams[parentPath]["Gate"];
-                diagram.CircuitGroup.Circuit.Gates["Wire"] = this.diagrams[parentPath]["Wire"];
+                diagram.CircuitGroup.Circuit.Gates["Gate"] = this.components[parentPath]["Gate"];
+                diagram.CircuitGroup.Circuit.Wires["Wire"] = this.components[parentPath]["Wire"];
                 this.circuits.push(diagram);
                 var j2x = new json2xml;
                 var output = j2x.convert(diagram);
                 this.fs.addFile("output" + i + ".xml", output);
             }
+            ++i;
         }
 
 
