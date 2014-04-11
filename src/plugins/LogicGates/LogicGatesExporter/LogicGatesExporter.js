@@ -55,6 +55,7 @@ define(['plugin/PluginConfig',
         // debugging
         this.gates = [];
         this.wires = [];
+        this.wires_to_add = [];
 
         core.loadChildren(selectedNode, function(err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
@@ -93,9 +94,9 @@ define(['plugin/PluginConfig',
                 }
 
             } else if (isWire) {
-                this.addWire(child);
+                  this.wires_to_add.push(child);
 
-            } else if (metaType === 'InputPort') {
+            } else if (metaType === 'InputPort' || metaType === 'OutputPort') {
                 this.CHILDREN_LUT[core.getPath(child)] = parentPath;
             }
 
@@ -108,8 +109,11 @@ define(['plugin/PluginConfig',
 
         if (this.objectToVisit === this.visitedObjects) {
 
+            // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
+            for (var l = 0; l < this.wires_to_add.length; ++l) {
+                this.addWire(this.wires_to_add[l]);
+            }
             this.createObjectFromDiagram();
-            console.log(this.modelID);
 
             // all objects have been visited
             var pluginResult = new PluginResult();
@@ -195,8 +199,8 @@ define(['plugin/PluginConfig',
 
         var srcMetaType,
             dstMetaType,
-            srcPort,
-            dstPort;
+            srcPort = 0,
+            dstPort = 0;
 
         core.loadByPath(self.rootNode, src, function (err, node) {
 
@@ -211,7 +215,6 @@ define(['plugin/PluginConfig',
                 if (isGate) {
                     parentPath = core.getPath(node.parent);
                     srcMetaType = metaType;
-                    srcPort = 0;
                     srcNodeObj = node;
                 } else if (isPort) {
                     var srcObj = core.getParent(node);
@@ -220,6 +223,7 @@ define(['plugin/PluginConfig',
                     srcNodeObj = srcObj;
                     parentPath = core.getPath(srcObj.parent);
                     node = srcObj;
+//                    srcPort =
                 }
 
                 if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
@@ -240,7 +244,6 @@ define(['plugin/PluginConfig',
                 if (isGate) {
                     parentPath = core.getPath(node.parent);
                     dstMetaType = metaType;
-                    dstPort = 0;
                     dstNodeObj = node;
                 } else if (isPort) {
                     var dstObj = core.getParent(node);
