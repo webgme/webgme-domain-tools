@@ -50,6 +50,8 @@ define(['plugin/PluginConfig',
         this.COMPLEX = ["And", "Or", "Nand", "Nor", "Xor", "Xnor"];
         this.CONNECTION_TYPES = ["OutputPort2InputPort", "UserInput2InputPort", "OutputPort2UserOutput", "UserInputBase2UserOutput", "PortBase2UserIOBase", "UserIOBase2PortBase", "UserIOBase2UserIOBase"];
 
+        this.SRC_PORT_LUT = [];
+        this.DST_PORT_LUT = [];
         // debugging
         this.gates = [];
         this.wires = [];
@@ -178,60 +180,88 @@ define(['plugin/PluginConfig',
         ++this.modelID;
 
         this.gates.push(gate);
+
     };
 
     LogicGatesExporterPlugin.prototype.addWire = function(nodeObj) {
 
         var core = this.core,
             self = this,
+            wireID = core.getPath(nodeObj),
             src = core.getPointerPath(nodeObj, "src"),
-            dst = core.getPointerPath(nodeObj, "dst");
+            dst = core.getPointerPath(nodeObj, "dst"),
+            srcNodeObj,
+            dstNodeObj;
 
         var srcMetaType,
-            dstMetaType;
+            dstMetaType,
+            srcPort,
+            dstPort;
 
-        core.loadByPath(self.rootNode, src, function (err, nodeObj) {
+        core.loadByPath(self.rootNode, src, function (err, node) {
+
             if (!err) {
-                // nodeObj is available to use and it is loaded.
-                if (!self.ID_LUT.hasOwnProperty(src)) {
-                    var baseClass = core.getBase(nodeObj);
-                    var parentPath = core.getPath(nodeObj.parent);
-                    srcMetaType = core.getAttribute(baseClass, 'name');
-                    var isComplex = self.COMPLEX.indexOf(srcMetaType) > -1;
-                    var isGate = self.META_TYPES.indexOf(srcMetaType) > -1;
-                    if (isGate) {
-                        self.ID_LUT[src] = self.modelID;
-                        self.addGate(nodeObj, srcMetaType, isComplex, parentPath);
-                    }
+                var baseObj = core.getBase(node),
+                    metaType = core.getAttribute(baseObj, 'name'),
+                    isComplex = self.COMPLEX.indexOf(metaType) > -1,
+                    isGate = self.META_TYPES.indexOf(metaType) > -1,
+                    isPort = metaType === 'InputPort' || metaType === 'OutputPort',
+                    parentPath;
+
+                if (isGate) {
+                    parentPath = core.getPath(node.parent);
+                    srcMetaType = metaType;
+                    srcPort = 0;
+                    srcNodeObj = node;
+                } else if (isPort) {
+                    var srcObj = core.getParent(node);
+                    src = core.getPath(srcObj);
+                    srcMetaType = core.getAttribute(srcObj, 'name');
+                    srcNodeObj = srcObj;
+                    parentPath = core.getPath(srcObj.parent);
+                    node = srcObj;
+                }
+
+                if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
+                    self.addGate(node, srcMetaType, isComplex, parentPath);
                 }
             }
         });
 
-        core.loadByPath(self.rootNode, dst, function (err, nodeObj) {
+        core.loadByPath(self.rootNode, dst, function (err, node) {
+
             if (!err) {
-                // nodeObj is available to use and it is loaded.
-                if (!self.ID_LUT.hasOwnProperty(dst)) {
-                    var parentPath = core.getPath(nodeObj.parent);
-                    dstMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
-                    var isComplex = self.COMPLEX.indexOf(dstMetaType) > -1;
-                    var isGate = self.META_TYPES.indexOf(dstMetaType) > -1;
-                    if (isGate)
-                    {
-                        self.ID_LUT[dst] = self.modelID;
-                        self.addGate(nodeObj, dstMetaType, isComplex, parentPath);
-                    }
+                var metaType = core.getAttribute(core.getBase(node), 'name'),
+                    isComplex = self.COMPLEX.indexOf(metaType) > -1,
+                    isGate = self.META_TYPES.indexOf(metaType) > -1,
+                    isPort = metaType === 'InputPort' || metaType === 'OutputPort',
+                    parentPath;
+
+                if (isGate) {
+                    parentPath = core.getPath(node.parent);
+                    dstMetaType = metaType;
+                    dstPort = 0;
+                    dstNodeObj = node;
+                } else if (isPort) {
+                    var dstObj = core.getParent(node);
+                    dst = core.getPath(dstObj);
+                    dstMetaType = core.getAttribute(dstObj, 'name');
+                    dstNodeObj = dstObj;
+                    parentPath = core.getPath(dstObj.parent);
+                    node = dstObj;
+                }
+
+                if (!self.ID_LUT.hasOwnProperty(dst) && (isPort || isGate)) {
+                    self.addGate(node, dstMetaType, isComplex, parentPath);
                 }
             }
         });
 
         // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
 
-        var parentPath = core.getPath(nodeObj.parent),
-            srcPort,
-            dstPort,
-            srcID = this.ID_LUT[src],
-            dstID = this.ID_LUT[dst];
-
+        var parentCircuitPath = core.getPath(nodeObj.parent);
+        var srcID = self.ID_LUT[src],
+            dstID = self.ID_LUT[dst];
         var wire = {
             "From": {
                 "@ID": srcID,
@@ -243,16 +273,16 @@ define(['plugin/PluginConfig',
             }
         };
 
-        if (!this.components.hasOwnProperty(parentPath)) {
-            this.components[parentPath] = {
+        if (!self.components.hasOwnProperty(parentCircuitPath)) {
+            self.components[parentCircuitPath] = {
                 "Gate": [],
                 "Wire": []
             };
         }
 
-        if (parentPath) {
-            this.components[parentPath]["Wire"].push(wire);
-            this.wires.push(wire);
+        if (parentCircuitPath) {
+            self.components[parentCircuitPath]["Wire"].push(wire);
+            self.wires.push(wire);
         }
     };
 
