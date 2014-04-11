@@ -14,7 +14,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     Logger.prototype.constructor = Logger;
 
     Logger.prototype.getName = function () {
-        return "Children";
+        return "Logger";
     };
 
     Logger.prototype.main = function (callback) {

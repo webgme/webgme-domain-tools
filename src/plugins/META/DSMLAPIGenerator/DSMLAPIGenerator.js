@@ -13,7 +13,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'plugin/DSMLAPIGenerator/DSM
         // FIXME: workaround
         // ejs is defined in tests
         // EJS is defined when plugin runs server side
-        // window.ejs is deinfed when plugin runs in client
+        // window.ejs is defined when plugin runs in client
         if (!ejs) {
             ejs = EJS || window.ejs;
         }
