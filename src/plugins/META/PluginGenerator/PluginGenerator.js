@@ -13,14 +13,6 @@ define(['plugin/PluginConfig',
     function (PluginConfig, PluginBase, EJS, TEMPLATES) {
         'use strict';
 
-        // FIXME: workaround
-        // ejs is defined in tests
-        // EJS is defined when plugin runs server side
-        // window.ejs is defined when plugin runs in client
-        if (!ejs) {
-            ejs = EJS || window.ejs;
-        }
-
         var PluginGeneratorPlugin = function () {
             // Call base class's constructor
             PluginBase.call(this);
@@ -29,6 +21,14 @@ define(['plugin/PluginConfig',
         PluginGeneratorPlugin.prototype = Object.create(PluginBase.prototype);
 
         PluginGeneratorPlugin.prototype.constructor = PluginGeneratorPlugin;
+
+        // FIXME: workaround
+        // ejs is defined in tests
+        // EJS is defined when plugin runs server side
+        // window.ejs is defined when plugin runs in client
+        if (!ejs) {
+            ejs = EJS || window.ejs;
+        }
 
         PluginGeneratorPlugin.prototype.getName = function () {
             return "Plugin Generator";
@@ -70,6 +70,14 @@ define(['plugin/PluginConfig',
                     "description": 'Optional description of the plugin.',
                     "value": '',
                     "valueType": "string",
+                    "readOnly": false
+                },
+                {
+                    "name": "test",
+                    "displayName": "Include testing script",
+                    "description": 'Generate template for unit-tests.',
+                    "value": true,
+                    "valueType": "boolean",
                     "readOnly": false
                 },
                 {
@@ -127,7 +135,9 @@ define(['plugin/PluginConfig',
                 pluginJS,
                 pluginFileName,
                 templateFileName,
-                outputDir;
+                dirCommon,
+                outputDir,
+                testDir;
 
             // Assume everything is ok.
             self.result.setSuccess(true);
@@ -137,8 +147,9 @@ define(['plugin/PluginConfig',
 
             currentConfig.date = new Date();
             currentConfig.projectName = self.projectName;
-            outputDir = 'src/plugins/' + self.projectName + '/' + currentConfig.pluginID + '/';
-
+            dirCommon = '/plugins/' + self.projectName + '/' + currentConfig.pluginID + '/';
+            outputDir = 'src' + dirCommon;
+            testDir = 'test/unit' + dirCommon;
             if (currentConfig.templateType === 'Python') {
                 currentConfig.templateExt = 'py';
                 templateFileName = outputDir + 'Templates/Python.py.ejs';
@@ -163,6 +174,11 @@ define(['plugin/PluginConfig',
             if (currentConfig.templateType) {
                 self.fs.addFile(outputDir + 'Templates/combine_templates.js',
                     ejs.render(TEMPLATES['combine_templates.js.ejs']));
+            }
+
+            if (currentConfig.test) {
+                self.fs.addFile(testDir + currentConfig.pluginID + 'Spec.js',
+                    ejs.render(TEMPLATES['unit_test.js.ejs'], currentConfig));
             }
 
             self.fs.saveArtifact();
