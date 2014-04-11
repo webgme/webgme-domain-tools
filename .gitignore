@@ -19,3 +19,5 @@ src/plugins/*/DSML/*.js*
 # ignore generated files and directories by plugins
 *-output.zip
 *-output
+
+blob-local-storage
