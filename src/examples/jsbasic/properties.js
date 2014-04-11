@@ -50,9 +50,9 @@ person.age = 33;
 var a1 = person.fullName;
 
 // invalid and webstorm helps
-person.fullName = 33;
-person.fullName = 'Jack Franklin';
-Person.prototype.attributes.fullName = 4;
+//person.fullName = 33;
+//person.fullName = 'Jack Franklin';
+//Person.prototype.attributes.fullName = 4;
 
 // performance considerations: http://jsperf.com/properties-implementation-in-javascript/2
 
