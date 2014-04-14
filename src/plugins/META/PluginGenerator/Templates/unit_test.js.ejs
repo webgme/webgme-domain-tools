@@ -14,6 +14,7 @@ if (typeof window === 'undefined') {
         expect = chai.expect;
 }
 
+// TODO: Update this with a more to-the-point regular expression
 var semanticVersionPattern = /^\d+\.\d+\.\d+$/;
 
 describe('<%= pluginID %>', function () {
@@ -28,7 +29,8 @@ describe('<%= pluginID %>', function () {
             //rootNode = core.getRootNode();
             //modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
             //core.setAttribute(modelsNode, 'name', 'Models');
-            });
+        done();
+        });
     });
 
     it('getVersion', function () {

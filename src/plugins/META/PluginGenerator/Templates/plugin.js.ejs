@@ -40,7 +40,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
     * @public
     */
     <%= pluginID %>.prototype.getDescription = function () {
-        return "Description for <%= pluginName %>";
+        return "<%= description %>";
     };<%} if (hasVersion) {%>
 
     /**
@@ -154,7 +154,7 @@ if (fs) {%>
 <%}
 if (configStructure) {%>
         // Obtain the current user configuration.
-        var currentConfig = this.getCurrentConfig();
+        var currentConfig = self.getCurrentConfig();
         self.logger.info('Current configuration ' + JSON.stringify(currentConfig, null, 4));
 <%}
 if (core) { %>
