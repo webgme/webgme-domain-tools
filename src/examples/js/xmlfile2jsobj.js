@@ -11,4 +11,5 @@ var parser = require('xml2json'),
 xmlString = fs.readFileSync(xmlFileName);
 jsonObj = parser.toJson(xmlString, {object: true});
 
-console.log(jsonObj.toString());
+console.log(JSON.stringify(jsonObj, null, 4));
+fs.writeFileSync('output.json', JSON.stringify(jsonObj, null, 4));
