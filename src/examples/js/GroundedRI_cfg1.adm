@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<Design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" DesignSpaceSrcID="{f91e5f03-1721-4949-8feb-a98715542695}" DesignID="{5831fbf6-dc1a-49a1-bb44-461b3041a93a}" Name="GroundedRI_cfg1" xmlns="avm">
+  <RootContainer xmlns:q1="avm" xsi:type="q1:Compound" Name="GroundedRI_cfg1" xmlns="">
+    <Property xsi:type="q1:PrimitiveProperty" Name="Inductance" ID="">
+      <Value ID="" DimensionType="Scalar" Dimensions="" DataType="String">
+        <ValueExpression xsi:type="q1:ParametricValue">
+          <AssignedValue xsi:type="q1:FixedValue">
+            <Value>0.011</Value>
+          </AssignedValue>
+        </ValueExpression>
+      </Value>
+    </Property>
+    <Property xsi:type="q1:PrimitiveProperty" Name="Resistance" ID="">
+      <Value ID="" DimensionType="Scalar" Dimensions="" DataType="String">
+        <ValueExpression xsi:type="q1:ParametricValue">
+          <AssignedValue xsi:type="q1:FixedValue">
+            <Value>1.1</Value>
+          </AssignedValue>
+        </ValueExpression>
+      </Value>
+    </Property>
+    <ComponentInstance Name="ResistorParameterResistance" DesignSpaceSrcComponentID="{aa220d34-b4f9-4c01-ad2a-527b323a777d}" ComponentID="a62199e3-a691-4706-abd3-05658c00e911" ID="{b1545185-a7d8-4359-9ee5-8194053b5c8a}">
+      <PrimitivePropertyInstance IDinComponentModel="">
+        <Value DimensionType="Scalar" Dimensions="" DataType="String" />
+      </PrimitivePropertyInstance>
+      <ConnectorInstance ConnectorComposition="d1179c38-f6b5-4157-962a-81121cde4871" ID="{b1545185-a7d8-4359-9ee5-8194053b5c8a}-717130f3-0e36-4143-9cea-0f99b538bb4d" ApplyJoinData="" IDinComponentModel="717130f3-0e36-4143-9cea-0f99b538bb4d" />
+      <ConnectorInstance ConnectorComposition="{22ee7761-9378-4b90-8fe2-ed8475cf651b}-1a545bdd-1c9a-4cc6-a2e9-35db587e65ec" ID="{b1545185-a7d8-4359-9ee5-8194053b5c8a}-a719a956-1015-4bbe-8643-3d1f0c01ade4" ApplyJoinData="" IDinComponentModel="a719a956-1015-4bbe-8643-3d1f0c01ade4" />
+    </ComponentInstance>
+    <ComponentInstance Name="Resistor__DoubleSeriesResistor" DesignSpaceSrcComponentID="{6df20dc9-faca-437f-85f1-1192b604c138}" ComponentID="945ad50a-3763-4006-845b-7aaf7a77e7e0" ID="{22ee7761-9378-4b90-8fe2-ed8475cf651b}">
+      <PrimitivePropertyInstance IDinComponentModel="">
+        <Value DimensionType="Scalar" Dimensions="" DataType="String" />
+      </PrimitivePropertyInstance>
+      <ConnectorInstance ConnectorComposition="{b1545185-a7d8-4359-9ee5-8194053b5c8a}-a719a956-1015-4bbe-8643-3d1f0c01ade4 d1179c38-f6b5-4157-962a-81121cde4871 {bb0f1606-a6d5-477c-a692-99579e3db62e}-91bb9364-0c4c-46e6-888f-2a7a13353def" ID="{22ee7761-9378-4b90-8fe2-ed8475cf651b}-1a545bdd-1c9a-4cc6-a2e9-35db587e65ec" ApplyJoinData="" IDinComponentModel="1a545bdd-1c9a-4cc6-a2e9-35db587e65ec" />
+      <ConnectorInstance ConnectorComposition="{ea47dbef-83e8-4569-b53a-e64d4c24276a}-4f358b12-9c32-4c82-aea5-35c3f4ff5d5c" ID="{22ee7761-9378-4b90-8fe2-ed8475cf651b}-984b994c-d971-40cd-8450-b5c45ef541ab" ApplyJoinData="" IDinComponentModel="984b994c-d971-40cd-8450-b5c45ef541ab" />
+    </ComponentInstance>
+    <ComponentInstance Name="Ground" DesignSpaceSrcComponentID="{cb27be26-53ff-4fb1-b1cf-b8b2bda60577}" ComponentID="9a882c9c-4f02-4cef-93b7-fe3d0d0cf081" ID="{bb0f1606-a6d5-477c-a692-99579e3db62e}">
+      <ConnectorInstance ConnectorComposition="{22ee7761-9378-4b90-8fe2-ed8475cf651b}-1a545bdd-1c9a-4cc6-a2e9-35db587e65ec" ID="{bb0f1606-a6d5-477c-a692-99579e3db62e}-91bb9364-0c4c-46e6-888f-2a7a13353def" ApplyJoinData="" IDinComponentModel="91bb9364-0c4c-46e6-888f-2a7a13353def" />
+    </ComponentInstance>
+    <ComponentInstance Name="Inductor" DesignSpaceSrcComponentID="{3310f7a1-fcd6-4136-ad29-b38511ca746a}" ComponentID="29a48caa-b009-403f-8ef9-ddbc0d406fde" ID="{ea47dbef-83e8-4569-b53a-e64d4c24276a}">
+      <PrimitivePropertyInstance IDinComponentModel="">
+        <Value DimensionType="Scalar" Dimensions="" DataType="String" />
+      </PrimitivePropertyInstance>
+      <ConnectorInstance ConnectorComposition="7d35802b-e82e-4371-bcac-a408d00816e2" ID="{ea47dbef-83e8-4569-b53a-e64d4c24276a}-b91b5160-39b2-4ceb-bde5-b446ab6627ea" ApplyJoinData="" IDinComponentModel="b91b5160-39b2-4ceb-bde5-b446ab6627ea" />
+      <ConnectorInstance ConnectorComposition="84bd3dcb-c903-4cda-b47e-f61f2765db0f {22ee7761-9378-4b90-8fe2-ed8475cf651b}-984b994c-d971-40cd-8450-b5c45ef541ab" ID="{ea47dbef-83e8-4569-b53a-e64d4c24276a}-4f358b12-9c32-4c82-aea5-35c3f4ff5d5c" ApplyJoinData="" IDinComponentModel="4f358b12-9c32-4c82-aea5-35c3f4ff5d5c" />
+    </ComponentInstance>
+    <Connector ConnectorComposition="{22ee7761-9378-4b90-8fe2-ed8475cf651b}-1a545bdd-1c9a-4cc6-a2e9-35db587e65ec {b1545185-a7d8-4359-9ee5-8194053b5c8a}-717130f3-0e36-4143-9cea-0f99b538bb4d" ID="d1179c38-f6b5-4157-962a-81121cde4871" ApplyJoinData="" Definition="" Name="nResistor" />
+    <Connector ConnectorComposition="{ea47dbef-83e8-4569-b53a-e64d4c24276a}-b91b5160-39b2-4ceb-bde5-b446ab6627ea" ID="7d35802b-e82e-4371-bcac-a408d00816e2" ApplyJoinData="" Definition="" Name="pInductor" />
+    <Connector ConnectorComposition="{ea47dbef-83e8-4569-b53a-e64d4c24276a}-4f358b12-9c32-4c82-aea5-35c3f4ff5d5c" ID="84bd3dcb-c903-4cda-b47e-f61f2765db0f" ApplyJoinData="" Definition="" Name="nInductor" />
+  </RootContainer>
+</Design>
