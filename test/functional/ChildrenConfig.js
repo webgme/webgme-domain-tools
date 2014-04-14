@@ -53,6 +53,34 @@ describe("Functional plugin tests", function() {
         });
     });
 
+    it('should run CoreExamples on TestCore project with activeSelection', function(done) {
+        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+            projectName: 'TestCore',
+            pluginName: 'CoreExamples',
+            activeNode: '/1023960100',
+            activeSelection: ["/1023960100/456322457", "/1023960100/757502452"]
+        }, function (err, result) {
+            expect(err).to.equal(null);
+            // TODO: expect result is a PluginResult type
+            expect(result.getSuccess()).to.equal(true);
+            done();
+        });
+    });
+
+    it('should run CoreExamples on TestCore project with activeSelection and bad path', function(done) {
+        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+            projectName: 'TestCore',
+            pluginName: 'CoreExamples',
+            activeNode: '/1023960100',
+            activeSelection: ["/1023960100/456322457", "/1023960100/757502452", "BAD_PATH"]
+        }, function (err, result) {
+            expect(err).to.equal(null);
+            // TODO: expect result is a PluginResult type
+            expect(result.getSuccess()).to.equal(true);
+            done();
+        });
+    });
+
     it('should fail CoreExamples on wrong active node', function(done) {
         webgme.runPlugin.main(webGMEGlobal.getConfig(), {
             projectName: 'TestCore',
