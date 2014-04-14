@@ -96,7 +96,6 @@ define(['plugin/PluginConfig',
                 this.wires_to_add.push(child);
 
             } else if (metaType === 'InputPort') {
-//                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
 
                 if (!this.CHILDREN_LUT.hasOwnProperty(parentPath)) {
 
@@ -119,8 +118,6 @@ define(['plugin/PluginConfig',
                 this.addWire(this.wires_to_add[l]);
             }
 
-            // TODO: add number of inputs to all the gates here
-
             this.createObjectFromDiagram();
 
             // all objects have been visited
@@ -132,8 +129,11 @@ define(['plugin/PluginConfig',
         }
     };
 
+    /// nodeObj is the current node to be visited
+    /// metaType is the meta type of current node
+    /// isComplex is a Boolean value indicating whether the current node is a complex logic gate
+    /// parentPath is the circuit diagram the current node belongs to
     LogicGatesExporterPlugin.prototype.addGate = function(nodeObj, metaType, isComplex, parentPath) {
-
         var core = this.core,
             self = this,
             gmeID = core.getPath(nodeObj),
@@ -159,9 +159,7 @@ define(['plugin/PluginConfig',
             }
         };
 
-        // add domain specific attributes
         if (isComplex) {
-            // TODO: fix this... this doesn't return the right number of children
             core.loadChildren(nodeObj, function(err, childNodes) {
                 gate["@NumInputs"] = childNodes.length - 1;
             });
@@ -228,7 +226,6 @@ define(['plugin/PluginConfig',
                     src = core.getPath(srcObj);
                     srcMetaType = core.getAttribute(srcObj, 'name');
                     srcNodeObj = srcObj;
-                    //parentPath = core.getPath(srcObj.parent);
                     parentPath = core.getPath(srcObj);
                     node = srcObj;
 
