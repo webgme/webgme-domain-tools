@@ -138,15 +138,10 @@ define(['plugin/PluginConfig',
             self = this,
             gmeID = core.getPath(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
-            numInputs, // number of children
             xPos = parseInt(nodeObj.data.reg.position.x, 10),
             yPos = parseInt(nodeObj.data.reg.position.y, 10),
             angle = 0;
 
-        // TODO: fix this... this doesn't return the right number of children
-        core.loadChildren(nodeObj, function(err, childNodes) {
-            numInputs = childNodes.length;
-        });
 
         this.ID_LUT[gmeID] = this.modelID;
 
@@ -166,7 +161,10 @@ define(['plugin/PluginConfig',
 
         // add domain specific attributes
         if (isComplex) {
-            gate["@NumInputs"] = numInputs;
+            // TODO: fix this... this doesn't return the right number of children
+            core.loadChildren(nodeObj, function(err, childNodes) {
+                gate["@NumInputs"] = childNodes.length - 1;
+            });
 
         } else if (metaType === "Clock") {
             gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
