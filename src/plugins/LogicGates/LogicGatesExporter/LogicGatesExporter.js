@@ -95,7 +95,7 @@ define(['plugin/PluginConfig',
 
                 this.wires_to_add.push(child);
 
-            } else if (metaType === 'InputPort' || metaType === 'OutputPort') {
+            } else if (metaType === 'InputPort') {
 //                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
 
                 if (!this.CHILDREN_LUT.hasOwnProperty(parentPath)) {
@@ -233,7 +233,12 @@ define(['plugin/PluginConfig',
                     //parentPath = core.getPath(srcObj.parent);
                     parentPath = core.getPath(srcObj);
                     node = srcObj;
-                    srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
+
+                    if (metaType === 'InputPort') {
+                        srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
+                    } else if (metaType === 'OutputPort') {
+                        srcPort = 0;
+                    }
                 }
 
                 if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
@@ -261,7 +266,6 @@ define(['plugin/PluginConfig',
                     dst = core.getPath(dstObj);
                     dstMetaType = core.getAttribute(dstObj, 'name');
                     dstNodeObj = dstObj;
-//                    parentPath = core.getPath(dstObj.parent);
                     parentPath = core.getPath(dstObj);
 
                     node = dstObj;
@@ -299,7 +303,8 @@ define(['plugin/PluginConfig',
             };
         }
 
-        if (parentCircuitPath) {
+        var validGates = (srcPort !== undefined) && (dstPort !== undefined) && (srcID !== undefined) && (dstID != undefined);
+        if (parentCircuitPath && validGates) {
             self.components[parentCircuitPath]["Wire"].push(wire);
             self.wires.push(wire);
         }
@@ -325,7 +330,7 @@ define(['plugin/PluginConfig',
                 this.circuits.push(diagram);
                 var j2x = new json2xml;
                 var output = j2x.convert(diagram);
-                this.fs.addFile("output" + i + ".xml", output);
+                this.fs.addFile("output" + i + ".gcg", output);
             }
             ++i;
         }
