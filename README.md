@@ -71,16 +71,51 @@ Example: `node node_modules\webgme\bin\run_plugin.js -c config.json -p Test -n C
 
 ## Configuring WebStorm ##
 
-TODO: ...
+For detailed information please see WebStorm documentation, which should be your primary source of information.
+Here we collected a few step by step instructions to get started.
+
+* File - Settings - Appearance - UI Options - Theme - Dracula
+* File - Settings - Editor - Appearance - Show line numbers
 
 ### Plugin ###
 
-TODO: ...
+Run - Edit Configurations ... - Add new configuration (+) - Node.js
+
+* Change the configuration name to `MyPlugin`
+* Working directory should have a full path to this directory. (webgme-domain-tools)
+* Javascript file: `node_modules\webgme\bin\run_plugin.js`
+* Application parameters: `-c config.json -p Test -n MyPlugin`
+
+For additional parameters and their meaning run `node node_modules\webgme\bin\run_plugin.js --help`
+
+* Select the configuration from the drop down list top right corner in WebStorm
+* Click on the green play button to run the configuration
+* Click on the debug button to debug your plugin as it runs on server side
 
 ### Server side tests ###
 
-TODO: ...
+Run - Edit Configurations ... - Add new configuration (+) - Mocha
+
+* Change the configuration name to `All tests`
+* Test directory - click on `...` - select the `test` directory in this project (full path has to be set.)
+* Check include all subdirectories
+* Create another configuration for `Unit tests` directory.
+* Create another configuration for `Functional tests` directory.
+* Select the configuration from the drop down list `All tests` top right corner in WebStorm
+* Click on the green play button to run all tests
+    * Once the tests ran, you can toggle to run tests automatically. It will rerun the tests as you save the files.
+* Click on the debug button to debug your tests
 
 ### Client side tests ###
 
-TODO: ...
+Run - Edit Configurations ... - Add new configuration (+) - Karma
+
+* Change the configuration name to `All client side tests`
+* Configuration file: `webgme-domain-tools\karma.conf.js` (full path has to be set.)
+* Select the configuration from the drop down list `All client side tests` top right corner in WebStorm
+* Click on the green play button to run all tests (open one or more browsers in the link indicated by Karma)
+    * Once the tests ran, you can toggle to run tests automatically. It will rerun the tests as you save the files.
+* Click on the debug button to debug your tests
+* Click on the run with coverage button to run your tests and get code coverage
+    * It runs your tests in the browser(s) and brings all test results and coverage to WebStorm.
+    * Each file test and source will have indicators next to the line number with a color green or red.
