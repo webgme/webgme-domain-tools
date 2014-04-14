@@ -1,5 +1,5 @@
 /**
- * Created by Dana Zhang on 3/31/2014.
+ * Created by Dana Zhang on 4/8/2014.
  */
 
 'use strict';
@@ -95,8 +95,7 @@ define(['plugin/PluginConfig',
 
                 this.wires_to_add.push(child);
 
-            } else if (metaType === 'InputPort' || metaType === 'OutputPort') {
-//                this.CHILDREN_LUT[core.getPath(child)] = parentPath;
+            } else if (metaType === 'InputPort') {
 
                 if (!this.CHILDREN_LUT.hasOwnProperty(parentPath)) {
 
@@ -119,8 +118,6 @@ define(['plugin/PluginConfig',
                 this.addWire(this.wires_to_add[l]);
             }
 
-            // TODO: add number of inputs to all the gates here
-
             this.createObjectFromDiagram();
 
             // all objects have been visited
@@ -132,21 +129,19 @@ define(['plugin/PluginConfig',
         }
     };
 
+    /// nodeObj is the current node to be visited
+    /// metaType is the meta type of current node
+    /// isComplex is a Boolean value indicating whether the current node is a complex logic gate
+    /// parentPath is the circuit diagram the current node belongs to
     LogicGatesExporterPlugin.prototype.addGate = function(nodeObj, metaType, isComplex, parentPath) {
-
         var core = this.core,
             self = this,
             gmeID = core.getPath(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
-            numInputs, // number of children
             xPos = parseInt(nodeObj.data.reg.position.x, 10),
             yPos = parseInt(nodeObj.data.reg.position.y, 10),
             angle = 0;
 
-        // TODO: fix this... this doesn't return the right number of children
-        core.loadChildren(nodeObj, function(err, childNodes) {
-            numInputs = childNodes.length;
-        });
 
         this.ID_LUT[gmeID] = this.modelID;
 
@@ -164,9 +159,10 @@ define(['plugin/PluginConfig',
             }
         };
 
-        // add domain specific attributes
         if (isComplex) {
-            gate["@NumInputs"] = numInputs;
+            core.loadChildren(nodeObj, function(err, childNodes) {
+                gate["@NumInputs"] = childNodes.length - 1;
+            });
 
         } else if (metaType === "Clock") {
             gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
@@ -230,10 +226,14 @@ define(['plugin/PluginConfig',
                     src = core.getPath(srcObj);
                     srcMetaType = core.getAttribute(srcObj, 'name');
                     srcNodeObj = srcObj;
-                    //parentPath = core.getPath(srcObj.parent);
                     parentPath = core.getPath(srcObj);
                     node = srcObj;
-                    srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
+
+                    if (metaType === 'InputPort') {
+                        srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
+                    } else if (metaType === 'OutputPort') {
+                        srcPort = 0;
+                    }
                 }
 
                 if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
@@ -261,7 +261,6 @@ define(['plugin/PluginConfig',
                     dst = core.getPath(dstObj);
                     dstMetaType = core.getAttribute(dstObj, 'name');
                     dstNodeObj = dstObj;
-//                    parentPath = core.getPath(dstObj.parent);
                     parentPath = core.getPath(dstObj);
 
                     node = dstObj;
@@ -299,7 +298,8 @@ define(['plugin/PluginConfig',
             };
         }
 
-        if (parentCircuitPath) {
+        var validGates = (srcPort !== undefined) && (dstPort !== undefined) && (srcID !== undefined) && (dstID != undefined);
+        if (parentCircuitPath && validGates) {
             self.components[parentCircuitPath]["Wire"].push(wire);
             self.wires.push(wire);
         }
@@ -325,7 +325,7 @@ define(['plugin/PluginConfig',
                 this.circuits.push(diagram);
                 var j2x = new json2xml;
                 var output = j2x.convert(diagram);
-                this.fs.addFile("output" + i + ".xml", output);
+                this.fs.addFile("output" + i + ".gcg", output);
             }
             ++i;
         }
