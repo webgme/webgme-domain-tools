@@ -31,30 +31,57 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             return;
         }
 
-        this.generateNodeInfo(self.fs, activeNode, self.core);
-
-        self.core.loadChildren(activeNode, function (err, childNodes) {
-            var i;
-            self.logger.log('%j has children::', self.core.getAttribute(activeNode, 'name'));
-
-            for (i = 0; i < childNodes.length; i += 1) {
-                self.logger.log('  - %j', self.core.getAttribute(childNodes[i], 'name'));
-
-                self.generateNodeInfo(childNodes[i]);
+        self.generateNodeInfo(activeNode, function (err) {
+            if (err) {
+                callback(err, self.result);
+                return;
             }
 
-            self.fs.addFile('debug.txt', 'Here comes some text');
+            self.core.loadChildren(activeNode, function (err, childNodes) {
+                var i;
+                self.logger.info(self.core.getAttribute(activeNode, 'name') + ' has children.');
 
-            self.fs.saveArtifact();
+                var remaining = childNodes.length;
 
-            if (callback) {
-                self.result.setSuccess(true);
-                callback(null, self.result);
-            }
+                for (i = 0; i < childNodes.length; i += 1) {
+                    self.logger.info('  - ' + self.core.getAttribute(childNodes[i], 'name'));
+
+                    (function(childNode) {
+                        self.generateNodeInfo(childNode, function (err) {
+                            remaining -= 1;
+
+                            if (err) {
+                                // TODO: do something?
+                                return;
+                            }
+
+                            if (remaining === 0) {
+                                // finalize ...
+                                self.fs.saveArtifact(function(err, hash) {
+                                    if (err) {
+                                        callback(err, self.result);
+                                        return;
+                                    }
+
+                                    self.logger.info('Artifacts are saved here: ' + hash);
+
+                                    self.result.setSuccess(true);
+                                    callback(null, self.result);
+                                });
+                            }
+
+                        });
+                    })(childNodes[i]);
+                }
+
+
+            });
+
         });
+
     };
 
-    ChildrenSaveArtifacts.prototype.generateNodeInfo = function (node) {
+    ChildrenSaveArtifacts.prototype.generateNodeInfo = function (node, callback) {
         var self = this,
             info = '';
 
@@ -73,7 +100,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         info += '\r\n';
 
         // FIXME: check if name is safe as a directory name
-        self.fs.addFile(self.core.getAttribute(node, 'name') + '/' + self.core.getGuid(node) + '.txt', info);
+        self.fs.addFile(self.core.getAttribute(node, 'name') + '/' + self.core.getGuid(node) + '.txt', info, callback);
     };
 
     return ChildrenSaveArtifacts;
