@@ -144,15 +144,15 @@ if (templateType) {%>
         // https://github.com/webgme/webgme-domain-tools/blob/master/src/tools/combine_templates.js
         var template<%=templateExt.toUpperCase()%> = ejs.render(TEMPLATES['<%=templateType%>.<%=templateExt%>.ejs'], {a: 'a', b: 'b'});
         // TODO: addFile and saveArtifact are asynchronous functions - insert rest of code before callback.
-        var templateFileName = 'generatedFiles/<%=templateType%>.<%=templateExt%>'
+        //var templateFileName = 'generatedFiles/<%=templateType%>.<%=templateExt%>'
         // self.fs.addFile(templateFileName, template<%=templateExt.toUpperCase()%>, function (err) {
         //    self.fs.saveArtifact(function (err, hash) {
         //        //FIXME: All code below needs to go here
         //        callback(null, self.result);
         //    });
         // });
-<%if (fs)
-{%>
+<%}
+if (fs) {%>
         // TODO: These are asynchronous functions - insert rest of code before callback.
         // self.fs works on both client and server side.
         // self.fs.addFile('dir/subdir/file.txt', 'This is a text file.', function (err) {
