@@ -10,7 +10,7 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/RegistryKeys.js',
+        'js/RegistryKeys',
         'js/Utils/METAAspectHelper',
         './LogicGatesDecorator.Constants',
         './LogicGates.META',
