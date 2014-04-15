@@ -135,12 +135,16 @@ define(['plugin/PluginConfig',
                 pluginJS,
                 pluginFileName,
                 templateFileName,
+                templateString,
                 dirCommon,
                 outputDir,
-                testDir;
+                testDir,
+                filesToAdd = {},
+                i,
+                nbrOfFiles,
+                fileKeys,
+                error = '';
 
-            // Assume everything is ok.
-            self.result.setSuccess(true);
             currentConfig = self.getCurrentConfig();
             self.logger.info('Current configuration');
             self.logger.info(JSON.stringify(currentConfig, null, 4));
@@ -153,39 +157,63 @@ define(['plugin/PluginConfig',
             if (currentConfig.templateType === 'Python') {
                 currentConfig.templateExt = 'py';
                 templateFileName = outputDir + 'Templates/Python.py.ejs';
-                self.fs.addFile(templateFileName, 'print "<%=a%> and <%=b%> provided."');
+                templateString = 'print "<%=a%> and <%=b%> provided."';
             } else if (currentConfig.templateType === 'CSharp') {
                 currentConfig.templateExt = 'cs';
                 templateFileName = outputDir + 'Templates/CSharp.cs.ejs';
-                self.fs.addFile(templateFileName, 'using System;\nnamespace Hey {\n\tclass Hi {\n\t\tstatic void Main()' +
-                    ' {\n\t\t\tConsole.WriteLine("<%=a%> and <%=b%> provided.");\n\t\t}\n\t}\n}');
+                templateString = 'using System;\nnamespace Hey {\n\tclass Hi {\n\t\tstatic void Main()' +
+                    ' {\n\t\t\tConsole.WriteLine("<%=a%> and <%=b%> provided.");\n\t\t}\n\t}\n}';
             } else if (currentConfig.templateType === 'JavaScript') {
                 currentConfig.templateExt = 'js';
                 templateFileName = outputDir + 'Templates/JavaScript.js.ejs';
-                self.fs.addFile(templateFileName, 'console.info("<%=a%> and <%=b%> provided.);"');
+                templateString = 'console.info("<%=a%> and <%=b%> provided.);"';
             } else {
                 currentConfig.templateType = null;
             }
 
             pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
             pluginFileName = outputDir + currentConfig.pluginID + '.js';
-            self.fs.addFile(pluginFileName, pluginJS);
+
+            filesToAdd[pluginFileName] =  pluginJS;
 
             if (currentConfig.templateType) {
-                self.fs.addFile(outputDir + 'Templates/combine_templates.js',
-                    ejs.render(TEMPLATES['combine_templates.js.ejs']));
+                filesToAdd[templateFileName] = templateString;
+                filesToAdd[outputDir + 'Templates/combine_templates.js'] =
+                    ejs.render(TEMPLATES['combine_templates.js.ejs']);
             }
 
             if (currentConfig.test) {
-                self.fs.addFile(testDir + currentConfig.pluginID + 'Spec.js',
-                    ejs.render(TEMPLATES['unit_test.js.ejs'], currentConfig));
+                filesToAdd[testDir + currentConfig.pluginID + 'Spec.js'] =
+                    ejs.render(TEMPLATES['unit_test.js.ejs'], currentConfig);
             }
 
-            self.fs.saveArtifact();
-            self.updateSuccess(true, null);
+            self.logger.info(JSON.stringify(filesToAdd, null, 4));
+            fileKeys = Object.keys(filesToAdd);
+            nbrOfFiles = fileKeys.length;
 
-            callback(null, self.result);
+            for (i = 0; fileKeys.length; i += 1) {
+                self.fs.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err) {
+                    error = err ? error + err : error;
+                    nbrOfFiles -= 1;
+                    if (nbrOfFiles === 0) {
+                        if (error) {
+                            callback('Something went wrong when adding files: ' + error, self.result);
+                            return;
+                        }
+                        self.fs.saveArtifact(function (err, hash) {
+                            if (err) {
+                                callback(err, self.result);
+                                return;
+                            }
 
+                            self.logger.info('Artifacts are saved here: ' + hash);
+
+                            self.result.setSuccess(true);
+                            callback(null, self.result);
+                        });
+                    }
+                });
+            }
         };
 
 

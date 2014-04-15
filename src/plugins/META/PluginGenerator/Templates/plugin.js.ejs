@@ -143,14 +143,24 @@ if (templateType) {%>
         // see instructions in file. You must run this after any modifications to the ejs template.
         // https://github.com/webgme/webgme-domain-tools/blob/master/src/tools/combine_templates.js
         var template<%=templateExt.toUpperCase()%> = ejs.render(TEMPLATES['<%=templateType%>.<%=templateExt%>.ejs'], {a: 'a', b: 'b'});
-        self.fs.addFile('generatedFiles/<%=templateType%>.<%=templateExt%>', template<%=templateExt.toUpperCase()%>);
-<%if (!fs) {%>        self.fs.saveArtifact();<%}%>
-<%}
-if (fs) {%>
+        // TODO: addFile and saveArtifact are asynchronous functions - insert rest of code before callback.
+        var templateFileName = 'generatedFiles/<%=templateType%>.<%=templateExt%>'
+        // self.fs.addFile(templateFileName, template<%=templateExt.toUpperCase()%>, function (err) {
+        //    self.fs.saveArtifact(function (err, hash) {
+        //        //FIXME: All code below needs to go here
+        //        callback(null, self.result);
+        //    });
+        // });
+<%if (fs)
+{%>
+        // TODO: These are asynchronous functions - insert rest of code before callback.
         // self.fs works on both client and server side.
-        self.fs.addFile('dir/subdir/file.txt', 'This is a text file.');
-        self.fs.addFile('dir/subdir2/file2.txt', 'This is another text file.');
-        self.fs.saveArtifact();
+        // self.fs.addFile('dir/subdir/file.txt', 'This is a text file.', function (err) {
+        //    self.fs.saveArtifact(function (err, hash) {
+        //        //FIXME: All code below needs to go here
+        //        callback(null, self.result);
+        //    });
+        // });
 <%}
 if (configStructure) {%>
         // Obtain the current user configuration.
