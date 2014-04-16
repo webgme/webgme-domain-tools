@@ -32,6 +32,15 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
     */
     <%= pluginID %>.prototype.getName = function () {
         return "<%= pluginName %>";
+    };
+
+    /**
+    * Gets the semantic version (semver.org) of the <%= pluginID %>.
+    * @returns {string} The version of the plugin.
+    * @public
+    */
+    <%= pluginID %>.prototype.getVersion = function () {
+        return "0.1.0";
     };<% if (description) {%>
 
     /**
@@ -41,16 +50,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
     */
     <%= pluginID %>.prototype.getDescription = function () {
         return "<%= description %>";
-    };<%} if (hasVersion) {%>
-
-    /**
-    * Gets the semantic version (semver.org) of the <%= pluginID %>.
-    * @returns {string} The version of the plugin.
-    * @public
-    */
-    <%= pluginID %>.prototype.getVersion = function () {
-        return "0.1.0";
-    };<%} if (configStructure) {%>
+    };<%}if (configStructure) {%>
 
     /**
     * Gets the configuration structure for the <%= pluginID %>.
@@ -113,12 +113,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
         ];
     };
 <%}%>
+
     /**
     * Main function for the plugin to execute. This will perform the execution.
     * Notes:
     * - Always log with the provided logger.[error,warning,info,debug].
     * - Do NOT put any user interaction logic UI, etc. inside this method.
-    * - callback always have to be called even if error happened.
+    * - callback always has to be called even if error happened.
     *
     * @param {function(string, plugin.PluginResult)} callback - the result callback
     */
@@ -126,74 +127,70 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
         var self = this;
-        self.result.setSuccess(true);
-<% if (core) {%>
-        // Using core to create an object.
-        var newNode = self.core.createNode({parent: self.rootNode, base: self.META['FCO']});
-        self.core.setAttribute(newNode, 'name', 'My new obj');
-        self.core.setRegistry(newNode, 'position', {x: 70, y: 70});
-<%}
-if (logger) {%>
         // Using the logger.
         self.logger.info('This is a debug message.');
         self.logger.info('This is an info message.');
         self.logger.warning('This is a warning message.');
         self.logger.error('This is an error message.');
-<%}
-if (templateType) {%>
-        // To transform ejs file into js file (needed for client-side runs) run combine_templates
-        // see instructions in file. You must run this after any modifications to the ejs template.
-        // https://github.com/webgme/webgme-domain-tools/blob/master/src/tools/combine_templates.js
-        var template<%=templateExt.toUpperCase()%> = ejs.render(TEMPLATES['<%=templateType%>.<%=templateExt%>.ejs'], {a: 'a', b: 'b'});
-        // TODO: addFile and saveArtifact are asynchronous functions - insert rest of code before callback.
-        //var templateFileName = 'generatedFiles/<%=templateType%>.<%=templateExt%>'
-        // self.fs.addFile(templateFileName, template<%=templateExt.toUpperCase()%>, function (err) {
-        //    self.fs.saveArtifact(function (err, hash) {
-        //        //FIXME: All code below needs to go here
-        //        callback(null, self.result);
-        //    });
-        // });
-<%}
-if (fs) {%>
-        // TODO: These are asynchronous functions - insert rest of code before callback.
-        // self.fs works on both client and server side.
-        // self.fs.addFile('dir/subdir/file.txt', 'This is a text file.', function (err) {
-        //    self.fs.saveArtifact(function (err, hash) {
-        //        //FIXME: All code below needs to go here
-        //        callback(null, self.result);
-        //    });
-        // });
+<% if (core) {%>
+        // Using the coreAPI to create an object.
+        var newNode = self.core.createNode({parent: self.rootNode, base: self.META['FCO']});
+        self.core.setAttribute(newNode, 'name', 'My new obj');
+        self.core.setRegistry(newNode, 'position', {x: 70, y: 70});
 <%}
 if (configStructure) {%>
         // Obtain the current user configuration.
         var currentConfig = self.getCurrentConfig();
         self.logger.info('Current configuration ' + JSON.stringify(currentConfig, null, 4));
 <%}
-if (core) { %>
+if (templateType) {%>
+        // First transform ejs-files into js files (needed for client-side runs) -> run Templates/combine_templates.js.
+        // See instructions in file. You must run this after any modifications to the ejs template.
+        var template<%=templateExt.toUpperCase()%> = ejs.render(TEMPLATES['<%=templateType%>.<%=templateExt%>.ejs'], {a: 'a', b: 'b'});
+        var templateFileName = 'generatedFiles/subDir/<%=templateType%>.<%=templateExt%>';
+        var artifact = self.blobClient.createArtifact('templateFiles');
+        artifact.addFile(templateFileName, template<%=templateExt.toUpperCase()%>, function (err) {
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
+            self.blobClient.saveAllArtifacts(function (err, hashes) {
+                if (err) {
+                    callback(err, self.result);
+                    return;
+                }
+                // This will add a download hyperlink in the result-dialog.
+                self.result.addArtifact(hashes[0]);
+                // This will save the changes. If you don't want to save;
+                // exclude self.save and call callback directly from this scope.
+                self.result.setSuccess(true);
+                self.save('added obj', function (err) {
+                    callback(null, self.result);
+                });
+            });
+        });
+<%} else {%>
         // This will save the changes. If you don't want to save;
         // exclude self.save and call callback directly from this scope.
+        self.result.setSuccess(true);
         self.save('added obj', function (err) {
             callback(null, self.result);
         });
-<%} else {%>
-        // Uncomment to save changes.
-        //self.save('added obj', function (err) {
-            callback(null, self.result);
-        //});
 <%}%>
     };
 
     /**
     * Checks if the given node is of the given meta-type.
     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-    * @param node - Node to be check for type.
-    * @param metaTypeObj - Node object defining the meta type.
+    * @param node - Node to be checked for type.
+    * @param metaNode - Node object defining the meta type.
     * @returns {boolean} - True if the given object was of the META type.
     */
-    <%= pluginID %>.prototype.isMetaTypeOf = function (node, metaTypeObj) {
-        var self = this;
+    <%= pluginID %>.prototype.isMetaTypeOf = function (node, metaNode) {
+        var self = this,
+            metaGuid = self.core.getGuid(metaNode);
         while (node) {
-            if (self.core.getGuid(node) === self.core.getGuid(metaTypeObj)) {
+            if (self.core.getGuid(node) === metaGuid) {
                 return true;
             }
             node = self.core.getBase(node);
@@ -203,7 +200,7 @@ if (core) { %>
 
     /**
     * Finds and returns the node object defining the meta type for the given node.
-    * @param node - Node to be check for type.
+    * @param node - Node to be checked for type.
     * @returns {Object} - Node object defining the meta type of node.
     */
     <%= pluginID %>.prototype.getMetaType = function (node) {

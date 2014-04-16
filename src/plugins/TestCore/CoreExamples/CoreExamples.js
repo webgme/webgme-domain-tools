@@ -390,14 +390,15 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     /**
      * Checks if the given node is of the given meta-type.
      * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-     * @param node - Node to be check for type.
-     * @param metaTypeObj - Node object defining the meta type.
+     * @param node - Node to be checked for type.
+     * @param metaNode - Node object defining the meta type.
      * @returns {boolean} - True if the given object was of the META type.
      */
-    CoreExamples.prototype.isMetaTypeOf = function (node, metaTypeObj) {
-        var self = this;
+    CoreExamples.prototype.isMetaTypeOf = function (node, metaNode) {
+        var self = this,
+            metaGuid = self.core.getGuid(metaNode);
         while (node) {
-            if (self.core.getGuid(node) === self.core.getGuid(metaTypeObj)) {
+            if (self.core.getGuid(node) === metaGuid) {
                 return true;
             }
             node = self.core.getBase(node);
@@ -407,7 +408,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
     /**
      * Finds and returns the node object defining the meta type for node.
-     * @param node - Node to be check for type.
+     * @param node - Node to be checked for type.
      * @returns {Object} - Node object defining the meta type of node.
      */
     CoreExamples.prototype.getMetaType = function (node) {

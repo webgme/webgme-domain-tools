@@ -59,14 +59,6 @@ define(['plugin/PluginConfig',
                     "readOnly": false
                 },
                 {
-                    "name": "hasVersion",
-                    "displayName": "Use version string",
-                    "description": 'Enable to generate version method.',
-                    "value": false,
-                    "valueType": "boolean",
-                    "readOnly": false
-                },
-                {
                     "name": "description",
                     "displayName": "Description",
                     "description": 'Optional description of the plugin.',
@@ -85,7 +77,8 @@ define(['plugin/PluginConfig',
                 {
                     "name": "templateType",
                     "displayName": "Example template",
-                    "description": 'Ejs template for code generation.',
+                    "description": 'Ejs template for code generation, also illustrates how to save' +
+                        ' artifacts using the blobClient.',
                     "value": 'None',
                     "valueType": "string",
                     "valueItems": [
@@ -107,22 +100,6 @@ define(['plugin/PluginConfig',
                 {
                     "name": "core",
                     "displayName": "Include core example",
-                    "description": '',
-                    "value": false,
-                    "valueType": "boolean",
-                    "readOnly": false
-                },
-                {
-                    "name": "logger",
-                    "displayName": "Include logger example.",
-                    "description": '',
-                    "value": false,
-                    "valueType": "boolean",
-                    "readOnly": false
-                },
-                {
-                    "name": "fs",
-                    "displayName": "Include file-system example.",
                     "description": '',
                     "value": false,
                     "valueType": "boolean",
@@ -198,7 +175,6 @@ define(['plugin/PluginConfig',
                 artifact.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err, hash) {
                     error = err ? error + err : error;
                     nbrOfFiles -= 1;
-
                     if (nbrOfFiles === 0) {
                         if (error) {
                             callback('Something went wrong when adding files: ' + error, self.result);
