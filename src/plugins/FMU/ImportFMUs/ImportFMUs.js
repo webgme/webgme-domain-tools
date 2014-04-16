@@ -175,7 +175,7 @@ define(['plugin/PluginConfig',
         for (index = 0; index < outputs.length; index += 1){
             var outputData = outputs[index];
 
-            var newOutputPortObject = core.createNode({parent: newFmuObject, base: FmuTypes.Input});
+            var newOutputPortObject = core.createNode({parent: newFmuObject, base: FmuTypes.Output});
             core.setAttribute(newOutputPortObject, 'name', outputData.name);
 
             if (outputData.description) {
