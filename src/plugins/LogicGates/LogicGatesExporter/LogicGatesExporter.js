@@ -2,12 +2,14 @@
  * Created by Dana Zhang on 4/8/2014.
  */
 
-'use strict';
+
 
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'plugin/PluginResult',
     'json2xml'], function (PluginConfig, PluginBase, PluginResult, Json2Xml) {
+
+    'use strict';
 
     var LogicGatesExporterPlugin = function () {
         PluginBase.call(this);
@@ -367,6 +369,43 @@ define(['plugin/PluginConfig',
         }
         // PC: the file system has changed recently and is still under construction..
         self.fs.saveArtifact();
+    };
+
+    /**
+     * Checks if the given node is of the given meta-type.
+     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
+     * @param node - Node to be checked for type.
+     * @param metaNode - Node object defining the meta type.
+     * @returns {boolean} - True if the given object was of the META type.
+     */
+    LogicGatesExporterPlugin.prototype.isMetaTypeOf = function (node, metaNode) {
+        var self = this,
+            metaGuid = self.core.getGuid(metaNode);
+        while (node) {
+            if (self.core.getGuid(node) === metaGuid) {
+                return true;
+            }
+            node = self.core.getBase(node);
+        }
+        return false;
+    };
+
+    /**
+     * Finds and returns the node object defining the meta type for node.
+     * @param node - Node to be checked for type.
+     * @returns {Object} - Node object defining the meta type of node.
+     */
+    LogicGatesExporterPlugin.prototype.getMetaType = function (node) {
+        var self = this,
+            name;
+        while (node) {
+            name = self.core.getAttribute(node, 'name');
+            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
+                break;
+            }
+            node = self.core.getBase(node);
+        }
+        return node;
     };
 
     return LogicGatesExporterPlugin;
