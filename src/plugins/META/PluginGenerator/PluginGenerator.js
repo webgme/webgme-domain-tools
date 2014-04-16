@@ -43,7 +43,9 @@ define(['plugin/PluginConfig',
                 {
                     "name": "pluginID",
                     "displayName": "Unique plugin identifier",
-                    "description": 'No spaces and special characters allowed. This value is used as the name of the generated plugin class.',
+                    "regex": '^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*',
+                    "regexMessage": 'No spaces and special characters allowed. This value is used as the name of the generated plugin class.',
+                    "description": 'Unique ID for the plugin.',
                     "value": 'MyNewExporterPlugin',
                     "valueType": "string",
                     "readOnly": false
@@ -191,7 +193,7 @@ define(['plugin/PluginConfig',
             fileKeys = Object.keys(filesToAdd);
             nbrOfFiles = fileKeys.length;
 
-            for (i = 0; fileKeys.length; i += 1) {
+            for (i = 0; i < fileKeys.length; i += 1) {
                 self.fs.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err) {
                     error = err ? error + err : error;
                     nbrOfFiles -= 1;

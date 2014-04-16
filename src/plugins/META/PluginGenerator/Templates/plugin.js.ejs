@@ -64,6 +64,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
             {
                 'name': 'species',
                 'displayName': 'Animal Species',
+                'regex': '^[a-zA-Z]+$',
+                'regexMessage': 'Name can only contain English characters!',
                 'description': 'Which species does the animal belong to.',
                 'value': 'Horse',
                 'valueType': 'string',
