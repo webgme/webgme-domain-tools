@@ -145,7 +145,8 @@ define(['plugin/PluginConfig',
                 i,
                 nbrOfFiles,
                 fileKeys,
-                error = '';
+                error = '',
+                artifact;
 
             currentConfig = self.getCurrentConfig();
             self.logger.info('Current configuration');
@@ -192,24 +193,24 @@ define(['plugin/PluginConfig',
             self.logger.info(JSON.stringify(filesToAdd, null, 4));
             fileKeys = Object.keys(filesToAdd);
             nbrOfFiles = fileKeys.length;
-
+            artifact = self.blobClient.createArtifact('pluginFiles');
             for (i = 0; i < fileKeys.length; i += 1) {
-                self.fs.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err) {
+                artifact.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err, hash) {
                     error = err ? error + err : error;
                     nbrOfFiles -= 1;
+
                     if (nbrOfFiles === 0) {
                         if (error) {
                             callback('Something went wrong when adding files: ' + error, self.result);
                             return;
                         }
-                        self.fs.saveArtifact(function (err, hash) {
+                        self.blobClient.saveAllArtifacts(function (err, hashes) {
                             if (err) {
                                 callback(err, self.result);
                                 return;
                             }
-
-                            self.logger.info('Artifacts are saved here: ' + hash);
-
+                            self.result.addArtifact(hashes[0]);
+                            self.logger.info('Artifacts are saved here: ' + hashes.toString());
                             self.result.setSuccess(true);
                             callback(null, self.result);
                         });

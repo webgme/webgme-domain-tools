@@ -21,35 +21,40 @@ define(['plugin/PluginConfig',
         this.id_lut = {};
         this.children_lut = {};
 
-        this.META_TYPES = {"Not": true,
-                           "Buffer": true,
-                           "And": true,
-                           "Or": true,
-                           "Nand": true,
-                           "Nor": true,
-                           "Xor": true,
-                           "Xnor": true,
-                           "NumericInput": true,
-                           "NumericOutput": true,
-                           "UserOutput": true,
-                           "UserInput": true,
-                           "Clock": true};
+        this.META_TYPES = {
+            "Not": true,
+            "Buffer": true,
+            "And": true,
+            "Or": true,
+            "Nand": true,
+            "Nor": true,
+            "Xor": true,
+            "Xnor": true,
+            "NumericInput": true,
+            "NumericOutput": true,
+            "UserOutput": true,
+            "UserInput": true,
+            "Clock": true
+        };
 
-        this.COMPLEX = {"And": true,
-                        "Or": true,
-                        "Nand": true,
-                        "Nor": true,
-                        "Xor": true,
-                        "Xnor": true};
+        this.COMPLEX = {
+            "And": true,
+            "Or": true,
+            "Nand": true,
+            "Nor": true,
+            "Xor": true,
+            "Xnor": true
+        };
 
-        this.CONNECTION_TYPES = {"OutputPort2InputPort": true,
-                                 "UserInput2InputPort": true,
-                                 "OutputPort2UserOutput": true,
-                                 "UserInputBase2UserOutput": true,
-                                 "PortBase2UserIOBase": true,
-                                 "UserIOBase2PortBase": true,
-                                 "UserIOBase2UserIOBase": true};
-
+        this.CONNECTION_TYPES = {
+            "OutputPort2InputPort": true,
+            "UserInput2InputPort": true,
+            "OutputPort2UserOutput": true,
+            "UserInputBase2UserOutput": true,
+            "PortBase2UserIOBase": true,
+            "UserIOBase2PortBase": true,
+            "UserIOBase2UserIOBase": true
+        };
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -63,10 +68,11 @@ define(['plugin/PluginConfig',
         var self = this,
             core = self.core,
             selectedNode = self.activeNode,
-            pluginResult = new PluginResult();
+            pluginResult = self.result; // You probably don't need a separate variable for this...
 
         if (!selectedNode) {
             callback('selectedNode is not defined', pluginResult);
+            return;
         }
 
         core.loadChildren(selectedNode, function (err, childNodes) {
@@ -75,8 +81,6 @@ define(['plugin/PluginConfig',
     };
 
     LogicGatesExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
-        this.objectToVisit += childNodes.length; // all child objects have to be visited
-
         var self = this,
             i,
             child,
@@ -90,7 +94,7 @@ define(['plugin/PluginConfig',
             isGate,
             isWire,
             pluginResult;
-
+        self.objectToVisit += childNodes.length; // all child objects have to be visited
         for (i = 0; i < childNodes.length; i += 1) {
 
             child = childNodes[i];
@@ -202,6 +206,8 @@ define(['plugin/PluginConfig',
             gate["@SelRep"] = selRep;
             gate["@Value"] = value;
         }
+
+        // Are these two if statements really independent of each other?
         if (!self.components.hasOwnProperty(parentPath)) {
             self.components[parentPath] = {
                 "Gate": [],
@@ -217,7 +223,6 @@ define(['plugin/PluginConfig',
     };
 
     LogicGatesExporterPlugin.prototype.addWire = function (nodeObj) {
-
         var self = this,
             core = self.core,
             src = core.getPointerPath(nodeObj, "src"),
@@ -242,7 +247,9 @@ define(['plugin/PluginConfig',
 
         // PC: loadByPath is asynchronous and addWire becomes that too.
         core.loadByPath(self.rootNode, src, function (err, node) {
-
+            // You can define variables here since your callback function defines a closure.
+            // They will only be accessible within this scope and not in "addWire", however you
+            // can access the variables defined in "addWire" here.
             if (!err) {
                 metaType = core.getAttribute(core.getBase(node), 'name');
                 isComplex = self.COMPLEX[metaType];
@@ -328,7 +335,6 @@ define(['plugin/PluginConfig',
     };
 
     LogicGatesExporterPlugin.prototype.createObjectFromDiagram = function () {
-
         var self = this,
             i = 0,
             parentPath,
@@ -338,22 +344,21 @@ define(['plugin/PluginConfig',
 
         for (parentPath in self.components) {
             if (self.components.hasOwnProperty(parentPath)) {
-                diagram = {"CircuitGroup":
-                    {
+                diagram = {
+                    "CircuitGroup": {
                         "@Version": 1.2,
-                        "Circuit" :
-                            {
-                                "Gates": {},
-                                "Wires": {}
-                            }
+                        "Circuit" : {
+                            "Gates": {},
+                            "Wires": {}
+                        }
                     }
-                    };
+                };
 
                 diagram.CircuitGroup.Circuit.Gates.Gate = self.components[parentPath].Gate;
                 diagram.CircuitGroup.Circuit.Wires.Wire = self.components[parentPath].Wire;
                 self.circuits.push(diagram);
 
-                j2x = new Json2Xml;
+                j2x = new Json2Xml();
                 output = j2x.convert(diagram);
                 // PC: the file system has changed recently and is still under construction..
                 self.fs.addFile("output" + i + ".gcg", output);
