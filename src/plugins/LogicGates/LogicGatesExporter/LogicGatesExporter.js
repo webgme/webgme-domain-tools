@@ -5,12 +5,51 @@
 'use strict';
 
 define(['plugin/PluginConfig',
-        'plugin/PluginBase',
-        'plugin/PluginResult',
-        'json2xml'], function (PluginConfig, PluginBase, PluginResult, json2xml) {
+    'plugin/PluginBase',
+    'plugin/PluginResult',
+    'json2xml'], function (PluginConfig, PluginBase, PluginResult, Json2Xml) {
 
     var LogicGatesExporterPlugin = function () {
         PluginBase.call(this);
+
+        this.objectToVisit = 1; // number of objects that have to be visited, visiting the selected node makes it start with 1
+        this.diagramPath = "";
+        this.modelID = 0;
+        this.wiresToAdd = [];
+        this.circuits = [];
+        this.components = {};
+        this.id_lut = {};
+        this.children_lut = {};
+
+        this.META_TYPES = {"Not": true,
+                           "Buffer": true,
+                           "And": true,
+                           "Or": true,
+                           "Nand": true,
+                           "Nor": true,
+                           "Xor": true,
+                           "Xnor": true,
+                           "NumericInput": true,
+                           "NumericOutput": true,
+                           "UserOutput": true,
+                           "UserInput": true,
+                           "Clock": true};
+
+        this.COMPLEX = {"And": true,
+                        "Or": true,
+                        "Nand": true,
+                        "Nor": true,
+                        "Xor": true,
+                        "Xnor": true};
+
+        this.CONNECTION_TYPES = {"OutputPort2InputPort": true,
+                                 "UserInput2InputPort": true,
+                                 "OutputPort2UserOutput": true,
+                                 "UserInputBase2UserOutput": true,
+                                 "PortBase2UserIOBase": true,
+                                 "UserIOBase2PortBase": true,
+                                 "UserIOBase2UserIOBase": true};
+
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -23,105 +62,87 @@ define(['plugin/PluginConfig',
     LogicGatesExporterPlugin.prototype.main = function (callback) {
         var self = this,
             core = self.core,
-            selectedNode = self.activeNode;
-
-        var pluginResult = new PluginResult();
+            selectedNode = self.activeNode,
+            pluginResult = new PluginResult();
 
         if (!selectedNode) {
             callback('selectedNode is not defined', pluginResult);
         }
 
-        // TODO: this is not the right way to do it..., but a way at least
-        this.objectToVisit = 0; // number of objects that have to be visited
-        this.visitedObjects = 0; // number of already visited
-
-        this.objectToVisit += 1; // we need to visit the selected node
-
-        this.diagramPath = "";
-
-        this.modelID = 0;
-
-        this.components = {};
-        this.circuits = [];
-        this.ID_LUT = {};
-        this.CHILDREN_LUT = {};
-        this.PORTID_LUT = {};
-
-        this.META_TYPES = ["Not", "Buffer", "And", "Or", "Nand", "Nor", "Xor", "Xnor", "NumericInput", "NumericOutput", "UserOutput", "UserInput", "Clock"];
-        this.COMPLEX = ["And", "Or", "Nand", "Nor", "Xor", "Xnor"];
-        this.CONNECTION_TYPES = ["OutputPort2InputPort", "UserInput2InputPort", "OutputPort2UserOutput", "UserInputBase2UserOutput", "PortBase2UserIOBase", "UserIOBase2PortBase", "UserIOBase2UserIOBase"];
-
-        // debugging
-        this.gates = [];
-        this.wires = [];
-        this.wires_to_add = [];
-
-        core.loadChildren(selectedNode, function(err, childNodes) {
+        core.loadChildren(selectedNode, function (err, childNodes) {
             self.visitObject(err, childNodes, core, callback);
         });
     };
 
     LogicGatesExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
-        var self = this;
-
         this.objectToVisit += childNodes.length; // all child objects have to be visited
 
-        var i;
-        for (i = 0; i < childNodes.length; ++i) {
+        var self = this,
+            i,
+            child,
+            gmeID,
+            parentPath,
+            baseClass,
+            metaType, // get child's base META Type
+            parentClass,
+            parentMeta,
+            isComplex,
+            isGate,
+            isWire,
+            pluginResult;
 
-            var child = childNodes[i],
-                gmeID = core.getPath(child),
-                parentPath = core.getPath(child.parent);
+        for (i = 0; i < childNodes.length; i += 1) {
 
-            var baseClass = core.getBase(child),
-                metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-
-            var parentClass = core.getBase(child.parent);
-            var parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
-            var isComplex = this.COMPLEX.indexOf(metaType) > -1;
-            var isGate = this.META_TYPES.indexOf(metaType) > -1 && parentMeta === "LogicCircuit";
-            var isWire = this.CONNECTION_TYPES.indexOf(metaType) > -1 && parentMeta === "LogicCircuit";
+            child = childNodes[i];
+            gmeID = core.getPath(child);
+            parentPath = core.getPath(core.getParent(child));
+            baseClass = core.getBase(child);
+            metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
+            parentClass = core.getBase(core.getParent(child));
+            parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
+            isComplex = self.COMPLEX[metaType];
+            isGate = self.META_TYPES[metaType] && parentMeta === "LogicCircuit";
+            isWire = self.CONNECTION_TYPES[metaType] && parentMeta === "LogicCircuit";
 
             if (isGate) {
 
                 // if key not exist already, add key; otherwise ignore
-
-                if (!this.ID_LUT.hasOwnProperty(gmeID)) {
-
-                    this.addGate(child, metaType, isComplex, parentPath);
+                if (!self.id_lut.hasOwnProperty(gmeID)) {
+                    // PC: addGate needs to be defined and called as an asynchronous function. see PC10
+                    self.addGate(child, metaType, isComplex, parentPath);
                 }
 
             } else if (isWire) {
 
-                this.wires_to_add.push(child);
+                self.wiresToAdd.push(child);
 
             } else if (metaType === 'InputPort') {
 
-                if (!this.CHILDREN_LUT.hasOwnProperty(parentPath)) {
+                if (!self.children_lut.hasOwnProperty(parentPath)) {
 
-                    this.CHILDREN_LUT[parentPath] = [];
+                    self.children_lut[parentPath] = [];
                 }
-                this.CHILDREN_LUT[parentPath].push(gmeID);
+                self.children_lut[parentPath].push(gmeID);
             }
 
-            core.loadChildren(childNodes[i], function(err, childNodes) {
+            core.loadChildren(childNodes[i], function (err, childNodes) {
                 self.visitObject(err, childNodes, core, callback);
             });
         }
 
-        this.visitedObjects += 1; // another object was just visited
+        self.objectToVisit -= 1; // another object was just visited
 
-        if (this.objectToVisit === this.visitedObjects) {
+        if (self.objectToVisit === 0) {
 
             // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
-            for (var l = 0; l < this.wires_to_add.length; ++l) {
-                this.addWire(this.wires_to_add[l]);
+            for (i = 0; i < self.wiresToAdd.length; i += 1) {
+                self.addWire(self.wiresToAdd[i]);
             }
 
-            this.createObjectFromDiagram();
+            self.createObjectFromDiagram();
 
             // all objects have been visited
-            var pluginResult = new PluginResult();
+            pluginResult = new PluginResult();
             pluginResult.success = true;
             if (callback) {
                 callback(null, pluginResult);
@@ -129,26 +150,33 @@ define(['plugin/PluginConfig',
         }
     };
 
-    /// nodeObj is the current node to be visited
-    /// metaType is the meta type of current node
-    /// isComplex is a Boolean value indicating whether the current node is a complex logic gate
-    /// parentPath is the circuit diagram the current node belongs to
-    LogicGatesExporterPlugin.prototype.addGate = function(nodeObj, metaType, isComplex, parentPath) {
-        var core = this.core,
-            self = this,
+    ///**
+    // * This function adds a gate to the circuit diagram it belongs to
+    // * @param {object} nodeObj - current node to be visited
+    // * @param {string} metaType - meta type of current node
+    // * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
+    // * @param {string} parentPath - the circuit diagram the current node belongs to
+    // * @returns {string} The version of the plugin.
+    // * @public
+    // */
+    LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath) {
+        var self = this,
+            core = self.core,
             gmeID = core.getPath(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
+            bits = core.getAttribute(nodeObj, 'Bits'),
+            selRep = core.getAttribute(nodeObj, 'SelRep'),
             xPos = parseInt(nodeObj.data.reg.position.x, 10),
             yPos = parseInt(nodeObj.data.reg.position.y, 10),
-            angle = 0;
+            value = core.getAttribute(nodeObj, 'Value'),
+            angle = 0,
+            gate;
 
-
-        this.ID_LUT[gmeID] = this.modelID;
+        self.id_lut[gmeID] = self.modelID;
 
         // all logic gates component have attrs: Type, Name, ID
         //                                 element: Point (attrs: X, Y, Angle)
-
-        var gate = {
+        gate = {
             "@Type": metaType,
             "@Name": name,
             "@ID": self.modelID,
@@ -160,7 +188,9 @@ define(['plugin/PluginConfig',
         };
 
         if (isComplex) {
-            core.loadChildren(nodeObj, function(err, childNodes) {
+            // PC: loadChildren is asynchronous the execution will most likely step to #192 before gate is updated.
+            // This fact also makes addGate asynchronous.
+            core.loadChildren(nodeObj, function (err, childNodes) {
                 gate["@NumInputs"] = childNodes.length - 1;
             });
 
@@ -168,76 +198,72 @@ define(['plugin/PluginConfig',
             gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
 
         } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
-            var bits = core.getAttribute(nodeObj, 'Bits');
-            var selRep = core.getAttribute(nodeObj, 'SelRep');
-            var value = core.getAttribute(nodeObj, 'Value');
             gate["@Bits"] = bits;
             gate["@SelRep"] = selRep;
             gate["@Value"] = value;
         }
-        if (!this.components.hasOwnProperty(parentPath)) {
-            this.components[parentPath] = {
+        if (!self.components.hasOwnProperty(parentPath)) {
+            self.components[parentPath] = {
                 "Gate": [],
                 "Wire": []
             };
         }
         if (parentPath) {
 
-            this.components[parentPath]["Gate"].push(gate);
+            self.components[parentPath].Gate.push(gate);
         }
-        ++this.modelID;
 
-        this.gates.push(gate);
-
+        self.modelID += 1;
     };
 
-    LogicGatesExporterPlugin.prototype.addWire = function(nodeObj) {
+    LogicGatesExporterPlugin.prototype.addWire = function (nodeObj) {
 
-        var core = this.core,
-            self = this,
-            wireID = core.getPath(nodeObj),
+        var self = this,
+            core = self.core,
             src = core.getPointerPath(nodeObj, "src"),
             dst = core.getPointerPath(nodeObj, "dst"),
             srcNodeObj,
-            dstNodeObj;
-
-        var srcMetaType,
+            dstNodeObj,
+            srcID,
+            dstID,
+            srcMetaType,
             dstMetaType,
             srcPort = 0,
-            dstPort = 0;
+            dstPort = 0,
+            wire,
+            metaType,
+            isComplex,
+            isGate,
+            isPort,
+            portGMEId,
+            parentPath,
+            parentCircuitPath,
+            validGates;
 
+        // PC: loadByPath is asynchronous and addWire becomes that too.
         core.loadByPath(self.rootNode, src, function (err, node) {
 
             if (!err) {
-                var baseObj = core.getBase(node),
-                    metaType = core.getAttribute(baseObj, 'name'),
-                    isComplex = self.COMPLEX.indexOf(metaType) > -1,
-                    isGate = self.META_TYPES.indexOf(metaType) > -1,
-                    isPort = metaType === 'InputPort' || metaType === 'OutputPort',
-                    parentPath;
+                metaType = core.getAttribute(core.getBase(node), 'name');
+                isComplex = self.COMPLEX[metaType];
+                isGate = self.META_TYPES[metaType];
+                isPort = metaType === 'InputPort' || metaType === 'OutputPort';
 
                 if (isGate) {
-                    parentPath = core.getPath(node.parent);
-                    srcMetaType = metaType;
                     srcNodeObj = node;
+                    parentPath = core.getPath(core.getParent(srcNodeObj));
+                    srcMetaType = metaType;
                 } else if (isPort) {
-                    var srcObj = core.getParent(node);
-                    var portGMEId = core.getPath(node);
-                    src = core.getPath(srcObj);
-                    srcMetaType = core.getAttribute(srcObj, 'name');
-                    srcNodeObj = srcObj;
-                    parentPath = core.getPath(srcObj);
-                    node = srcObj;
-
-                    if (metaType === 'InputPort') {
-                        srcPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
-                    } else if (metaType === 'OutputPort') {
-                        srcPort = 0;
-                    }
+                    srcNodeObj = core.getParent(node);
+                    portGMEId = core.getPath(srcNodeObj);
+                    src = core.getPath(srcNodeObj);
+                    srcMetaType = core.getAttribute(srcNodeObj, 'name');
+                    parentPath = core.getPath(srcNodeObj);
+                    srcPort = 0;
                 }
 
-                if ((!self.ID_LUT.hasOwnProperty(src)) && (isPort || isGate)) {
-                    self.addGate(node, srcMetaType, isComplex, parentPath);
+                if ((isPort || isGate) && (!self.id_lut.hasOwnProperty(src))) {
+                    self.addGate(srcNodeObj, srcMetaType, isComplex, parentPath);
                 }
             }
         });
@@ -245,42 +271,39 @@ define(['plugin/PluginConfig',
         core.loadByPath(self.rootNode, dst, function (err, node) {
 
             if (!err) {
-                var metaType = core.getAttribute(core.getBase(node), 'name'),
-                    isComplex = self.COMPLEX.indexOf(metaType) > -1,
-                    isGate = self.META_TYPES.indexOf(metaType) > -1,
-                    isPort = metaType === 'InputPort' || metaType === 'OutputPort',
-                    parentPath;
+                metaType = core.getAttribute(core.getBase(node), 'name');
+                isComplex = self.COMPLEX[metaType];
+                isGate = self.META_TYPES[metaType];
+                isPort = metaType === 'InputPort' || metaType === 'OutputPort';
 
                 if (isGate) {
-                    parentPath = core.getPath(node.parent);
-                    dstMetaType = metaType;
                     dstNodeObj = node;
+                    parentPath = core.getPath(core.getParent(dstNodeObj));
+                    dstMetaType = metaType;
                 } else if (isPort) {
-                    var dstObj = core.getParent(node);
-                    var portGMEId = core.getPath(node);
-                    dst = core.getPath(dstObj);
-                    dstMetaType = core.getAttribute(dstObj, 'name');
-                    dstNodeObj = dstObj;
-                    parentPath = core.getPath(dstObj);
-
-                    node = dstObj;
-
-                    dstPort = self.CHILDREN_LUT[parentPath].indexOf(portGMEId);
+                    dstNodeObj = core.getParent(node);
+                    portGMEId = core.getPath(dstNodeObj);
+                    dst = core.getPath(dstNodeObj);
+                    dstMetaType = core.getAttribute(dstNodeObj, 'name');
+                    parentPath = core.getPath(dstNodeObj);
+                    dstPort = self.children_lut[parentPath].indexOf(portGMEId);
                 }
 
-                if (!self.ID_LUT.hasOwnProperty(dst) && (isPort || isGate)) {
-                    self.addGate(node, dstMetaType, isComplex, parentPath);
+                if ((isPort || isGate) && !self.id_lut.hasOwnProperty(dst)) {
+                    self.addGate(dstNodeObj, dstMetaType, isComplex, parentPath);
                 }
             }
         });
 
         // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
 
-        var parentCircuitPath = core.getPath(nodeObj.parent);
-        var srcID = self.ID_LUT[src],
-            dstID = self.ID_LUT[dst];
+        parentCircuitPath = core.getPath(core.getParent(nodeObj));
+        // PC: At this point src, dst, srcID, dstID might not have been modified by
+        // the core.loadPath callbacks. More on that later...
+        srcID = self.id_lut[src];
+        dstID = self.id_lut[dst];
 
-        var wire = {
+        wire = {
             "From": {
                 "@ID": srcID,
                 "@Port": srcPort
@@ -298,38 +321,47 @@ define(['plugin/PluginConfig',
             };
         }
 
-        var validGates = (srcPort !== undefined) && (dstPort !== undefined) && (srcID !== undefined) && (dstID != undefined);
+        validGates = (srcPort !== undefined) && (dstPort !== undefined) && (srcID !== undefined) && (dstID !== undefined);
         if (parentCircuitPath && validGates) {
-            self.components[parentCircuitPath]["Wire"].push(wire);
-            self.wires.push(wire);
+            self.components[parentCircuitPath].Wire.push(wire);
         }
     };
 
     LogicGatesExporterPlugin.prototype.createObjectFromDiagram = function () {
 
-        var i = 0;
-        for (var parentPath in this.components) {
-            if (this.components.hasOwnProperty(parentPath)) {
-                var diagram = {"CircuitGroup":
+        var self = this,
+            i = 0,
+            parentPath,
+            diagram,
+            j2x,
+            output;
+
+        for (parentPath in self.components) {
+            if (self.components.hasOwnProperty(parentPath)) {
+                diagram = {"CircuitGroup":
                     {
                         "@Version": 1.2,
                         "Circuit" :
-                        {
-                            "Gates": {},
-                            "Wires": {}
-                        }
+                            {
+                                "Gates": {},
+                                "Wires": {}
+                            }
                     }
-                };
-                diagram.CircuitGroup.Circuit.Gates["Gate"] = this.components[parentPath]["Gate"];
-                diagram.CircuitGroup.Circuit.Wires["Wire"] = this.components[parentPath]["Wire"];
-                this.circuits.push(diagram);
-                var j2x = new json2xml;
-                var output = j2x.convert(diagram);
-                this.fs.addFile("output" + i + ".gcg", output);
+                    };
+
+                diagram.CircuitGroup.Circuit.Gates.Gate = self.components[parentPath].Gate;
+                diagram.CircuitGroup.Circuit.Wires.Wire = self.components[parentPath].Wire;
+                self.circuits.push(diagram);
+
+                j2x = new Json2Xml;
+                output = j2x.convert(diagram);
+                // PC: the file system has changed recently and is still under construction..
+                self.fs.addFile("output" + i + ".gcg", output);
             }
-            ++i;
+            i += 1;
         }
-        this.fs.saveArtifact();
+        // PC: the file system has changed recently and is still under construction..
+        self.fs.saveArtifact();
     };
 
     return LogicGatesExporterPlugin;
