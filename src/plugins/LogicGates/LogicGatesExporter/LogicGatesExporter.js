@@ -176,17 +176,18 @@ define(['plugin/PluginConfig',
             bits = core.getAttribute(nodeObj, 'Bits'),
             selRep = core.getAttribute(nodeObj, 'SelRep'),
             xNull = nodeObj.data,
-            yNull = nodeObj.data.reg;
-            if (!xNull || !yNull || !nodeObj)
-            {
-                console.log("abc");
-            }
-
-        var xPos = parseInt(nodeObj.data.reg.position.x, 10),
+            yNull = nodeObj.data.reg,
+            xPos = parseInt(nodeObj.data.reg.position.x, 10),
             yPos = parseInt(nodeObj.data.reg.position.y, 10),
             value = core.getAttribute(nodeObj, 'Value'),
             angle = 0,
             gate;
+
+            // debugging use: this becomes true when a gate in a subcircuit is being visited
+//            if (!xNull || !yNull || !nodeObj || !yNull.position)
+//            {
+//                console.log("abc");
+//            }
 
         self.idLUT[gmeID] = self.modelID;
 
@@ -238,21 +239,11 @@ define(['plugin/PluginConfig',
             core = self.core,
             src = core.getPointerPath(nodeObj, "src"),
             dst = core.getPointerPath(nodeObj, "dst"),
-            srcNodeObj,
-            dstNodeObj,
             srcID,
             dstID,
-            srcMetaType,
-            dstMetaType,
             srcPort = 0,
             dstPort = 0,
             wire,
-            metaType,
-            isComplex,
-            isGate,
-            isPort,
-            portGMEId,
-            parentPath,
             parentCircuitPath,
             validGates;
 
@@ -261,6 +252,14 @@ define(['plugin/PluginConfig',
             // You can define variables here since your callback function defines a closure.
             // They will only be accessible within this scope and not in "addWire", however you
             // can access the variables defined in "addWire" here.
+            var srcMetaType,
+                srcNodeObj,
+                parentPath,
+                metaType,
+                isGate,
+                isPort,
+                isComplex;
+
             if (!err) {
                 metaType = core.getAttribute(core.getBase(node), 'name');
                 isComplex = self.COMPLEX[metaType];
@@ -273,7 +272,6 @@ define(['plugin/PluginConfig',
                     srcMetaType = metaType;
                 } else if (isPort) {
                     srcNodeObj = core.getParent(node);
-                    portGMEId = core.getPath(srcNodeObj);
                     src = core.getPath(srcNodeObj);
                     srcMetaType = core.getAttribute(srcNodeObj, 'name');
                     parentPath = core.getPath(srcNodeObj);
@@ -287,6 +285,15 @@ define(['plugin/PluginConfig',
         });
 
         core.loadByPath(self.rootNode, dst, function (err, node) {
+
+            var portGMEId,
+                parentPath,
+                metaType,
+                isComplex,
+                isGate,
+                isPort,
+                dstMetaType,
+                dstNodeObj;
 
             if (!err) {
                 metaType = core.getAttribute(core.getBase(node), 'name');
