@@ -69,16 +69,19 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/FmiExporter/F
     * @param {function(string, plugin.PluginResult)} callback - the result callback
     */
     FmiExporter.prototype.main = function (callback) {
-        // Use self to access core, project, result, logger etc from PluginBase.
-        // These are all instantiated at this point.
-        var self = this;
-        self.result.setSuccess(true);
+        var self = this,
+            core = self.core,
+            selectedNode = self.activeNode,
+            pluginResult = self.result;
 
+        if (!selectedNode) {
+            callback('selectedNode is not defined', pluginResult);
+            return;
+        }
 
-
-        // Obtain the current user configuration.
-        var currentConfig = self.getCurrentConfig();
-        self.logger.info('Current configuration ' + JSON.stringify(currentConfig, null, 4));
+        core.loadChildren(selectedNode, function (err, childNodes) {
+            self.visitObject(err, childNodes, core, callback);
+        });
 
         // This will save the changes. If you don't want to save;
         // exclude self.save and call callback directly from this scope.
@@ -87,6 +90,15 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/FmiExporter/F
         });
 
     };
+
+    FmiExporter.prototype.visitObject = function (err, childNodes, core, callback) {
+        var self = this,
+            i;
+    }
+
+        for (i = 0; i < childNodes.length; i += 1) {
+
+    }
 
     /**
     * Checks if the given node is of the given meta-type.
