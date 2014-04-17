@@ -20,8 +20,8 @@ define(['plugin/PluginConfig',
         this.wiresToAdd = [];
         this.circuits = [];
         this.components = {};
-        this.id_lut = {};
-        this.children_lut = {};
+        this.idLUT = {};
+        this.childrenLUT = {};
 
         this.META_TYPES = {
             "Not": true,
@@ -113,7 +113,7 @@ define(['plugin/PluginConfig',
             if (isGate) {
 
                 // if key not exist already, add key; otherwise ignore
-                if (!self.id_lut.hasOwnProperty(gmeID)) {
+                if (!self.idLUT.hasOwnProperty(gmeID)) {
                     // PC: addGate needs to be defined and called as an asynchronous function. see PC10
                     self.addGate(child, metaType, isComplex, parentPath);
                 }
@@ -124,11 +124,11 @@ define(['plugin/PluginConfig',
 
             } else if (metaType === 'InputPort') {
 
-                if (!self.children_lut.hasOwnProperty(parentPath)) {
+                if (!self.childrenLUT.hasOwnProperty(parentPath)) {
 
-                    self.children_lut[parentPath] = [];
+                    self.childrenLUT[parentPath] = [];
                 }
-                self.children_lut[parentPath].push(gmeID);
+                self.childrenLUT[parentPath].push(gmeID);
             }
 
             core.loadChildren(childNodes[i], function (err, childNodes) {
@@ -156,15 +156,16 @@ define(['plugin/PluginConfig',
         }
     };
 
-    ///**
-    // * This function adds a gate to the circuit diagram it belongs to
-    // * @param {object} nodeObj - current node to be visited
-    // * @param {string} metaType - meta type of current node
-    // * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
-    // * @param {string} parentPath - the circuit diagram the current node belongs to
-    // * @returns {string} The version of the plugin.
-    // * @public
-    // */
+    /**
+    * This function adds a gate to the circuit diagram it belongs to
+    * @param {object} nodeObj - current node to be visited
+    * @param {string} metaType - meta type of current node
+    * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
+    * @param {string} parentPath - the circuit diagram the current node belongs to
+    * @returns {string} The version of the plugin.
+    * @public
+    */
+
     LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath) {
         var self = this,
             core = self.core,
@@ -178,7 +179,7 @@ define(['plugin/PluginConfig',
             angle = 0,
             gate;
 
-        self.id_lut[gmeID] = self.modelID;
+        self.idLUT[gmeID] = self.modelID;
 
         // all logic gates component have attrs: Type, Name, ID
         //                                 element: Point (attrs: X, Y, Angle)
@@ -209,7 +210,6 @@ define(['plugin/PluginConfig',
             gate["@Value"] = value;
         }
 
-        // Are these two if statements really independent of each other?
         if (!self.components.hasOwnProperty(parentPath)) {
             self.components[parentPath] = {
                 "Gate": [],
@@ -271,7 +271,7 @@ define(['plugin/PluginConfig',
                     srcPort = 0;
                 }
 
-                if ((isPort || isGate) && (!self.id_lut.hasOwnProperty(src))) {
+                if ((isPort || isGate) && (!self.idLUT.hasOwnProperty(src))) {
                     self.addGate(srcNodeObj, srcMetaType, isComplex, parentPath);
                 }
             }
@@ -295,10 +295,10 @@ define(['plugin/PluginConfig',
                     dst = core.getPath(dstNodeObj);
                     dstMetaType = core.getAttribute(dstNodeObj, 'name');
                     parentPath = core.getPath(dstNodeObj);
-                    dstPort = self.children_lut[parentPath].indexOf(portGMEId);
+                    dstPort = self.childrenLUT[parentPath].indexOf(portGMEId);
                 }
 
-                if ((isPort || isGate) && !self.id_lut.hasOwnProperty(dst)) {
+                if ((isPort || isGate) && !self.idLUT.hasOwnProperty(dst)) {
                     self.addGate(dstNodeObj, dstMetaType, isComplex, parentPath);
                 }
             }
@@ -309,8 +309,8 @@ define(['plugin/PluginConfig',
         parentCircuitPath = core.getPath(core.getParent(nodeObj));
         // PC: At this point src, dst, srcID, dstID might not have been modified by
         // the core.loadPath callbacks. More on that later...
-        srcID = self.id_lut[src];
-        dstID = self.id_lut[dst];
+        srcID = self.idLUT[src];
+        dstID = self.idLUT[dst];
 
         wire = {
             "From": {
