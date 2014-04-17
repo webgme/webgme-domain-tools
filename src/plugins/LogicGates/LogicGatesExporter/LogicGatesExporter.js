@@ -2,8 +2,6 @@
  * Created by Dana Zhang on 4/8/2014.
  */
 
-
-
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'plugin/PluginResult',
@@ -23,7 +21,7 @@ define(['plugin/PluginConfig',
         this.idLUT = {};
         this.childrenLUT = {};
 
-        this.META_TYPES = {
+        this.GATE_TYPES = {
             "Not": true,
             "Buffer": true,
             "And": true,
@@ -48,7 +46,7 @@ define(['plugin/PluginConfig',
             "Xnor": true
         };
 
-        this.CONNECTION_TYPES = {
+        this.WIRE_TYPES = {
             "OutputPort2InputPort": true,
             "UserInput2InputPort": true,
             "OutputPort2UserOutput": true,
@@ -88,7 +86,7 @@ define(['plugin/PluginConfig',
             child,
             gmeID,
             parentPath,
-            baseClass,
+            baseNode,
             metaType, // get child's base META Type
             parentClass,
             parentMeta,
@@ -96,19 +94,23 @@ define(['plugin/PluginConfig',
             isGate,
             isWire,
             pluginResult;
+
         self.objectToVisit += childNodes.length; // all child objects have to be visited
         for (i = 0; i < childNodes.length; i += 1) {
 
             child = childNodes[i];
             gmeID = core.getPath(child);
             parentPath = core.getPath(core.getParent(child));
-            baseClass = core.getBase(child);
-            metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-            parentClass = core.getBase(core.getParent(child));
+            // baseClass = core.getBase(child);
+            //metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
+            baseNode = self.getMetaType(child);
+            metaType = baseNode ? core.getAttribute(baseNode, 'name') : "";
+            // parentClass = core.getBase(core.getParent(child));
+            parentClass = self.getMetaType(core.getParent(child));
             parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
             isComplex = self.COMPLEX[metaType];
-            isGate = self.META_TYPES[metaType] && parentMeta === "LogicCircuit";
-            isWire = self.CONNECTION_TYPES[metaType] && parentMeta === "LogicCircuit";
+            isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit";
+            isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
 
             if (isGate) {
 
@@ -173,7 +175,14 @@ define(['plugin/PluginConfig',
             name = core.getAttribute(nodeObj, 'name'),
             bits = core.getAttribute(nodeObj, 'Bits'),
             selRep = core.getAttribute(nodeObj, 'SelRep'),
-            xPos = parseInt(nodeObj.data.reg.position.x, 10),
+            xNull = nodeObj.data,
+            yNull = nodeObj.data.reg;
+            if (!xNull || !yNull || !nodeObj)
+            {
+                console.log("abc");
+            }
+
+        var xPos = parseInt(nodeObj.data.reg.position.x, 10),
             yPos = parseInt(nodeObj.data.reg.position.y, 10),
             value = core.getAttribute(nodeObj, 'Value'),
             angle = 0,
@@ -255,7 +264,7 @@ define(['plugin/PluginConfig',
             if (!err) {
                 metaType = core.getAttribute(core.getBase(node), 'name');
                 isComplex = self.COMPLEX[metaType];
-                isGate = self.META_TYPES[metaType];
+                isGate = self.GATE_TYPES[metaType];
                 isPort = metaType === 'InputPort' || metaType === 'OutputPort';
 
                 if (isGate) {
@@ -282,7 +291,7 @@ define(['plugin/PluginConfig',
             if (!err) {
                 metaType = core.getAttribute(core.getBase(node), 'name');
                 isComplex = self.COMPLEX[metaType];
-                isGate = self.META_TYPES[metaType];
+                isGate = self.GATE_TYPES[metaType];
                 isPort = metaType === 'InputPort' || metaType === 'OutputPort';
 
                 if (isGate) {
@@ -363,12 +372,12 @@ define(['plugin/PluginConfig',
                 j2x = new Json2Xml();
                 output = j2x.convert(diagram);
                 // PC: the file system has changed recently and is still under construction..
-                self.fs.addFile("output" + i + ".gcg", output);
+                // self.fs.addFile("output" + i + ".gcg", output);
             }
             i += 1;
         }
         // PC: the file system has changed recently and is still under construction..
-        self.fs.saveArtifact();
+        // self.fs.saveArtifact();
     };
 
     /**
