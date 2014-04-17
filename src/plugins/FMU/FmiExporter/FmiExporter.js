@@ -128,38 +128,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/FmiExporter/F
         var self = this;
         self.result.setSuccess(true);
 
-        // Using core to create an object.
-        var newNode = self.core.createNode({parent: self.rootNode, base: self.META['FCO']});
-        self.core.setAttribute(newNode, 'name', 'My new obj');
-        self.core.setRegistry(newNode, 'position', {x: 70, y: 70});
 
-        // Using the logger.
-        self.logger.info('This is a debug message.');
-        self.logger.info('This is an info message.');
-        self.logger.warning('This is a warning message.');
-        self.logger.error('This is an error message.');
-
-        // To transform ejs file into js file (needed for client-side runs) run combine_templates
-        // see instructions in file. You must run this after any modifications to the ejs template.
-        // https://github.com/webgme/webgme-domain-tools/blob/master/src/tools/combine_templates.js
-        var templatePY = ejs.render(TEMPLATES['Python.py.ejs'], {a: 'a', b: 'b'});
-        // TODO: addFile and saveArtifact are asynchronous functions - insert rest of code before callback.
-        //var templateFileName = 'generatedFiles/Python.py'
-        // self.fs.addFile(templateFileName, templatePY, function (err) {
-        //    self.fs.saveArtifact(function (err, hash) {
-        //        //FIXME: All code below needs to go here
-        //        callback(null, self.result);
-        //    });
-        // });
-
-        // TODO: These are asynchronous functions - insert rest of code before callback.
-        // self.fs works on both client and server side.
-        // self.fs.addFile('dir/subdir/file.txt', 'This is a text file.', function (err) {
-        //    self.fs.saveArtifact(function (err, hash) {
-        //        //FIXME: All code below needs to go here
-        //        callback(null, self.result);
-        //    });
-        // });
 
         // Obtain the current user configuration.
         var currentConfig = self.getCurrentConfig();
@@ -211,3 +180,38 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/FmiExporter/F
 
     return FmiExporter;
 });
+
+/**
+ // Using core to create an object.
+ var newNode = self.core.createNode({parent: self.rootNode, base: self.META['FCO']});
+ self.core.setAttribute(newNode, 'name', 'My new obj');
+ self.core.setRegistry(newNode, 'position', {x: 70, y: 70});
+
+ // Using the logger.
+ self.logger.info('This is a debug message.');
+ self.logger.info('This is an info message.');
+ self.logger.warning('This is a warning message.');
+ self.logger.error('This is an error message.');
+
+ // To transform ejs file into js file (needed for client-side runs) run combine_templates
+ // see instructions in file. You must run this after any modifications to the ejs template.
+ // https://github.com/webgme/webgme-domain-tools/blob/master/src/tools/combine_templates.js
+ var templatePY = ejs.render(TEMPLATES['Python.py.ejs'], {a: 'a', b: 'b'});
+ // TODO: addFile and saveArtifact are asynchronous functions - insert rest of code before callback.
+ //var templateFileName = 'generatedFiles/Python.py'
+ // self.fs.addFile(templateFileName, templatePY, function (err) {
+        //    self.fs.saveArtifact(function (err, hash) {
+        //        //FIXME: All code below needs to go here
+        //        callback(null, self.result);
+        //    });
+        // });
+
+ // TODO: These are asynchronous functions - insert rest of code before callback.
+ // self.fs works on both client and server side.
+ // self.fs.addFile('dir/subdir/file.txt', 'This is a text file.', function (err) {
+        //    self.fs.saveArtifact(function (err, hash) {
+        //        //FIXME: All code below needs to go here
+        //        callback(null, self.result);
+        //    });
+        // });
+ */
