@@ -20,11 +20,11 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     ChildrenConfigPlugin.prototype.getConfigStructure = function () {
         return [
             {
-                "name": "logChildrenNames",
-                "displayName": "Log Children Names",
+                "name": "myAsset",
+                "displayName": "Asset Example",
                 "description": '',
-                "value": true, // this is the 'default config'
-                "valueType": "boolean",
+                "value": "", // this is the 'default config'
+                "valueType": "asset",
                 "readOnly": false
             },
             {
@@ -85,18 +85,26 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             self = this,
             currentConfig;
 
-        if (!activeNode) {
-            callback('activeNode is not defined', this.result);
-            return;
-        }
 
         self.logger.info('Current configuration');
-
         currentConfig = this.getCurrentConfig();
         self.logger.info(currentConfig.logChildrenNames);
         self.logger.info(currentConfig.logLevel);
         self.logger.info(currentConfig.maxChildrenToLog);
         self.logger.info(currentConfig.whatIsYourName);
+        if (currentConfig.myAsset) {
+            self.blobClient.getObject(currentConfig.myAsset, function (err, content) {
+                self.logger.info(JSON.parse(content));
+                callback(null, self.result);
+            });
+            return;
+        }
+
+        if (!activeNode) {
+            callback('activeNode is not defined', this.result);
+            return;
+        }
+
 
 
         core.loadChildren(activeNode, function (err, childNodes) {
