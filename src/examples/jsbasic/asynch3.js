@@ -86,14 +86,14 @@ var visitAllChildrenRec = function (node, counter, callback) {
             callback('loadChildren failed for ' + node.toString());
             return;
         }
-
-        counter.visits += children.length;
         console.log('Node : ' + node.toString() + ' has ' + children.length.toString() + ' children.');
+        // The current node's children adds to the counter.
+        counter.visits += children.length;
         if (children.length === 0) {
             // The only chance for callback to be called.
             callback(null);
         } else {
-            // The node needs to be accounted for.
+            // The current node needs to be accounted for.
             counter.visits -= 1;
         }
         for (i = 0; i < children.length; i += 1) {
