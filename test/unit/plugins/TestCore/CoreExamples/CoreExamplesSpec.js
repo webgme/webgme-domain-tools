@@ -46,7 +46,7 @@ describe('CoreExamples', function () {
             plugin = new CoreExamples();
             core = new Core();
             meta = createMETATypesTests(core);
-            rootNode = core.getRootNode();
+            rootNode = core._rootNode;
             modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
             core.setAttribute(modelsNode, 'name', 'Models');
 

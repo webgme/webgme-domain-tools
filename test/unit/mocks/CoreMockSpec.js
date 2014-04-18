@@ -43,7 +43,7 @@ describe('Core Mock attribute getter and setter', function() {
     });
 
     it ('should pass', function() {
-        var n = core.createNode({parent: core.getRootNode()});
+        var n = core.createNode({parent: core._rootNode});
         core.setAttribute(n, 'name', 'test name');
         expect(n).should.not.equal(null);
         var name = core.getAttribute(n, 'name');

@@ -94,11 +94,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/FmiExporter/F
     FmiExporter.prototype.visitObject = function (err, childNodes, core, callback) {
         var self = this,
             i;
-    }
 
         for (i = 0; i < childNodes.length; i += 1) {
-
-    }
+        }
+    };
 
     /**
     * Checks if the given node is of the given meta-type.

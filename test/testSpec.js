@@ -41,7 +41,7 @@ describe("A test suite", function() {
 
     it ('core Mock test', function() {
         var core = new CoreMock();
-        var n = core.createNode({parent: core.getRootNode()});
+        var n = core.createNode({parent: core._rootNode});
         core.setAttribute(n, 'name', 'test name');
         expect(n).should.not.equal(null);
         var name = core.getAttribute(n, 'name');

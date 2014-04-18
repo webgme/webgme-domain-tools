@@ -7,9 +7,9 @@
 'use strict';
 define(['./NodeMock'], function (NodeMock) {
 
-    var CoreMock = function () {
+    var CoreMock = function (timeOut) {
         this._nodes = {};
-
+        this._timeOut = timeOut || 0;
         var options = {};
         var node = new NodeMock(this, options);
 
@@ -29,11 +29,6 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.addChild = function (node, child) {
         node.children.push(this.getPath(child));
-    };
-
-    // FIXME: this method does not exist on the core API! This should be moved to the StorageMock.
-    CoreMock.prototype.getRootNode = function () {
-        return this._rootNode;
     };
 
     CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
