@@ -108,8 +108,8 @@ define(['plugin/PluginConfig',
             //metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
             baseNode = self.getMetaType(child);
             metaType = baseNode ? core.getAttribute(baseNode, 'name') : "";
-            // parentClass = core.getBase(core.getParent(child));
-            parentClass = self.getMetaType(core.getParent(child));
+            parentClass = core.getBase(core.getParent(child));
+//            parentClass = self.getMetaType(core.getParent(child));
             parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
             isComplex = self.COMPLEX[metaType];
             isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit";
@@ -428,6 +428,25 @@ define(['plugin/PluginConfig',
             node = self.core.getBase(node);
         }
         return node;
+    };
+
+    /**
+     * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
+     * @param node - Node to be checked.
+     * @returns {boolean}
+     */
+    LogicGatesExporterPlugin.prototype.isBaseMeta = function (node) {
+        var self = this,
+            baseName,
+            baseNode = self.core.getBase(node);
+
+        if (!baseNode) {
+            // FCO does not have a base node, by definition function returns true.
+            return true;
+        }
+
+        baseName = self.core.getAttribute(baseNode, 'name');
+        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
     };
 
     return LogicGatesExporterPlugin;
