@@ -159,16 +159,16 @@ define(['plugin/PluginConfig',
     };
 
     /**
-    * This function adds a gate to the circuit diagram it belongs to
-    * @param {object} nodeObj - current node to be visited
-    * @param {string} metaType - meta type of current node
-    * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
-    * @param {string} parentPath - the circuit diagram the current node belongs to
-    * @returns {string} The version of the plugin.
-    * @public
-    */
-
-    LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath) {
+     * This function adds a gate to the circuit diagram it belongs to
+     * @param {object} nodeObj - current node to be visited
+     * @param {string} metaType - meta type of current node
+     * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
+     * @param {string} parentPath - the circuit diagram the current node belongs to
+     * @param {function(string)} callback - the result callback
+     * @returns {string} The version of the plugin.
+     * @public
+     */
+    LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath, callback) {
         var self = this,
             core = self.core,
             gmeID = core.getPath(nodeObj),
@@ -180,7 +180,9 @@ define(['plugin/PluginConfig',
             yPos = position.y,
             value = core.getAttribute(nodeObj, 'Value'),
             angle = 0,
-            gate;
+            gate,
+            pushGate;
+
 
             // debugging use: this becomes true when a gate in a subcircuit is being visited
 //            if (!xNull || !yNull || !nodeObj || !yNull.position)
@@ -203,34 +205,39 @@ define(['plugin/PluginConfig',
             }
         };
 
-        if (isComplex) {
-            // PC: loadChildren is asynchronous the execution will most likely step to #192 before gate is updated.
-            // This fact also makes addGate asynchronous.
-            core.loadChildren(nodeObj, function (err, childNodes) {
-                gate["@NumInputs"] = childNodes.length - 1;
-            });
+        pushGate = function (modGate) {
+            if (!self.components.hasOwnProperty(parentPath)) {
+                self.components[parentPath] = {
+                    "Gate": [],
+                    "Wire": []
+                };
+            }
+            if (parentPath) {
 
+                self.components[parentPath].Gate.push(modGate);
+            }
+            self.modelID += 1;
+            callback(null);
+        };
+
+        if (isComplex) {
+            core.loadChildren(nodeObj, function (err, childNodes) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                gate["@NumInputs"] = childNodes.length - 1;
+                pushGate(gate);
+            });
         } else if (metaType === "Clock") {
             gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
-
+            pushGate(gate);
         } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
             gate["@Bits"] = bits;
             gate["@SelRep"] = selRep;
             gate["@Value"] = value;
+            pushGate(gate);
         }
-
-        if (!self.components.hasOwnProperty(parentPath)) {
-            self.components[parentPath] = {
-                "Gate": [],
-                "Wire": []
-            };
-        }
-        if (parentPath) {
-
-            self.components[parentPath].Gate.push(gate);
-        }
-
-        self.modelID += 1;
     };
 
     LogicGatesExporterPlugin.prototype.addWire = function (nodeObj) {
