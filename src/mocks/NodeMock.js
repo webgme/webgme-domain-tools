@@ -7,6 +7,13 @@
 'use strict';
 define([], function () {
 
+    function generateGUID() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+
     var NodeMock = function (core, options) {
 
         NodeMock._nodes.push(this);
@@ -49,13 +56,6 @@ define([], function () {
     };
 
     NodeMock._nodes = [];
-
-    function generateGUID() {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-        }
-        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-    }
 
     return NodeMock;
 });

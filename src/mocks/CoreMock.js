@@ -12,7 +12,6 @@ define(['./NodeMock'], function (NodeMock) {
         this._timeOut = timeOut || 0;
         var options = {};
         var node = new NodeMock(this, options);
-
         this._nodes[this.getPath(node)] = node;
         this._rootNode = node;
     };
@@ -29,31 +28,6 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.addChild = function (node, child) {
         node.children.push(this.getPath(child));
-    };
-
-    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
-        // dummyNode is never used (pass null) since all nodes are accessable from this._nodes.
-        var err,
-            node;
-
-        if (this._nodes.hasOwnProperty(pathToObject)) {
-            node = this._nodes[pathToObject];
-        } else {
-            err = 'Given path : ' + pathToObject + 'does not exist!';
-        }
-
-        callback(err, node);
-    };
-
-    CoreMock.prototype.loadChildren = function (node, callback) {
-        var err,
-            childNodes = [],
-            i;
-        for (i = 0; i < node.children.length; i += 1) {
-            childNodes.push(this._nodes[node.children[i]]);
-        }
-
-        callback(err, childNodes);
     };
 
     CoreMock.prototype.getPath = function (node) {
@@ -89,17 +63,6 @@ define(['./NodeMock'], function (NodeMock) {
         return node.pointers.hasOwnProperty(name);
     };
 
-    CoreMock.prototype.loadPointer = function (node, name, callback) {
-        var err,
-            pointer;
-        if (this.hasPointer(node, name)) {
-            pointer = this._nodes[node.pointers[name]];
-        } else {
-            err = this.getAttribute(node, 'name') + ' does not have a pointer ' + name;
-        }
-        callback(err, pointer);
-    };
-
     CoreMock.prototype.getBase = function (node) {
         // FIXME: temporary change to fix tests, please review it.
         return this._nodes[node.pointers['base']];
@@ -117,19 +80,74 @@ define(['./NodeMock'], function (NodeMock) {
         return Object.keys(node.collection);
     };
 
+// ------------------------- Asynchronous methods ---------------------------------
+
+    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
+        var self = this,
+            timeOutFunction = function () {
+                var err,
+                    node;
+
+                if (self._nodes.hasOwnProperty(pathToObject)) {
+                    node = self._nodes[pathToObject];
+                } else {
+                    err = 'Given path : ' + pathToObject + 'does not exist!';
+                }
+
+                callback(err, node);
+            };
+        setTimeout(timeOutFunction, Math.random() * self._timeOut);
+    };
+
+    CoreMock.prototype.loadChildren = function (node, callback) {
+        var self = this,
+            timeOutFunction = function () {
+                var err,
+                    childNodes = [],
+                    i;
+                for (i = 0; i < node.children.length; i += 1) {
+                    childNodes.push(self._nodes[node.children[i]]);
+                }
+
+                callback(err, childNodes);
+            };
+
+        setTimeout(timeOutFunction, Math.random() * this._timeOut);
+    };
+
+    CoreMock.prototype.loadPointer = function (node, name, callback) {
+        var self = this,
+            timeOutFunction = function () {
+                var err,
+                    pointer;
+                if (self.hasPointer(node, name)) {
+                    pointer = self._nodes[node.pointers[name]];
+                } else {
+                    err = self.getAttribute(node, 'name') + ' does not have a pointer ' + name;
+                }
+                callback(err, pointer);
+            };
+
+        setTimeout(timeOutFunction, Math.random() * self._timeOut);
+    };
+
     CoreMock.prototype.loadCollection = function (node, name, callback) {
-        var colNodes = [],
-            err,
-            i,
-            nodeIds = node.collection[name];
-        if (nodeIds) {
-            for (i = 0; i < nodeIds.length; i += 1) {
-                colNodes.push(this._nodes[nodeIds[i]]);
-            }
-        } else {
-            err = this.getAttribute(node, 'name') + ' does not have a collection ' + name;
-        }
-        callback(err, colNodes);
+        var self = this,
+            timeOutFunction = function () {
+                var colNodes = [],
+                    err,
+                    i,
+                    nodeIds = node.collection[name];
+                if (nodeIds) {
+                    for (i = 0; i < nodeIds.length; i += 1) {
+                        colNodes.push(self._nodes[nodeIds[i]]);
+                    }
+                } else {
+                    err = self.getAttribute(node, 'name') + ' does not have a collection ' + name;
+                }
+                callback(err, colNodes);
+            };
+        setTimeout(timeOutFunction, Math.random() * self._timeOut);
     };
 
     return CoreMock;

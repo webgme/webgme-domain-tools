@@ -324,11 +324,12 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 } else {
                     error = 'Reference and original node did not have the same GUID!';
                 }
+                callback(error);
             });
         } else {
             error = 'Reference did not have a ref pointer!';
+            callback(error);
         }
-        callback(error);
     };
 
 // ------------------------------ Recursive Children Example ----------------------------

@@ -44,7 +44,7 @@ describe('CoreExamples', function () {
                 p1;
 
             plugin = new CoreExamples();
-            core = new Core();
+            core = new Core(10);
             meta = createMETATypesTests(core);
             rootNode = core._rootNode;
             modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
@@ -66,7 +66,6 @@ describe('CoreExamples', function () {
             refNode = core.createNode({base: meta.ModelRef, parent: referenceExample});
             core.setAttribute(refNode, 'name', 'm-ref');
             core.setPointer(refNode, 'ref', orgNode);
-            done();
 
             // Connection Example
             connectionExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
@@ -97,6 +96,7 @@ describe('CoreExamples', function () {
             core.setAttribute(conn33, 'name', 'ConnectionElement');
             core.setPointer(conn33, 'src', port3);
             core.setPointer(conn33, 'dst', port3);
+            done();
         });
     });
 
@@ -280,10 +280,6 @@ describe('CoreExamples', function () {
         this.warning_messages = [];
         this.error_messages = [];
     }
-
-    TestLogger.prototype.log = function (msg) {
-        this.log_messages.push(msg);
-    };
 
     TestLogger.prototype.debug = function (msg) {
         this.debug_messages.push(msg);
