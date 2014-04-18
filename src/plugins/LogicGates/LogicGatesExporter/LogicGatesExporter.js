@@ -55,6 +55,8 @@ define(['plugin/PluginConfig',
             "UserIOBase2PortBase": true,
             "UserIOBase2UserIOBase": true
         };
+
+        this.outputFiles = {};
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -67,10 +69,10 @@ define(['plugin/PluginConfig',
     LogicGatesExporterPlugin.prototype.main = function (callback) {
         var self = this,
             core = self.core,
-            selectedNode = self.activeNode,
-            pluginResult = self.result; // You probably don't need a separate variable for this...
+            selectedNode = self.activeNode;
 
         if (!selectedNode) {
+            self.result.setSuccess(false);
             callback('selectedNode is not defined', pluginResult);
             return;
         }
@@ -93,7 +95,8 @@ define(['plugin/PluginConfig',
             isComplex,
             isGate,
             isWire,
-            pluginResult;
+            pluginResult,
+            artifact;
 
         self.objectToVisit += childNodes.length; // all child objects have to be visited
         for (i = 0; i < childNodes.length; i += 1) {
@@ -141,102 +144,20 @@ define(['plugin/PluginConfig',
         self.objectToVisit -= 1; // another object was just visited
 
         if (self.objectToVisit === 0) {
-
+            // all objects have been visited
             // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
             for (i = 0; i < self.wiresToAdd.length; i += 1) {
                 self.addWire(self.wiresToAdd[i]);
             }
-
             self.createObjectFromDiagram();
-
-            // all objects have been visited
-            pluginResult = new PluginResult();
-            pluginResult.success = true;
-            if (callback) {
-                callback(null, pluginResult);
-            }
-        }
-    };
-
-    /**
-     * This function adds a gate to the circuit diagram it belongs to
-     * @param {object} nodeObj - current node to be visited
-     * @param {string} metaType - meta type of current node
-     * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
-     * @param {string} parentPath - the circuit diagram the current node belongs to
-     * @param {function(string)} callback - the result callback
-     * @returns {string} The version of the plugin.
-     * @public
-     */
-    LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath, callback) {
-        var self = this,
-            core = self.core,
-            gmeID = core.getPath(nodeObj),
-            name = core.getAttribute(nodeObj, 'name'),
-            bits = core.getAttribute(nodeObj, 'Bits'),
-            selRep = core.getAttribute(nodeObj, 'SelRep'),
-            position = core.getRegistry(nodeObj, 'position'),
-            xPos = position.x,
-            yPos = position.y,
-            value = core.getAttribute(nodeObj, 'Value'),
-            angle = 0,
-            gate,
-            pushGate;
-
-
-            // debugging use: this becomes true when a gate in a subcircuit is being visited
-//            if (!xNull || !yNull || !nodeObj || !yNull.position)
-//            {
-//                console.log("abc");
-//            }
-
-        self.idLUT[gmeID] = self.modelID;
-
-        // all logic gates component have attrs: Type, Name, ID
-        //                                 element: Point (attrs: X, Y, Angle)
-        gate = {
-            "@Type": metaType,
-            "@Name": name,
-            "@ID": self.modelID,
-            "Point": {
-                "@X": xPos,
-                "@Y": yPos,
-                "@Angle": angle
-            }
-        };
-
-        pushGate = function (modGate) {
-            if (!self.components.hasOwnProperty(parentPath)) {
-                self.components[parentPath] = {
-                    "Gate": [],
-                    "Wire": []
-                };
-            }
-            if (parentPath) {
-
-                self.components[parentPath].Gate.push(modGate);
-            }
-            self.modelID += 1;
-            callback(null);
-        };
-
-        if (isComplex) {
-            core.loadChildren(nodeObj, function (err, childNodes) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                gate["@NumInputs"] = childNodes.length - 1;
-                pushGate(gate);
+            artifact = self.blobClient.createArtifact('logicGateExporterOutput');
+            artifact.addFiles(self.outputFiles, function (err, hashes) {
+                //TODO: error handling
+                self.blobClient.saveAllArtifacts(function (err, hashes) {
+                    self.result.addArtifact(hashes[0]);
+                    callback(null, pluginResult);
+                });
             });
-        } else if (metaType === "Clock") {
-            gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
-            pushGate(gate);
-        } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
-            gate["@Bits"] = bits;
-            gate["@SelRep"] = selRep;
-            gate["@Value"] = value;
-            pushGate(gate);
         }
     };
 
@@ -358,6 +279,88 @@ define(['plugin/PluginConfig',
         }
     };
 
+    /**
+     * This function adds a gate to the circuit diagram it belongs to
+     * @param {object} nodeObj - current node to be visited
+     * @param {string} metaType - meta type of current node
+     * @param {boolean} isComplex - indicating whether the current node is a complex logic gate
+     * @param {string} parentPath - the circuit diagram the current node belongs to
+     * @param {function(string)} callback - the result callback
+     * @returns {string} The version of the plugin.
+     * @public
+     */
+    LogicGatesExporterPlugin.prototype.addGate = function (nodeObj, metaType, isComplex, parentPath, callback) {
+        var self = this,
+            core = self.core,
+            gmeID = core.getPath(nodeObj),
+            name = core.getAttribute(nodeObj, 'name'),
+            bits = core.getAttribute(nodeObj, 'Bits'),
+            selRep = core.getAttribute(nodeObj, 'SelRep'),
+            position = core.getRegistry(nodeObj, 'position'),
+            xPos = position.x,
+            yPos = position.y,
+            value = core.getAttribute(nodeObj, 'Value'),
+            angle = 0,
+            gate,
+            pushGate;
+
+
+            // debugging use: this becomes true when a gate in a subcircuit is being visited
+//            if (!xNull || !yNull || !nodeObj || !yNull.position)
+//            {
+//                console.log("abc");
+//            }
+
+        self.idLUT[gmeID] = self.modelID;
+
+        // all logic gates component have attrs: Type, Name, ID
+        //                                 element: Point (attrs: X, Y, Angle)
+        gate = {
+            "@Type": metaType,
+            "@Name": name,
+            "@ID": self.modelID,
+            "Point": {
+                "@X": xPos,
+                "@Y": yPos,
+                "@Angle": angle
+            }
+        };
+
+        pushGate = function (modGate) {
+            if (!self.components.hasOwnProperty(parentPath)) {
+                self.components[parentPath] = {
+                    "Gate": [],
+                    "Wire": []
+                };
+            }
+            if (parentPath) {
+
+                self.components[parentPath].Gate.push(modGate);
+            }
+            self.modelID += 1;
+            callback(null);
+        };
+
+        if (isComplex) {
+            core.loadChildren(nodeObj, function (err, childNodes) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                gate["@NumInputs"] = childNodes.length - 1;
+                pushGate(gate);
+            });
+        } else if (metaType === "Clock") {
+            gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
+            pushGate(gate);
+        } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
+            gate["@Bits"] = bits;
+            gate["@SelRep"] = selRep;
+            gate["@Value"] = value;
+            pushGate(gate);
+        }
+    };
+
     LogicGatesExporterPlugin.prototype.createObjectFromDiagram = function () {
         var self = this,
             i = 0,
@@ -384,13 +387,10 @@ define(['plugin/PluginConfig',
 
                 j2x = new Json2Xml();
                 output = j2x.convert(diagram);
-                // PC: the file system has changed recently and is still under construction..
-                // self.fs.addFile("output" + i + ".gcg", output);
+                self.outputFiles["output" + i + ".gcg"] = output;
             }
             i += 1;
         }
-        // PC: the file system has changed recently and is still under construction..
-        // self.fs.saveArtifact();
     };
 
     /**
