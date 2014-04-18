@@ -80,53 +80,24 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     };
 
     ChildrenConfigPlugin.prototype.main = function (callback) {
-        var core = this.core,
-            activeNode = this.activeNode,
-            self = this,
+        var self = this,
             currentConfig;
 
 
         self.logger.info('Current configuration');
         currentConfig = this.getCurrentConfig();
-        self.logger.info(currentConfig.logChildrenNames);
         self.logger.info(currentConfig.logLevel);
         self.logger.info(currentConfig.maxChildrenToLog);
         self.logger.info(currentConfig.whatIsYourName);
+
         if (currentConfig.myAsset) {
             self.blobClient.getObject(currentConfig.myAsset, function (err, content) {
-                self.logger.info(JSON.parse(content));
+                self.logger.info(content);
+                self.result.setSuccess(true);
                 callback(null, self.result);
             });
-            return;
         }
-
-        if (!activeNode) {
-            callback('activeNode is not defined', this.result);
-            return;
-        }
-
-
-
-        core.loadChildren(activeNode, function (err, childNodes) {
-            var i;
-            self.logger.info(core.getAttribute(activeNode, 'name') + ' has children');
-
-            for (i = 0; i < childNodes.length; i += 1) {
-
-                self.createMessage(childNodes[i], 'Message text ' + i + ' element');
-
-                self.logger.info('  ' + core.getAttribute(childNodes[i], 'name'));
-            }
-
-
-            if (callback) {
-                self.result.setSuccess(true);
-                self.logger.info(JSON.stringify(self.result.serialize()));
-                callback(null, self.result);
-            }
-        });
     };
-
 
     return ChildrenConfigPlugin;
 });
