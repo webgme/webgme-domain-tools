@@ -16,6 +16,7 @@ define(['plugin/PluginConfig',
         this.diagramPath = "";
         this.modelID = 0;
         this.wiresToAdd = [];
+        this.gatesToAdd = [];
         this.circuits = [];
         this.components = {};
         this.idLUT = {};
@@ -57,6 +58,10 @@ define(['plugin/PluginConfig',
         };
 
         this.outputFiles = {};
+
+        // debugging use
+        this.gates = [];
+        this.wires = [];
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -120,7 +125,7 @@ define(['plugin/PluginConfig',
                 // if key not exist already, add key; otherwise ignore
                 if (!self.idLUT.hasOwnProperty(gmeID)) {
                     // PC: addGate needs to be defined and called as an asynchronous function. see PC10
-                    self.addGate(child, metaType, isComplex, parentPath);
+                    self.addGate(child, metaType, isComplex, parentPath, function (err) {console.log("we just added a gate from visitObject() and " + err)});
                 }
 
             } else if (isWire) {
@@ -147,12 +152,16 @@ define(['plugin/PluginConfig',
             // all objects have been visited
             // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
             for (i = 0; i < self.wiresToAdd.length; i += 1) {
-                self.addWire(self.wiresToAdd[i]);
+                self.addWire(self.wiresToAdd[i], function (err) {console.log("We are adding a wire")});
             }
             self.createObjectFromDiagram();
             artifact = self.blobClient.createArtifact('logicGateExporterOutput');
             artifact.addFiles(self.outputFiles, function (err, hashes) {
-                //TODO: error handling
+                // TODO: error handling
+                if (err) {
+                    callback(null, null);
+                    return;
+                }
                 self.blobClient.saveAllArtifacts(function (err, hashes) {
                     self.result.addArtifact(hashes[0]);
                     callback(null, pluginResult);
@@ -161,7 +170,7 @@ define(['plugin/PluginConfig',
         }
     };
 
-    LogicGatesExporterPlugin.prototype.addWire = function (nodeObj) {
+    LogicGatesExporterPlugin.prototype.addWire = function (nodeObj, callback) {
         var self = this,
             core = self.core,
             src = core.getPointerPath(nodeObj, "src"),
@@ -174,13 +183,8 @@ define(['plugin/PluginConfig',
             parentCircuitPath,
             validGates;
 
-        // PC: loadByPath is asynchronous and addWire becomes that too.
         core.loadByPath(self.rootNode, src, function (err, node) {
-            // You can define variables here since your callback function defines a closure.
-            // They will only be accessible within this scope and not in "addWire", however you
-            // can access the variables defined in "addWire" here.
-            var srcMetaType,
-                srcNodeObj,
+            var srcNodeObj,
                 parentPath,
                 metaType,
                 isGate,
@@ -196,17 +200,16 @@ define(['plugin/PluginConfig',
                 if (isGate) {
                     srcNodeObj = node;
                     parentPath = core.getPath(core.getParent(srcNodeObj));
-                    srcMetaType = metaType;
                 } else if (isPort) {
                     srcNodeObj = core.getParent(node);
                     src = core.getPath(srcNodeObj);
-                    srcMetaType = core.getAttribute(srcNodeObj, 'name');
+                    metaType = core.getAttribute(srcNodeObj, 'name');
                     parentPath = core.getPath(srcNodeObj);
                     srcPort = 0;
                 }
 
                 if ((isPort || isGate) && (!self.idLUT.hasOwnProperty(src))) {
-                    self.addGate(srcNodeObj, srcMetaType, isComplex, parentPath);
+                    self.addGate(srcNodeObj, metaType, isComplex, parentPath, function (err) {console.log("we just added a src gate from addWire()")});
                 }
             }
         });
@@ -219,7 +222,6 @@ define(['plugin/PluginConfig',
                 isComplex,
                 isGate,
                 isPort,
-                dstMetaType,
                 dstNodeObj;
 
             if (!err) {
@@ -231,18 +233,17 @@ define(['plugin/PluginConfig',
                 if (isGate) {
                     dstNodeObj = node;
                     parentPath = core.getPath(core.getParent(dstNodeObj));
-                    dstMetaType = metaType;
                 } else if (isPort) {
                     dstNodeObj = core.getParent(node);
                     portGMEId = core.getPath(dstNodeObj);
                     dst = core.getPath(dstNodeObj);
-                    dstMetaType = core.getAttribute(dstNodeObj, 'name');
+                    metaType = core.getAttribute(dstNodeObj, 'name');
                     parentPath = core.getPath(dstNodeObj);
                     dstPort = self.childrenLUT[parentPath].indexOf(portGMEId);
                 }
 
                 if ((isPort || isGate) && !self.idLUT.hasOwnProperty(dst)) {
-                    self.addGate(dstNodeObj, dstMetaType, isComplex, parentPath);
+                    self.addGate(dstNodeObj, metaType, isComplex, parentPath, function (err) {console.log("We just added a dst gate from addWire()")});
                 }
             }
         });
@@ -277,6 +278,7 @@ define(['plugin/PluginConfig',
         if (parentCircuitPath && validGates) {
             self.components[parentCircuitPath].Wire.push(wire);
         }
+        callback(null);
     };
 
     /**
@@ -296,14 +298,12 @@ define(['plugin/PluginConfig',
             name = core.getAttribute(nodeObj, 'name'),
             bits = core.getAttribute(nodeObj, 'Bits'),
             selRep = core.getAttribute(nodeObj, 'SelRep'),
-            position = core.getRegistry(nodeObj, 'position'),
-            xPos = position.x,
-            yPos = position.y,
             value = core.getAttribute(nodeObj, 'Value'),
+            xPos = core.getRegistry(nodeObj, 'position').x,
+            yPos = core.getRegistry(nodeObj, 'position').y,
             angle = 0,
             gate,
             pushGate;
-
 
             // debugging use: this becomes true when a gate in a subcircuit is being visited
 //            if (!xNull || !yNull || !nodeObj || !yNull.position)
@@ -348,15 +348,18 @@ define(['plugin/PluginConfig',
                     return;
                 }
                 gate["@NumInputs"] = childNodes.length - 1;
+                self.gates.push(gate);
                 pushGate(gate);
             });
         } else if (metaType === "Clock") {
             gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
+            self.gates.push(gate);
             pushGate(gate);
         } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
             gate["@Bits"] = bits;
             gate["@SelRep"] = selRep;
             gate["@Value"] = value;
+            self.gates.push(gate);
             pushGate(gate);
         }
     };
