@@ -64,7 +64,7 @@ define(['plugin/PluginConfig',
             fileKeys,
             nbrOfFiles;
 
-        this.objectToVisit += childNodes.length; // all child objects have to be visited
+        self.objectToVisit += childNodes.length; // all child objects have to be visited
 
         for (i = 0; i < childNodes.length; i += 1) {
 
@@ -145,8 +145,6 @@ define(['plugin/PluginConfig',
                             }
                     }
             };
-
-            // TODO: need to fix this. Not a good way to do
 
             self.diagram.petrinet.page.place = self.places;
             self.diagram.petrinet.page.transition = self.transitions;
