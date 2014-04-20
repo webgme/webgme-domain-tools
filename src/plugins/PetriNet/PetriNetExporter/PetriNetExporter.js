@@ -13,21 +13,15 @@ define(['plugin/PluginConfig',
         PluginBase.call(this);
         //TODO: this is not the right way to do it..., but a way at least
         this.objectToVisit = 0; // number of objects that have to be visited
-        this.visitedObjects = 0; // number of already visited
-
         this.objectToVisit += 1; // we need to visit the selected node
-
         this.diagramPath = "";
-
         this.modelID = 0;
-
         this.diagrams = [];
         this.diagram = {};
         this.places = [];
         this.transitions = [];
         this.arcs = [];
-
-        this.ID_LUT = {};
+        this.idLUT = {};
         this.outputFiles = {};
     };
 
@@ -102,7 +96,7 @@ define(['plugin/PluginConfig',
                 self.diagrams.push(self.diagram);
 
                 // reset values
-                self.ID_LUT = {};
+                self.idLUT = {};
                 self.places = [];
                 self.transitions = [];
                 self.arcs = [];
@@ -125,7 +119,7 @@ define(['plugin/PluginConfig',
                     // if key not exist already, add key; otherwise ignore
                     gmeID = core.getPath(child);
 
-                    if (!self.ID_LUT.hasOwnProperty(gmeID)) {
+                    if (!self.idLUT.hasOwnProperty(gmeID)) {
 
                         self.addComponent(child, metaType);
                     }
@@ -141,9 +135,9 @@ define(['plugin/PluginConfig',
             });
         }
 
-        self.visitedObjects += 1; // another object was just visited
+        self.objectToVisit -= 1; // another object was just visited
 
-        if (self.objectToVisit === self.visitedObjects) {
+        if (self.objectToVisit === 0) {
 
             self.diagram = {
                 "petrinet":
@@ -177,7 +171,7 @@ define(['plugin/PluginConfig',
             fileKeys = Object.keys(this.outputFiles);
             nbrOfFiles = fileKeys.length;
             for (i = 0; i < fileKeys.length; i += 1) {
-                artifact.addFile(fileKeys[i], this.outputFiles[fileKeys[i]], function (err, hash) {
+                artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], function (err, hash) {
                     nbrOfFiles -= 1;
                     if (nbrOfFiles === 0) {
                         if (err) {
@@ -213,7 +207,7 @@ define(['plugin/PluginConfig',
             place,
             transition;
 
-        self.ID_LUT[gmeID] = self.modelID;
+        self.idLUT[gmeID] = self.modelID;
 
         if (metaType === 'Place') {
 
@@ -277,7 +271,7 @@ define(['plugin/PluginConfig',
 
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
             if (!err) {
-                if (!self.ID_LUT.hasOwnProperty(src)) {
+                if (!self.idLUT.hasOwnProperty(src)) {
                     srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
                     self.addComponent(nodeObj, srcMetaType);
 
@@ -292,7 +286,7 @@ define(['plugin/PluginConfig',
         core.loadByPath(self.rootNode, dst, function (err, nodeObj) {
             if (!err) {
                 // nodeObj is available to use and it is loaded.
-                if (!self.ID_LUT.hasOwnProperty(dst)) {
+                if (!self.idLUT.hasOwnProperty(dst)) {
                     srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
                     self.addComponent(nodeObj, dstMetaType);
                     self.modelID += 1;
@@ -308,8 +302,8 @@ define(['plugin/PluginConfig',
 
         arc = {
             "@id": self.modelID,
-            "@source": self.ID_LUT[src],
-            "@target": self.ID_LUT[dst],
+            "@source": self.idLUT[src],
+            "@target": self.idLUT[dst],
             "@delay": delay,
             "@weight": weight,
             "points": {
