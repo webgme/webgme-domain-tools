@@ -66,7 +66,9 @@ define(['plugin/PluginConfig',
             visitType,
             j2x,
             output,
-            artifact;
+            artifact,
+            fileKeys,
+            nbrOfFiles;
 
         this.objectToVisit += childNodes.length; // all child objects have to be visited
 
@@ -168,24 +170,33 @@ define(['plugin/PluginConfig',
             for (i = 1; i < this.diagrams.length; i += 1) {
 
                 output = j2x.convert(self.diagrams[i]);
-                artifact = self.blobClient.createArtifact('output' + i);
+                this.outputFiles['output' + i + '.xml'] = output;
             }
-//            artifact = self.blobClient.createArtifact('PetriNetExporterOutput');
+            artifact = self.blobClient.createArtifact('PetriNetExporterOutput');
 
-//            artifact.addFiles(self.outputFiles, function (err, hashes) {
-//                if (err) {
-//                    callback(null, null);
-//                }
-//            });
-
-            self.blobClient.saveAllArtifacts(function (err, hashes) {
-                for (i = 0; i < hashes.length; i += 1) {
-                    self.result.addArtifact(hashes[i]);
-                }
-
-                self.result.setSuccess(true);
-                callback(null, self.result);
-            });
+            fileKeys = Object.keys(this.outputFiles);
+            nbrOfFiles = fileKeys.length;
+            for (i = 0; i < fileKeys.length; i += 1) {
+                artifact.addFile(fileKeys[i], this.outputFiles[fileKeys[i]], function (err, hash) {
+                    nbrOfFiles -= 1;
+                    if (nbrOfFiles === 0) {
+                        if (err) {
+                            callback('Something went wrong when adding files: ' + err, self.result);
+                            return;
+                        }
+                        self.blobClient.saveAllArtifacts(function (err, hashes) {
+                            if (err) {
+                                callback(err, self.result);
+                                return;
+                            }
+                            self.result.addArtifact(hashes[0]);
+                            self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                            self.result.setSuccess(true);
+                            callback(null, self.result);
+                        });
+                    }
+                });
+            }
         }
     };
 
