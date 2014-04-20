@@ -54,10 +54,10 @@ define(['plugin/PluginConfig',
             gmeID,
             parentPath,
             parentBaseClass,
-            parentMetaType,
+            isParentNodeDiagram,
             baseClass,
-            metaType,
             visitType,
+            isArc,
             j2x,
             output,
             artifact,
@@ -69,13 +69,12 @@ define(['plugin/PluginConfig',
         for (i = 0; i < childNodes.length; i += 1) {
 
             child = childNodes[i];
-
             parentPath = core.getParent(child) ? core.getPath(core.getParent(child)) : "";
-            parentBaseClass = parentPath ? core.getBase(core.getParent(child)) : "";
-            parentMetaType = parentBaseClass ? core.getAttribute(parentBaseClass, 'name') : "";
+            parentBaseClass = self.getMetaType(core.getParent(child));
+            isParentNodeDiagram = self.isMetaTypeOf(parentBaseClass, self.META.PetriNetDiagram);
 
             // if visiting a new diagram, reset global values
-            if ((self.diagramPath && parentPath !== self.diagramPath) || (!self.diagramPath && parentMetaType === 'PetriNetDiagram')) {
+            if ((self.diagramPath && parentPath !== self.diagramPath) || (!self.diagramPath && isParentNodeDiagram)) {
 
                 self.diagram = {
                     "petrinet":
@@ -106,27 +105,23 @@ define(['plugin/PluginConfig',
                 self.diagramPath = parentPath;
             }
 
-            baseClass = core.getBase(child);
-            metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-            visitType = metaType === 'Place' || metaType === 'Transition' || metaType === 'Place2Transition' || metaType === 'Transition2Place';
+            baseClass = self.getMetaType(child);
+            isArc = self.isMetaTypeOf(baseClass, self.META.Place2Transition) || self.isMetaTypeOf(baseClass, self.META.Transition2Place);
+            visitType = self.isMetaTypeOf(baseClass, self.META.Place) || self.isMetaTypeOf(baseClass, self.META.Transition) || isArc;
 
             if (visitType) {
 
                 self.modelID += 1;
-
-                if (metaType === 'Place' || metaType === 'Transition') {
+                if (isArc) {
+                    self.addConnection(child);
+                } else {
 
                     // if key not exist already, add key; otherwise ignore
                     gmeID = core.getPath(child);
-
                     if (!self.idLUT.hasOwnProperty(gmeID)) {
 
-                        self.addComponent(child, metaType);
+                        self.addComponent(child);
                     }
-
-                } else if (metaType === 'Place2Transition' || metaType === 'Transition2Place') {
-
-                    self.addConnection(child);
                 }
             }
 
@@ -194,11 +189,12 @@ define(['plugin/PluginConfig',
         }
     };
 
-    PetriNetExporterPlugin.prototype.addComponent = function (nodeObj, metaType) {
+    PetriNetExporterPlugin.prototype.addComponent = function (nodeObj) {
 
         var self = this,
             core = self.core,
             gmeID = core.getPath(nodeObj),
+            baseClass = self.getMetaType(nodeObj),
             name = core.getAttribute(nodeObj, 'name'),
             capacity = core.getAttribute(nodeObj, 'Capacity'),
             marking = core.getAttribute(nodeObj, 'InitialMarking'),
@@ -209,7 +205,7 @@ define(['plugin/PluginConfig',
 
         self.idLUT[gmeID] = self.modelID;
 
-        if (metaType === 'Place') {
+        if (self.isMetaTypeOf(baseClass, self.META.Place)) {
 
             // Place component's attrs: id, name, portdir, initialmarking, capacity
             //                   elements: location (attrs: x, y), size (attrs: width, height)
@@ -272,14 +268,14 @@ define(['plugin/PluginConfig',
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
             if (!err) {
                 if (!self.idLUT.hasOwnProperty(src)) {
-                    srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
+                    srcMetaType = core.getAttribute(self.getMetaType(nodeObj), 'name');
                     self.addComponent(nodeObj, srcMetaType);
 
                     self.modelID += 1;
                 }
 
-                srcX = nodeObj.data.reg.position.x;
-                srcY = nodeObj.data.reg.position.y;
+                srcX = core.getRegistry(nodeObj, 'position').x;
+                srcY = core.getRegistry(nodeObj, 'position').y;
             }
         });
 
@@ -287,13 +283,13 @@ define(['plugin/PluginConfig',
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.idLUT.hasOwnProperty(dst)) {
-                    srcMetaType = core.getAttribute(core.getBase(nodeObj), 'name');
+                    srcMetaType = core.getAttribute(self.getMetaType(nodeObj), 'name');
                     self.addComponent(nodeObj, dstMetaType);
                     self.modelID += 1;
                 }
 
-                dstX = nodeObj.data.reg.position.x;
-                dstY = nodeObj.data.reg.position.y;
+                dstX = core.getRegistry(nodeObj, 'position').x;
+                dstY = core.getRegistry(nodeObj, 'position').y;
             }
         });
 
@@ -320,6 +316,43 @@ define(['plugin/PluginConfig',
             }
         };
         self.arcs.push(arc);
+    };
+
+    /**
+     * Checks if the given node is of the given meta-type.
+     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
+     * @param node - Node to be checked for type.
+     * @param metaNode - Node object defining the meta type.
+     * @returns {boolean} - True if the given object was of the META type.
+     */
+    PetriNetExporterPlugin.prototype.isMetaTypeOf = function (node, metaNode) {
+        var self = this,
+            metaGuid = self.core.getGuid(metaNode);
+        while (node) {
+            if (self.core.getGuid(node) === metaGuid) {
+                return true;
+            }
+            node = self.core.getBase(node);
+        }
+        return false;
+    };
+
+    /**
+     * Finds and returns the node object defining the meta type for node.
+     * @param node - Node to be checked for type.
+     * @returns {Object} - Node object defining the meta type of node.
+     */
+    PetriNetExporterPlugin.prototype.getMetaType = function (node) {
+        var self = this,
+            name;
+        while (node) {
+            name = self.core.getAttribute(node, 'name');
+            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
+                break;
+            }
+            node = self.core.getBase(node);
+        }
+        return node;
     };
 
     return PetriNetExporterPlugin;
