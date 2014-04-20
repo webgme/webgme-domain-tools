@@ -4,8 +4,7 @@
 
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
-    'plugin/PluginResult',
-    'json2xml'], function (PluginConfig, PluginBase, PluginResult, Json2Xml) {
+    'json2xml'], function (PluginConfig, PluginBase, Json2Xml) {
 
     'use strict';
 
@@ -16,7 +15,6 @@ define(['plugin/PluginConfig',
         this.diagramPath = "";
         this.modelID = 0;
         this.wiresToAdd = [];
-        this.gatesToAdd = [];
         this.circuits = [];
         this.components = {};
         this.idLUT = {};
@@ -61,7 +59,6 @@ define(['plugin/PluginConfig',
 
         // debugging use
         this.gates = [];
-        this.wires = [];
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -78,7 +75,7 @@ define(['plugin/PluginConfig',
 
         if (!selectedNode) {
             self.result.setSuccess(false);
-            callback('selectedNode is not defined', pluginResult);
+            callback('selectedNode is not defined', self.result);
             return;
         }
 
@@ -100,7 +97,8 @@ define(['plugin/PluginConfig',
             isComplex,
             isGate,
             isWire,
-            pluginResult,
+            fileKeys,
+            nbrOfFiles,
             artifact;
 
         self.objectToVisit += childNodes.length; // all child objects have to be visited
@@ -154,19 +152,32 @@ define(['plugin/PluginConfig',
             for (i = 0; i < self.wiresToAdd.length; i += 1) {
                 self.addWire(self.wiresToAdd[i], function (err) {console.log("We are adding a wire")});
             }
+
             self.createObjectFromDiagram();
-            artifact = self.blobClient.createArtifact('logicGateExporterOutput');
-            artifact.addFiles(self.outputFiles, function (err, hashes) {
-                // TODO: error handling
-                if (err) {
-                    callback(null, null);
-                    return;
-                }
-                self.blobClient.saveAllArtifacts(function (err, hashes) {
-                    self.result.addArtifact(hashes[0]);
-                    callback(null, pluginResult);
+            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput');
+            fileKeys = Object.keys(self.outputFiles);
+
+            for (i = 0; i < fileKeys.length; i += 1) {
+                artifact.addFile(fileKeys[i], this.outputFiles[fileKeys[i]], function (err, hash) {
+                    nbrOfFiles -= 1;
+                    if (nbrOfFiles === 0) {
+                        if (err) {
+                            callback('Something went wrong when adding files: ' + err, self.result);
+                            return;
+                        }
+                        self.blobClient.saveAllArtifacts(function (err, hashes) {
+                            if (err) {
+                                callback(err, self.result);
+                                return;
+                            }
+                            self.result.addArtifact(hashes[0]);
+                            self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                            self.result.setSuccess(true);
+                            callback(null, self.result);
+                        });
+                    }
                 });
-            });
+            }
         }
     };
 
