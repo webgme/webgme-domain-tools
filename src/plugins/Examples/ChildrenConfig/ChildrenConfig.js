@@ -96,6 +96,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 self.result.setSuccess(true);
                 callback(null, self.result);
             });
+        } else {
+            self.result.setSuccess(false);
+            callback('No asset was specified in configuration.', self.result);
         }
     };
 
