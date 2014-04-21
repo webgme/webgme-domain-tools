@@ -1,0 +1,39 @@
+define(['mocks/CoreMock'], function (CoreMock) {
+    var core = new CoreMock(<%=timeOut%>),
+        meta;
+
+    meta = createMETATypesTests(core);
+
+    var <%=activeNode.ID%> = core.createNode({base: meta.<%=activeNode.metaType%>, parent: core._rootNode});
+    core.setAttribute(<%=activeNode.ID%>, 'name', '<%=activeNode.name%>');
+
+<%
+var nodeData, i;
+for (i = 0; i < nodes.length; i += 1) {
+    nodeData = nodes[i];
+%>
+    var <%=nodeData.ID%> = core.createNode({
+        base: meta.<%=nodeData.metaType%>,
+        parent: <%=nodeData.parentID%>
+    });
+    core.setAttribute(<%=nodeData.ID%>, 'name', '<%=nodeData.name%>');
+<%}%>
+
+    function createMETATypesTests (core) {
+        var META = {},
+        options = {},
+        node;
+        // FIXME: This does not account for inheritance at this stage.
+<% var metaTypeName;
+for (i = 0; i < metaTypeNames.length; i += 1) {
+    metaTypeName = metaTypeNames[i];
+%>
+        node = core.createNode(options);
+        core.setAttribute(node, 'name', '<%- metaTypeName %>');
+        META.<%- metaTypeName %> = node;
+<%}%>
+        return META;
+    }
+
+    return core;
+});

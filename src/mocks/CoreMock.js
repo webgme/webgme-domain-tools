@@ -82,7 +82,7 @@ define(['./NodeMock'], function (NodeMock) {
 
 // ------------------------- Asynchronous methods ---------------------------------
 
-    CoreMock.prototype.loadByPath = function (dummyNode, pathToObject, callback) {
+    CoreMock.prototype.loadByPath = function (node, pathToObject, callback) {
         var self = this,
             timeOutFunction = function () {
                 var err,
