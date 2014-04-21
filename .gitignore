@@ -21,3 +21,5 @@ src/plugins/*/DSML/*.js*
 *-output
 
 blob-local-storage
+src/examples/jsbasic/asyncExamples_jk.js
+src/plugins/FMU/FmiExporter/FmiExporter - Copy.js
