@@ -20,11 +20,13 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
-        this.fmusInModelExchange = 0;
         this.fmuIdToInfoMap = {};
-        this.fmuGuidToInfoMap = {};
         this.connections = [];
-        this.simulationInfo = {};
+        this.simulationInfo = {
+            'StartTime': 0,
+            'StopTime': 1,
+            'StepSize': 0.001
+        };
         this.modelExchangeConfig = {};
         this.fmiMetaTypes = {
             'FMU': '/1822302751/902541625',
@@ -105,12 +107,28 @@ define(['plugin/PluginConfig',
                     return;
                 }
 
-                self.result.setSuccess(true);
+                var artifact = self.blobClient.createArtifact('model_exchange_config');
 
-                // This will save the changes. If you don't want to save;
-                // exclude self.save and call callback directly from this scope.
-                self.save('Finished FmiExporter', function (err) {
-                    callback(null, self.result);
+                self.modelExchangeConfig['Connections'] = self.connections;
+                self.modelExchangeConfig['FMUs'] = self.fmuIdToInfoMap;
+                self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
+
+                artifact.addFile('model_exchange_config.json', JSON.stringify(self.modelExchangeConfig, null, 4), function (err, fileHash) {
+                    self.logger.info('Generated file hash: ' + fileHash);
+
+                    self.blobClient.saveAllArtifacts(function (err, artifactHashes) {
+                        self.logger.info('Saved artifact hashes are: ' + artifactHashes[0]);
+
+                        self.result.addArtifact(artifactHashes[0]);
+
+                        self.result.setSuccess(true);
+
+                        // This will save the changes. If you don't want to save;
+                        // exclude self.save and call callback directly from this scope.
+                        self.save('Finished FmiExporter', function (err) {
+                            callback(null, self.result);
+                        });
+                    })
                 });
             };
 
@@ -125,6 +143,7 @@ define(['plugin/PluginConfig',
         var self = this,
             i,
             meChildNode,
+            meChildName,
             baseTypeNode,
             baseTypePath,
             counter = modelExchangeChildren.length,
@@ -152,7 +171,7 @@ define(['plugin/PluginConfig',
             fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
             fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
             fmuInfo['Priority'] = 2;
-            fmuInfo['node'] = fmuNode;
+            //fmuInfo['node'] = fmuNode;
 
             if (Object.keys(fmuInfo.Inputs).length === 0) {
                 fmuInfo['Priority'] = 1;
@@ -196,6 +215,11 @@ define(['plugin/PluginConfig',
                 self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction);
 
             } else if (baseTypePath === self.fmiMetaTypes.SimulationParameter) {
+                meChildName = self.core.getAttribute(meChildNode, 'name');
+
+                if (self.simulationInfo.hasOwnProperty(meChildName)) {
+                    self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
+                }
 
                 iterationCallback(null);
             }
