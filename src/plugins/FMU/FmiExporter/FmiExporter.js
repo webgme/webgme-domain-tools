@@ -143,7 +143,23 @@ define(['plugin/PluginConfig',
         };
 
         var loadFmuChildrenCallbackFunction = function (loadChildrenErr, fmuChildren) {
-            self.addFmu(fmuChildren);
+            var fmuNode = self.core.getParent(fmuChildren[0]),
+                relid = self.core.getRelid(fmuNode),
+                fmuInfo;
+
+            fmuInfo = self.extractFmuInfo(fmuChildren);
+
+            fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
+            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
+            fmuInfo['Priority'] = 2;
+            fmuInfo['node'] = fmuNode;
+
+            if (Object.keys(fmuInfo.Inputs).length === 0) {
+                fmuInfo['Priority'] = 1;
+            }
+
+            self.fmuIdToInfoMap[relid] = fmuInfo;
+
             iterationCallback(loadChildrenErr);
         };
 
@@ -176,18 +192,6 @@ define(['plugin/PluginConfig',
                 iterationCallback(null);
 
             } else if (baseTypePath === self.fmiMetaTypes.FMU) {
-
-                var relid = self.core.getRelid(meChildNode);
-
-                var fmuInfo = {
-                    'Name': self.core.getAttribute(meChildNode, 'name'),
-                    'File': self.core.getAttribute(meChildNode, 'fmu_path'),
-                    'Priority': 1,
-                    'node': meChildNode
-                };
-
-                self.fmuIdToInfoMap[relid] = fmuInfo;
-
                 // asynchronous call to get parameter and port information
                 self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction);
 
@@ -196,27 +200,27 @@ define(['plugin/PluginConfig',
                 iterationCallback(null);
             }
 
-
-
             self.logger.info("We have reached the debug point!");
-
         }
     };
 
         // a Synchronous helper function to get FMU Parameters, Inputs, and Outputs
-        FmiExporter.prototype.addFmu = function (fmuChildren, fmuInfo) {
+        FmiExporter.prototype.extractFmuInfo = function (fmuChildren) {
             var self = this,
                 i,
                 fmuChildNode,
+                fmuChildNodeRelid,
                 baseTypeNode,
                 baseTypePath,
                 parameters = {},
-                inputs = [],
-                outputs = [];
+                inputs = {},
+                outputs = {},
+                fmuInfo = {};
 
             for (i = 0; i < fmuChildren.length; i += 1) {
 
                 fmuChildNode = fmuChildren[i];
+                fmuChildNodeRelid = self.core.getRelid(fmuChildNode);
                 baseTypeNode = self.getMetaType(fmuChildNode);
                 baseTypePath = self.core.getPath(baseTypeNode);
 
@@ -224,10 +228,12 @@ define(['plugin/PluginConfig',
                     parameters[self.core.getAttribute(fmuChildNode, 'name')] = self.core.getAttribute(fmuChildNode, 'value');
                 }
                 else if (baseTypePath === self.fmiMetaTypes.Input) {
-                    inputs.push(self.core.getAttribute(fmuChildNode, 'name'));
+                    inputs[fmuChildNodeRelid] = self.core.getAttribute(fmuChildNode, 'name');
+                    //inputs[self.core.getAttribute(fmuChildNode, 'name')] = fmuChildNodeRelid;
                 }
                 else if (baseTypePath === self.fmiMetaTypes.Output) {
-                    outputs.push(self.core.getAttribute(fmuChildNode, 'name'));
+                    outputs[fmuChildNodeRelid] = self.core.getAttribute(fmuChildNode, 'name');
+                    //outputs[self.core.getAttribute(fmuChildNode, 'name')] = fmuChildNodeRelid;
                 }
             }
 
