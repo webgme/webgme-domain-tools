@@ -67,6 +67,10 @@ var visitAllChildren = function (node, syncWorkAtNode, callback) {
             callback('Could not load children for first object, err: ' + err);
             return;
         }
+        if (children.length === 0) {
+            callback(null);
+            return;
+        }
         counter = {visits: children.length};
         itrCallback = function (err) {
             error = err ? error += err : error;

@@ -61,6 +61,10 @@ var visitAllChildren = function (node, callback) {
             callback('Could not load children for first object, err: ' + err);
             return;
         }
+        if (children.length === 0) {
+            callback(null);
+            return;
+        }
         // Define a counter and callback for the recursion.
         counter = {visits: children.length};
         console.log('Node : ' + node.toString() + ' has ' + children.length.toString() + ' children.');

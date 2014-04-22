@@ -64,6 +64,16 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     MockModelGenerator.prototype.getConfigStructure = function () {
         return [
             {
+                'name': 'modelName',
+                'displayName': 'Model Name',
+                'regex': '^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*',
+                'regexMessage': 'No spaces nor special characters allowed. This value is used as a js-file name.',
+                'description': 'File name (w/o extension) for the model.',
+                'value': 'examplemodel',
+                'valueType': "string",
+                'readOnly': false
+            },
+            {
                 'name': 'meta',
                 'displayName': 'Include META',
                 'description': 'Regenerate the META mock model.',
@@ -117,7 +127,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         };
 
         generateFiles = function () {
-            var modelFileName = 'test/models/' + self.projectName + '/modelExample.js',
+            var modelFileName = 'test/models/' + self.projectName + '/' + config.modelName + '.js',
                 metaFileName = 'test/models/' + self.projectName + '/META.js',
                 metaData = {},
                 artifact = self.blobClient.createArtifact('mockModel'),
@@ -243,6 +253,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 error = '';
             if (err) {
                 callback('Could not load children for first object, err: ' + err);
+                return;
+            }
+            if (children.length === 0) {
+                callback(null);
                 return;
             }
             counter = {visits: children.length};
