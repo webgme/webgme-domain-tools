@@ -19,9 +19,13 @@ define([], function () {
         NodeMock._nodes.push(this);
 
         this.ID = NodeMock._nodes.length;
-        this.attributes = {
-            name: ''
-        };
+        if (options.attr) {
+            this.attributes = options.attr;
+        } else {
+            this.attributes = {
+                name: ''
+            };
+        }
 
         this.registry = {
             DisplayFormat: '',

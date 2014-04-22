@@ -117,14 +117,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             callback('No activeNode given', self.result);
             return;
         }
-
+        // ADMMoldelCool : "/1667744534/1064479209/181258295"
         modelData.date = date;
         modelData.timeOut = config.timeOut;
-        modelData.activeNode = {
-            name: self.core.getAttribute(self.activeNode, 'name'),
-            ID: 'ID' + self.core.getGuid(self.activeNode).replace(/-/gi, '_'),
-            metaType: self.core.getAttribute(self.getMetaType(self.activeNode), 'name')
-        };
+        modelData.activeNode = self.atModelNode(self.activeNode);
 
         generateFiles = function () {
             var modelFileName = 'test/models/' + self.projectName + '/' + config.modelName + '.js',
@@ -172,18 +168,41 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     MockModelGenerator.prototype.atModelNode = function (node, parent, siblings) {
         var self = this,
             metaTypeName = self.core.getAttribute(self.getMetaType(node), 'name'),
+            attributeNames,
+            i,
             nodeData = {
-                name: self.core.getAttribute(node, 'name'),
+                attr: {},
+                reg: {},
                 ID: 'ID' + self.core.getGuid(node).replace(/-/gi, '_'),
-                parentID: 'ID' + self.core.getGuid(parent).replace(/-/gi, '_'),
+                parentID: null,
                 metaType: metaTypeName,
-                base: metaTypeName,
-                baseIsMeta: true
+                base: null,
+                baseIsMeta: false
             };
-        // TODO: Add case when base is non-meta
+        // ----- BaseNode -------
+        if (self.baseIsMeta(node)) {
+            nodeData.base = metaTypeName;
+            nodeData.baseIsMeta = true;
+        } else {
+            // TODO: Add case when base is non-meta
+            self.logger.error(nodeData.name + ' has non-meta base!');
+            self.logger.error('// TODO: Add case when base is non-meta...');
+        }
+        // ----- Attributes -----
+        attributeNames = self.core.getAttributeNames(node);
+        for (i = 0; i < attributeNames.length; i += 1) {
+            nodeData.attr[attributeNames[i]] = self.core.getAttribute(node, attributeNames[i]);
+        }
+        // ----- Pointers -------
         // TODO: Add pointers (i.e. connections and such)
-        self.modelNodes.push(nodeData);
-        //self.logger.info('Added :: ' + JSON.stringify(nodeData, null, 4));
+
+        // This is just so this function can be reused for the active node.
+        if (parent) {
+            nodeData.parentID = 'ID' + self.core.getGuid(parent).replace(/-/gi, '_');
+            self.modelNodes.push(nodeData);
+        } else {
+            return nodeData;
+        }
     };
 
     MockModelGenerator.prototype.populateMetaNodes = function () {
@@ -331,6 +350,23 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             node = self.core.getBase(node);
         }
         return node;
+    };
+
+    /**
+    * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
+    * @param node - Node to be checked.
+    * @returns {boolean}
+    */
+    MockModelGenerator.prototype.baseIsMeta = function (node) {
+        var self = this,
+            baseName,
+            baseNode = self.core.getBase(node);
+        if (!baseNode) {
+            // FCO does not have a base node, by definition function returns true.
+            return true;
+        }
+        baseName = self.core.getAttribute(baseNode, 'name');
+        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
     };
 
     return MockModelGenerator;

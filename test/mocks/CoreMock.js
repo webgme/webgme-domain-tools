@@ -34,12 +34,26 @@ define(['./NodeMock'], function (NodeMock) {
         return node.path;
     };
 
+    CoreMock.prototype.getRelid = function (node) {
+        return node.ID;
+    };
+
     CoreMock.prototype.setAttribute = function (node, name, value) {
         node.attributes[name] = value;
     };
 
     CoreMock.prototype.getAttribute = function (node, name) {
-        return node.attributes[name];
+        var self = this;
+        do {
+            if (node.attributes[name] !== undefined) {
+                return node.attributes[name];
+            }
+            node = self.getBase(node);
+        } while (node);
+    };
+
+    CoreMock.prototype.getAttributeNames = function (node) {
+        throw new Error("TODO: Should return all attributes (including bases') for this node.");
     };
 
     CoreMock.prototype.setRegistry = function (node, name, value) {
@@ -64,8 +78,10 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.getBase = function (node) {
-        // FIXME: temporary change to fix tests, please review it.
-        return this._nodes[node.pointers['base']];
+        if (node.pointers.base === null) {
+            return null;
+        }
+        return this._nodes[node.pointers.base];
     };
 
     CoreMock.prototype.getParent = function (node) {
