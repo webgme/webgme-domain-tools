@@ -38,7 +38,8 @@ define(['plugin/PluginConfig',
             'Input': '/1822302751/873609603',
             'Output': '/1822302751/206401000',
             'Parameter': '/1822302751/1582216564',
-            'SimulationParameter': '/1822302751/1963127367'
+            'SimulationParameter': '/1822302751/1963127367',
+            'ModelExchange': '/1822302751/637828452'
         };
     };
 
@@ -88,11 +89,20 @@ define(['plugin/PluginConfig',
     */
     FmiExporter.prototype.main = function (callback) {
         var self = this,
-            selectedNode = self.activeNode;
+            selectedNode = self.activeNode,
+            selectedNodeBaseType = self.getMetaType(selectedNode),
+            selectedNodeBasePath = self.core.getPath(selectedNodeBaseType),
+            modelExchangeNode;
 
         if (!selectedNode) {
             callback('selectedNode is not defined', self.result);
             return;
+        }
+
+        if (selectedNodeBasePath != self.fmiMetaTypes.ModelExchange) {
+            callback('SelectedNode is not a ModelExchange!', self.result);
+        } else {
+            modelExchangeNode = selectedNode;
         }
 
         // core.loadChildren returns err and childNodes
@@ -116,6 +126,7 @@ define(['plugin/PluginConfig',
                 var artifact = self.blobClient.createArtifact('model_exchange_config');
 
                 self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
+                self.modelExchangeConfig['Connections'] = self.connections;
                 self.modelExchangeConfig['FmuMap'] = self.fmuIdToInfoMap;
                 self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
 
@@ -151,7 +162,7 @@ define(['plugin/PluginConfig',
             self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
         };
 
-        self.core.loadChildren(selectedNode, loadModelExchangeChildrenCallbackFunction);
+        self.core.loadChildren(modelExchangeNode, loadModelExchangeChildrenCallbackFunction);
     };
 
     // An asynchronous function to iterate over the ModelExchange children and extract info
@@ -260,7 +271,7 @@ define(['plugin/PluginConfig',
     FmiExporter.prototype.followConnsAssignPriority = function (srcFmuId, srcFmu) {
         var self = this,
             srcFmuName = srcFmu.Name,
-            srcFmuOutputs = srcFmu.Outputs,
+            srcFmuOutputs = srcFmu.OutputMap,
             outputIds = Object.keys(srcFmuOutputs),
             srcPriority = srcFmu.Priority,
             dstPriority = srcPriority + 1,
@@ -289,7 +300,9 @@ define(['plugin/PluginConfig',
             for (j = 0; j < allConnections.length; j += 1) {
                 var connectedInput = allConnections[j],
                     dstFmuId = connectedInput.split("/")[0],
-                    dstFmu = self.fmuIdToInfoMap[dstFmuId];
+                    dstPortId = connectedInput.split("/")[1],
+                    dstFmu = self.fmuIdToInfoMap[dstFmuId],
+                    dstPortName = dstFmu.InputMap[dstPortId];
 
                 if (dstFmu.Priority < dstPriority) {
                     dstFmu.Priority = dstPriority;
@@ -297,6 +310,15 @@ define(['plugin/PluginConfig',
 
                 // dst becomes src, repeat
                 self.followConnsAssignPriority(dstFmuId, dstFmu);
+
+                self.connections.push(
+                    {
+                        'Source': srcFmuName + '.' + outputName,
+                        'Destination': dstFmu.Name + '.' + dstPortName,
+                        'SrcPriority': srcPriority,
+                        'DstPriority': dstPriority
+                    }
+                );
             }
         }
     };
