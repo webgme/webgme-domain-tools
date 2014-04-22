@@ -36,13 +36,16 @@ describe('CoreExamples', function () {
         referenceExample,
         m1,
         modelsNode,
-        Logger;
+        Logger,
+        exampleModel;
 
-    before(function (done) { requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock', 'mocks/LoggerMock'],
-        function (CoreExamples, Core, Logger_) {
+    before(function (done) { requirejs(
+        ['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock', 'mocks/LoggerMock', 'models/TestCore/modelExample'],
+        function (CoreExamples, Core, Logger_, exampleModel_) {
             var rootNode,
                 mChild,
                 p1;
+            exampleModel = exampleModel_;
             Logger = Logger_;
             plugin = new CoreExamples();
             core = new Core(10);
@@ -132,6 +135,29 @@ describe('CoreExamples', function () {
         });
     });
 
+    it('exampleModel', function (done) {
+        plugin.core = exampleModel.core;
+        plugin.META = exampleModel.META;
+        plugin.logger = new Logger();
+        plugin.core.loadChildren(exampleModel.activeNode, function (err, children) {
+            var i,
+                parent;
+            for (i = 0; i < children.length; i += 1) {
+                if (plugin.core.getAttribute(children[i], 'name') === 'ParentExample') {
+                    parent = children[i];
+                    break;
+                }
+            }
+            plugin.core.loadChildren(parent, function (err, children) {
+                plugin.parentExample(children, function (err) {
+                    expect(err).to.equal('');
+                    expect(plugin.logger.info_messages[0]).
+                        to.equal("Parent och its child's parent had the same GUID (as expected).");
+                    done();
+                });
+            });
+        });
+    });
     it('parentExample', function (done) {
         var children = [mParent];
         plugin.core = core;
