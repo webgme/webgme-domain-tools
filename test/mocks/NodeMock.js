@@ -4,9 +4,9 @@
  * Author: Zsolt Lattmann
  */
 
-'use strict';
-define([], function () {
 
+define([], function () {
+    'use strict';
     function generateGUID() {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);

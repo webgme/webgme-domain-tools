@@ -35,14 +35,15 @@ describe('CoreExamples', function () {
         connectionExample,
         referenceExample,
         m1,
-        modelsNode;
+        modelsNode,
+        Logger;
 
-    before(function (done) {
-        requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock'], function (CoreExamples, Core) {
+    before(function (done) { requirejs(['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock', 'mocks/LoggerMock'],
+        function (CoreExamples, Core, Logger_) {
             var rootNode,
                 mChild,
                 p1;
-
+            Logger = Logger_;
             plugin = new CoreExamples();
             core = new Core(10);
             meta = createMETATypesTests(core);
@@ -121,7 +122,7 @@ describe('CoreExamples', function () {
 
     it('compareParentAndChildsParent', function (done) {
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
 
         plugin.compareParentAndChildsParent(mParent, function (err) {
             expect(err).to.equal('');
@@ -134,7 +135,7 @@ describe('CoreExamples', function () {
     it('parentExample', function (done) {
         var children = [mParent];
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.parentExample(children, function (err) {
             expect(err).to.equal('');
@@ -147,7 +148,7 @@ describe('CoreExamples', function () {
     it('referenceExample', function (done) {
         var children = [orgNode, refNode];
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.referenceExample(children, function (err) {
             expect(err).to.equal('');
@@ -159,7 +160,7 @@ describe('CoreExamples', function () {
 
     it('visitPorts1', function (done) {
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
 
         plugin.visitPorts(port1, function (err) {
             expect(err).to.equal('');
@@ -171,7 +172,7 @@ describe('CoreExamples', function () {
 
     it('visitPorts3', function (done) {
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
 
         plugin.visitPorts(port3, function (err) {
             expect(err).to.equal('');
@@ -184,7 +185,7 @@ describe('CoreExamples', function () {
     it('connectionExample', function (done) {
         var children = [port1, port2, port3, conn11, conn21, conn33, m1];
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
 
         plugin.connectionExample(children, function (err) {
@@ -197,7 +198,7 @@ describe('CoreExamples', function () {
     it('recursiveChildrenExample1', function (done) {
         var children = [parentExample];
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.recursiveChildrenExample(children, function (err) {
             expect(err).to.equal('');
@@ -209,7 +210,7 @@ describe('CoreExamples', function () {
     it('recursiveChildrenExample2', function (done) {
         var children = [connectionExample];
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.recursiveChildrenExample(children, function (err) {
             expect(err).to.equal('');
@@ -220,7 +221,7 @@ describe('CoreExamples', function () {
 
     it('runExamples1', function (done) {
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.runExamples(connectionExample, function (err) {
             expect(err).to.equal('');
@@ -231,7 +232,7 @@ describe('CoreExamples', function () {
 
     it('runExamplesEmpty', function (done) {
         plugin.core = core;
-        plugin.logger = new TestLogger();
+        plugin.logger = new Logger();
         plugin.META = meta;
         plugin.runExamples(modelsNode, function (err) {
             expect(err).to.equal(null);
@@ -272,30 +273,6 @@ describe('CoreExamples', function () {
 
         return META;
     }
-
-    function TestLogger() {
-        this.log_messages = [];
-        this.debug_messages = [];
-        this.info_messages = [];
-        this.warning_messages = [];
-        this.error_messages = [];
-    }
-
-    TestLogger.prototype.debug = function (msg) {
-        this.debug_messages.push(msg);
-    };
-
-    TestLogger.prototype.info = function (msg) {
-        this.info_messages.push(msg);
-    };
-
-    TestLogger.prototype.warning = function (msg) {
-        this.warning_messages.push(msg);
-    };
-
-    TestLogger.prototype.error = function (msg) {
-        this.error_messages.push(msg);
-    };
 });
 
 

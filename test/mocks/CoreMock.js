@@ -4,9 +4,9 @@
  * Author: Zsolt Lattmann
  */
 
-'use strict';
-define(['./NodeMock'], function (NodeMock) {
 
+define(['./NodeMock'], function (NodeMock) {
+    'use strict';
     var CoreMock = function (timeOut) {
         this._nodes = {};
         this._timeOut = timeOut || 0;
