@@ -22,13 +22,15 @@ define(['plugin/PluginConfig',
 
         this.fmuIdToInfoMap = {};
         this.fmus = [];
-        this.connectionMap = [];
+        this.connectionMap = {};
+        this.connections = [];
         this.simulationInfo = {
             'StartTime': 0,
             'StopTime': 1,
             'StepSize': 0.001
         };
         this.modelExchangeConfig = {};
+
         // FIXME: this map should be exported from WebGME
         this.fmiMetaTypes = {
             'FMU': '/1822302751/902541625',
@@ -109,12 +111,12 @@ define(['plugin/PluginConfig',
                     return;
                 }
 
-
+                self.assignFmuPriority();
 
                 var artifact = self.blobClient.createArtifact('model_exchange_config');
 
-                self.modelExchangeConfig['Connections'] = self.connections;
-                self.modelExchangeConfig['FMUs'] = self.fmus;
+                self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
+                self.modelExchangeConfig['FmuMap'] = self.fmuIdToInfoMap;
                 self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
 
                 var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
@@ -142,7 +144,7 @@ define(['plugin/PluginConfig',
 
                             callback(null, self.result);
                         });
-                    })
+                    });
                 });
             };
 
@@ -177,19 +179,16 @@ define(['plugin/PluginConfig',
 
         var loadFmuChildrenCallbackFunction = function (loadChildrenErr, fmuChildren) {
             var fmuNode = self.core.getParent(fmuChildren[0]),
-                relid = self.core.getRelid(fmuNode),// FIXME: this should be getPath, should not be?
+                relid = self.core.getRelid(fmuNode),
                 fmuInfo;
 
             fmuInfo = self.extractFmuInfo(fmuChildren);
 
             fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
-            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');// FIXME: this will be an asset
-            fmuInfo['Priority'] = 2;
-            fmuInfo['node'] = fmuNode;
-
-            if (Object.keys(fmuInfo.Inputs).length === 0) {
-                fmuInfo['Priority'] = 1;
-            }
+            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
+            fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
+            fmuInfo['Priority'] = 1;
+            //fmuInfo['node'] = fmuNode;
 
             self.fmuIdToInfoMap[relid] = fmuInfo;
 
@@ -207,24 +206,16 @@ define(['plugin/PluginConfig',
             if (baseTypePath === self.fmiMetaTypes.PortComposition) {
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
-                    srcIds = srcPath.split('/').slice(-2).join('.'),// FIXME: extract this as a (synchronous) function
                     dstPath = self.core.getPointerPath(meChildNode, 'dst'),
-                    dstIds = dstPath.split('/').slice(-2).join('.'),// FIXME: extract this as a (synchronous) function
-                    connInfo = {
-                        srcIds: dstIds
-                    };
+                    srcIds = srcPath.split('/').slice(-2).join('/'), // FIXME: extract this as a (synchronous) function
+                    dstIds = dstPath.split('/').slice(-2).join('/'); // FIXME: extract this as a (synchronous) function
 
-//                var connInfo = {
-//                    'Source': srcFmuIds,
-//                    'Destination': dstFmuIds,
-//                    'SrcPriority': srcPriority,
-//                    'DstPriority': dstPriority
-//                };
+                if (self.connectionMap.hasOwnProperty(srcIds)) {
+                    self.connectionMap[srcIds].push(dstIds);
 
-                self.connectionMap.push(connInfo);
-
-                // FIXME: change this to a debug message
-                self.logger.info("Src and Dst are found!");
+                } else {
+                    self.connectionMap[srcIds] = [dstIds];
+                }
 
                 iterationCallback(null);
 
@@ -242,20 +233,79 @@ define(['plugin/PluginConfig',
                 iterationCallback(null);
             }
 
-            // FIXME: change this to a debug message
-            self.logger.info("We have reached the debug point!");
         }
     };
 
     FmiExporter.prototype.assignFmuPriority = function () {
         var self = this,
+            fmuMapKeys = Object.keys(self.fmuIdToInfoMap),
+            fmuId,
+            fmu,
+            fmuPriority,
             i;
 
-        for (i = 0; i < Object.keys(self.fmuIdToInfoMap).length; i += 1) {
+        for (i = 0; i < fmuMapKeys.length; i += 1) {
+            fmuId = fmuMapKeys[i],
+            fmu = self.fmuIdToInfoMap[fmuId],
+            fmuPriority = fmu.Priority;
 
+            if (fmuPriority === 1) {
+                self.followConnsAssignPriority(fmuId, fmu);
+            }
 
+            self.addFmuToFlatList(fmu);
+        }
+    };
+
+    FmiExporter.prototype.followConnsAssignPriority = function (srcFmuId, srcFmu) {
+        var self = this,
+            srcFmuName = srcFmu.Name,
+            srcFmuOutputs = srcFmu.Outputs,
+            outputIds = Object.keys(srcFmuOutputs),
+            srcPriority = srcFmu.Priority,
+            dstPriority = srcPriority + 1,
+            numberOutputs = outputIds.length,
+            i,
+            j;
+
+        if (numberOutputs === 0) {
+            self.logger.debug(srcFmu.Name + " has no Outputs.");
+            return;
         }
 
+        for (i = 0; i < outputIds.length; i += 1) {
+            var outputId = outputIds[i],
+                outputName = srcFmuOutputs[outputId],
+                connMapKey = srcFmuId + '/' + outputId;
+
+            if (self.connectionMap.hasOwnProperty(connMapKey) === false) {
+                self.logger.debug("No connections leaving from " + srcFmuName + "." + outputName);
+                continue;
+            }
+
+            // Could be multiple connections leaving this port
+            var allConnections = self.connectionMap[connMapKey];
+
+            for (j = 0; j < allConnections.length; j += 1) {
+                var connectedInput = allConnections[j],
+                    dstFmuId = connectedInput.split("/")[0],
+                    dstFmu = self.fmuIdToInfoMap[dstFmuId];
+
+                if (dstFmu.Priority < dstPriority) {
+                    dstFmu.Priority = dstPriority;
+                }
+
+                // dst becomes src, repeat
+                self.followConnsAssignPriority(dstFmuId, dstFmu);
+            }
+        }
+    };
+
+    FmiExporter.prototype.addConnToFlatList = function () {
+
+    };
+
+    FmiExporter.prototype.addFmuToFlatList = function (fmuToAdd) {
 
     };
 
@@ -269,14 +319,16 @@ define(['plugin/PluginConfig',
             baseTypeNode,
             baseTypePath,
             parameters = {},
-            inputs = {},
-            outputs = {},
+            inputMap = {},
+            outputMap = {},
+            inputs = [],
+            outputs = [],
             fmuInfo = {};
 
         for (i = 0; i < fmuChildren.length; i += 1) {
 
             fmuChildNode = fmuChildren[i];
-            fmuChildNodeRelid = self.core.getRelid(fmuChildNode); // FIXME: this should be getPath
+            fmuChildNodeRelid = self.core.getRelid(fmuChildNode); // FIXME: getPath?
             fmuChildNodeName = self.core.getAttribute(fmuChildNode, 'name');
             baseTypeNode = self.getMetaType(fmuChildNode);
             baseTypePath = self.core.getPath(baseTypeNode);
@@ -285,18 +337,20 @@ define(['plugin/PluginConfig',
                 parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
 
             } else if (baseTypePath === self.fmiMetaTypes.Input) {
-                inputs[fmuChildNodeRelid] = fmuChildNodeName;
-                inputs[fmuChildNodeName] = fmuChildNodeRelid;
+                inputMap[fmuChildNodeRelid] = fmuChildNodeName;
+                inputs.push(fmuChildNodeName);
 
             } else if (baseTypePath === self.fmiMetaTypes.Output) {
-                outputs[fmuChildNodeRelid] = fmuChildNodeName;
-                outputs[fmuChildNodeName] = fmuChildNodeRelid;
+                outputMap[fmuChildNodeRelid] = fmuChildNodeName;
+                outputs.push(fmuChildNodeName);
             }
         }
 
         fmuInfo['Parameters'] = parameters;
         fmuInfo['Inputs'] = inputs;
+        fmuInfo['InputMap'] = inputMap;
         fmuInfo['Outputs'] = outputs;
+        fmuInfo['OutputMap'] = outputMap;
 
         return fmuInfo;
     };
