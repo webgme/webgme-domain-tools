@@ -28,6 +28,7 @@
     },
 
     "test_paths": {
-        "mocks": "./src/mocks"
+        "mocks": "./src/mocks",
+        "models": "./test/models"
     }
 }

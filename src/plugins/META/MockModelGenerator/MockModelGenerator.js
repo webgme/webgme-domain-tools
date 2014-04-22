@@ -106,6 +106,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             callback('No activeNode given', self.result);
             return;
         }
+        data.date = new Date();
         data.timeOut = config.timeOut;
         data.activeNode = {
             name: self.core.getAttribute(self.activeNode, 'name'),
@@ -115,7 +116,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
 
         generateFiles = function () {
             var modelJS,
-                fileName = 'coremockmodel.js',
+                fileName = 'test/models/' + self.projectName + '/coremockmodel.js',
                 artifact;
 
             modelJS = ejs.render(TEMPLATES['coremockmodel.js.ejs'], data);
