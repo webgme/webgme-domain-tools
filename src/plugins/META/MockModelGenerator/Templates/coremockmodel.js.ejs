@@ -25,15 +25,15 @@ for (i = 0; i < modelNodes.length; i += 1) {
 
     function createMETATypesTests (core) {
         var meta = {},
-        options = {},
-        node;
-        // FIXME: This does not account for inheritance at this stage.
+            node;
 <%
 for (i = 0; i < metaNodes.length; i += 1) {
     nodeData = metaNodes[i];
-%>
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', '<%- nodeData.name %>');
+    if (nodeData.base) {%>
+        node = core.createNode({base: meta.<%- nodeData.base %>});
+<%} else {%>
+        node = core.createNode({});
+<%}%>        core.setAttribute(node, 'name', '<%- nodeData.name %>');
         meta.<%- nodeData.name %> = node;
 <%}%>
         return meta;

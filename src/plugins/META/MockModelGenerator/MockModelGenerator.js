@@ -174,14 +174,56 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             i,
             base,
             names = Object.keys(self.META),
-            nodeData = {};
+            orderedMetaNodes = {},
+            nbrOfBases = 0,
+            nodeData,
+            nodeDataType = {
+                name: null,
+                base: null
+            };
+        // Iterate over all meta-nodes and put their data in orderedMetaNodes
+        // based on their number of bases.
         for (i = 0; i < names.length; i += 1) {
+            nodeData = Object.create(nodeDataType);
             nodeData.name = names[i];
             base = self.core.getBase(self.META[names[i]]); // What happens for FCO?
+            nbrOfBases = 0;
             if (base) {
                 nodeData.base = self.core.getAttribute(base, 'name');
+                while (base) {
+                    nbrOfBases += 1;
+                    base = self.core.getBase(base);
+                }
             }
-            self.metaNodes.push(nodeData);
+            if (orderedMetaNodes[nbrOfBases]) {
+                orderedMetaNodes[nbrOfBases].push(nodeData);
+            } else {
+                orderedMetaNodes[nbrOfBases] = [nodeData];
+            }
+        }
+        // When we have all data for the nodes move it over, sorted, to an array.
+        self.populateMetaNodesOrdered(orderedMetaNodes);
+    };
+
+    /**
+     * Populates self.metaNodes with meta-node data ordered first based on number of bases,
+     * and secondly on the names.
+     * @param metaNodes - dictionary with #bases as keys and arrays of nodeData as values.
+     */
+    MockModelGenerator.prototype.populateMetaNodesOrdered = function (metaNodes) {
+        var self = this,
+            subArray,
+            keys = Object.keys(metaNodes),
+            i,
+            compare = function (a, b) {
+                return a.name.localeCompare(b.name);
+            };
+
+        keys.sort();
+        for (i = 0; i < keys.length; i += 1) {
+            subArray = metaNodes[keys[i]];
+            subArray.sort(compare);
+            self.metaNodes = self.metaNodes.concat(subArray);
         }
     };
 
