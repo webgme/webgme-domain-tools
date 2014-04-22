@@ -29,6 +29,7 @@ define(['plugin/PluginConfig',
             'StepSize': 0.001
         };
         this.modelExchangeConfig = {};
+        // FIXME: this map should be exported from WebGME
         this.fmiMetaTypes = {
             'FMU': '/1822302751/902541625',
             'PortComposition': '/1822302751/472382791',
@@ -39,7 +40,7 @@ define(['plugin/PluginConfig',
         };
     };
 
-    // Prototypal inheritance from PluginBase.
+    // Prototype inheritance from PluginBase.
     FmiExporter.prototype = Object.create(PluginBase.prototype);
     FmiExporter.prototype.constructor = FmiExporter;
 
@@ -88,7 +89,7 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode;
 
         if (!selectedNode) {
-            callback('selectedNode is not defined', pluginResult);
+            callback('selectedNode is not defined', self.result);
             return;
         }
 
@@ -119,9 +120,15 @@ define(['plugin/PluginConfig',
                 var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
 
                 artifact.addFile('model_exchange_config.json', fileInfo, function (err, fileHash) {
+                    // FIXME: error handling
+
                     self.logger.info('Generated file hash: ' + fileHash);
 
+                    // FIXME: in case you use only a single artifact then artifact.save(function(err, hash) {...
+                    //        can be used
                     self.blobClient.saveAllArtifacts(function (err, artifactHashes) {
+                        // FIXME: error handling
+
                         self.logger.info('Saved artifact hashes are: ' + artifactHashes[0]);
 
                         self.result.addArtifact(artifactHashes[0]);
@@ -131,6 +138,8 @@ define(['plugin/PluginConfig',
                         // This will save the changes. If you don't want to save;
                         // exclude self.save and call callback directly from this scope.
                         self.save('Finished FmiExporter', function (err) {
+                            // FIXME: error handling
+
                             callback(null, self.result);
                         });
                     })
@@ -168,13 +177,13 @@ define(['plugin/PluginConfig',
 
         var loadFmuChildrenCallbackFunction = function (loadChildrenErr, fmuChildren) {
             var fmuNode = self.core.getParent(fmuChildren[0]),
-                relid = self.core.getRelid(fmuNode),
+                relid = self.core.getRelid(fmuNode),// FIXME: this should be getPath, should not be?
                 fmuInfo;
 
             fmuInfo = self.extractFmuInfo(fmuChildren);
 
             fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
-            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
+            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');// FIXME: this will be an asset
             fmuInfo['Priority'] = 2;
             fmuInfo['node'] = fmuNode;
 
@@ -193,12 +202,14 @@ define(['plugin/PluginConfig',
             baseTypeNode = self.getMetaType(meChildNode);
             baseTypePath = self.core.getPath(baseTypeNode);
 
+            // FIXME: this condition is fine now, but will not work correctly if we have a more complicated inheritance
+            //        in the meta model.
             if (baseTypePath === self.fmiMetaTypes.PortComposition) {
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
-                    srcIds = srcPath.split('/').slice(-2).join('.'),
+                    srcIds = srcPath.split('/').slice(-2).join('.'),// FIXME: extract this as a (synchronous) function
                     dstPath = self.core.getPointerPath(meChildNode, 'dst'),
-                    dstIds = dstPath.split('/').slice(-2).join('.'),
+                    dstIds = dstPath.split('/').slice(-2).join('.'),// FIXME: extract this as a (synchronous) function
                     connInfo = {
                         srcIds: dstIds
                     };
@@ -212,6 +223,7 @@ define(['plugin/PluginConfig',
 
                 self.connectionMap.push(connInfo);
 
+                // FIXME: change this to a debug message
                 self.logger.info("Src and Dst are found!");
 
                 iterationCallback(null);
@@ -230,12 +242,14 @@ define(['plugin/PluginConfig',
                 iterationCallback(null);
             }
 
+            // FIXME: change this to a debug message
             self.logger.info("We have reached the debug point!");
         }
     };
 
     FmiExporter.prototype.assignFmuPriority = function () {
-        var self = this;
+        var self = this,
+            i;
 
         for (i = 0; i < Object.keys(self.fmuIdToInfoMap).length; i += 1) {
 
@@ -262,19 +276,19 @@ define(['plugin/PluginConfig',
         for (i = 0; i < fmuChildren.length; i += 1) {
 
             fmuChildNode = fmuChildren[i];
-            fmuChildNodeRelid = self.core.getRelid(fmuChildNode);
+            fmuChildNodeRelid = self.core.getRelid(fmuChildNode); // FIXME: this should be getPath
             fmuChildNodeName = self.core.getAttribute(fmuChildNode, 'name');
             baseTypeNode = self.getMetaType(fmuChildNode);
             baseTypePath = self.core.getPath(baseTypeNode);
 
             if (baseTypePath === self.fmiMetaTypes.Parameter) {
                 parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
-            }
-            else if (baseTypePath === self.fmiMetaTypes.Input) {
+
+            } else if (baseTypePath === self.fmiMetaTypes.Input) {
                 inputs[fmuChildNodeRelid] = fmuChildNodeName;
                 inputs[fmuChildNodeName] = fmuChildNodeRelid;
-            }
-            else if (baseTypePath === self.fmiMetaTypes.Output) {
+
+            } else if (baseTypePath === self.fmiMetaTypes.Output) {
                 outputs[fmuChildNodeRelid] = fmuChildNodeName;
                 outputs[fmuChildNodeName] = fmuChildNodeRelid;
             }

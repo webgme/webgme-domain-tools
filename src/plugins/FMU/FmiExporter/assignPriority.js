@@ -40,7 +40,8 @@ followConnections = function (srcFmuId, srcFmu) {
         outputIds = Object.keys(outputs),
         srcPriority = srcFmu.Priority,
         dstPriority = srcPriority + 1,
-        numberOutputs = outputIds.length;
+        numberOutputs = outputIds.length,
+        j;
 
     if (numberOutputs === 0) {
         return;
