@@ -15,7 +15,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     var MockModelGenerator = function () {
         // Call base class' constructor.
         PluginBase.call(this);
-        this.modelElements = [];
+        this.modelNodes = [];
+        this.metaNodes = [];
     };
 
     // Prototypal inheritance from PluginBase.
@@ -98,27 +99,25 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         // These are all instantiated at this point.
         var self = this,
             config = self.getCurrentConfig(),
-            data = { };
+            data = {},
+            generateFiles;
 
         if (!self.activeNode) {
             callback('No activeNode given', self.result);
             return;
         }
+        data.timeOut = config.timeOut;
+        data.activeNode = {
+            name: self.core.getAttribute(self.activeNode, 'name'),
+            ID: 'ID' + self.core.getGuid(self.activeNode).replace(/-/gi, '_'),
+            metaType: self.core.getAttribute(self.getMetaType(self.activeNode), 'name')
+        };
 
-        self.visitAllChildren(self.activeNode, function (err) {
+        generateFiles = function () {
             var modelJS,
                 fileName = 'coremockmodel.js',
                 artifact;
-            data.activeNode = {
-                name: self.core.getAttribute(self.activeNode, 'name'),
-                ID: 'ID' + self.core.getGuid(self.activeNode).replace(/-/gi, '_'),
-                metaType: self.core.getAttribute(self.getMetaType(self.activeNode), 'name')
-            };
-            data.timeOut = config.timeOut;
-            // FIXME: This should elaborate on the meta-types finding the correct inheritance.
-            data.metaTypeNames = Object.keys(self.META);
-            // FIXME: This assumes that the bases are direct instances of META-Types.
-            data.nodes = self.modelElements;
+
             modelJS = ejs.render(TEMPLATES['coremockmodel.js.ejs'], data);
             artifact = self.blobClient.createArtifact('mockModels');
             artifact.addFile(fileName, modelJS, function (err, hash) {
@@ -137,18 +136,52 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                     callback(null, self.result);
                 });
             });
+        };
+
+        self.visitAllChildren(self.activeNode, function (err) {
+            if (err) {
+                callback('failed to get modelNodes' + err, self.result);
+                return;
+            }
+            // FIXME: This assumes that the bases are direct instances of META-Types.
+            data.modelNodes = self.modelNodes;
+            self.populateMetaNodes();
+            data.metaNodes = self.metaNodes;
+            generateFiles();
         });
     };
 
-    MockModelGenerator.prototype.atNode = function (node, parent, siblings) {
+    MockModelGenerator.prototype.atModelNode = function (node, parent, siblings) {
         var self = this,
-            nodeData = {};
-        nodeData.name = self.core.getAttribute(node, 'name');
-        nodeData.ID = 'ID' + self.core.getGuid(node).replace(/-/gi, '_');
-        nodeData.parentID = 'ID' + self.core.getGuid(parent).replace(/-/gi, '_');
-        nodeData.metaType = self.core.getAttribute(self.getMetaType(node), 'name');
-        self.modelElements.push(nodeData);
+            metaTypeName = self.core.getAttribute(self.getMetaType(node), 'name'),
+            nodeData = {
+                name: self.core.getAttribute(node, 'name'),
+                ID: 'ID' + self.core.getGuid(node).replace(/-/gi, '_'),
+                parentID: 'ID' + self.core.getGuid(parent).replace(/-/gi, '_'),
+                metaType: metaTypeName,
+                base: metaTypeName,
+                baseIsMeta: true
+            };
+        // TODO: Add case when base is non-meta
+        // TODO: Add pointers (i.e. connections and such)
+        self.modelNodes.push(nodeData);
         //self.logger.info('Added :: ' + JSON.stringify(nodeData, null, 4));
+    };
+
+    MockModelGenerator.prototype.populateMetaNodes = function () {
+        var self = this,
+            i,
+            base,
+            names = Object.keys(self.META),
+            nodeData = {};
+        for (i = 0; i < names.length; i += 1) {
+            nodeData.name = names[i];
+            base = self.core.getBase(self.META[names[i]]); // What happens for FCO?
+            if (base) {
+                nodeData.base = self.core.getAttribute(base, 'name');
+            }
+            self.metaNodes.push(nodeData);
+        }
     };
 
     MockModelGenerator.prototype.visitAllChildren = function (node, callback) {
@@ -172,7 +205,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             };
 
             for (i = 0; i < children.length; i += 1) {
-                self.atNode(children[i], node, children);
+                self.atModelNode(children[i], node, children);
                 self.visitAllChildrenRec(children[i], counter, itrCallback);
             }
         });
@@ -192,12 +225,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             } else {
                 counter.visits -= 1;
                 for (i = 0; i < children.length; i += 1) {
-                    self.atNode(children[i], node, children);
+                    self.atModelNode(children[i], node, children);
                     self.visitAllChildrenRec(children[i], counter, callback);
                 }
             }
         });
     };
+
     /**
     * Checks if the given node is of the given meta-type.
     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
