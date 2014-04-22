@@ -21,7 +21,8 @@ define(['plugin/PluginConfig',
         PluginBase.call(this);
 
         this.fmuIdToInfoMap = {};
-        this.connections = [];
+        this.fmus = [];
+        this.connectionMap = [];
         this.simulationInfo = {
             'StartTime': 0,
             'StopTime': 1,
@@ -99,7 +100,7 @@ define(['plugin/PluginConfig',
                 return;
             }
 
-            var generateMeCfgCallbackFunction = function (err) {
+            var extractMeConfigInfoCallback = function (err) {
 
                 if (err) {
                     self.result.setSuccess(false);
@@ -107,13 +108,17 @@ define(['plugin/PluginConfig',
                     return;
                 }
 
+
+
                 var artifact = self.blobClient.createArtifact('model_exchange_config');
 
                 self.modelExchangeConfig['Connections'] = self.connections;
-                self.modelExchangeConfig['FMUs'] = self.fmuIdToInfoMap;
+                self.modelExchangeConfig['FMUs'] = self.fmus;
                 self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
 
-                artifact.addFile('model_exchange_config.json', JSON.stringify(self.modelExchangeConfig, null, 4), function (err, fileHash) {
+                var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
+
+                artifact.addFile('model_exchange_config.json', fileInfo, function (err, fileHash) {
                     self.logger.info('Generated file hash: ' + fileHash);
 
                     self.blobClient.saveAllArtifacts(function (err, artifactHashes) {
@@ -132,14 +137,14 @@ define(['plugin/PluginConfig',
                 });
             };
 
-            self.generateModelExchangeConfig(childNodes, generateMeCfgCallbackFunction);
+            self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
         };
 
         self.core.loadChildren(selectedNode, loadModelExchangeChildrenCallbackFunction);
     };
 
     // An asynchronous function to iterate over the ModelExchange children and extract info
-    FmiExporter.prototype.generateModelExchangeConfig = function (modelExchangeChildren, callback) {
+    FmiExporter.prototype.extractModelExchangeConfigInfo = function (modelExchangeChildren, callback) {
         var self = this,
             i,
             meChildNode,
@@ -171,7 +176,7 @@ define(['plugin/PluginConfig',
             fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
             fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
             fmuInfo['Priority'] = 2;
-            //fmuInfo['node'] = fmuNode;
+            fmuInfo['node'] = fmuNode;
 
             if (Object.keys(fmuInfo.Inputs).length === 0) {
                 fmuInfo['Priority'] = 1;
@@ -191,20 +196,21 @@ define(['plugin/PluginConfig',
             if (baseTypePath === self.fmiMetaTypes.PortComposition) {
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
-                    srcFmuIds = srcPath.split('/').slice(-2),
+                    srcIds = srcPath.split('/').slice(-2).join('.'),
                     dstPath = self.core.getPointerPath(meChildNode, 'dst'),
-                    dstFmuIds = dstPath.split('/').slice(-2),
-                    srcPriority = 0,
-                    dstPriority = srcPriority + 1;
+                    dstIds = dstPath.split('/').slice(-2).join('.'),
+                    connInfo = {
+                        srcIds: dstIds
+                    };
 
-                var connInfo = {
-                    'Source': srcFmuIds,
-                    'Destination': dstFmuIds,
-                    'SrcPriority': srcPriority,
-                    'DstPriority': dstPriority
-                };
+//                var connInfo = {
+//                    'Source': srcFmuIds,
+//                    'Destination': dstFmuIds,
+//                    'SrcPriority': srcPriority,
+//                    'DstPriority': dstPriority
+//                };
 
-                self.connections.push(connInfo);
+                self.connectionMap.push(connInfo);
 
                 self.logger.info("Src and Dst are found!");
 
@@ -228,45 +234,58 @@ define(['plugin/PluginConfig',
         }
     };
 
-        // a Synchronous helper function to get FMU Parameters, Inputs, and Outputs
-        FmiExporter.prototype.extractFmuInfo = function (fmuChildren) {
-            var self = this,
-                i,
-                fmuChildNode,
-                fmuChildNodeRelid,
-                baseTypeNode,
-                baseTypePath,
-                parameters = {},
-                inputs = {},
-                outputs = {},
-                fmuInfo = {};
+    FmiExporter.prototype.assignFmuPriority = function () {
+        var self = this;
 
-            for (i = 0; i < fmuChildren.length; i += 1) {
+        for (i = 0; i < Object.keys(self.fmuIdToInfoMap).length; i += 1) {
 
-                fmuChildNode = fmuChildren[i];
-                fmuChildNodeRelid = self.core.getRelid(fmuChildNode);
-                baseTypeNode = self.getMetaType(fmuChildNode);
-                baseTypePath = self.core.getPath(baseTypeNode);
 
-                if (baseTypePath === self.fmiMetaTypes.Parameter) {
-                    parameters[self.core.getAttribute(fmuChildNode, 'name')] = self.core.getAttribute(fmuChildNode, 'value');
-                }
-                else if (baseTypePath === self.fmiMetaTypes.Input) {
-                    inputs[fmuChildNodeRelid] = self.core.getAttribute(fmuChildNode, 'name');
-                    //inputs[self.core.getAttribute(fmuChildNode, 'name')] = fmuChildNodeRelid;
-                }
-                else if (baseTypePath === self.fmiMetaTypes.Output) {
-                    outputs[fmuChildNodeRelid] = self.core.getAttribute(fmuChildNode, 'name');
-                    //outputs[self.core.getAttribute(fmuChildNode, 'name')] = fmuChildNodeRelid;
-                }
+        }
+
+
+    };
+
+    // a Synchronous helper function to get FMU Parameters, Inputs, and Outputs
+    FmiExporter.prototype.extractFmuInfo = function (fmuChildren) {
+        var self = this,
+            i,
+            fmuChildNode,
+            fmuChildNodeRelid,
+            fmuChildNodeName,
+            baseTypeNode,
+            baseTypePath,
+            parameters = {},
+            inputs = {},
+            outputs = {},
+            fmuInfo = {};
+
+        for (i = 0; i < fmuChildren.length; i += 1) {
+
+            fmuChildNode = fmuChildren[i];
+            fmuChildNodeRelid = self.core.getRelid(fmuChildNode);
+            fmuChildNodeName = self.core.getAttribute(fmuChildNode, 'name');
+            baseTypeNode = self.getMetaType(fmuChildNode);
+            baseTypePath = self.core.getPath(baseTypeNode);
+
+            if (baseTypePath === self.fmiMetaTypes.Parameter) {
+                parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
             }
+            else if (baseTypePath === self.fmiMetaTypes.Input) {
+                inputs[fmuChildNodeRelid] = fmuChildNodeName;
+                inputs[fmuChildNodeName] = fmuChildNodeRelid;
+            }
+            else if (baseTypePath === self.fmiMetaTypes.Output) {
+                outputs[fmuChildNodeRelid] = fmuChildNodeName;
+                outputs[fmuChildNodeName] = fmuChildNodeRelid;
+            }
+        }
 
-            fmuInfo['Parameters'] = parameters;
-            fmuInfo['Inputs'] = inputs;
-            fmuInfo['Outputs'] = outputs;
+        fmuInfo['Parameters'] = parameters;
+        fmuInfo['Inputs'] = inputs;
+        fmuInfo['Outputs'] = outputs;
 
-            return fmuInfo;
-        };
+        return fmuInfo;
+    };
 
     /**
     * Checks if the given node is of the given meta-type.
