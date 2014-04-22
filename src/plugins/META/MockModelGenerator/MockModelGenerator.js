@@ -64,9 +64,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     MockModelGenerator.prototype.getConfigStructure = function () {
         return [
             {
-                'name': 'debug',
-                'displayName': 'Do not save',
-                'description': 'Will only print to the console.',
+                'name': 'meta',
+                'displayName': 'Include META',
+                'description': 'Regenerate the META mock model.',
                 'value': true,
                 'valueType': 'boolean',
                 'readOnly': false
@@ -75,9 +75,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 'name': 'timeOut',
                 'displayName': 'Time out [ms]',
                 'description': 'Time out time for asynchronous core methods.',
-                'value': 10,
+                'value': 1,
                 "minValue": 1,
-                "maxValue": 10000,
+                "maxValue": 100,
                 'valueType': 'number',
                 'readOnly': false
             }
@@ -99,40 +99,49 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         // These are all instantiated at this point.
         var self = this,
             config = self.getCurrentConfig(),
-            data = {},
-            generateFiles;
+            modelData = {},
+            generateFiles,
+            date = new Date();
 
         if (!self.activeNode) {
             callback('No activeNode given', self.result);
             return;
         }
-        data.date = new Date();
-        data.timeOut = config.timeOut;
-        data.activeNode = {
+
+        modelData.date = date;
+        modelData.timeOut = config.timeOut;
+        modelData.activeNode = {
             name: self.core.getAttribute(self.activeNode, 'name'),
             ID: 'ID' + self.core.getGuid(self.activeNode).replace(/-/gi, '_'),
             metaType: self.core.getAttribute(self.getMetaType(self.activeNode), 'name')
         };
 
         generateFiles = function () {
-            var modelJS,
-                fileName = 'test/models/' + self.projectName + '/coremockmodel.js',
-                artifact;
+            var modelFileName = 'test/models/' + self.projectName + '/modelExample.js',
+                metaFileName = 'test/models/' + self.projectName + '/META.js',
+                metaData = {},
+                artifact = self.blobClient.createArtifact('mockModel'),
+                files = {};
 
-            modelJS = ejs.render(TEMPLATES['coremockmodel.js.ejs'], data);
-            artifact = self.blobClient.createArtifact('mockModels');
-            artifact.addFile(fileName, modelJS, function (err, hash) {
+            files[modelFileName] = ejs.render(TEMPLATES['model.js.ejs'], modelData);
+            if (config.meta) {
+                metaData.date = date;
+                self.populateMetaNodes();
+                metaData.metaNodes = self.metaNodes;
+                files[metaFileName] = ejs.render(TEMPLATES['meta.js.ejs'], metaData);
+            }
+            artifact.addFiles(files, function (err, hashes) {
                 if (err) {
                     callback(err, self.result);
                     return;
                 }
-                self.logger.warning(hash);
-                self.blobClient.saveAllArtifacts(function (err, hashes) {
+                self.logger.warning(hashes.toString());
+                artifact.save(function (err, hash) {
                     if (err) {
                         callback(err, self.result);
                         return;
                     }
-                    self.result.addArtifact(hashes[0]);
+                    self.result.addArtifact(hash);
                     self.result.setSuccess(true);
                     callback(null, self.result);
                 });
@@ -145,9 +154,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 return;
             }
             // FIXME: This assumes that the bases are direct instances of META-Types.
-            data.modelNodes = self.modelNodes;
-            self.populateMetaNodes();
-            data.metaNodes = self.metaNodes;
+            modelData.modelNodes = self.modelNodes;
             generateFiles();
         });
     };
