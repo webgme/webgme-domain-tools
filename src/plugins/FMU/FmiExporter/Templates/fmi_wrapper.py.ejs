@@ -19,9 +19,9 @@ class FMI_ME(object):
         fmu_list = model_exchange_config['FMUs']
         conn_list = model_exchange_config['Connections']
         sim_info = model_exchange_config['SimulationInfo']
-        self.sim_start_time = sim_info['StartTime']
-        self.sim_stop_time = sim_info['StopTime']
-        self.step_size = sim_info['StepSize']
+        self.sim_start_time = float(sim_info['StartTime'])
+        self.sim_stop_time = float(sim_info['StopTime'])
+        self.step_size = float(sim_info['StepSize'])
         self.priority_map = dict()
         self.connections = list()
 
