@@ -128,57 +128,50 @@ define(['plugin/PluginConfig',
 
                 var artifact = self.blobClient.createArtifact(modelExchangeName);
 
-                //self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
                 self.modelExchangeConfig['Connections'] = self.connections;
-                //self.modelExchangeConfig['FmuMap'] = self.fmuIdToInfoMap;
                 self.modelExchangeConfig['FMUs'] = self.fmus;
                 self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
-
                 var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
 
+                var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
+                var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
+                var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+
                 self.filesToSave['model_exchange_config.json'] = fileInfo;
+                self.filesToSave['fmi_wrapper.py'] = tt1;
+                self.filesToSave['jmodelica_model_exchange.py'] = tt2;
+                self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
 
-                var currentDate = new Date();
-                var dateTime = currentDate.getDate() + "/"
-                    + (currentDate.getMonth()+1)  + "/"
-                    + currentDate.getFullYear() + " @ "
-                    + currentDate.getHours() + ":"
-                    + currentDate.getMinutes() + ":"
-                    + currentDate.getSeconds();
-
-                //var ret1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs'], dateTime);
-                var ret1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
-                //var ret2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs'], dateTime);
-                var ret2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-                var ret3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-
-                self.filesToSave['fmi_wrapper.py'] = ret1;
-                self.filesToSave['jmodelica_model_exchange.py'] = ret2;
-                self.filesToSave['run_jmodelica_model_exchange.cmd'] = ret3;
-
-                artifact.addFiles(self.filesToSave, function (err, fileHash) {
-                    // FIXME: error handling
-
-                    self.logger.info('Generated file hash: ' + fileHash);
-
-                    var i,
-                        fmuPackageName,
-                        fmuHash,
-                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap);
-
-                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-                        fmuPackageName = fmuPackageHashMapKeys[i],
-                        fmuHash = self.fmuPackageHashMap[fmuPackageName];
-                        artifact.addHash(fmuPackageName + ".fmu", fmuHash);
+                var addFilesCallback = function (err, fileHashes) {
+                    if (err) {
+                        self.result.setSuccess(false);
+                        callback(err, self.result);
+                        return;
                     }
+
+                    self.logger.info('Generated file hashes: ' + fileHashes);
+
+//                    var i,
+//                        fmuPackageName,
+//                        fmuHash,
+//                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap);
+//
+//                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+//                        fmuPackageName = fmuPackageHashMapKeys[i],
+//                        fmuHash = self.fmuPackageHashMap[fmuPackageName];
+//                        artifact.addHash(fmuPackageName + ".fmu", fmuHash);
+//                    }
 
                     // FIXME: in case you use only a single artifact then artifact.save(function(err, hash) {...
                     //        can be used
+                    //artifact.save(function (err, artifactHash) {
                     self.blobClient.saveAllArtifacts(function (err, artifactHashes) {
                         // FIXME: error handling
 
+                        //self.logger.info('Saved artifact hashes are: ' + artifactHash);
                         self.logger.info('Saved artifact hashes are: ' + artifactHashes[0]);
 
+                        //self.result.addArtifact(artifactHash);
                         self.result.addArtifact(artifactHashes[0]);
 
                         self.result.setSuccess(true);
@@ -191,7 +184,9 @@ define(['plugin/PluginConfig',
                             callback(null, self.result);
                         });
                     });
-                });
+                };
+
+                artifact.addFiles(self.filesToSave, addFilesCallback);
             };
 
             self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
@@ -234,7 +229,6 @@ define(['plugin/PluginConfig',
             fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
             fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
             fmuInfo['Priority'] = 1;
-            //fmuInfo['node'] = fmuNode;
 
             self.fmuIdToInfoMap[relid] = fmuInfo;
 
@@ -404,14 +398,6 @@ define(['plugin/PluginConfig',
                 self.followConnsAssignPriority(dstFmuId, dstFmu);
             }
         }
-    };
-
-    FmiExporter.prototype.addConnToFlatList = function () {
-
-    };
-
-    FmiExporter.prototype.addFmuToFlatList = function (fmuToAdd) {
-
     };
 
     // a Synchronous helper function to get FMU Parameters, Inputs, and Outputs
