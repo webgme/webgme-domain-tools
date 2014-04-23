@@ -6,17 +6,19 @@ define(['mocks/CoreMock', './META'], function (CoreMock, createMeta) {
     'use strict';
     var core = new CoreMock(<%=timeOut%>),
         META = createMeta(core),
-        options = {};
+        options;
 
     options = {
         base: META.<%=activeNode.metaType%>,
         parent: core._rootNode,
         attr: {
 <%
-var nodeData, i, key;
+var nodeData, i, key, val, q;
 for (key in activeNode.attr) {
-        if (activeNode.attr.hasOwnProperty(key)){
-%>            '<%=key%>': '<%=activeNode.attr[key]%>',
+    if (activeNode.attr.hasOwnProperty(key)){
+        val = activeNode.attr[key];
+        q = typeof val === 'string';
+%>            '<%=key%>': <%if (q) {%>'<%=val%>'<%}else{%><%=val%><%}%>,
 <%}}%>        }
     };
     var <%=activeNode.ID%> = core.createNode(options);
@@ -30,7 +32,9 @@ for (i = 0; i < modelNodes.length; i += 1) {
         attr: {
 <%  for (key in nodeData.attr) {
         if (nodeData.attr.hasOwnProperty(key)){
-%>            '<%=key%>': '<%=nodeData.attr[key]%>',
+            val = activeNode.attr[key];
+            q = typeof val === 'string';
+%>            '<%=key%>': <%if (q) {%>'<%=val%>'<%}else{%><%=val%><%}%>,
 <%}}%>        }
     };
     var <%=nodeData.ID%> = core.createNode(options);
