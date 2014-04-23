@@ -18,6 +18,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         this.modelNodes = [];
         this.metaNodes = [];
         this.basePairs = {};
+        this.pointers = [];
+        this.activeNodeData = {};
     };
 
     // Prototypal inheritance from PluginBase.
@@ -121,7 +123,6 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         // ADMMoldelCool : "/1667744534/1064479209/181258295"
         modelData.date = date;
         modelData.timeOut = config.timeOut;
-        modelData.activeNode = self.atModelNode(self.activeNode);
 
         generateFiles = function () {
             var modelFileName = 'test/models/' + self.projectName + '/' + config.modelName + '.js',
@@ -161,50 +162,108 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 return;
             }
             modelData.modelNodes = self.modelNodes;
-            // FIXME: This assumes that the bases are direct instances of META-Types.
-            modelData.basePairs = self.basePairs;
-            generateFiles();
+            self.atModelNode(self.activeNode, null, function (err) {
+                if (err) {
+                    callback('failed to get modelNode for activeNode' + err, self.result);
+                    return;
+                }
+                modelData.activeNode = self.activeNodeData;
+                modelData.basePairs = self.basePairs;
+                modelData.pointers = self.pointers;
+                generateFiles();
+            });
+
         });
     };
 
-    MockModelGenerator.prototype.atModelNode = function (node, parent, siblings) {
-        var self = this,
+    MockModelGenerator.prototype.atModelNode = function (node, parent, callback) {
+        var self = this, i,
             metaTypeName = self.core.getAttribute(self.getMetaType(node), 'name'),
-            attributeNames,
-            i,
+            attributeNames = self.core.getAttributeNames(node),
+            pointerNames = self.core.getPointerNames(node),
+            counter = pointerNames.length,
+            error = '',
+            pointerData,
+            pointerDataType = {
+                owner: '',
+                name: '',
+                pointsTo: null
+            },
             nodeData = {
                 attr: {},
                 reg: {},
-                ID: 'ID' + self.core.getGuid(node).replace(/-/gi, '_'),
+                ID: self.getUniqueID(node),
                 parentID: null,
                 metaType: metaTypeName,
                 base: null,
                 baseIsMeta: false
-            };
+            },
+            counterCallback = function (err) {
+                counter -= 1;
+                error = err ? error += err : error;
+                if (counter <= 0) {
+                    // This is just so this function can be reused for the active node.
+                    if (parent) {
+                        nodeData.parentID = self.getUniqueID(parent);
+                        self.modelNodes.push(nodeData);
+                    } else {
+                        self.activeNodeData = nodeData;
+                    }
+                    callback(error);
+                }
+            },
+            pointerCallback;
         // ----- BaseNode -------
         if (self.baseIsMeta(node)) {
             nodeData.base = metaTypeName;
             nodeData.baseIsMeta = true;
         } else {
-            nodeData.base = 'ID' + self.core.getGuid(self.core.getBase(node)).replace(/-/gi, '_');
+            nodeData.base = self.getUniqueID(self.core.getBase(node));
             nodeData.baseIsMeta = false;
             self.basePairs[nodeData.ID] = nodeData.base;
         }
         // ----- Attributes -----
-        attributeNames = self.core.getAttributeNames(node);
         for (i = 0; i < attributeNames.length; i += 1) {
             nodeData.attr[attributeNames[i]] = self.core.getAttribute(node, attributeNames[i]);
         }
         // ----- Pointers -------
-        // TODO: Add pointers (i.e. connections and such)
-
-        // This is just so this function can be reused for the active node.
-        if (parent) {
-            nodeData.parentID = 'ID' + self.core.getGuid(parent).replace(/-/gi, '_');
-            self.modelNodes.push(nodeData);
-        } else {
-            return nodeData;
+        if (pointerNames.length === 0) {
+            counterCallback(null);
         }
+
+        pointerCallback = function (pointerName) {
+            return function (err, pointsTo) {
+                if (err) {
+                    counterCallback(err);
+                    return;
+                }
+                pointerData = Object.create(pointerDataType);
+                pointerData.owner = nodeData.ID;
+                pointerData.name = pointerName;
+                if (pointsTo) {
+                    pointerData.pointsTo = self.getUniqueID(pointsTo);
+                } else {
+                    self.logger.warning(nodeData.attr.name + "'s pointer '" + pointerName + "' is a null pointer.");
+                }
+                self.pointers.push(pointerData);
+                counterCallback(null);
+            };
+        };
+
+        for (i = 0; i < pointerNames.length; i += 1) {
+            if (pointerNames[i] === 'base') {
+                counterCallback(null);
+            } else {
+                self.core.loadPointer(node, pointerNames[i], pointerCallback(pointerNames[i]));
+            }
+        }
+    };
+
+    MockModelGenerator.prototype.getUniqueID = function (node) {
+        var self = this,
+            guid = self.core.getGuid(node);
+
+        return 'ID__' + guid.replace(/-/gi, '_');
     };
 
     MockModelGenerator.prototype.populateMetaNodes = function () {
@@ -268,10 +327,11 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     MockModelGenerator.prototype.visitAllChildren = function (node, callback) {
         var self = this;
         self.core.loadChildren(node, function (err, children) {
-            var counter,
-                i,
-                itrCallback,
-                error = '';
+            var i,
+                error = '',
+                counter,
+                counterCallback,
+                atModelNodeCallback;
             if (err) {
                 callback('Could not load children for first object, err: ' + err);
                 return;
@@ -281,7 +341,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 return;
             }
             counter = {visits: children.length};
-            itrCallback = function (err) {
+            counterCallback = function (err) {
                 error = err ? error += err : error;
                 counter.visits -= 1;
                 if (counter.visits === 0) {
@@ -289,9 +349,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 }
             };
 
+            atModelNodeCallback = function (childNode) {
+                return function (err) {
+                    self.visitAllChildrenRec(childNode, counter, counterCallback);
+                };
+            };
             for (i = 0; i < children.length; i += 1) {
-                self.atModelNode(children[i], node, children);
-                self.visitAllChildrenRec(children[i], counter, itrCallback);
+                self.atModelNode(children[i], node, atModelNodeCallback(children[i]));
             }
         });
     };
@@ -299,9 +363,10 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
     MockModelGenerator.prototype.visitAllChildrenRec = function (node, counter, callback) {
         var self = this;
         self.core.loadChildren(node, function (err, children) {
-            var i;
+            var i,
+                atModelNodeCallback;
             if (err) {
-                callback('loadChildren failed for ' + node.toString());
+                callback('loadChildren failed for ' + self.core.getAttribute(node, 'name'));
                 return;
             }
             counter.visits += children.length;
@@ -309,9 +374,13 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 callback(null);
             } else {
                 counter.visits -= 1;
+                atModelNodeCallback = function (childNode) {
+                    return function (err) {
+                        self.visitAllChildrenRec(childNode, counter, callback);
+                    };
+                };
                 for (i = 0; i < children.length; i += 1) {
-                    self.atModelNode(children[i], node, children);
-                    self.visitAllChildrenRec(children[i], counter, callback);
+                    self.atModelNode(children[i], node, atModelNodeCallback(children[i]));
                 }
             }
         });

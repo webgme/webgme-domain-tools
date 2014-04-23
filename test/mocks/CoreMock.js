@@ -42,6 +42,7 @@ define(['./NodeMock'], function (NodeMock) {
         node.attributes[name] = value;
     };
 
+    // TODO: should attribute look up be inherited?
     CoreMock.prototype.getAttribute = function (node, name) {
         var self = this;
         do {
@@ -51,9 +52,9 @@ define(['./NodeMock'], function (NodeMock) {
             node = self.getBase(node);
         } while (node);
     };
-
+    // TODO: Here it does not look for inheritance.
     CoreMock.prototype.getAttributeNames = function (node) {
-        throw new Error("TODO: Should return all attributes (including bases') for this node.");
+        return Object.keys(node.attributes);
     };
 
     CoreMock.prototype.setRegistry = function (node, name, value) {
@@ -62,6 +63,10 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.getRegistry = function (node, name) {
         return node.registry[name];
+    };
+
+    CoreMock.prototype.getPointerNames = function (node) {
+        return Object.keys(node.pointers);
     };
 
     CoreMock.prototype.setPointer = function (node, name, target) {
@@ -74,6 +79,7 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.hasPointer = function (node, name) {
+        // TODO: Should this return true for null pointers?
         return node.pointers.hasOwnProperty(name);
     };
 
