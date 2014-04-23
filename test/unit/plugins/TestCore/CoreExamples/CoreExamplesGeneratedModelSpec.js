@@ -16,9 +16,7 @@ if (typeof window === 'undefined') {
         expect = chai.expect;
 }
 
-var semanticVersionPattern = /^\d+\.\d+\.\d+$/;
-
-describe('CoreExamples', function () {
+describe('CoreExamplesGen', function () {
     var plugin,
         core,
         meta,
@@ -39,86 +37,32 @@ describe('CoreExamples', function () {
         Logger;
 
     before(function (done) { requirejs(
-        ['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/CoreMock', 'mocks/LoggerMock'],
-        function (CoreExamples, Core, Logger_) {
-            var rootNode,
-                mChild,
-                p1;
+        ['plugin/CoreExamples/CoreExamples/CoreExamples', 'mocks/LoggerMock', 'models/TestCore/modelExample'],
+        function (CoreExamples, Logger_, mockModel_) {
+            var mockModel = mockModel_;
             Logger = Logger_;
             plugin = new CoreExamples();
-            core = new Core(10);
-            meta = createMETATypesTests(core);
-            rootNode = core._rootNode;
-            modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});
-            core.setAttribute(modelsNode, 'name', 'Models');
-
+            core = mockModel.core;
+            meta = mockModel.META;
             // Parent Example
-            parentExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
-            core.setAttribute(parentExample, 'name', 'ParentExample');
-            mParent = core.createNode({base: meta.ModelElement, parent: parentExample});
-            core.setAttribute(mParent, 'name', 'm_parent');
-            mChild = core.createNode({base: meta.ModelElement, parent: mParent});
-            core.setAttribute(mChild, 'name', 'm_child');
-
+            modelsNode = mockModel.activeNode;
+            parentExample = mockModel.parentExample;
+            mParent = mockModel.mParent;
             // Reference Example
-            referenceExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
-            core.setAttribute(referenceExample, 'name', 'ReferenceExample');
-            orgNode = core.createNode({base: meta.ModelElement, parent: referenceExample});
-            core.setAttribute(orgNode, 'name', 'm');
-            refNode = core.createNode({base: meta.ModelRef, parent: referenceExample});
-            core.setAttribute(refNode, 'name', 'm-ref');
-            core.setPointer(refNode, 'ref', orgNode);
-
+            referenceExample = mockModel.referenceExample;
+            orgNode = mockModel.orgNode;
+            refNode = mockModel.refNode;
             // Connection Example
-            connectionExample = core.createNode({base: meta.ModelElement, parent: modelsNode});
-            core.setAttribute(connectionExample, 'name', 'ConnectionExample');
-            m1 = core.createNode({base: meta.ModelElement, parent: connectionExample});
-            core.setAttribute(m1, 'name', 'm1');
-            p1 = core.createNode({base: meta.PortElement, parent: m1});
-            core.setAttribute(p1, 'name', 'p1');
-
-            port1 = core.createNode({base: meta.PortElement, parent: connectionExample});
-            core.setAttribute(port1, 'name', 'Port1');
-            port2 = core.createNode({base: meta.PortElement, parent: connectionExample});
-            core.setAttribute(port2, 'name', 'Port2');
-            port3 = core.createNode({base: meta.PortElement, parent: connectionExample});
-            core.setAttribute(port3, 'name', 'Port3');
-
-            conn11 = core.createNode({base: meta.ConnectionElement, parent: connectionExample});
-            core.setAttribute(conn11, 'name', 'ConnectionElement');
-            core.setPointer(conn11, 'src', port1);
-            core.setPointer(conn11, 'dst', p1);
-
-            conn21 = core.createNode({base: meta.ConnectionElement, parent: connectionExample});
-            core.setAttribute(conn21, 'name', 'ConnectionElement');
-            core.setPointer(conn21, 'src', port2);
-            core.setPointer(conn21, 'dst', port1);
-
-            conn33 = core.createNode({base: meta.ConnectionElement, parent: connectionExample});
-            core.setAttribute(conn33, 'name', 'ConnectionElement');
-            core.setPointer(conn33, 'src', port3);
-            core.setPointer(conn33, 'dst', port3);
+            connectionExample = mockModel.connectionExample;
+            m1 = mockModel.m1;
+            port1 = mockModel.port1;
+            port2 = mockModel.port2;
+            port3 = mockModel.port3;
+            conn11 = mockModel.conn1;
+            conn21 = mockModel.conn2;
+            conn33 = mockModel.conn3;
             done();
         });
-    });
-
-    it('getVersion', function () {
-        expect(semanticVersionPattern.test(plugin.getVersion())).to.equal(true);
-    });
-
-    it('getDescription', function () {
-        var description = plugin.getDescription();
-        expect(typeof description === 'string' || description instanceof String).to.equal(true);
-    });
-
-    it('getName', function () {
-        var name = plugin.getName();
-        expect(typeof name === 'string' || name instanceof String).to.equal(true);
-    });
-
-    it('main should be implemented', function () {
-        var proto = Object.getPrototypeOf(plugin);
-        expect(proto.hasOwnProperty('main')).to.equal(true);
     });
 
     it('compareParentAndChildsParent', function (done) {
@@ -241,39 +185,6 @@ describe('CoreExamples', function () {
             done();
         });
     });
-
-    // Helper Functions
-    function createMETATypesTests(core) {
-        var META = {},
-            options = {},
-            node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ConnectionElement');
-        META.ConnectionElement = node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'FCO');
-        META.FCO = node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'Language');
-        META.Language = node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelElement');
-        META.ModelElement = node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'ModelRef');
-        META.ModelRef = node;
-
-        node = core.createNode(options);
-        core.setAttribute(node, 'name', 'PortElement');
-        META.PortElement = node;
-
-        return META;
-    }
 });
 
 
