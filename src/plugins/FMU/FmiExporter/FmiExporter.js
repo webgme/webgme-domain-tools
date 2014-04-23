@@ -22,6 +22,7 @@ define(['plugin/PluginConfig',
 
         this.fmuIdToInfoMap = {};
         this.fmus = [];
+        this.fmuPackageHashMap = {};
         this.connectionMap = {};
         this.connections = [];
         this.simulationInfo = {
@@ -92,6 +93,7 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             selectedNodeBaseType = self.getMetaType(selectedNode),
             selectedNodeBasePath = self.core.getPath(selectedNodeBaseType),
+            modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
             modelExchangeNode;
 
         if (!selectedNode) {
@@ -121,13 +123,14 @@ define(['plugin/PluginConfig',
                     return;
                 }
 
-                self.assignFmuPriority();
+                self.assignPriorityAndFlatten();
 
-                var artifact = self.blobClient.createArtifact('model_exchange_config');
+                var artifact = self.blobClient.createArtifact(modelExchangeName + "_FmiPackage");
 
-                self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
+                //self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
                 self.modelExchangeConfig['Connections'] = self.connections;
-                self.modelExchangeConfig['FmuMap'] = self.fmuIdToInfoMap;
+                //self.modelExchangeConfig['FmuMap'] = self.fmuIdToInfoMap;
+                self.modelExchangeConfig['FMUs'] = self.fmus;
                 self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
 
                 var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
@@ -136,6 +139,17 @@ define(['plugin/PluginConfig',
                     // FIXME: error handling
 
                     self.logger.info('Generated file hash: ' + fileHash);
+
+//                    var i,
+//                        fmuPackageName,
+//                        fmuHash,
+//                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap);
+//
+//                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+//                        fmuPackageName = fmuPackageHashMapKeys[i],
+//                        fmuHash = self.fmuPackageHashMap[fmuPackageName];
+//                        artifact.addHash(fmuPackageName, fmuHash);
+//                    }
 
                     // FIXME: in case you use only a single artifact then artifact.save(function(err, hash) {...
                     //        can be used
@@ -247,24 +261,81 @@ define(['plugin/PluginConfig',
         }
     };
 
-    FmiExporter.prototype.assignFmuPriority = function () {
+    FmiExporter.prototype.assignPriorityAndFlatten = function () {
+
         var self = this,
             fmuMapKeys = Object.keys(self.fmuIdToInfoMap),
+            connMapKeys = Object.keys(self.connectionMap),
+            connMapKey,
             fmuId,
             fmu,
+            fmuHash,
             fmuPriority,
             i;
 
         for (i = 0; i < fmuMapKeys.length; i += 1) {
             fmuId = fmuMapKeys[i],
             fmu = self.fmuIdToInfoMap[fmuId],
+            fmuHash = fmu.Asset,
             fmuPriority = fmu.Priority;
 
             if (fmuPriority === 1) {
                 self.followConnsAssignPriority(fmuId, fmu);
             }
 
-            self.addFmuToFlatList(fmu);
+            self.fmuPackageHashMap[fmu.Name] = fmuHash;
+            self.fmus.push(fmu);
+        }
+
+        var splitKey,
+            srcFmu,
+            srcPriority,
+            srcFmuId,
+            srcFmuName,
+            srcPortId,
+            srcPortName,
+            dstConnections,
+            dstConnIds,
+            splitIds,
+            dstFmu,
+            dstPriority,
+            dstFmuId,
+            dstFmuName,
+            dstPortId,
+            dstPortName,
+            flatConnInfo,
+            j;
+
+        for (i = 0; i < connMapKeys.length; i += 1) {
+            connMapKey = connMapKeys[i];
+            splitKey = connMapKey.split('/');
+            srcFmuId = splitKey[0];
+            srcPortId = splitKey[1];
+            srcFmu = self.fmuIdToInfoMap[srcFmuId];
+            srcFmuName = srcFmu.Name;
+            srcPriority = srcFmu.Priority;
+            srcPortName = srcFmu.OutputMap[srcPortId];
+            dstConnections = self.connectionMap[connMapKey];
+
+            for (j = 0; j < dstConnections.length; j += 1) {
+                dstConnIds = dstConnections[j];
+                splitIds = dstConnIds.split('/');
+                dstFmuId = splitIds[0];
+                dstPortId = splitIds[1];
+                dstFmu = self.fmuIdToInfoMap[dstFmuId];
+                dstFmuName = dstFmu.Name;
+                dstPriority = dstFmu.Priority;
+                dstPortName = dstFmu.InputMap[dstPortId];
+
+                flatConnInfo = {
+                    'Source': srcFmuName + '.' + srcPortName,
+                    'Destination': dstFmuName + '.' + dstPortName,
+                    'SrcPriority': srcPriority,
+                    'DstPriority': dstPriority
+                };
+
+                self.connections.push(flatConnInfo);
+            }
         }
     };
 
@@ -310,15 +381,6 @@ define(['plugin/PluginConfig',
 
                 // dst becomes src, repeat
                 self.followConnsAssignPriority(dstFmuId, dstFmu);
-
-                self.connections.push(
-                    {
-                        'Source': srcFmuName + '.' + outputName,
-                        'Destination': dstFmu.Name + '.' + dstPortName,
-                        'SrcPriority': srcPriority,
-                        'DstPriority': dstPriority
-                    }
-                );
             }
         }
     };
