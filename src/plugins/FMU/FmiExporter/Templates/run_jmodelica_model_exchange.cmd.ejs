@@ -1,0 +1,6 @@
+:: Use System Python (which should have access to JModelica) to run the FMI_ME example
+echo off
+pushd %~dp0
+call C:\JModelica.org-1.12\setenv.bat
+"C:\Python27\python.exe" .\\jmodelica_model_exchange.py .\\model_exchange_config.json
+popd
