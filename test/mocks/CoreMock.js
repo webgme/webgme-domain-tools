@@ -65,7 +65,7 @@ define(['./NodeMock'], function (NodeMock) {
     };
 
     CoreMock.prototype.setPointer = function (node, name, target) {
-        node.pointers[name] = this.getPath(target);
+        node.pointers[name] = target.path;
         if (target.collection[name]) {
             target.collection[name].push(node.path);
         } else {

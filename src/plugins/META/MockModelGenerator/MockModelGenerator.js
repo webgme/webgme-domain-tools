@@ -17,6 +17,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         PluginBase.call(this);
         this.modelNodes = [];
         this.metaNodes = [];
+        this.basePairs = {};
     };
 
     // Prototypal inheritance from PluginBase.
@@ -159,8 +160,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
                 callback('failed to get modelNodes' + err, self.result);
                 return;
             }
-            // FIXME: This assumes that the bases are direct instances of META-Types.
             modelData.modelNodes = self.modelNodes;
+            // FIXME: This assumes that the bases are direct instances of META-Types.
+            modelData.basePairs = self.basePairs;
             generateFiles();
         });
     };
@@ -184,9 +186,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
             nodeData.base = metaTypeName;
             nodeData.baseIsMeta = true;
         } else {
-            // TODO: Add case when base is non-meta
-            self.logger.error(nodeData.name + ' has non-meta base!');
-            self.logger.error('// TODO: Add case when base is non-meta...');
+            nodeData.base = 'ID' + self.core.getGuid(self.core.getBase(node)).replace(/-/gi, '_');
+            nodeData.baseIsMeta = false;
+            self.basePairs[nodeData.ID] = nodeData.base;
         }
         // ----- Attributes -----
         attributeNames = self.core.getAttributeNames(node);
