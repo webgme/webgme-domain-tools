@@ -25,7 +25,8 @@
         "panels": "./src/panels",
         "widgets": "./src/widgets",
         "json2xml": "./util/json2xml",
-        "xmljsonconverter": "./lib/xmljsonconverter/xmljsonconverter"
+        "xmljsonconverter": "./lib/xmljsonconverter/xmljsonconverter",
+        "sax": "./lib/sax/sax"
     },
 
     "test_paths": {
