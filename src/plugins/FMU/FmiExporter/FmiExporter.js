@@ -149,41 +149,55 @@ define(['plugin/PluginConfig',
                         return;
                     }
 
-                    self.logger.info('Generated file hashes: ' + fileHashes);
+                    var i,
+                        fmuPackageName,
+                        fmuHash,
+                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
+                        addHashesError,
+                        addHashesCounter = fmuPackageHashMapKeys.length;
 
-//                    var i,
-//                        fmuPackageName,
-//                        fmuHash,
-//                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap);
-//
-//                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-//                        fmuPackageName = fmuPackageHashMapKeys[i],
-//                        fmuHash = self.fmuPackageHashMap[fmuPackageName];
-//                        artifact.addHash(fmuPackageName + ".fmu", fmuHash);
-//                    }
+                    var addHashCounterCallback = function (addHashCallbackError, addedHash) {
+                        if (addHashCallbackError) {
+                            addHashesError += addHashCallbackError;
+                        }
 
-                    // FIXME: in case you use only a single artifact then artifact.save(function(err, hash) {...
-                    //        can be used
-                    //artifact.save(function (err, artifactHash) {
-                    self.blobClient.saveAllArtifacts(function (err, artifactHashes) {
-                        // FIXME: error handling
+                        addHashesCounter -= 1;
 
-                        //self.logger.info('Saved artifact hashes are: ' + artifactHash);
-                        self.logger.info('Saved artifact hashes are: ' + artifactHashes[0]);
+                        if (addHashesCounter === 0) {
 
-                        //self.result.addArtifact(artifactHash);
-                        self.result.addArtifact(artifactHashes[0]);
+                            if (addHashesError) {
+                                self.result.setSuccess(false);
+                                callback(addHashesError, self.result);
+                                return;
+                            }
 
-                        self.result.setSuccess(true);
+                            var artifactSaveCallback = function (err, artifactHash) {
+                                // FIXME: error handling
 
-                        // This will save the changes. If you don't want to save;
-                        // exclude self.save and call callback directly from this scope.
-                        self.save('Finished FmiExporter', function (err) {
-                            // FIXME: error handling
+                                self.logger.info('Saved artifact hashes are: ' + artifactHash);
 
-                            callback(null, self.result);
-                        });
-                    });
+                                self.result.addArtifact(artifactHash);
+
+                                self.result.setSuccess(true);
+
+                                // This will save the changes. If you don't want to save;
+                                // exclude self.save and call callback directly from this scope.
+                                self.save('Finished FmiExporter', function (err) {
+                                    // FIXME: error handling
+
+                                    callback(null, self.result);
+                                });
+                            };
+
+                            artifact.save(artifactSaveCallback);
+                        }
+                    };
+
+                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+                        fmuPackageName = fmuPackageHashMapKeys[i],
+                        fmuHash = self.fmuPackageHashMap[fmuPackageName];
+                        artifact.addHash(fmuPackageName + ".fmu", fmuHash, addHashCounterCallback);
+                    }
                 };
 
                 artifact.addFiles(self.filesToSave, addFilesCallback);
