@@ -6,7 +6,7 @@ define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'ejs',
         'plugin/FmiExporter/FmiExporter/Templates/Templates'],
-    function (PluginConfig, PluginBase, EJS, TEMPLATES) {
+    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
     'use strict';
 
     /**
@@ -48,10 +48,6 @@ define(['plugin/PluginConfig',
     // Prototype inheritance from PluginBase.
     FmiExporter.prototype = Object.create(PluginBase.prototype);
     FmiExporter.prototype.constructor = FmiExporter;
-
-    if (!ejs) {
-        ejs = EJS || window.ejs;
-    }
 
     /**
     * Gets the name of the FmiExporter.
@@ -240,7 +236,7 @@ define(['plugin/PluginConfig',
             fmuInfo = self.extractFmuInfo(fmuChildren);
 
             fmuInfo['Name'] = self.core.getAttribute(fmuNode, 'name');
-            fmuInfo['File'] = self.core.getAttribute(fmuNode, 'fmu_path');
+            fmuInfo['File'] = '.\\' + fmuInfo['Name'] + '.fmu';
             fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
             fmuInfo['Priority'] = 1;
 
