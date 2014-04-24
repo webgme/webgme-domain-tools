@@ -10,7 +10,7 @@ define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'ejs',
         'plugin/PluginGenerator/PluginGenerator/Templates/Templates'],
-    function (PluginConfig, PluginBase, EJS, TEMPLATES) {
+    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
         'use strict';
 
         var PluginGeneratorPlugin = function () {
@@ -21,14 +21,6 @@ define(['plugin/PluginConfig',
         PluginGeneratorPlugin.prototype = Object.create(PluginBase.prototype);
 
         PluginGeneratorPlugin.prototype.constructor = PluginGeneratorPlugin;
-
-        // FIXME: workaround
-        // ejs is defined in tests
-        // EJS is defined when plugin runs server side
-        // window.ejs is defined when plugin runs in client
-        if (!ejs) {
-            ejs = EJS || window.ejs;
-        }
 
         PluginGeneratorPlugin.prototype.getName = function () {
             return "Plugin Generator";

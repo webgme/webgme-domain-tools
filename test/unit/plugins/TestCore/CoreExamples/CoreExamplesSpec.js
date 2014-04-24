@@ -46,7 +46,7 @@ describe('CoreExamples', function () {
                 p1;
             Logger = Logger_;
             plugin = new CoreExamples();
-            core = new Core(10);
+            core = new Core(1);
             meta = createMETATypesTests(core);
             rootNode = core._rootNode;
             modelsNode = core.createNode({base: meta.ModelElement, parent: rootNode});

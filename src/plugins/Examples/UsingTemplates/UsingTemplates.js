@@ -5,21 +5,13 @@ define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'plugin/UsingTemplates/UsingTemplates/Templates/Templates',
     'ejs'],
-    function (PluginConfig, PluginBase, TEMPLATES, EJS) {
+    function (PluginConfig, PluginBase, TEMPLATES, ejs) {
         'use strict';
 
         var UsingTemplatesPlugin = function () {
             // Call base class's constructor
             PluginBase.call(this);
         };
-
-        // FIXME: workaround
-        // ejs is defined in tests
-        // EJS is defined when plugin runs server side
-        // window.ejs is deinfed when plugin runs in client
-        if (!ejs) {
-            ejs = EJS || window.ejs;
-        }
 
         UsingTemplatesPlugin.prototype = Object.create(PluginBase.prototype);
 
