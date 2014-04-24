@@ -257,8 +257,19 @@ define(['plugin/PluginConfig',
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
                     dstPath = self.core.getPointerPath(meChildNode, 'dst'),
-                    srcIds = srcPath.split('/').slice(-2).join('/'), // FIXME: extract this as a (synchronous) function
-                    dstIds = dstPath.split('/').slice(-2).join('/'); // FIXME: extract this as a (synchronous) function
+                    srcIds,
+                    dstIds;
+
+                if (srcPath) {
+                    srcIds = srcPath.split('/').slice(-2).join('/');
+                } else {
+                    iterationCallback("PortComposition has no SrcPointer.");
+                }
+                if (dstPath) {
+                    dstIds = dstPath.split('/').slice(-2).join('/');
+                } else {
+                    iterationCallback("PortComposition has no DstPointer");
+                }
 
                 if (self.connectionMap.hasOwnProperty(srcIds)) {
                     self.connectionMap[srcIds].push(dstIds);
