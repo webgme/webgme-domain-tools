@@ -24,7 +24,8 @@
         "ejs": "./lib/ejs/ejs.min",
         "panels": "./src/panels",
         "widgets": "./src/widgets",
-        "json2xml": "./util/json2xml"
+        "json2xml": "./util/json2xml",
+        "xmljsonconverter": "./lib/xmljsonconverter/xmljsonconverter"
     },
 
     "test_paths": {
