@@ -147,6 +147,7 @@ define(['plugin/PluginConfig',
 
                     var i,
                         fmuPackageName,
+                        fmuPathWithinArtifact,
                         fmuHash,
                         fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
                         addHashesError,
@@ -157,6 +158,7 @@ define(['plugin/PluginConfig',
                             addHashesError += addHashCallbackError;
                         }
 
+                        fileHashes.push(addedHash);
                         addHashesCounter -= 1;
 
                         if (addHashesCounter === 0) {
@@ -192,7 +194,12 @@ define(['plugin/PluginConfig',
                     for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
                         fmuPackageName = fmuPackageHashMapKeys[i],
                         fmuHash = self.fmuPackageHashMap[fmuPackageName];
-                        artifact.addHash(fmuPackageName + ".fmu", fmuHash, addHashCounterCallback);
+                        fmuPathWithinArtifact = "\\FMUs\\" + fmuPackageName + ".fmu";
+                        artifact.addHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+
+//                        if (fileHashes.indexOf(fmuHash) < 0) {
+//                            artifact.addHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+//                        }
                     }
                 };
 
