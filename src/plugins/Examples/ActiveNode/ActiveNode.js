@@ -19,8 +19,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'xmljsonconverter'], functio
 
     Logger.prototype.main = function (callback) {
         var self = this,
-            converter = new Converter.Xml2json(),
-            obj = converter.xmlStr2json('<xml>Hello, <who name="world">world</who>!</xml>');
+            converter = new Converter.Xml2json(null, {skipWSText: true}),
+            obj = converter.xmlStr2json('<xml>Hello, <who name="world">world<ttt> \n\r  </ttt></who>!</xml>');
         self.logger.info(JSON.stringify(obj, null, 4));
 
         if (!self.activeNode) {
