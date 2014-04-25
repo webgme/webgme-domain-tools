@@ -7,6 +7,7 @@ __author__ = 'James Klingler'
 import os
 import sys
 import json
+import csv
 import logging
 import pylab as P
 import matplotlib.pyplot as plt
@@ -32,14 +33,30 @@ parser.add_option("-c",
                   dest="model_exchange_config_file",
                   help="Path to the model exchange configuration file.")
 
-# Set up logger to write to 'filename'
-logging.basicConfig(filename= "jmodelica_model_exchange_py.log",
-                    level=logging.DEBUG,
-                    format="%(asctime)s %(levelname)s: %(message)s",
-                    datefmt="%Y-%m-%d %H:%M:%S")
+                  
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
+# Create a file handler with a debug log level
+fh = logging.FileHandler("jmodelica_model_exchange_py.log")
+fh.setLevel(logging.DEBUG)
+
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 def read_model_exchange_config(model_exchange_config_file):
+
+    logger.debug("Enter 'read_model_exchange_config({0})'".format(model_exchange_config_file))
 
     with open(model_exchange_config_file, 'r') as f_in:
         config_dict = json.load(f_in)
@@ -47,6 +64,8 @@ def read_model_exchange_config(model_exchange_config_file):
     return config_dict
 
 def run_explicit_euler(fmi_me_object):
+
+    logger.debug("Enter 'run_explicit_euler'")
 
     # All FMUs have been loaded and initialized
 
@@ -83,6 +102,8 @@ def run_explicit_euler(fmi_me_object):
         # Increment the index and the time
         i += 1
         time_at_step_i = time_at_step_i + t_increment
+        
+        logger.debug("Solving system for at t={0}".format(time_at_step_i))
 
         for priority_level, fmu_map in fmi_me_object.priority_map.iteritems():
 
@@ -165,9 +186,17 @@ def run_explicit_euler(fmi_me_object):
                     dst_fmu.pyfmi_fmu.set_real(conn.dst_value_ref, value)
 
         time_for_result.append(time_at_step_i)
-
+    
+    # Save results .csv file
+    name_plus_data = ['time'] + time_for_result
+    
+    with open('results.csv', 'ab') as result_file:
+        csv_writer = csv.writer(result_file)
+        csv_writer.writerow(name_plus_data)
 
     #  PLOTTING
+    logger.debug("Saving .svg files for all inputs/outputs")   
+    
     plot_index = 1
 
     if not os.path.isdir('Plots'):
@@ -178,14 +207,28 @@ def run_explicit_euler(fmi_me_object):
             plt.figure(plot_index)
             plt.title(fmu_name)
             plt.xlabel('Time (s)')
+            
+            # Save all time-varying results to csv
+            for value_ref in fmu.time_varying_refs:
+                value_ref_index = fmu.time_varying_refs.index(value_ref)
+                variable_name = fmu_name + '.' + fmu.pyfmi_fmu.get_variable_by_valueref(value_ref)
+                data_series = N.array(results_data[fmu_name])[:,value_ref_index]
+                data_series_list = data_series.tolist()
+                name_plus_data_series = [variable_name] + data_series_list
+                with open('results.csv', 'ab') as result_file:
+                    csv_writer = csv.writer(result_file)
+                    csv_writer.writerow(name_plus_data_series)
+            
             for input_name in fmu.input_names:
                 input_valueref = fmu.pyfmi_fmu.get_variable_valueref(input_name)
                 var_to_plot_index = fmu.time_varying_refs.index(input_valueref)
-                plt.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], label=input_name)  # Inputs in blue
+                data_series = N.array(results_data[fmu_name])[:,var_to_plot_index]
+                plt.plot(time_for_result, data_series, label=input_name)
             for output_name in fmu.output_names:
                 output_valueref = fmu.pyfmi_fmu.get_variable_valueref(output_name)
                 var_to_plot_index = fmu.time_varying_refs.index(output_valueref)
-                plt.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], label=output_name)  # Outputs in red
+                data_series = N.array(results_data[fmu_name])[:,var_to_plot_index]
+                plt.plot(time_for_result, data_series, label=output_name)
 
             plt.legend(loc=0)
             plot_name = fmu_name + '_InputsOutputs.svg'
@@ -196,6 +239,10 @@ def run_explicit_euler(fmi_me_object):
 
 
 def main():
+
+    logger.debug("===================================")
+    logger.debug("RUNNING jmodelica_model_exchange.py")
+    logger.debug("===================================")
 
     (options, args) = parser.parse_args()
 
@@ -212,7 +259,7 @@ def main():
 
 
 if __name__ == '__main__':
-    log = logging.getLogger()
+
     root_dir = os.getcwd()
 
     try:
@@ -221,10 +268,7 @@ if __name__ == '__main__':
         import traceback
         trace = traceback.format_exc()
 
-        failed_file = os.path.join(root_dir,
-                                   'jmodelica_model_exchange_FAILED.txt')
-
-        with open(failed_file, 'wb') as f_out:
-            f_out.write(trace)
-        log.error('See {0} for details.'.format(failed_file))
+        logger.error(trace)
+        logger.info('See jmodelica_model_exchange_py.log for details.')
+        
         sys.exit(2)
