@@ -69,7 +69,7 @@ class FMU(object):
 
     def __init__(self, fmu_info, sim_start_time):
 
-        self.name = fmu_info['Name']
+        self.name = fmu_info['InstanceName']
         self.priority = fmu_info['Priority']
 
         fmu_file_path = fmu_info['File']

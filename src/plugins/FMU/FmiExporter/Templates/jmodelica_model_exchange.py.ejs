@@ -9,6 +9,7 @@ import sys
 import json
 import logging
 import pylab as P
+import matplotlib.pyplot as plt
 import numpy as N
 
 from fmi_wrapper import FMI_ME, FMU
@@ -169,24 +170,29 @@ def run_explicit_euler(fmi_me_object):
     #  PLOTTING
     plot_index = 1
 
+    if not os.path.isdir('Plots'):
+        os.mkdir('Plots')
+
     for priority_level, fmu_map in fmi_me_object.priority_map.iteritems():
         for fmu_name, fmu in fmu_map.iteritems():
-            P.figure(plot_index)
-            P.title(fmu_name)
-            P.xlabel('Time (s)')
+            plt.figure(plot_index)
+            plt.title(fmu_name)
+            plt.xlabel('Time (s)')
             for input_name in fmu.input_names:
                 input_valueref = fmu.pyfmi_fmu.get_variable_valueref(input_name)
                 var_to_plot_index = fmu.time_varying_refs.index(input_valueref)
-                P.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], 'b', label=input_name)  # Inputs in blue
+                plt.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], label=input_name)  # Inputs in blue
             for output_name in fmu.output_names:
                 output_valueref = fmu.pyfmi_fmu.get_variable_valueref(output_name)
                 var_to_plot_index = fmu.time_varying_refs.index(output_valueref)
-                P.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], 'r', label=output_name)  # Outputs in red
+                plt.plot(time_for_result, N.array(results_data[fmu_name])[:,var_to_plot_index], label=output_name)  # Outputs in red
 
-            P.legend(loc=7)
+            plt.legend(loc=0)
+            plot_name = fmu_name + '_InputsOutputs.svg'
+            plot_path = os.path.join('Plots', plot_name)
+            plt.savefig(plot_path)
+            plt.close()
             plot_index += 1
-
-    P.show()
 
 
 def main():
