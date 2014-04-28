@@ -21,12 +21,12 @@
 
 
     "paths": {
-        "ejs": "./lib/ejs/ejs.min",
+        "ejs": "./support/ejs/ejs.min",
         "panels": "./src/panels",
         "widgets": "./src/widgets",
-        "json2xml": "./util/json2xml",
-        "xmljsonconverter": "./lib/xmljsonconverter/xmljsonconverter",
-        "sax": "./lib/sax/sax"
+        "json2xml": "./lib/json2xml",
+        "xmljsonconverter": "./lib/xmljsonconverter",
+        "sax": "./support/sax/sax"
     },
 
     "test_paths": {
