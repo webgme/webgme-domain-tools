@@ -82,14 +82,27 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
         var self = this,
+            selectedNode = self.activeNode,
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
-            fmuHash = currentConfig.FMU;
+            fmuHash = currentConfig.FMU,
+            fmuModelDescriptionXml,
+            fmuJsonDict;
 
         self.logger.debug('Entering FmuImporter main');
 
         self.logger.debug('CurrentConfig:');
         self.logger.debug(currentConfigString);
+
+//        var newFmuObject = core.createNode({parent: rootNode, base: '/1822302751/902541625'});  //FMU base object
+//        core.newFmuObject(newFmuObject, 'resource', fmuHash);
+//        core.newFmuObject(newFmuObject, 'name', 'Here_is_a_brand_new_FMU');
+
+        // TODO: Zsolt please upzip the FMU associated with 'fmuHash' and get the XML only
+        fmuModelDescriptionXml = self.getFmuModelDescriptionXml(fmuHash);
+
+        // TODO: Patrik please convert the XML to JSON
+        fmuJsonDict = self.convertXml2Json(fmuModelDescriptionXml);
 
         var testDownloadArtifact = self.blobClient.createArtifact('testArtifact');
 
@@ -123,6 +136,36 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         };
 
         testDownloadArtifact.addHash('aNewFmu.fmu', fmuHash, addHashCallback);
+    };
+
+    FmuImporter.prototype.getFmuModelDescriptionXml = function (fmuHash) {
+        return false;
+        // extract fmu zip
+        // return .\modelDescription.xml
+    };
+
+    FmuImporter.prototype.convertXml2Json = function (modelDescriptionXml) {
+        return false;
+        // extract fmu zip
+        // return .\modelDescription.xml
+    };
+
+    /**
+     * Finds and returns the node object defining the meta type for the given node.
+     * @param node - Node to be check for type.
+     * @returns {Object} - Node object defining the meta type of node.
+     */
+    FmuImporter.prototype.getMetaType = function (node) {
+        var self = this,
+            name;
+        while (node) {
+            name = self.core.getAttribute(node, 'name');
+            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
+                break;
+            }
+            node = self.core.getBase(node);
+        }
+        return node;
     };
 
     return FmuImporter;
