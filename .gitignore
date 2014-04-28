@@ -21,7 +21,9 @@ src/plugins/*/DSML/*.js*
 *-output
 
 blob-local-storage
+
 src/examples/jsbasic/asyncExamples_jk.js
 src/plugins/FMU/FmiExporter/FmiExporter - Copy.js
-1af87e16-1919-4d42-96b8-3c5b4bad7860.tmp
-c8196673-5527-f786-aaec-deee01db3239.tmp
+
+# ignore all temp files
+*.tmp
