@@ -58,53 +58,12 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     FmuImporter.prototype.getConfigStructure = function () {
         return [
             {
-                'name': 'species',
-                'displayName': 'Animal Species',
-                'regex': '^[a-zA-Z]+$',
-                'regexMessage': 'Name can only contain English characters!',
-                'description': 'Which species does the animal belong to.',
-                'value': 'Horse',
-                'valueType': 'string',
-                'readOnly': false
-            },
-            {
-                'name': 'age',
-                'displayName': 'Age',
-                'description': 'How old is the animal.',
-                'value': 3,
-                'valueType': 'number',
-                'minValue': 0,
-                'maxValue': 10000,
-                'readOnly': false
-            },
-            {
-                'name': 'carnivor',
-                'displayName': 'Carnivor',
-                'description': 'Does the animal eat other animals?',
-                'value': false,
-                'valueType': 'boolean',
-                'readOnly': false
-            },
-            {
-                'name': 'classification',
-                'displayName': 'Classification',
-                'description': '',
-                'value': 'Vertebrates',
-                'valueType': 'string',
-                'valueItems': [
-                    'Vertebrates',
-                    'Invertebrates',
-                    'Unknown'
-                ]
-            },
-            {
-                "name": "color",
-                "displayName": "Color",
-                "description": 'The hex color code for the animal.',
-                "readOnly": false,
-                "value": '#FF0000',
-                "regex": '^#([A-Fa-f0-9]{6})$',
-                "valueType": "string"
+                "name": "FMU",
+                "displayName": "FmuPackage",
+                "description": 'Click and drag an existing compiled FMU',
+                "value": "", // this is the 'default config'
+                "valueType": "asset",
+                "readOnly": false
             }
         ];
     };
@@ -117,66 +76,53 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
     * - Do NOT put any user interaction logic UI, etc. inside this method.
     * - callback always has to be called even if error happened.
     *
-    * @param {function(string, plugin.PluginResult)} callback - the result callback
+    * @param {function(string, plugin.PluginResult)} mainCallback - the result callback
     */
-    FmuImporter.prototype.main = function (callback) {
+    FmuImporter.prototype.main = function (mainCallback) {
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
-        var self = this;
-        // Using the logger.
-        self.logger.info('This is a debug message.');
-        self.logger.info('This is an info message.');
-        self.logger.warning('This is a warning message.');
-        self.logger.error('This is an error message.');
-
-        // Obtain the current user configuration.
-        var currentConfig = self.getCurrentConfig();
-        self.logger.info('Current configuration ' + JSON.stringify(currentConfig, null, 4));
-
-        // This will save the changes. If you don't want to save;
-        // exclude self.save and call callback directly from this scope.
-        self.result.setSuccess(true);
-        self.save('added obj', function (err) {
-            callback(null, self.result);
-        });
-
-    };
-
-    /**
-    * Checks if the given node is of the given meta-type.
-    * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-    * @param node - Node to be checked for type.
-    * @param metaNode - Node object defining the meta type.
-    * @returns {boolean} - True if the given object was of the META type.
-    */
-    FmuImporter.prototype.isMetaTypeOf = function (node, metaNode) {
         var self = this,
-            metaGuid = self.core.getGuid(metaNode);
-        while (node) {
-            if (self.core.getGuid(node) === metaGuid) {
-                return true;
-            }
-            node = self.core.getBase(node);
-        }
-        return false;
-    };
+            currentConfig = self.getCurrentConfig(),
+            currentConfigString = JSON.stringify(currentConfig, null, 4),
+            fmuHash = currentConfig.FMU;
 
-    /**
-    * Finds and returns the node object defining the meta type for the given node.
-    * @param node - Node to be checked for type.
-    * @returns {Object} - Node object defining the meta type of node.
-    */
-    FmuImporter.prototype.getMetaType = function (node) {
-        var self = this,
-            name;
-        while (node) {
-            name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
-                break;
+        self.logger.debug('Entering FmuImporter main');
+
+        self.logger.debug('CurrentConfig:');
+        self.logger.debug(currentConfigString);
+
+        var testDownloadArtifact = self.blobClient.createArtifact('testArtifact');
+
+        var addHashCallback = function (err, fileHash) {
+            if (err) {
+                self.result.setSuccess(false);
+                mainCallback(err, self.result);
+                return;
             }
-            node = self.core.getBase(node);
-        }
-        return node;
+
+            self.logger.debug('Added hash ' + fileHash + 'to testArtifact.');
+
+            var artifactSaveCallback = function (err, artifactHash) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    mainCallback(err, self.result);
+                    return;
+                }
+
+                self.result.addArtifact(artifactHash);
+
+                // This will save the changes. If you don't want to save;
+                // exclude self.save and call callback directly from this scope.
+                self.result.setSuccess(true);
+                self.save('Saving FmuImporter results to database...', function (err) {
+                    mainCallback(null, self.result);
+                });
+            };
+
+            testDownloadArtifact.save(artifactSaveCallback);
+        };
+
+        testDownloadArtifact.addHash('aNewFmu.fmu', fmuHash, addHashCallback);
     };
 
     return FmuImporter;
