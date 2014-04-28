@@ -88,8 +88,9 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
-            fmuHash = currentConfig.FMU,
-            fmuJsonDict;
+            fmuHash = "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f",
+            numFmus,
+            i;
 
         self.logger.debug('Entering FmuImporter main');
 
@@ -100,69 +101,78 @@ define(['plugin/PluginConfig',
 //        core.newFmuObject(newFmuObject, 'resource', fmuHash);
 //        core.newFmuObject(newFmuObject, 'name', 'Here_is_a_brand_new_FMU');
 
-        // TODO: Zsolt please upzip the FMU associated with 'fmuHash' and get the XML only
-        self.getFmuModelDescriptionXml(fmuHash, function (err, fmuModelDescriptionXml) {
+        self.getFmuModelDescriptions(fmuHash, function (err, fmuModelDescriptions) {
             if (err) {
                 self.logger.error(err);
                 return;
             }
 
-            // TODO: Patrik please convert the XML to JSON
-            fmuJsonDict = self.convertXml2Json(fmuModelDescriptionXml);
-        });
+            numFmus = fmuModelDescriptions.length;
 
-        var testDownloadArtifact = self.blobClient.createArtifact('testArtifact');
-
-        var addHashCallback = function (err, fileHash) {
-            if (err) {
-                self.result.setSuccess(false);
-                mainCallback(err, self.result);
-                return;
+            for (i = 0; i < numFmus; i += 1) {
+                self.createNewFmu(fmuModelDescriptions[i]);
             }
 
-            self.logger.debug('Added hash ' + fileHash + 'to testArtifact.');
+            // This will save the changes. If you don't want to save;
+            // exclude self.save and call callback directly from this scope.
+            self.result.setSuccess(true);
+            self.save('Saving FmuImporter results to database...', function (err) {
+                mainCallback(null, self.result);
+            });
+        });
 
-            var artifactSaveCallback = function (err, artifactHash) {
-                if (err) {
-                    self.result.setSuccess(false);
-                    mainCallback(err, self.result);
-                    return;
-                }
-
-                self.result.addArtifact(artifactHash);
-
-                // This will save the changes. If you don't want to save;
-                // exclude self.save and call callback directly from this scope.
-                self.result.setSuccess(true);
-                self.save('Saving FmuImporter results to database...', function (err) {
-                    mainCallback(null, self.result);
-                });
-            };
-
-            testDownloadArtifact.save(artifactSaveCallback);
-        };
-
-        testDownloadArtifact.addHash('aNewFmu.fmu', fmuHash, addHashCallback);
     };
 
-    FmuImporter.prototype.getFmuModelDescriptionXml = function (fmuHash, callback) {
-        var self = this;
+    FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, getFmuModelDescriptionsCallback) {
+        var self = this,
+            zip,
+            fmuZip,
+            fmuFileHash = 32,
+            modelDescriptionXml,
+            modelDescriptionJson,
+            modelDescriptionMap = {},
+            fmusWithinZip,
+            numFmus,
+            i;
 
-        self.blobClient.getObject(fmuHash, function (err, content) {
+        var blobGetObjectCallback = function (err, content) {
             if (err) {
-                callback(err);
+                getFmuModelDescriptionsCallback(err);
                 return;
             }
 
             // TODO: what if the content is not a ZIP? TODO: check metadata
-            var zip = new JSZip(content);
+            zip = new JSZip(content);
 
-            // extract fmu zip
-            var modelDescriptionXml = zip.file("modelDescription.xml").asText();
+            modelDescriptionXml = zip.file("modelDescription.xml");
+
+            if (modelDescriptionXml === null) {
+                // we might have a zip with multiple fmus within
+                fmusWithinZip = zip.file(/\.fmu/);
+                numFmus = fmusWithinZip.length;
+
+                for (i = 0; i < numFmus; i += 1) {
+                    fmuZip = fmusWithinZip[i];
+                    fmuFileHash += 1;
+                    modelDescriptionXml = fmuZip.file("modelDescription.xml");
+                    if (modelDescriptionXml != null) {
+                        modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+                        modelDescriptionMap[fmuFileHash] = modelDescriptionJson;
+                    } else {
+                        self.logger.error('Could not extract fmu modelDescription');
+                        continue;
+                    }
+                }
+            } else {
+                modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+                modelDescriptionMap[uploadedFileHash] = modelDescriptionJson;
+            }
 
             // return .\modelDescription.xml
-            callback(null, modelDescriptionXml);
-        });
+            getFmuModelDescriptionsCallback(null, modelDescriptionMap);
+        };
+
+        self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
     };
 
     FmuImporter.prototype.convertXml2Json = function (modelDescriptionXml) {
@@ -171,8 +181,6 @@ define(['plugin/PluginConfig',
         var self = this,
             converter = new Converter.Xml2json(null, {skipWSText: true}),
             obj = converter.xmlStr2json(modelDescriptionXml);
-
-        self.logger.info(JSON.stringify(obj, null, 4));
 
         return obj;
     };
