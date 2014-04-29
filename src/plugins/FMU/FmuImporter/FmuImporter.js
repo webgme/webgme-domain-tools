@@ -160,6 +160,7 @@ define(['plugin/PluginConfig',
             outputY = 100,
             offsetY = 60;
 
+        self.logger.info("Creating " + fmuName);
         // Create the new FMU in current context
         newFmuNode = self.core.createNode({parent: parentNode, base: FmuMetaTypes.FMU});
         self.core.setAttribute(newFmuNode, 'name', fmuName);
