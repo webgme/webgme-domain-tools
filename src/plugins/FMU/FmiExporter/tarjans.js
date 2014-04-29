@@ -4,13 +4,15 @@
 
 var executeTarjans = function() {
 
+    var f = new Vertex("f");
     var a = new Vertex("a");
+    var g = new Vertex("g");
     var b = new Vertex("b");
     var c = new Vertex("c");
     var d = new Vertex("d");
     var e = new Vertex("e");
-    var f = new Vertex("f");
-    var g = new Vertex("g");
+
+
 
     a.connections.push(f);
     b.connections.push(f);
