@@ -4,8 +4,9 @@
 
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
+    'plugin/FmuImporter/FmuImporter/FMU',
     'jszip',
-    'xmljsonconverter'], function (PluginConfig, PluginBase, JSZip, Converter) {
+    'xmljsonconverter'], function (PluginConfig, PluginBase, FmuMetaTypes, JSZip, Converter) {
     'use strict';
 
     /**
@@ -64,7 +65,8 @@ define(['plugin/PluginConfig',
                 "name": "FMU",
                 "displayName": "FmuPackage",
                 "description": 'Click and drag an existing compiled FMU',
-                "value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // this is the 'default config'
+                //"value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // this is the 'default config'
+                "value": "0101da04257bf60436b20beb44433b6a45b84e77", // this is the 'default config'
                 "valueType": "asset",
                 "readOnly": false
             }
@@ -94,12 +96,11 @@ define(['plugin/PluginConfig',
 
         self.logger.debug('Entering FmuImporter main');
 
+        // get all 'possible' object types from the MetaModel
+        this.updateMETA(FmuMetaTypes);
+
         self.logger.debug('CurrentConfig:');
         self.logger.debug(currentConfigString);
-
-//        var newFmuObject = core.createNode({parent: rootNode, base: '/1822302751/902541625'});  //FMU base object
-//        core.newFmuObject(newFmuObject, 'resource', fmuHash);
-//        core.newFmuObject(newFmuObject, 'name', 'Here_is_a_brand_new_FMU');
 
         self.getFmuModelDescriptions(fmuHash, function (err, fmuModelDescriptions) {
             if (err) {
@@ -123,7 +124,10 @@ define(['plugin/PluginConfig',
     };
 
     FmuImporter.prototype.createNewFmu = function (fmuModelDescription) {
-        var fmuInfo = fmuModelDescription["fmiModelDescription"],
+        var self = this,
+            newFmuNode,
+            newFmuChildNode,
+            fmuInfo = fmuModelDescription["fmiModelDescription"],
             modelName = fmuInfo["_modelName"],
             splitNames = modelName.split('.'),
             modelVariables = fmuInfo["ModelVariables"],
@@ -136,10 +140,20 @@ define(['plugin/PluginConfig',
             valueRef,
             varTypeInfo,
             value,
-            i;
+            i,
+            paramX = 400,
+            paramY = 100,
+            inputX = 100,
+            inputY = 100,
+            outputX = 700,
+            outputY = 100,
+            offsetY = 60;
 
+        // Create the new FMU in current context
+        newFmuNode = self.core.createNode({parent: self.rootNode, base: FmuMetaTypes.FMU});
+        self.core.setAttribute(newFmuNode, 'name', modelName);
 
-
+        // Create the Inputs, Outputs, Parameters
         for (i = 0; i < numVariables; i += 1) {
             variable = scalarVariables[i];
             varName = variable["_name"];
@@ -147,11 +161,23 @@ define(['plugin/PluginConfig',
             causality = variable["_causality"];
             valueRef = variable["_valueReference"];
             varTypeInfo = self.getVariableTypeInfo(variable);
-            value = varTypeInfo["_start"];
+
+            if (varName.split()[0] === '_') {
+                continue;
+            }
+
+            if (causality === "input") {
+                // Create Input
+            } else if (causality === "output") {
+                // Create Output
+            } else if (causality === "internal") {
+                if (variability === "parameter") {
+                    if (varTypeInfo.hasOwnProperty("_start")) {
+                        value = varTypeInfo["_start"]
+                    }
+                }
+            }
         }
-
-
-
     };
 
     FmuImporter.prototype.getVariableTypeInfo = function (variableDict) {
