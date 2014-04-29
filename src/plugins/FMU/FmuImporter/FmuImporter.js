@@ -152,7 +152,7 @@ define(['plugin/PluginConfig',
                 numFmus = fmusWithinZip.length;
 
                 for (i = 0; i < numFmus; i += 1) {
-                    fmuZip = fmusWithinZip[i];
+                    fmuZip = new JSZip(fmusWithinZip[i].asArrayBuffer());
                     fmuFileHash += 1;
                     modelDescriptionXml = fmuZip.file("modelDescription.xml");
                     if (modelDescriptionXml != null) {
