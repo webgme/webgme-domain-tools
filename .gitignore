@@ -27,3 +27,6 @@ src/plugins/FMU/FmiExporter/FmiExporter - Copy.js
 
 # ignore all temp files
 *.tmp
+
+# ignore all .zip files
+*.zip
