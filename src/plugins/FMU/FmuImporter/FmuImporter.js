@@ -87,18 +87,26 @@ define(['plugin/PluginConfig',
         // These are all instantiated at this point.
         var self = this,
             selectedNode = self.activeNode,
+            selectedNodeMetaType = self.getMetaType(selectedNode),
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
             artifactHash = currentConfig.UploadedArtifact,
-            fmuHashes,
             fmuHash,
-            numFmus,
             i;
 
         self.logger.debug('Entering FmuImporter main');
 
         // get all 'possible' object types from the MetaModel
         this.updateMETA(FmuMetaTypes);
+
+        // TODO: Z/P please look at my context checking...
+        if (!self.isMetaTypeOf(selectedNode, FmuMetaTypes.FMU_Library)) {
+            var msg = "FmuImporter must be called from an FMU_Library!";
+            self.logger.error(msg);
+            self.result.setSuccess(false);
+            mainCallback(msg, self.result);
+            return;
+        }
 
         self.logger.debug('CurrentConfig:');
         self.logger.debug(currentConfigString);
@@ -109,12 +117,8 @@ define(['plugin/PluginConfig',
                 return;
             }
 
-            fmuHashes = Object.keys(hashFmuDescriptionMap);
-            numFmus = fmuHashes.length;
-
-            for (i = 0; i < numFmus; i += 1) {
-                fmuHash = fmuHashes[i];
-                self.createNewFmu(hashFmuDescriptionMap[fmuHash]);
+            for (fmuHash in hashFmuDescriptionMap) {
+                self.createNewFmu(selectedNode, hashFmuDescriptionMap[fmuHash]);
             }
 
             // This will save the changes. If you don't want to save;
@@ -128,13 +132,14 @@ define(['plugin/PluginConfig',
         self.getFmuModelDescriptions(artifactHash, getFmuModelDescriptionsCallback);
     };
 
-    FmuImporter.prototype.createNewFmu = function (fmuModelDescription) {
+    FmuImporter.prototype.createNewFmu = function (parentNode, fmuModelDescription) {
         var self = this,
             newFmuNode,
             newFmuChildNode,
             fmuInfo = fmuModelDescription["fmiModelDescription"],
-            modelName = fmuInfo["_modelName"],
-            splitNames = modelName.split('.'),
+            modelicaName = fmuInfo["_modelName"],
+            fmuName = fmuInfo["_modelIdentifier"],
+            splitNames = modelicaName.split('.'),
             modelVariables = fmuInfo["ModelVariables"],
             scalarVariables = modelVariables["ScalarVariable"],
             numVariables = scalarVariables.length,
@@ -143,6 +148,7 @@ define(['plugin/PluginConfig',
             variability,
             causality,
             valueRef,
+            description,
             varTypeInfo,
             value,
             i,
@@ -155,8 +161,8 @@ define(['plugin/PluginConfig',
             offsetY = 60;
 
         // Create the new FMU in current context
-        newFmuNode = self.core.createNode({parent: self.rootNode, base: FmuMetaTypes.FMU});
-        self.core.setAttribute(newFmuNode, 'name', modelName);
+        newFmuNode = self.core.createNode({parent: parentNode, base: FmuMetaTypes.FMU});
+        self.core.setAttribute(newFmuNode, 'name', fmuName);
 
         // Create the Inputs, Outputs, Parameters
         for (i = 0; i < numVariables; i += 1) {
@@ -164,22 +170,53 @@ define(['plugin/PluginConfig',
             varName = variable["_name"];
             variability = variable["_variability"];
             causality = variable["_causality"];
+            description = "";
+            value = "";
             valueRef = variable["_valueReference"];
             varTypeInfo = self.getVariableTypeInfo(variable);
 
-            if (varName.split()[0] === '_') {
-                continue;
+            if (varName.split('')[0] === '_') {
+                continue;  // TODO: revisit this; we might need to make these as properties
+            }
+
+            if (variable.hasOwnProperty("_description")) {
+                description = variable["_description"];
             }
 
             if (causality === "input") {
+
                 // Create Input
+                newFmuChildNode = self.core.createNode({parent: newFmuNode, base: FmuMetaTypes.Input});
+                self.core.setAttribute(newFmuChildNode, 'name', varName);
+                self.core.setAttribute(newFmuChildNode, 'description', description);
+                self.core.setAttribute(newFmuChildNode, 'fmiValueRef', valueRef);
+                self.core.setRegistry(newFmuChildNode, 'position', {x: inputX, y: inputY});
+                inputY += offsetY;
+
             } else if (causality === "output") {
+
                 // Create Output
+                newFmuChildNode = self.core.createNode({parent: newFmuNode, base: FmuMetaTypes.Output});
+                self.core.setAttribute(newFmuChildNode, 'name', varName);
+                self.core.setAttribute(newFmuChildNode, 'description', description);
+                self.core.setAttribute(newFmuChildNode, 'fmiValueRef', valueRef);
+                self.core.setRegistry(newFmuChildNode, 'position', {x: outputX, y: outputY});
+                outputY += offsetY;
+
             } else if (causality === "internal") {
                 if (variability === "parameter") {
                     if (varTypeInfo.hasOwnProperty("_start")) {
                         value = varTypeInfo["_start"]
                     }
+
+                    newFmuChildNode = self.core.createNode({parent: newFmuNode, base: FmuMetaTypes.Parameter});
+                    self.core.setAttribute(newFmuChildNode, 'name', varName);
+                    self.core.setAttribute(newFmuChildNode, 'value', value);
+                    self.core.setAttribute(newFmuChildNode, 'defaultValue', value);
+                    self.core.setAttribute(newFmuChildNode, 'description', description);
+                    self.core.setAttribute(newFmuChildNode, 'fmiValueRef', valueRef);
+                    self.core.setRegistry(newFmuChildNode, 'position', {x: paramX, y: paramY});
+                    paramY += offsetY;
                 }
             }
         }
@@ -284,6 +321,24 @@ define(['plugin/PluginConfig',
             node = self.core.getBase(node);
         }
         return node;
+    };
+
+    /**
+     * Checks if the given node is of the given meta-type.
+     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
+     * @param node - Node to be check for type.
+     * @param metaTypeObj - Node object defining the meta type.
+     * @returns {boolean} - True if the given object was of the META type.
+     */
+    FmuImporter.prototype.isMetaTypeOf = function (node, metaTypeObj) {
+        var self = this;
+        while (node) {
+            if (self.core.getGuid(node) === self.core.getGuid(metaTypeObj)) {
+                return true;
+            }
+            node = self.core.getBase(node);
+        }
+        return false;
     };
 
     return FmuImporter;
