@@ -14,6 +14,10 @@ define(['plugin/PluginConfig',
         var PluginGeneratorPlugin = function () {
             // Call base class's constructor
             PluginBase.call(this);
+            this.currentConfig = null;
+            this.pluginDir = '';
+            this.testDir = '';
+            this.filesToAdd = {};
         };
 
         PluginGeneratorPlugin.prototype = Object.create(PluginBase.prototype);
@@ -100,69 +104,47 @@ define(['plugin/PluginConfig',
 
         PluginGeneratorPlugin.prototype.main = function (callback) {
             var self = this,
-                currentConfig,
-                pluginJS,
+                pluginFileContent,
                 pluginFileName,
-                templateFileName,
-                templateString,
                 dirCommon,
-                outputDir,
-                testDir,
-                filesToAdd = {},
                 i,
                 nbrOfFiles,
                 fileKeys,
                 error = '',
                 artifact;
 
-            currentConfig = self.getCurrentConfig();
+            // Get and log the configuration which will be appended to and used in the templates.
+            self.currentConfig = self.getCurrentConfig();
             self.logger.info('Current configuration');
-            self.logger.info(JSON.stringify(currentConfig, null, 4));
+            self.logger.info(JSON.stringify(self.currentConfig, null, 4));
 
-            currentConfig.date = new Date();
-            currentConfig.projectName = self.projectName;
-            dirCommon = '/plugins/' + self.projectName + '/' + currentConfig.pluginID + '/';
-            outputDir = 'src' + dirCommon;
-            testDir = 'test/unit' + dirCommon;
-            if (currentConfig.templateType === 'Python') {
-                currentConfig.templateExt = 'py';
-                templateFileName = outputDir + 'Templates/Python.py.ejs';
-                templateString = 'print "<%=a%> and <%=b%> provided."';
-            } else if (currentConfig.templateType === 'CSharp') {
-                currentConfig.templateExt = 'cs';
-                templateFileName = outputDir + 'Templates/CSharp.cs.ejs';
-                templateString = 'using System;\nnamespace Hey {\n\tclass Hi {\n\t\tstatic void Main()' +
-                    ' {\n\t\t\tConsole.WriteLine("<%=a%> and <%=b%> provided.");\n\t\t}\n\t}\n}';
-            } else if (currentConfig.templateType === 'JavaScript') {
-                currentConfig.templateExt = 'js';
-                templateFileName = outputDir + 'Templates/JavaScript.js.ejs';
-                templateString = 'console.info("<%=a%> and <%=b%> provided.);"';
-            } else {
-                currentConfig.templateType = null;
+            // Update date, projectName and paths
+            self.currentConfig.date = new Date();
+            self.currentConfig.projectName = self.projectName;
+            dirCommon = '/plugins/' + self.projectName + '/' + self.currentConfig.pluginID + '/';
+            self.pluginDir = 'src' + dirCommon;
+            self.testDir = 'test/unit' + dirCommon;
+
+            // Add test file if requested.
+            if (self.currentConfig.test) {
+                self.filesToAdd[self.testDir + self.currentConfig.pluginID + 'Spec.js'] =
+                    ejs.render(TEMPLATES['unit_test.js.ejs'], self.currentConfig);
             }
+            self.addTemplateFile();
+            self.addMetaFile();
+            // Add the plugin file.
+            pluginFileContent = ejs.render(TEMPLATES['plugin.js.ejs'], self.currentConfig);
+            pluginFileName = self.pluginDir + self.currentConfig.pluginID + '.js';
+            self.filesToAdd[pluginFileName] =  pluginFileContent;
 
-            pluginJS = ejs.render(TEMPLATES['plugin.js.ejs'], currentConfig);
-            pluginFileName = outputDir + currentConfig.pluginID + '.js';
 
-            filesToAdd[pluginFileName] =  pluginJS;
-
-            if (currentConfig.templateType) {
-                filesToAdd[templateFileName] = templateString;
-                filesToAdd[outputDir + 'Templates/combine_templates.js'] =
-                    ejs.render(TEMPLATES['combine_templates.js.ejs']);
-            }
-
-            if (currentConfig.test) {
-                filesToAdd[testDir + currentConfig.pluginID + 'Spec.js'] =
-                    ejs.render(TEMPLATES['unit_test.js.ejs'], currentConfig);
-            }
-
-            self.logger.info(JSON.stringify(filesToAdd, null, 4));
-            fileKeys = Object.keys(filesToAdd);
+            // Add the file at the end.
+            self.logger.info(JSON.stringify(self.filesToAdd, null, 4));
+            fileKeys = Object.keys(self.filesToAdd);
             nbrOfFiles = fileKeys.length;
             artifact = self.blobClient.createArtifact('pluginFiles');
             for (i = 0; i < fileKeys.length; i += 1) {
-                artifact.addFile(fileKeys[i], filesToAdd[fileKeys[i]], function (err, hash) {
+                artifact.addFile(fileKeys[i], self.filesToAdd[fileKeys[i]], function (err, hash) {
                     error = err ? error + err : error;
                     nbrOfFiles -= 1;
                     if (nbrOfFiles === 0) {
@@ -185,6 +167,62 @@ define(['plugin/PluginConfig',
             }
         };
 
+        PluginGeneratorPlugin.prototype.addMetaFile = function () {
+            var self = this,
+                i,
+                metaNodes = [],
+                names = Object.keys(self.META),
+                nodeData,
+                nodeDataType = {
+                    name: null,
+                    path: null
+                },
+                compare = function (a, b) {
+                    return a.name.localeCompare(b.name);
+                };
+            // Get all the names and paths for the meta nodes.
+            for (i = 0; i < names.length; i += 1) {
+                nodeData = Object.create(nodeDataType);
+                nodeData.name = names[i];
+                nodeData.path = self.core.getPath(self.META[names[i]]);
+                metaNodes.push(nodeData);
+            }
+            // When done sort them by names.
+            metaNodes.sort(compare);
+            self.filesToAdd[self.pluginDir + 'meta.js'] = ejs.render(TEMPLATES['meta.js.ejs'], {
+                metaNodes: metaNodes,
+                date: self.currentConfig.date
+            });
+        };
+
+        PluginGeneratorPlugin.prototype.addTemplateFile = function () {
+            var self = this,
+                fileName,
+                fileContent;
+
+            if (self.currentConfig.templateType === 'Python') {
+                self.currentConfig.templateExt = 'py';
+                fileName = self.pluginDir + 'Templates/Python.py.ejs';
+                fileContent = 'print "<%=a%> and <%=b%> provided."';
+            } else if (self.currentConfig.templateType === 'CSharp') {
+                self.currentConfig.templateExt = 'cs';
+                fileName = self.pluginDir + 'Templates/CSharp.cs.ejs';
+                fileContent = 'using System;\nnamespace Hey {\n\tclass Hi {\n\t\tstatic void Main()' +
+                    ' {\n\t\t\tConsole.WriteLine("<%=a%> and <%=b%> provided.");\n\t\t}\n\t}\n}';
+            } else if (self.currentConfig.templateType === 'JavaScript') {
+                self.currentConfig.templateExt = 'js';
+                fileName = self.pluginDir + 'Templates/JavaScript.js.ejs';
+                fileContent = 'console.info("<%=a%> and <%=b%> provided.);"';
+            } else {
+                self.currentConfig.templateType = null;
+            }
+
+            if (self.currentConfig.templateType) {
+                self.filesToAdd[fileName] = fileContent;
+                self.filesToAdd[self.pluginDir + 'Templates/combine_templates.js'] =
+                    ejs.render(TEMPLATES['combine_templates.js.ejs']);
+            }
+        };
 
         return PluginGeneratorPlugin;
     });
