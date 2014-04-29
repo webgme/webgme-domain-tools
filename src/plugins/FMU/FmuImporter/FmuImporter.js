@@ -64,7 +64,7 @@ define(['plugin/PluginConfig',
                 "name": "FMU",
                 "displayName": "FmuPackage",
                 "description": 'Click and drag an existing compiled FMU',
-                "value": "", // this is the 'default config'
+                "value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // this is the 'default config'
                 "valueType": "asset",
                 "readOnly": false
             }
@@ -88,7 +88,7 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
-            fmuHash = "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f",
+            fmuHash = currentConfig.FMU,
             numFmus,
             i;
 
