@@ -222,5 +222,22 @@ if (templateType) {%>
         return node;
     };
 
+    /**
+    * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
+    * @param node - Node to be checked.
+    * @returns {boolean}
+    */
+    <%= pluginID %>.prototype.baseIsMeta = function (node) {
+        var self = this,
+        baseName,
+        baseNode = self.core.getBase(node);
+        if (!baseNode) {
+            // FCO does not have a base node, by definition function returns true.
+            return true;
+        }
+        baseName = self.core.getAttribute(baseNode, 'name');
+        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
+    };
+
     return <%= pluginID %>;
 });
