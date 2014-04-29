@@ -62,9 +62,9 @@ define(['plugin/PluginConfig',
     FmuImporter.prototype.getConfigStructure = function () {
         return [
             {
-                "name": "FMU",
-                "displayName": "FmuPackage",
-                "description": 'Click and drag an existing compiled FMU',
+                "name": "UploadedArtifact",
+                "displayName": "FMUs",
+                "description": "Click and drag existing compiled FMU(s)",
                 //"value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // this is the 'default config'
                 "value": "0101da04257bf60436b20beb44433b6a45b84e77", // this is the 'default config'
                 "valueType": "asset",
@@ -72,7 +72,6 @@ define(['plugin/PluginConfig',
             }
         ];
     };
-
 
     /**
     * Main function for the plugin to execute. This will perform the execution.
@@ -90,7 +89,9 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
-            fmuHash = currentConfig.FMU,
+            artifactHash = currentConfig.UploadedArtifact,
+            fmuHashes,
+            fmuHash,
             numFmus,
             i;
 
@@ -102,16 +103,18 @@ define(['plugin/PluginConfig',
         self.logger.debug('CurrentConfig:');
         self.logger.debug(currentConfigString);
 
-        self.getFmuModelDescriptions(fmuHash, function (err, fmuModelDescriptions) {
+        var getFmuModelDescriptionsCallback = function (err, hashFmuDescriptionMap) {
             if (err) {
                 self.logger.error(err);
                 return;
             }
 
-            numFmus = fmuModelDescriptions.length;
+            fmuHashes = Object.keys(hashFmuDescriptionMap);
+            numFmus = fmuHashes.length;
 
             for (i = 0; i < numFmus; i += 1) {
-                self.createNewFmu(fmuModelDescriptions[i]);
+                fmuHash = fmuHashes[i];
+                self.createNewFmu(hashFmuDescriptionMap[fmuHash]);
             }
 
             // This will save the changes. If you don't want to save;
@@ -120,7 +123,9 @@ define(['plugin/PluginConfig',
             self.save('Saving FmuImporter results to database...', function (err) {
                 mainCallback(null, self.result);
             });
-        });
+        };
+
+        self.getFmuModelDescriptions(artifactHash, getFmuModelDescriptionsCallback);
     };
 
     FmuImporter.prototype.createNewFmu = function (fmuModelDescription) {
@@ -200,12 +205,12 @@ define(['plugin/PluginConfig',
         return typeInfo;
     };
 
-    FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, getFmuModelDescriptionsCallback) {
+    FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, callback) {
         var self = this;
 
         var blobGetObjectCallback = function (err, content) {
             if (err) {
-                getFmuModelDescriptionsCallback(err);
+                callback(err);
                 return;
             }
 
@@ -247,7 +252,7 @@ define(['plugin/PluginConfig',
             }
 
             // return .\modelDescription.xml
-            getFmuModelDescriptionsCallback(null, modelDescriptionMap);
+            callback(null, modelDescriptionMap);
         };
 
         self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
