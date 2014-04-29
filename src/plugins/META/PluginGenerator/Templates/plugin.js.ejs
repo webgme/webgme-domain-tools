@@ -98,13 +98,21 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'<%if (templateType) {%>, 'ejs'
                 ]
             },
             {
-                "name": "color",
-                "displayName": "Color",
-                "description": 'The hex color code for the animal.',
-                "readOnly": false,
-                "value": '#FF0000',
-                "regex": '^#([A-Fa-f0-9]{6})$',
-                "valueType": "string"
+                'name': 'color',
+                'displayName': 'Color',
+                'description': 'The hex color code for the animal.',
+                'readOnly': false,
+                'value': '#FF0000',
+                'regex': '^#([A-Fa-f0-9]{6})$',
+                'valueType': 'string'
+            },
+            {
+                'name': 'anAsset',
+                'displayName': 'Document',
+                'description': '',
+                'value': '',
+                'valueType': 'asset',
+                'readOnly': false
             }
         ];
     };
