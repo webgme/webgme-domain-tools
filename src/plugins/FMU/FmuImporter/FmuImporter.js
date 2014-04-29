@@ -120,7 +120,58 @@ define(['plugin/PluginConfig',
                 mainCallback(null, self.result);
             });
         });
+    };
 
+    FmuImporter.prototype.createNewFmu = function (fmuModelDescription) {
+        var fmuInfo = fmuModelDescription["fmiModelDescription"],
+            modelName = fmuInfo["_modelName"],
+            splitNames = modelName.split('.'),
+            modelVariables = fmuInfo["ModelVariables"],
+            scalarVariables = modelVariables["ScalarVariable"],
+            numVariables = scalarVariables.length,
+            variable,
+            varName,
+            variability,
+            causality,
+            valueRef,
+            varTypeInfo,
+            value,
+            i;
+
+
+
+        for (i = 0; i < numVariables; i += 1) {
+            variable = scalarVariables[i];
+            varName = variable["_name"];
+            variability = variable["_variability"];
+            causality = variable["_causality"];
+            valueRef = variable["_valueReference"];
+            varTypeInfo = self.getVariableTypeInfo(variable);
+            value = varTypeInfo["_start"];
+        }
+
+
+
+    };
+
+    FmuImporter.prototype.getVariableTypeInfo = function (variableDict) {
+        var typeInfo = {};
+
+        if (variableDict.hasOwnProperty("Real")) {
+            typeInfo = variableDict["Real"];
+            typeInfo["_type"] = "Real";
+        } else if (variableDict.hasOwnProperty("Boolean")) {
+            typeInfo = variableDict["Boolean"];
+            typeInfo["_type"] = "Boolean";
+        } else if (variableDict.hasOwnProperty("Integer")) {
+            typeInfo = variableDict["Integer"];
+            typeInfo["_type"] = "Integer";
+        } else if (variableDict.hasOwnProperty("Enumeration")) {
+            typeInfo = variableDict["Enumeration"];
+            typeInfo["_type"] = "Enumeration";
+        }
+
+        return typeInfo;
     };
 
     FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, getFmuModelDescriptionsCallback) {
