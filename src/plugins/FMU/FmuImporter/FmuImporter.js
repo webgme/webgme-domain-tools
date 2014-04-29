@@ -201,22 +201,23 @@ define(['plugin/PluginConfig',
     };
 
     FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, getFmuModelDescriptionsCallback) {
-        var self = this,
-            zip,
-            fmuZip,
-            fmuFileHash = 32,
-            modelDescriptionXml,
-            modelDescriptionJson,
-            modelDescriptionMap = {},
-            fmusWithinZip,
-            numFmus,
-            i;
+        var self = this;
 
         var blobGetObjectCallback = function (err, content) {
             if (err) {
                 getFmuModelDescriptionsCallback(err);
                 return;
             }
+
+            var zip,
+                fmuZip,
+                fmuFileHash = 32,
+                modelDescriptionXml,
+                modelDescriptionJson,
+                modelDescriptionMap = {},
+                fmusWithinZip,
+                numFmus,
+                i;
 
             // TODO: what if the content is not a ZIP? TODO: check metadata
             zip = new JSZip(content);
