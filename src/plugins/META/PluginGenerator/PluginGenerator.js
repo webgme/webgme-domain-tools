@@ -1,10 +1,8 @@
 /**
- * Created by Zsolt on 4/3/2014.
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  *
- * Regenerate templates:
- *   node src\tools\combine_templates.js -t src\plugins\META\PluginGenerator\Templates
+ * Author: Patrik Meijer, Zsolt Lattmann
  */
-
 
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
@@ -38,7 +36,7 @@ define(['plugin/PluginConfig',
                     "regex": '^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[a-zA-Z_$][0-9a-zA-Z_$]*',
                     "regexMessage": 'No spaces and special characters allowed. This value is used as the name of the generated plugin class.',
                     "description": 'Unique ID for the plugin.',
-                    "value": 'MyNewExporterPlugin',
+                    "value": 'NewPlugin',
                     "valueType": "string",
                     "readOnly": false
                 },
@@ -46,7 +44,7 @@ define(['plugin/PluginConfig',
                     "name": "pluginName",
                     "displayName": "Name",
                     "description": 'Short readable plugin name; spaces are allowed',
-                    "value": 'My New Exporter',
+                    "value": 'New Plugin',
                     "valueType": "string",
                     "readOnly": false
                 },
