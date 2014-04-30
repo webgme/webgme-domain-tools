@@ -31,7 +31,9 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
             self.logger.info(self.core.getAttribute(self.activeNode, 'name') + ' has children');
 
             for (i = 0; i < childNodes.length; i += 1) {
-                self.logger.info('  - ' + self.core.getAttribute(childNodes[i], 'name'));
+                var name = self.core.getAttribute(childNodes[i], 'name');
+                self.logger.info('  - ' + name);
+                self.createMessage(childNodes[i], 'This is a child node (' + i + ' - ' + name + '), everything is ok.');
             }
 
             if (callback) {
