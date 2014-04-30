@@ -65,8 +65,9 @@ define(['plugin/PluginConfig',
                 "name": "UploadedArtifact",
                 "displayName": "FMUs",
                 "description": "Click and drag existing compiled FMU(s)",
-                //"value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // this is the 'default config'
-                "value": "0101da04257bf60436b20beb44433b6a45b84e77", // this is the 'default config'
+                //"value": "167d532ae62ec4ce73f085fffba2091ac29f487b", // multiple txt.zip in zip
+                "value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // multiple fmus in zip
+                //"value": "0101da04257bf60436b20beb44433b6a45b84e77", // single fmu
                 "valueType": "asset",
                 "readOnly": false
             }
@@ -87,12 +88,13 @@ define(['plugin/PluginConfig',
         // These are all instantiated at this point.
         var self = this,
             selectedNode = self.activeNode,
-            selectedNodeMetaType = self.getMetaType(selectedNode),
+            fmuLibraryNode,
             currentConfig = self.getCurrentConfig(),
             currentConfigString = JSON.stringify(currentConfig, null, 4),
             artifactHash = currentConfig.UploadedArtifact,
             fmuHash,
-            i;
+            numUploaded,
+            numCreated = 0;
 
         self.logger.debug('Entering FmuImporter main');
 
@@ -103,9 +105,12 @@ define(['plugin/PluginConfig',
         if (!self.isMetaTypeOf(selectedNode, FmuMetaTypes.FMU_Library)) {
             var msg = "FmuImporter must be called from an FMU_Library!";
             self.logger.error(msg);
+            self.createMessage(selectedNode, msg);
             self.result.setSuccess(false);
             mainCallback(msg, self.result);
             return;
+        } else {
+            fmuLibraryNode = selectedNode;
         }
 
         self.logger.debug('CurrentConfig:');
@@ -117,13 +122,18 @@ define(['plugin/PluginConfig',
                 return;
             }
 
+            numUploaded = Object.keys(hashFmuDescriptionMap).length;
+
             for (fmuHash in hashFmuDescriptionMap) {
-                self.createNewFmu(selectedNode, hashFmuDescriptionMap[fmuHash]);
+                if (self.createNewFmu(fmuLibraryNode, fmuHash, hashFmuDescriptionMap[fmuHash])) {
+                    numCreated += 1;
+                }
             }
 
             // This will save the changes. If you don't want to save;
             // exclude self.save and call callback directly from this scope.
             self.result.setSuccess(true);
+            self.createMessage(selectedNode, numCreated + " FMUs created out of " + numUploaded + " uploaded.");
             self.save('Saving FmuImporter results to database...', function (err) {
                 mainCallback(null, self.result);
             });
@@ -132,7 +142,7 @@ define(['plugin/PluginConfig',
         self.getFmuModelDescriptions(artifactHash, getFmuModelDescriptionsCallback);
     };
 
-    FmuImporter.prototype.createNewFmu = function (parentNode, fmuModelDescription) {
+    FmuImporter.prototype.createNewFmu = function (parentNode, fmuHash, fmuModelDescription) {
         var self = this,
             newFmuNode,
             newFmuChildNode,
@@ -164,6 +174,7 @@ define(['plugin/PluginConfig',
         // Create the new FMU in current context
         newFmuNode = self.core.createNode({parent: parentNode, base: FmuMetaTypes.FMU});
         self.core.setAttribute(newFmuNode, 'name', fmuName);
+        self.core.setAttribute(newFmuNode, 'resource', fmuHash);
 
         // Create the Inputs, Outputs, Parameters
         for (i = 0; i < numVariables; i += 1) {
@@ -221,6 +232,12 @@ define(['plugin/PluginConfig',
                 }
             }
         }
+
+        if (newFmuNode) {
+            return true;
+        } else {
+            return false;
+        }
     };
 
     FmuImporter.prototype.getVariableTypeInfo = function (variableDict) {
@@ -246,13 +263,14 @@ define(['plugin/PluginConfig',
     FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, callback) {
         var self = this;
 
-        var blobGetObjectCallback = function (err, content) {
+        var blobGetObjectCallback = function (err, objectContent) {
             if (err) {
                 callback(err);
                 return;
             }
 
             var zip,
+                fmuContent,
                 fmuZip,
                 fmuFileHash = 32,
                 modelDescriptionXml,
@@ -263,7 +281,7 @@ define(['plugin/PluginConfig',
                 i;
 
             // TODO: what if the content is not a ZIP? TODO: check metadata
-            zip = new JSZip(content);
+            zip = new JSZip(objectContent);
 
             modelDescriptionXml = zip.file("modelDescription.xml");
 
@@ -273,8 +291,10 @@ define(['plugin/PluginConfig',
                 numFmus = fmusWithinZip.length;
 
                 for (i = 0; i < numFmus; i += 1) {
-                    fmuZip = new JSZip(fmusWithinZip[i].asArrayBuffer());
-                    fmuFileHash += 1;
+                    fmuContent = fmusWithinZip[i].asArrayBuffer();
+                    fmuZip = new JSZip(fmuContent);
+                    //fmuFileHash = self.blobClient.getHash(fmuContent);
+                    fmuFileHash += 1;  // need to get the actual download (soft-link) hash for this content
                     modelDescriptionXml = fmuZip.file("modelDescription.xml");
                     if (modelDescriptionXml != null) {
                         modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
