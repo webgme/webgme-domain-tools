@@ -19,8 +19,8 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'xmljsonconverter'], functio
 
     Logger.prototype.main = function (callback) {
         var self = this,
-            converter = new Converter.Xml2json(null, {skipWSText: true}),
-            obj = converter.xmlStr2json('<xml>Hello, <who name="world">world<ttt> \n\r  </ttt></who>!</xml>');
+            xml2json = new Converter.XmlStr2json(null, {skipWSText: true}),
+            obj = xml2json.convert('<xml>Hello, <who name="world">world<ttt attr="4"> \n\r  </ttt></who>!</xml>');
         self.logger.info(JSON.stringify(obj, null, 4));
 
         if (!self.activeNode) {
@@ -32,7 +32,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'xmljsonconverter'], functio
         self.logger.info('name : ' + self.core.getAttribute(self.activeNode, 'name'));
         self.logger.info('path : ' + self.core.getPath(self.activeNode));
         self.logger.info('GUID : ' + self.core.getGuid(self.activeNode));
-        self.createMessage(self.activeNode, JSON.stringify(obj, null, 4));
+        self.createMessage(self.activeNode, JSON.stringify(obj, null, 0));
         self.result.setSuccess(true);
         callback(null, self.result);
     };
