@@ -4,9 +4,10 @@
 
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
+        'plugin/FmiExporter/FmiExporter/FMU',
         'ejs',
         'plugin/FmiExporter/FmiExporter/Templates/Templates'],
-    function (PluginConfig, PluginBase, ejs, TEMPLATES) {
+    function (PluginConfig, PluginBase, FmuMetaTypes, ejs, TEMPLATES) {
     'use strict';
 
     /**
@@ -32,17 +33,6 @@ define(['plugin/PluginConfig',
         };
         this.modelExchangeConfig = {};
         this.filesToSave = {};
-
-        // FIXME: this map should be exported from WebGME
-        this.fmiMetaTypes = {
-            'FMU': '/1822302751/902541625',
-            'PortComposition': '/1822302751/472382791',
-            'Input': '/1822302751/873609603',
-            'Output': '/1822302751/206401000',
-            'Parameter': '/1822302751/1582216564',
-            'SimulationParameter': '/1822302751/1963127367',
-            'ModelExchange': '/1822302751/637828452'
-        };
     };
 
     // Prototype inheritance from PluginBase.
@@ -98,7 +88,9 @@ define(['plugin/PluginConfig',
             return;
         }
 
-        if (selectedNodeBasePath != self.fmiMetaTypes.ModelExchange) {
+        this.updateMETA(FmuMetaTypes);
+
+        if (selectedNodeBaseType != FmuMetaTypes.ModelExchange) {
             callback('SelectedNode is not a ModelExchange!', self.result);
         } else {
             modelExchangeNode = selectedNode;
@@ -196,7 +188,7 @@ define(['plugin/PluginConfig',
                     for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
                         fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
                         fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
-                        artifact.addHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+                        artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
 
 //                        if (fileHashes.indexOf(fmuHash) < 0) {
 //                            artifact.addHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
@@ -283,7 +275,7 @@ define(['plugin/PluginConfig',
 
             // FIXME: this condition is fine now, but will not work correctly if we have a more complicated inheritance
             //        in the meta model.
-            if (metaTypePath === self.fmiMetaTypes.PortComposition) {
+            if (metaTypeNode === FmuMetaTypes.PortComposition) {
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
                     dstPath = self.core.getPointerPath(meChildNode, 'dst'),
@@ -317,11 +309,11 @@ define(['plugin/PluginConfig',
 
                 iterationCallback(null);
 
-            } else if (metaTypePath === self.fmiMetaTypes.FMU) {
+            } else if (metaTypeNode === FmuMetaTypes.FMU) {
                 // asynchronous call to get parameter and port information
                 self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction(meChildName));
 
-            } else if (metaTypePath === self.fmiMetaTypes.SimulationParameter) {
+            } else if (metaTypeNode === FmuMetaTypes.SimulationParameter) {
                 if (self.simulationInfo.hasOwnProperty(meChildName)) {
                     self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
                 }
@@ -480,14 +472,14 @@ define(['plugin/PluginConfig',
             baseTypeNode = self.getMetaType(fmuChildNode);
             baseTypePath = self.core.getPath(baseTypeNode);
 
-            if (baseTypePath === self.fmiMetaTypes.Parameter) {
+            if (baseTypeNode === FmuMetaTypes.Parameter) {
                 parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
 
-            } else if (baseTypePath === self.fmiMetaTypes.Input) {
+            } else if (baseTypeNode === FmuMetaTypes.Input) {
                 inputMap[fmuChildNodeRelid] = fmuChildNodeName;
                 inputs.push(fmuChildNodeName);
 
-            } else if (baseTypePath === self.fmiMetaTypes.Output) {
+            } else if (baseTypeNode === FmuMetaTypes.Output) {
                 outputMap[fmuChildNodeRelid] = fmuChildNodeName;
                 outputs.push(fmuChildNodeName);
             }
