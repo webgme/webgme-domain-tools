@@ -16,7 +16,7 @@ define(['plugin/PluginConfig',
         this.modelID = 0;
         this.wiresToAdd = [];
         this.circuits = [];
-        this.components = {};
+        this.components = {}; // stores a list of diagrams, each of which contains its circuit diagram components
         this.idLUT = {};
         this.childrenLUT = {};
 
@@ -73,12 +73,24 @@ define(['plugin/PluginConfig',
             core = self.core,
             selectedNode = self.activeNode;
 
+          // uncomment this to enable updating "validPlugin" field
+//        var newRootHash,
+//            result;
+//        core.setRegistry(self.rootNode, 'validPlugins', '');
+//        // Commit changes.
+//        core.persist(self.rootNode, function (err) {
+//        });
+//        newRootHash = core.getHash(self.rootNode);
+//        console.info(self.project.makeCommit);
+//        result = {'commitHash': self.commitHash};
+//        result.commitHash = self.project.makeCommit([result.commitHash], newRootHash, 'Plugin updated the model.', function (err) {
+//        });
+
         if (!selectedNode) {
             self.result.setSuccess(false);
             callback('selectedNode is not defined', self.result);
             return;
         }
-
 
 //        core.loadChildren(selectedNode, function (err, childNodes) {
 //            self.visitObject(err, childNodes, core, callback);

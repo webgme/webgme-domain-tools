@@ -6,7 +6,8 @@
 
 "use strict";
 
-define(['js/Widgets/DiagramDesigner/Connection'], function (Connection) {
+define(['js/Widgets/DiagramDesigner/Connection',
+        'js/Constants'], function (Connection, CONSTANTS) {
 
     var NetLabelConnection;
 
@@ -19,10 +20,22 @@ define(['js/Widgets/DiagramDesigner/Connection'], function (Connection) {
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
 
         this._segPoints = segPoints.slice(0);
-
+        self.logger.debug(CONSTANTS.POINTER_SOURCE);
         //this.paper   is a RaphaelJS paper
-        //this.diagramDesigner.skinParts.$itemsContainer ---- HTML EL
 
+//        var _toolTipBase = $('<div class="port_info"> \
+//            <span class="class_name">CLASS NAME</span> \
+//            <span class="name">NAME</span> \
+//        </div>');
+        var _toolTipBase = $('<div class="port_info"></div>');
+//        this.skinParts.srcDragPoint.css({"position": "absolute",
+//            "top": this.sourceCoordinates.y,
+//            "left": this.sourceCoordinates.x});
+
+        _toolTipBase.html('abcdefg');
+        this.diagramDesigner.skinParts.$itemsContainer.append(_toolTipBase);
+        this.logger.debug(this.srcText);
+        this.logger.debug(this.dstText);
 
         this.logger.error("!!!! CONNECTION DRAWING NOT YET IMPLEMENTED: " + JSON.stringify(segPoints));
 

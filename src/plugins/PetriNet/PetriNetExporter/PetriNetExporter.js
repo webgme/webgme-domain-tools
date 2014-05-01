@@ -2,7 +2,6 @@
  * Created by Dana Zhang on 3/31/2014.
  */
 
-
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'json2xml'], function (PluginConfig, PluginBase, Json2Xml) {
@@ -12,8 +11,7 @@ define(['plugin/PluginConfig',
     var PetriNetExporterPlugin = function () {
         PluginBase.call(this);
         //TODO: this is not the right way to do it..., but a way at least
-        this.objectToVisit = 0; // number of objects that have to be visited
-        this.objectToVisit += 1; // we need to visit the selected node
+        this.objectToVisit  = 1; // number of objects that have to be visited and we are visiting the root one
         this.diagramPath = "";
         this.modelID = 0;
         this.diagrams = [];
@@ -23,6 +21,7 @@ define(['plugin/PluginConfig',
         this.arcs = [];
         this.idLUT = {};
         this.outputFiles = {};
+        this.petriNetDiagrams = {};
     };
 
     PetriNetExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -52,6 +51,10 @@ define(['plugin/PluginConfig',
             i,
             child,
             gmeID,
+            basenode,
+            metatype,
+            isPlace,
+            isTransition,
             parentPath,
             parentBaseClass,
             isParentNodeDiagram,
@@ -69,7 +72,9 @@ define(['plugin/PluginConfig',
         for (i = 0; i < childNodes.length; i += 1) {
 
             child = childNodes[i];
-            parentPath = core.getParent(child) ? core.getPath(core.getParent(child)) : "";
+//            basenode = self.get
+            parentPath = core.getPath(core.getParent(child));
+//            parentPath = core.getParent(child) ? core.getPath(core.getParent(child)) : "";
             parentBaseClass = self.getMetaType(core.getParent(child));
             isParentNodeDiagram = self.isMetaTypeOf(parentBaseClass, self.META.PetriNetDiagram);
 
@@ -113,7 +118,9 @@ define(['plugin/PluginConfig',
 
                 self.modelID += 1;
                 if (isArc) {
-                    self.addConnection(child);
+                    self.addConnection(child, function (err) {
+                        console.log("error occured");
+                    });
                 } else {
 
                     // if key not exist already, add key; otherwise ignore
@@ -247,7 +254,7 @@ define(['plugin/PluginConfig',
         }
     };
 
-    PetriNetExporterPlugin.prototype.addConnection = function (nodeObj) {
+    PetriNetExporterPlugin.prototype.addConnection = function (nodeObj, callback) {
 
         var self = this,
             core = self.core,
@@ -264,20 +271,28 @@ define(['plugin/PluginConfig',
             arc;
 
         core.loadByPath(self.rootNode, src, function (err, nodeObj) {
-            if (!err) {
-                if (!self.idLUT.hasOwnProperty(src)) {
-                    srcMetaType = core.getAttribute(self.getMetaType(nodeObj), 'name');
-                    self.addComponent(nodeObj, srcMetaType);
-
-                    self.modelID += 1;
-                }
-
-                srcX = core.getRegistry(nodeObj, 'position').x;
-                srcY = core.getRegistry(nodeObj, 'position').y;
+            if (err) {
+                callback(null);
+                return;
             }
+
+            if (!self.idLUT.hasOwnProperty(src)) {
+                srcMetaType = core.getAttribute(self.getMetaType(nodeObj), 'name');
+                self.addComponent(nodeObj, srcMetaType);
+
+                self.modelID += 1;
+            }
+
+            srcX = core.getRegistry(nodeObj, 'position').x;
+            srcY = core.getRegistry(nodeObj, 'position').y;
+
         });
 
         core.loadByPath(self.rootNode, dst, function (err, nodeObj) {
+            if (err) {
+                callback(null);
+                return;
+            }
             if (!err) {
                 // nodeObj is available to use and it is loaded.
                 if (!self.idLUT.hasOwnProperty(dst)) {
