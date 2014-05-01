@@ -66,7 +66,6 @@ define(['plugin/PluginConfig',
 
     LogicGatesExporterPlugin.prototype.main = function (callback) {
         var self = this,
-            core = self.core,
             selectedNode = self.activeNode,
             afterAllVisited;
 
@@ -95,13 +94,20 @@ define(['plugin/PluginConfig',
                 error,
                 counter = self.wiresToAdd.length,
                 afterWireAdded;
-            //TODO: error handling
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
             self.logger.warning('Visited all children!');
 
             afterWireAdded = function (err) {
-                //TODO: error handling
+                error = err ? error += err : error;
                 counter -= 1;
                 if (counter === 0) {
+                    if (error) {
+                        callback(error, self.result);
+                        return;
+                    }
                     self.createObjectFromDiagram();
                     self.saveResults(callback);
                 }
@@ -119,6 +125,7 @@ define(['plugin/PluginConfig',
         var self = this,
             i,
             error = '',
+            afterFileAdded,
             artifact = self.blobClient.createArtifact('LogicGatesExporterOutput'),
             fileKeys = Object.keys(self.outputFiles),
             nbrOfFiles = fileKeys.length;
@@ -128,35 +135,41 @@ define(['plugin/PluginConfig',
             return;
         }
 
-        for (i = 0; i < fileKeys.length; i += 1) {
-            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], function (err, hash) {
-                error = err ? error + err : error;
-                nbrOfFiles -= 1;
-                if (nbrOfFiles === 0) {
-                    // if only using err, then it is only err on the last one
-                    if (error) {
-                        callback('Something went wrong when adding files: ' + err, self.result);
-                        return;
-                    }
-                    self.blobClient.saveAllArtifacts(function (err, hashes) {
-                        if (err) {
-                            callback(err, self.result);
-                            return;
-                        }
-                        self.result.addArtifact(hashes[0]);
-                        self.logger.info('Artifacts are saved here: ' + hashes.toString());
-                        self.result.setSuccess(true);
-                        callback(null, self.result);
-                    });
+        afterFileAdded = function (err, hash) {
+            var afterSavingArtifact;
+
+            afterSavingArtifact = function (err, hashes) {
+                if (err) {
+                    callback(err, self.result);
+                    return;
                 }
-            });
+                self.result.addArtifact(hashes[0]);
+                self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                self.result.setSuccess(true);
+                callback(null, self.result);
+            };
+
+            error = err ? error + err : error;
+            nbrOfFiles -= 1;
+            if (nbrOfFiles === 0) {
+                if (error) {
+                    callback('Something went wrong when adding files: ' + err, self.result); // if only using err, then it is only err on the last one
+                    return;
+                }
+                self.blobClient.saveAllArtifacts(afterSavingArtifact);
+            }
+        };
+
+        for (i = 0; i < fileKeys.length; i += 1) {
+            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], afterFileAdded);
         }
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildren = function (node, callback) {
-        var self = this;
-        // load root's children
-        self.core.loadChildren(node, function (err, children) {
+        var self = this,
+            afterLoading;
+
+        afterLoading = function (err, children) {
             var counter,
                 i,
                 itrCallback,
@@ -180,14 +193,17 @@ define(['plugin/PluginConfig',
                     self.visitAllChildrenRec(node, counter, itrCallback);
                 });
             }
-        });
+        };
+        // load root's children
+        self.core.loadChildren(node, afterLoading);
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildrenRec = function (node, counter, callback) {
         var self = this,
-            core = self.core;
+            core = self.core,
+            afterLoading;
 
-        core.loadChildren(node, function (err, children) {
+        afterLoading = function (err, children) {
             var i;
             if (err) {
                 callback('loadChildren failed'); // for ' + node.toString());
@@ -204,7 +220,9 @@ define(['plugin/PluginConfig',
                     });
                 }
             }
-        });
+        };
+
+        core.loadChildren(node, afterLoading);
     };
 
     LogicGatesExporterPlugin.prototype.atNode = function (node, callback) {
@@ -221,9 +239,7 @@ define(['plugin/PluginConfig',
             isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
 
         if (isGate) {
-            // if key not exist already, add key; otherwise ignore
             self.addGate(node, metaType, isComplex, parentPath, function (err) {
-                self.logger.info("we just added a gate");
                 callback(err, node);
             });
 
@@ -259,7 +275,9 @@ define(['plugin/PluginConfig',
             validGates,
             pushWire,
             counter = 2,
-            error = '';
+            error = '',
+            afterLoadingSrc,
+            afterLoadingDst;
         // Wire component's elements: From (attrs: ID, Port), To (attrs: ID, Port)
         pushWire = function (err, shouldPush) {
             if (err) {
@@ -306,7 +324,7 @@ define(['plugin/PluginConfig',
             }
         };
 
-        core.loadByPath(self.rootNode, src, function (err, node) {
+        afterLoadingSrc = function (err, node) {
             var srcNodeObj,
                 parentPath,
                 metaType,
@@ -314,15 +332,15 @@ define(['plugin/PluginConfig',
                 isPort,
                 isComplex;
 
+            metaType = core.getAttribute(core.getBase(node), 'name');
+            isGate = self.GATE_TYPES[metaType];
+            isPort = metaType === 'InputPort' || metaType === 'OutputPort';
+            isComplex = self.COMPLEX[metaType];
+
             if (err) {
                 pushWire(err, false);
                 return;
             }
-
-            metaType = core.getAttribute(core.getBase(node), 'name');
-            isComplex = self.COMPLEX[metaType];
-            isGate = self.GATE_TYPES[metaType];
-            isPort = metaType === 'InputPort' || metaType === 'OutputPort';
 
             if (isGate) {
                 srcNodeObj = node;
@@ -337,15 +355,15 @@ define(['plugin/PluginConfig',
 
             if ((isPort || isGate) && (!self.idLUT.hasOwnProperty(src))) {
                 self.addGate(srcNodeObj, metaType, isComplex, parentPath, function (err) {
-                    self.logger.info("we just added a src gate from addWire()");
                     pushWire(err, true);
                 });
             } else {
                 pushWire(null, false);
             }
-        });
+        };
+        core.loadByPath(self.rootNode, src, afterLoadingSrc);
 
-        core.loadByPath(self.rootNode, dst, function (err, node) {
+        afterLoadingDst = function (err, node) {
             var portGMEId,
                 parentPath,
                 metaType,
@@ -354,14 +372,15 @@ define(['plugin/PluginConfig',
                 isPort,
                 dstNodeObj;
 
-            if (err) {
-                pushWire(err, false);
-                return;
-            }
             metaType = core.getAttribute(core.getBase(node), 'name');
             isComplex = self.COMPLEX[metaType];
             isGate = self.GATE_TYPES[metaType];
             isPort = metaType === 'InputPort' || metaType === 'OutputPort';
+
+            if (err) {
+                pushWire(err, false);
+                return;
+            }
 
             if (isGate) {
                 dstNodeObj = node;
@@ -382,7 +401,8 @@ define(['plugin/PluginConfig',
             } else {
                 pushWire(null, false);
             }
-        });
+        };
+        core.loadByPath(self.rootNode, dst, afterLoadingDst);
     };
 
     /**
@@ -409,20 +429,13 @@ define(['plugin/PluginConfig',
             gate,
             pushGate;
 
-            // debugging use: this becomes true when a gate in a subcircuit is being visited
-//            if (!xNull || !yNull || !nodeObj || !yNull.position)
-//            {
-//                console.log("abc");
-//            }
-
-        self.idLUT[gmeID] = self.modelID;
 
         // all logic gates component have attrs: Type, Name, ID
         //                                 element: Point (attrs: X, Y, Angle)
         gate = {
             "@Type": metaType,
             "@Name": name,
-            "@ID": self.modelID,
+//            "@ID": self.modelID,
             "Point": {
                 "@X": xPos,
                 "@Y": yPos,
@@ -430,7 +443,10 @@ define(['plugin/PluginConfig',
             }
         };
 
-        pushGate = function (modGate) {
+        pushGate = function (modGate, gateGmeID) {
+            modGate["@ID"] = self.modelID;
+            self.idLUT[gateGmeID] = self.modelID;
+            self.modelID += 1;
             if (!self.circuits.hasOwnProperty(parentPath)) {
                 self.circuits[parentPath] = {
                     "Gate": [],
@@ -441,7 +457,6 @@ define(['plugin/PluginConfig',
 
                 self.circuits[parentPath].Gate.push(modGate);
             }
-            self.modelID += 1;
             callback(null);
         };
 
@@ -452,7 +467,7 @@ define(['plugin/PluginConfig',
                     return;
                 }
                 gate["@NumInputs"] = childNodes.length - 1;
-                pushGate(gate);
+                pushGate(gate, gmeID);
             });
 
         } else {
@@ -464,7 +479,7 @@ define(['plugin/PluginConfig',
                 gate["@SelRep"] = selRep;
                 gate["@Value"] = value;
             }
-            pushGate(gate);
+            pushGate(gate, gmeID);
         }
     };
 
