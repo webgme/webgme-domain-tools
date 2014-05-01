@@ -139,12 +139,13 @@ define(['plugin/PluginConfig',
             });
         };
 
-
-
         self.getFmuModelDescriptions(artifactHash, getFmuModelDescriptionsCallback);
     };
 
-    FmuImporter.prototype.createNewFmu = function (parentNode, fmuHash, fmuModelDescription) {
+    FmuImporter.prototype.createNewFmu = function (parentNode, fmuHash, fmuModelDescription, locX, locY) {
+        locX = locX || 100;
+        locY = locY || 100;
+
         var self = this,
             newFmuNode,
             newFmuChildNode,
@@ -336,8 +337,8 @@ define(['plugin/PluginConfig',
         // TODO: what if modelDescriptionXml is NOT an xml?
 
         var self = this,
-            converter = new Converter.XmlStr2json({skipWSText: true}),
-            obj = converter.convert(modelDescriptionXml);
+            converter = new Converter.Xml2json({skipWSText: true}),
+            obj = converter.convertFromStr(modelDescriptionXml);
 
         return obj;
     };
