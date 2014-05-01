@@ -15,10 +15,11 @@ define(['plugin/PluginConfig',
         this.diagramPath = "";
         this.modelID = 0;
         this.wiresToAdd = [];
-        this.circuits = [];
-        this.components = {}; // stores a list of diagrams, each of which contains its circuit diagram components
+        this.circuit = [];
+        this.circuits = {}; // stores a list of diagrams, each of which contains its circuit diagram circuits
         this.idLUT = {};
         this.childrenLUT = {};
+        this.outputFiles = {};
 
         this.GATE_TYPES = {
             "Not": true,
@@ -54,11 +55,6 @@ define(['plugin/PluginConfig',
             "UserIOBase2PortBase": true,
             "UserIOBase2UserIOBase": true
         };
-
-        this.outputFiles = {};
-
-        // debugging use
-        this.gates = [];
     };
 
     LogicGatesExporterPlugin.prototype = Object.create(PluginBase.prototype);
@@ -71,7 +67,8 @@ define(['plugin/PluginConfig',
     LogicGatesExporterPlugin.prototype.main = function (callback) {
         var self = this,
             core = self.core,
-            selectedNode = self.activeNode;
+            selectedNode = self.activeNode,
+            afterAllVisited;
 
           // uncomment this to enable updating "validPlugin" field
 //        var newRootHash,
@@ -92,54 +89,68 @@ define(['plugin/PluginConfig',
             return;
         }
 
-//        core.loadChildren(selectedNode, function (err, childNodes) {
-//            self.visitObject(err, childNodes, core, callback);
-//        });
-
-        self.visitAllChildren(selectedNode, function (err) {
+        // after all children are visited
+        afterAllVisited = function (err) {
             var i,
-                artifact,
-                nbrOfFiles,
-                fileKeys,
-                counter = self.wiresToAdd.length;
+                error,
+                counter = self.wiresToAdd.length,
+                afterWireAdded;
             //TODO: error handling
             self.logger.warning('Visited all children!');
-            var whenWired = function (err) {
+
+            afterWireAdded = function (err) {
                 //TODO: error handling
                 counter -= 1;
                 if (counter === 0) {
                     self.createObjectFromDiagram();
-                    artifact = self.blobClient.createArtifact('LogicGatesExporterOutput');
-                    fileKeys = Object.keys(self.outputFiles);
-                    nbrOfFiles = fileKeys.length;
-                    for (i = 0; i < fileKeys.length; i += 1) {
-                        artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], function (err, hash) {
-                            nbrOfFiles -= 1;
-                            if (nbrOfFiles === 0) {
-                                if (err) {
-                                    callback('Something went wrong when adding files: ' + err, self.result);
-                                    return;
-                                }
-                                self.blobClient.saveAllArtifacts(function (err, hashes) {
-                                    if (err) {
-                                        callback(err, self.result);
-                                        return;
-                                    }
-                                    self.result.addArtifact(hashes[0]);
-                                    self.logger.info('Artifacts are saved here: ' + hashes.toString());
-                                    self.result.setSuccess(true);
-                                    callback(null, self.result);
-                                });
-                            }
-                        });
-                    }
+                    self.saveResults(callback);
                 }
             };
 
             for (i = 0; i < self.wiresToAdd.length; i += 1) {
-                self.addWire(self.wiresToAdd[i], whenWired);
+                self.addWire(self.wiresToAdd[i], afterWireAdded);
             }
-        });
+        };
+
+        self.visitAllChildren(selectedNode, afterAllVisited);
+    };
+
+    LogicGatesExporterPlugin.prototype.saveResults = function (callback) {
+        var self = this,
+            i,
+            error = '',
+            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput'),
+            fileKeys = Object.keys(self.outputFiles),
+            nbrOfFiles = fileKeys.length;
+
+        if (nbrOfFiles === 0) {
+            callback(null, self.result);
+            return;
+        }
+
+        for (i = 0; i < fileKeys.length; i += 1) {
+            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], function (err, hash) {
+                error = err ? error + err : error;
+                nbrOfFiles -= 1;
+                if (nbrOfFiles === 0) {
+                    // if only using err, then it is only err on the last one
+                    if (error) {
+                        callback('Something went wrong when adding files: ' + err, self.result);
+                        return;
+                    }
+                    self.blobClient.saveAllArtifacts(function (err, hashes) {
+                        if (err) {
+                            callback(err, self.result);
+                            return;
+                        }
+                        self.result.addArtifact(hashes[0]);
+                        self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                        self.result.setSuccess(true);
+                        callback(null, self.result);
+                    });
+                }
+            });
+        }
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildren = function (node, callback) {
@@ -214,7 +225,6 @@ define(['plugin/PluginConfig',
             self.addGate(node, metaType, isComplex, parentPath, function (err) {
                 self.logger.info("we just added a gate");
                 callback(err, node);
-                self.gates.push(node);
             });
 
         } else if (isWire) {
@@ -263,6 +273,7 @@ define(['plugin/PluginConfig',
                     callback(error);
                     return;
                 }
+                shouldPush = true;
                 if (shouldPush) {
                     parentCircuitPath = core.getPath(core.getParent(nodeObj));
                     srcID = self.idLUT[src];
@@ -279,8 +290,8 @@ define(['plugin/PluginConfig',
                         }
                     };
 
-                    if (!self.components.hasOwnProperty(parentCircuitPath)) {
-                        self.components[parentCircuitPath] = {
+                    if (!self.circuits.hasOwnProperty(parentCircuitPath)) {
+                        self.circuits[parentCircuitPath] = {
                             "Gate": [],
                             "Wire": []
                         };
@@ -288,7 +299,7 @@ define(['plugin/PluginConfig',
 
                     validGates = (srcPort !== undefined) && (dstPort !== undefined) && (srcID !== undefined) && (dstID !== undefined);
                     if (parentCircuitPath && validGates) {
-                        self.components[parentCircuitPath].Wire.push(wire);
+                        self.circuits[parentCircuitPath].Wire.push(wire);
                     }
                 }
                 callback(null);
@@ -420,15 +431,15 @@ define(['plugin/PluginConfig',
         };
 
         pushGate = function (modGate) {
-            if (!self.components.hasOwnProperty(parentPath)) {
-                self.components[parentPath] = {
+            if (!self.circuits.hasOwnProperty(parentPath)) {
+                self.circuits[parentPath] = {
                     "Gate": [],
                     "Wire": []
                 };
             }
             if (parentPath) {
 
-                self.components[parentPath].Gate.push(modGate);
+                self.circuits[parentPath].Gate.push(modGate);
             }
             self.modelID += 1;
             callback(null);
@@ -441,21 +452,19 @@ define(['plugin/PluginConfig',
                     return;
                 }
                 gate["@NumInputs"] = childNodes.length - 1;
-                self.gates.push(gate);
                 pushGate(gate);
             });
-        } else if (metaType === "Clock") {
-            gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
-            self.gates.push(gate);
-            pushGate(gate);
-        } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
-            gate["@Bits"] = bits;
-            gate["@SelRep"] = selRep;
-            gate["@Value"] = value;
-            self.gates.push(gate);
-            pushGate(gate);
+
         } else {
-            callback(null);
+
+            if (metaType === "Clock") {
+               gate["@Milliseconds"] = core.getAttribute(nodeObj, 'Milliseconds');
+            } else if (metaType === "NumericInput" || metaType === "NumericOutput") {
+                gate["@Bits"] = bits;
+                gate["@SelRep"] = selRep;
+                gate["@Value"] = value;
+            }
+            pushGate(gate);
         }
     };
 
@@ -467,10 +476,10 @@ define(['plugin/PluginConfig',
             j2x,
             output;
 
-        for (parentPath in self.components) {
-            if (self.components.hasOwnProperty(parentPath)) {
+        for (parentPath in self.circuits) {
+            if (self.circuits.hasOwnProperty(parentPath)) {
                 diagram = {
-                    "CircuitGroup": {
+                    "circuits": {
                         "@Version": 1.2,
                         "Circuit" : {
                             "Gates": {},
@@ -479,9 +488,9 @@ define(['plugin/PluginConfig',
                     }
                 };
 
-                diagram.CircuitGroup.Circuit.Gates.Gate = self.components[parentPath].Gate;
-                diagram.CircuitGroup.Circuit.Wires.Wire = self.components[parentPath].Wire;
-                self.circuits.push(diagram);
+                diagram.circuits.Circuit.Gates.Gate = self.circuits[parentPath].Gate;
+                diagram.circuits.Circuit.Wires.Wire = self.circuits[parentPath].Wire;
+                self.circuit.push(diagram);
 
                 j2x = new Json2Xml();
                 output = j2x.convert(diagram);
