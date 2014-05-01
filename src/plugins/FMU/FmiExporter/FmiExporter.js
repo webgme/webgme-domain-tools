@@ -164,7 +164,11 @@ define(['plugin/PluginConfig',
                             }
 
                             var artifactSaveCallback = function (err, artifactHash) {
-                                // FIXME: error handling
+                                if (err) {
+                                    self.result.setSuccess(false);
+                                    callback(err, self.result);
+                                    return;
+                                }
 
                                 self.logger.info('Saved artifact hashes are: ' + artifactHash);
 
@@ -175,7 +179,11 @@ define(['plugin/PluginConfig',
                                 // This will save the changes. If you don't want to save;
                                 // exclude self.save and call callback directly from this scope.
                                 self.save('Finished FmiExporter', function (err) {
-                                    // FIXME: error handling
+                                    if (err) {
+                                        self.result.setSuccess(false);
+                                        callback(err, self.result);
+                                        return;
+                                    }
 
                                     callback(null, self.result);
                                 });
@@ -189,10 +197,6 @@ define(['plugin/PluginConfig',
                         fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
                         fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
                         artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
-
-//                        if (fileHashes.indexOf(fmuHash) < 0) {
-//                            artifact.addHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
-//                        }
                     }
                 };
 
@@ -258,7 +262,7 @@ define(['plugin/PluginConfig',
                     fmuInfo['Asset'] = self.core.getAttribute(fmuInstanceNode, 'resource');
                 }
 
-                self.fmuPackageHashMap[fmuInfo['File']] = fmuInfo['Asset'];
+                self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
 
                 self.fmuIdToInfoMap[relid] = fmuInfo;
 
