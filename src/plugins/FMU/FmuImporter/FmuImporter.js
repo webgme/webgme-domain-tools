@@ -65,8 +65,8 @@ define(['plugin/PluginConfig',
                 "name": "UploadedArtifact",
                 "displayName": "FMUs",
                 "description": "Click and drag existing compiled FMU(s)",
-                //"value": "167d532ae62ec4ce73f085fffba2091ac29f487b", // multiple txt.zip in zip
-                "value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // multiple fmus in zip
+                "value": "167d532ae62ec4ce73f085fffba2091ac29f487b", // multiple txt.zip in zip
+                //"value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // multiple fmus in zip
                 //"value": "0101da04257bf60436b20beb44433b6a45b84e77", // single fmu
                 "valueType": "asset",
                 "readOnly": false
@@ -139,6 +139,8 @@ define(['plugin/PluginConfig',
             });
         };
 
+
+
         self.getFmuModelDescriptions(artifactHash, getFmuModelDescriptionsCallback);
     };
 
@@ -147,8 +149,8 @@ define(['plugin/PluginConfig',
             newFmuNode,
             newFmuChildNode,
             fmuInfo = fmuModelDescription["fmiModelDescription"],
-            modelicaName = fmuInfo["_modelName"],
-            fmuName = fmuInfo["_modelIdentifier"],
+            modelicaName = fmuInfo["@modelName"],
+            fmuName = fmuInfo["@modelIdentifier"],
             splitNames = modelicaName.split('.'),
             modelVariables = fmuInfo["ModelVariables"],
             scalarVariables = modelVariables["ScalarVariable"],
@@ -179,20 +181,20 @@ define(['plugin/PluginConfig',
         // Create the Inputs, Outputs, Parameters
         for (i = 0; i < numVariables; i += 1) {
             variable = scalarVariables[i];
-            varName = variable["_name"];
-            variability = variable["_variability"];
-            causality = variable["_causality"];
+            varName = variable["@name"];
+            variability = variable["@variability"];
+            causality = variable["@causality"];
             description = "";
             value = "";
-            valueRef = variable["_valueReference"];
+            valueRef = variable["@valueReference"];
             varTypeInfo = self.getVariableTypeInfo(variable);
 
             if (varName.split('')[0] === '_') {
                 continue;  // TODO: revisit this; we might need to make these as properties
             }
 
-            if (variable.hasOwnProperty("_description")) {
-                description = variable["_description"];
+            if (variable.hasOwnProperty("@description")) {
+                description = variable["@description"];
             }
 
             if (causality === "input") {
@@ -217,8 +219,8 @@ define(['plugin/PluginConfig',
 
             } else if (causality === "internal") {
                 if (variability === "parameter") {
-                    if (varTypeInfo.hasOwnProperty("_start")) {
-                        value = varTypeInfo["_start"]
+                    if (varTypeInfo.hasOwnProperty("@start")) {
+                        value = varTypeInfo["@start"]
                     }
 
                     newFmuChildNode = self.core.createNode({parent: newFmuNode, base: FmuMetaTypes.Parameter});
@@ -263,65 +265,79 @@ define(['plugin/PluginConfig',
     FmuImporter.prototype.getFmuModelDescriptions = function (uploadedFileHash, callback) {
         var self = this;
 
-        var blobGetObjectCallback = function (err, objectContent) {
+        var blobGetMetadataCallback = function (err, metadata) {
             if (err) {
                 callback(err);
                 return;
             }
 
-            var zip,
-                fmuContent,
-                fmuZip,
-                fmuFileHash = 32,
-                modelDescriptionXml,
-                modelDescriptionJson,
-                modelDescriptionMap = {},
-                fmusWithinZip,
-                numFmus,
-                i;
+            var metadataContent = metadata.content;
 
-            // TODO: what if the content is not a ZIP? TODO: check metadata
-            zip = new JSZip(objectContent);
-
-            modelDescriptionXml = zip.file("modelDescription.xml");
-
-            if (modelDescriptionXml === null) {
-                // we might have a zip with multiple fmus within
-                fmusWithinZip = zip.file(/\.fmu/);
-                numFmus = fmusWithinZip.length;
-
-                for (i = 0; i < numFmus; i += 1) {
-                    fmuContent = fmusWithinZip[i].asArrayBuffer();
-                    fmuZip = new JSZip(fmuContent);
-                    //fmuFileHash = self.blobClient.getHash(fmuContent);
-                    fmuFileHash += 1;  // need to get the actual download (soft-link) hash for this content
-                    modelDescriptionXml = fmuZip.file("modelDescription.xml");
-                    if (modelDescriptionXml != null) {
-                        modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
-                        modelDescriptionMap[fmuFileHash] = modelDescriptionJson;
-                    } else {
-                        self.logger.error('Could not extract fmu modelDescription');
-                        continue;
-                    }
+            var blobGetObjectCallback = function (err, objectContent) {
+                if (err) {
+                    callback(err);
+                    return;
                 }
-            } else {
-                modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
-                modelDescriptionMap[uploadedFileHash] = modelDescriptionJson;
-            }
 
-            // return .\modelDescription.xml
-            callback(null, modelDescriptionMap);
+                var zip,
+                    fmuObject,
+                    fmuContentName,
+                    fmuContent,
+                    fmuAsZip,
+                    fmuFileHash,
+                    modelDescriptionXml,
+                    modelDescriptionJson,
+                    modelDescriptionMap = {},
+                    fmusWithinZip,
+                    numFmus,
+                    i;
+
+                // TODO: what if the content is not a ZIP? TODO: check metadata
+                zip = new JSZip(objectContent);
+
+                modelDescriptionXml = zip.file("modelDescription.xml");
+
+                if (modelDescriptionXml === null) {
+                    // we might have a zip with multiple fmus within
+                    fmusWithinZip = zip.file(/\.fmu/);
+                    numFmus = fmusWithinZip.length;
+
+                    for (i = 0; i < numFmus; i += 1) {
+                        fmuObject = fmusWithinZip[i];
+                        fmuContentName = fmuObject.name;
+                        fmuContent = fmuObject.asArrayBuffer();
+                        fmuAsZip = new JSZip(fmuContent);
+                        fmuFileHash = metadataContent[fmuContentName].content;  // blob 'soft-link' hash
+                        modelDescriptionXml = fmuAsZip.file("modelDescription.xml");
+                        if (modelDescriptionXml != null) {
+                            modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+                            modelDescriptionMap[fmuFileHash] = modelDescriptionJson;
+                        } else {
+                            self.logger.error('Could not extract fmu modelDescription');
+                            continue;
+                        }
+                    }
+                } else {
+                    modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+                    modelDescriptionMap[uploadedFileHash] = modelDescriptionJson;
+                }
+
+                // return .\modelDescription.xml
+                callback(null, modelDescriptionMap);
+            };
+
+            self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
         };
 
-        self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
+        self.blobClient.getMetadata(uploadedFileHash, blobGetMetadataCallback);
     };
 
     FmuImporter.prototype.convertXml2Json = function (modelDescriptionXml) {
         // TODO: what if modelDescriptionXml is NOT an xml?
 
         var self = this,
-            converter = new Converter.Xml2json(null, {skipWSText: true}),
-            obj = converter.xmlStr2json(modelDescriptionXml);
+            converter = new Converter.XmlStr2json({skipWSText: true}),
+            obj = converter.convert(modelDescriptionXml);
 
         return obj;
     };
