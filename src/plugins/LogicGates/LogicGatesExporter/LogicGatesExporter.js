@@ -144,13 +144,14 @@ define(['plugin/PluginConfig',
 
     LogicGatesExporterPlugin.prototype.visitAllChildren = function (node, callback) {
         var self = this;
+        // load root's children
         self.core.loadChildren(node, function (err, children) {
             var counter,
                 i,
                 itrCallback,
                 error = '';
             if (err) {
-                callback('Could not load children for first object, err: ' + err);
+                callback('Could not load children for object, err: ' + err);
                 return;
             }
             counter = {visits: children.length};
@@ -172,11 +173,13 @@ define(['plugin/PluginConfig',
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildrenRec = function (node, counter, callback) {
-        var self = this;
-        self.core.loadChildren(node, function (err, children) {
+        var self = this,
+            core = self.core;
+
+        core.loadChildren(node, function (err, children) {
             var i;
             if (err) {
-                callback('loadChildren failed for ' + node.toString());
+                callback('loadChildren failed'); // for ' + node.toString());
                 return;
             }
             counter.visits += children.length;
@@ -196,45 +199,27 @@ define(['plugin/PluginConfig',
     LogicGatesExporterPlugin.prototype.atNode = function (node, callback) {
         var self = this,
             core = self.core,
-            child,
-            gmeID,
-            parentPath,
-            baseNode,
-            metaType, // get child's base META Type
-            parentClass,
-            parentMeta,
-            isComplex,
-            isGate,
-            isWire;
-
-        child = node;
-        gmeID = core.getPath(child);
-        parentPath = core.getPath(core.getParent(child));
-        // baseClass = core.getBase(child);
-        //metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-        baseNode = self.getMetaType(child);
-        metaType = baseNode ? core.getAttribute(baseNode, 'name') : "";
-        parentClass = core.getBase(core.getParent(child));
-//            parentClass = self.getMetaType(core.getParent(child));
-        parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
-        isComplex = self.COMPLEX[metaType];
-        isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit";
-        isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
+            gmeID = core.getPath(node),
+            parentPath = core.getPath(core.getParent(node)),
+            baseNode = self.getMetaType(node),
+            metaType = baseNode ? core.getAttribute(baseNode, 'name') : "", // get node's base META Type
+            parentClass = core.getBase(core.getParent(node)),
+            parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "",
+            isComplex = self.COMPLEX[metaType],
+            isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit",
+            isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
 
         if (isGate) {
             // if key not exist already, add key; otherwise ignore
-            if (!self.idLUT.hasOwnProperty(gmeID)) {
-                self.addGate(child, metaType, isComplex, parentPath, function (err) {
-                    self.logger.info("we just added a gate from visitObject() and " + err);
-                    callback(err, node);
-                });
-            } else {
-                callback(null, node);
-            }
+            self.addGate(node, metaType, isComplex, parentPath, function (err) {
+                self.logger.info("we just added a gate");
+                callback(err, node);
+                self.gates.push(node);
+            });
 
         } else if (isWire) {
 
-            self.wiresToAdd.push(child);
+            self.wiresToAdd.push(node);
             callback(null, node);
 
         } else if (metaType === 'InputPort') {
@@ -247,174 +232,6 @@ define(['plugin/PluginConfig',
             callback(null, node);
         } else {
             callback(null, node);
-        }
-    };
-
-    LogicGatesExporterPlugin.prototype.visitffObject = function (err, childNodes, core, callback) {
-        var self = this,
-            i,
-            child,
-            gmeID,
-            parentPath,
-            baseNode,
-            metaType, // get child's base META Type
-            parentClass,
-            parentMeta,
-            isComplex,
-            isGate,
-            isWire,
-            fileKeys,
-            nbrOfFiles,
-            artifact;
-
-        self.objectToVisit += childNodes.length; // all child objects have to be visited
-        for (i = 0; i < childNodes.length; i += 1) {
-
-            child = childNodes[i];
-            gmeID = core.getPath(child);
-            parentPath = core.getPath(core.getParent(child));
-            // baseClass = core.getBase(child);
-            //metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-            baseNode = self.getMetaType(child);
-            metaType = baseNode ? core.getAttribute(baseNode, 'name') : "";
-            parentClass = core.getBase(core.getParent(child));
-//            parentClass = self.getMetaType(core.getParent(child));
-            parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
-            isComplex = self.COMPLEX[metaType];
-            isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit";
-            isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
-
-            if (isGate) {
-
-                // if key not exist already, add key; otherwise ignore
-                if (!self.idLUT.hasOwnProperty(gmeID)) {
-                    // PC: addGate needs to be defined and called as an asynchronous function. see PC10
-                    self.addGate(child, metaType, isComplex, parentPath, function (err) {
-                        self.logger.info("we just added a gate from visitObject() and " + err);
-                    });
-                }
-
-            } else if (isWire) {
-
-                self.wiresToAdd.push(child);
-
-            } else if (metaType === 'InputPort') {
-
-                if (!self.childrenLUT.hasOwnProperty(parentPath)) {
-
-                    self.childrenLUT[parentPath] = [];
-                }
-                self.childrenLUT[parentPath].push(gmeID);
-            }
-
-            core.loadChildren(childNodes[i], function (err, childNodes) {
-                self.visitObject(err, childNodes, core, callback);
-            });
-        }
-
-        self.objectToVisit -= 1; // another object was just visited
-
-        if (self.objectToVisit === 0) {
-            // all objects have been visited
-            // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
-
-        }
-    };
-
-    LogicGatesExporterPlugin.prototype.visitObject = function (err, childNodes, core, callback) {
-        var self = this,
-            i,
-            child,
-            gmeID,
-            parentPath,
-            baseNode,
-            metaType, // get child's base META Type
-            parentClass,
-            parentMeta,
-            isComplex,
-            isGate,
-            isWire,
-            fileKeys,
-            nbrOfFiles,
-            artifact;
-
-        self.objectToVisit += childNodes.length; // all child objects have to be visited
-        for (i = 0; i < childNodes.length; i += 1) {
-
-            child = childNodes[i];
-            gmeID = core.getPath(child);
-            parentPath = core.getPath(core.getParent(child));
-            // baseClass = core.getBase(child);
-            //metaType = baseClass ? core.getAttribute(baseClass, 'name') : ""; // get child's base META Type
-            baseNode = self.getMetaType(child);
-            metaType = baseNode ? core.getAttribute(baseNode, 'name') : "";
-            parentClass = core.getBase(core.getParent(child));
-//            parentClass = self.getMetaType(core.getParent(child));
-            parentMeta = parentClass ? core.getAttribute(parentClass, 'name') : "";
-            isComplex = self.COMPLEX[metaType];
-            isGate = self.GATE_TYPES[metaType] && parentMeta === "LogicCircuit";
-            isWire = self.WIRE_TYPES[metaType] && parentMeta === "LogicCircuit";
-
-            if (isGate) {
-
-                // if key not exist already, add key; otherwise ignore
-                if (!self.idLUT.hasOwnProperty(gmeID)) {
-                    // PC: addGate needs to be defined and called as an asynchronous function. see PC10
-                    self.addGate(child, metaType, isComplex, parentPath, function (err) {console.log("we just added a gate from visitObject() and " + err)});
-                }
-
-            } else if (isWire) {
-
-                self.wiresToAdd.push(child);
-
-            } else if (metaType === 'InputPort') {
-
-                if (!self.childrenLUT.hasOwnProperty(parentPath)) {
-
-                    self.childrenLUT[parentPath] = [];
-                }
-                self.childrenLUT[parentPath].push(gmeID);
-            }
-
-            core.loadChildren(childNodes[i], function (err, childNodes) {
-                self.visitObject(err, childNodes, core, callback);
-            });
-        }
-
-        self.objectToVisit -= 1; // another object was just visited
-
-        if (self.objectToVisit === 0) {
-            // all objects have been visited
-            // had to do it this way because we need to wait for all the gates to be added before adding the wires to avoid problems async causes
-            for (i = 0; i < self.wiresToAdd.length; i += 1) {
-                self.addWire(self.wiresToAdd[i], function (err) {console.log("We are adding a wire")});
-            }
-
-            self.createObjectFromDiagram();
-            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput');
-            fileKeys = Object.keys(self.outputFiles);
-
-            for (i = 0; i < fileKeys.length; i += 1) {
-                artifact.addFile(fileKeys[i], this.outputFiles[fileKeys[i]], function (err, hash) {
-                    nbrOfFiles -= 1;
-                    if (nbrOfFiles === 0) {
-                        if (err) {
-                            callback('Something went wrong when adding files: ' + err, self.result);
-                            return;
-                        }
-                        self.blobClient.saveAllArtifacts(function (err, hashes) {
-                            if (err) {
-                                callback(err, self.result);
-                                return;
-                            }
-                            self.result.addArtifact(hashes[0]);
-                            self.logger.info('Artifacts are saved here: ' + hashes.toString());
-                            self.result.setSuccess(true);
-                            callback(null, self.result);
-                        });
-                    }
-                });
-            }
         }
     };
 
