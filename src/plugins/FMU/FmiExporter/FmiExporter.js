@@ -78,8 +78,6 @@ define(['plugin/PluginConfig',
     FmiExporter.prototype.main = function (callback) {
         var self = this,
             selectedNode = self.activeNode,
-            selectedNodeBaseType = self.getMetaType(selectedNode),
-            selectedNodeBasePath = self.core.getPath(selectedNodeBaseType),
             modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
             modelExchangeNode;
 
@@ -89,31 +87,31 @@ define(['plugin/PluginConfig',
         }
 
         this.updateMETA(FmuMetaTypes);
-        // PM: Use self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange) to check meta-type.
-        // return after callback (no need for else).
-        if (selectedNodeBaseType != FmuMetaTypes.ModelExchange) {
-            callback('SelectedNode is not a ModelExchange!', self.result);
-        } else {
+
+        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
             modelExchangeNode = selectedNode;
+        } else {
+            callback('SelectedNode is not a ModelExchange!', self.result);
+            return;
         }
 
-        // core.loadChildren returns err and childNodes
         var loadModelExchangeChildrenCallbackFunction = function (err, childNodes) {
             if (err) {
-                self.logger.error('Something went wrong getting child nodes');
-                callback('Something went wrong getting child nodes', self.result);
+                var msg = "Something went wrong getting child nodes";
+                self.logger.error(msg);
+                callback(msg, self.result);
                 return;
             }
 
             var extractMeConfigInfoCallback = function (err) {
-
                 if (err) {
                     self.result.setSuccess(false);
                     callback(err, self.result);
                     return;
                 }
 
-                self.assignPriorityAndFlatten();
+                //self.assignPriorityAndFlatten();
+                self.runTarjans();
 
                 var artifact = self.blobClient.createArtifact(modelExchangeName);
 
