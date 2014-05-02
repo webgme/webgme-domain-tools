@@ -78,6 +78,8 @@ define(['plugin/PluginConfig',
     FmiExporter.prototype.main = function (callback) {
         var self = this,
             selectedNode = self.activeNode,
+            selectedNodeBaseType = self.getMetaType(selectedNode),
+            selectedNodeBasePath = self.core.getPath(selectedNodeBaseType),
             modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
             modelExchangeNode;
 
@@ -87,31 +89,31 @@ define(['plugin/PluginConfig',
         }
 
         this.updateMETA(FmuMetaTypes);
-
-        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
-            modelExchangeNode = selectedNode;
-        } else {
+        // PM: Use self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange) to check meta-type.
+        // return after callback (no need for else).
+        if (selectedNodeBaseType != FmuMetaTypes.ModelExchange) {
             callback('SelectedNode is not a ModelExchange!', self.result);
-            return;
+        } else {
+            modelExchangeNode = selectedNode;
         }
 
+        // core.loadChildren returns err and childNodes
         var loadModelExchangeChildrenCallbackFunction = function (err, childNodes) {
             if (err) {
-                var msg = "Something went wrong getting child nodes";
-                self.logger.error(msg);
-                callback(msg, self.result);
+                self.logger.error('Something went wrong getting child nodes');
+                callback('Something went wrong getting child nodes', self.result);
                 return;
             }
 
             var extractMeConfigInfoCallback = function (err) {
+
                 if (err) {
                     self.result.setSuccess(false);
                     callback(err, self.result);
                     return;
                 }
 
-                //self.assignPriorityAndFlatten();
-                self.runTarjans();
+                self.assignPriorityAndFlatten();
 
                 var artifact = self.blobClient.createArtifact(modelExchangeName);
 
@@ -218,12 +220,7 @@ define(['plugin/PluginConfig',
             metaTypeNode,
             metaTypePath,
             counter = modelExchangeChildren.length,
-            error = '',
-            srcPath,
-            dstPath,
-            splitPath,
-            srcIds,
-            dstIds;
+            error = '';
 
         var iterationCallback = function (err) {
             if (err) {
@@ -252,8 +249,7 @@ define(['plugin/PluginConfig',
                     fmuBaseNode = self.core.getBase(fmuInstanceNode),
                     fmuBaseName = self.core.getAttribute(fmuBaseNode, 'name'),
                     fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource'),
-                    //relid = self.core.getRelid(fmuInstanceNode),
-                    fullPath = self.core.getPath(fmuInstanceNode),
+                    relid = self.core.getRelid(fmuInstanceNode),
                     fmuInfo;
                 // PM: Move this up.
                 fmuInfo = self.extractFmuInfo(fmuChildren);
@@ -272,8 +268,7 @@ define(['plugin/PluginConfig',
 
                 self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
 
-                //self.fmuIdToInfoMap[relid] = fmuInfo;
-                self.fmuIdToInfoMap[fullPath] = fmuInfo;
+                self.fmuIdToInfoMap[relid] = fmuInfo;
 
                 iterationCallback(loadChildrenErr);
             };
@@ -291,27 +286,26 @@ define(['plugin/PluginConfig',
             // PM: isMetaTypeOf takes care of the inheritance.
             if (metaTypeNode === FmuMetaTypes.PortComposition) {
 
-                srcPath = self.core.getPointerPath(meChildNode, 'src');
-                dstPath = self.core.getPointerPath(meChildNode, 'dst');
+                var srcPath = self.core.getPointerPath(meChildNode, 'src'),
+                    dstPath = self.core.getPointerPath(meChildNode, 'dst'),
+                    splitPath,
+                    srcIds,
+                    dstIds;
 
                 if (srcPath) {
-                    srcIds = srcPath;
-
-//                    splitPath = srcPath.split('/');
-//                    if (splitPath.length > 2) {
-//                        srcIds = splitPath.slice(-2).join('/');
-//                    }
+                    splitPath = srcPath.split('/');
+                    if (splitPath.length > 2) {
+                        srcIds = splitPath.slice(-2).join('/');
+                    }
                 } else {
                     // PM: You need to continue after this call - if that's the intention.
                     iterationCallback("PortComposition has no SrcPointer.");
                 }
                 if (dstPath) {
-                    dstIds = dstPath;
-
-//                    splitPath = dstPath.split('/');
-//                    if (splitPath.length > 2) {
-//                        dstIds = splitPath.slice(-2).join('/');
-//                    }
+                    splitPath = dstPath.split('/');
+                    if (splitPath.length > 2) {
+                        dstIds = splitPath.slice(-2).join('/');
+                    }
                 } else {
                     // PM: You need to continue after this call - if that's the intention.
                     iterationCallback("PortComposition has no DstPointer");
@@ -352,15 +346,12 @@ define(['plugin/PluginConfig',
             fmu,
             fmuHash,
             fmuPriority,
-            fmuPath,
             i;
 
-        //for (i = 0; i < fmuMapKeys.length; i += 1) {
-        for (fmuPath in self.fmuIdToInfoMap) {
+        for (i = 0; i < fmuMapKeys.length; i += 1) {
             // PM: Comma should only be used in declarations, i.e. var a, b, c;
-            //fmuId = fmuMapKeys[i],
-            //fmu = self.fmuIdToInfoMap[fmuId],
-            fmu = self.fmuIdToInfoMap[fmuPath],
+            fmuId = fmuMapKeys[i],
+            fmu = self.fmuIdToInfoMap[fmuId],
             fmuHash = fmu.Asset,
             fmuPriority = fmu.Priority;
 
@@ -378,7 +369,6 @@ define(['plugin/PluginConfig',
             srcFmuId,
             srcFmuName,
             srcPortId,
-            srcPortPath,
             srcPortName,
             dstConnections,
             dstConnIds,
@@ -392,9 +382,8 @@ define(['plugin/PluginConfig',
             flatConnInfo,
             j;
 
-        //for (i = 0; i < connMapKeys.length; i += 1) {
-        for (srcPortPath in self.connectionMap) {
-            //connMapKey = connMapKeys[i];
+        for (i = 0; i < connMapKeys.length; i += 1) {
+            connMapKey = connMapKeys[i];
             splitKey = connMapKey.split('/');
             srcFmuId = splitKey[0];
             srcPortId = splitKey[1];
