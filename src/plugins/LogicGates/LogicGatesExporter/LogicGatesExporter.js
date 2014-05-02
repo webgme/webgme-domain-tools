@@ -387,11 +387,15 @@ define(['plugin/PluginConfig',
                 parentPath = core.getPath(core.getParent(dstNodeObj));
             } else if (isPort) {
                 dstNodeObj = core.getParent(node);
-                portGMEId = core.getPath(dstNodeObj);
+                portGMEId = core.getPath(node);
                 dst = core.getPath(dstNodeObj);
                 metaType = core.getAttribute(dstNodeObj, 'name');
                 parentPath = core.getPath(dstNodeObj);
                 dstPort = self.childrenLUT[parentPath].indexOf(portGMEId);
+                if (dstPort === -1) {
+                    self.childrenLUT[parentPath].push(portGMEId);
+                    dstPort = self.childrenLUT[parentPath].indexOf(portGMEId);
+                }
             }
 
             if ((isPort || isGate) && !self.idLUT.hasOwnProperty(dst)) {
@@ -435,7 +439,6 @@ define(['plugin/PluginConfig',
         gate = {
             "@Type": metaType,
             "@Name": name,
-//            "@ID": self.modelID,
             "Point": {
                 "@X": xPos,
                 "@Y": yPos,
