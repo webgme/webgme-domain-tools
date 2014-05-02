@@ -1,7 +1,10 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, PluginBase) {
+define(['plugin/PluginConfig',
+    'plugin/PluginBase',
+    'xmljsonconverter',
+    'json2xml'], function (PluginConfig, PluginBase, Converter, JSON2XML) {
     'use strict';
 
     var ChildrenConfigPlugin = function () {
@@ -23,7 +26,7 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
                 "name": "myAsset",
                 "displayName": "Asset Example",
                 "description": '',
-                "value": "", // this is the 'default config'
+                "value": "785ff33577152925fd6b70c92c5ee3400cdbf58b", // this is the 'default config'
                 "valueType": "asset",
                 "readOnly": false
             },
@@ -81,23 +84,40 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
 
     ChildrenConfigPlugin.prototype.main = function (callback) {
         var self = this,
-            currentConfig;
-
+            currentConfig = this.getCurrentConfig(),
+            xml2json = new Converter.Xml2json({
+                attrTag: '@',
+                textTag: '#text',
+                skipWSText: true,
+                arrayElements: {}
+            }),
+            json2xmlOld = new JSON2XML(),
+            json2xml = new Converter.Json2xml();
 
         self.logger.info('Current configuration');
-        currentConfig = this.getCurrentConfig();
         self.logger.info(currentConfig.logLevel);
         self.logger.info(currentConfig.maxChildrenToLog);
         self.logger.info(currentConfig.whatIsYourName);
 
         if (currentConfig.myAsset) {
             self.blobClient.getObject(currentConfig.myAsset, function (err, content) {
+                var xmlAsJson = xml2json.convertFromBuffer(content),
+                    xmlStrOld,
+                    xmlStr;
                 self.logger.info(content);
+                if (xmlAsJson instanceof Error) {
+                    self.createMessage(null, 'Parsing provided xml returned with error :' + xmlAsJson.message);
+                    return callback(xmlAsJson.message, self.result);
+                }
+                xmlStr = json2xml.convertToString(xmlAsJson);
+                xmlStrOld = json2xmlOld.convert(xmlAsJson);
+
+                self.logger.info(xmlStrOld);
+                self.logger.info(xmlStr);
                 self.result.setSuccess(true);
                 callback(null, self.result);
             });
         } else {
-            self.result.setSuccess(false);
             callback('No asset was specified in configuration.', self.result);
         }
     };
