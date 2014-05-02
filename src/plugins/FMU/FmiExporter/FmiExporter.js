@@ -5,9 +5,9 @@
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/FmiExporter/FmiExporter/FMU',
-        'ejs',
-        'plugin/FmiExporter/FmiExporter/Templates/Templates'],
-    function (PluginConfig, PluginBase, FmuMetaTypes, ejs, TEMPLATES) {
+        'plugin/FmiExporter/FmiExporter/Templates/Templates',
+        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, ejs, TEMPLATES) {
+    // PM: This change saves you one indent (or JSLint complaints for each method).
     'use strict';
 
     /**
@@ -89,7 +89,8 @@ define(['plugin/PluginConfig',
         }
 
         this.updateMETA(FmuMetaTypes);
-
+        // PM: Use self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange) to check meta-type.
+        // return after callback (no need for else).
         if (selectedNodeBaseType != FmuMetaTypes.ModelExchange) {
             callback('SelectedNode is not a ModelExchange!', self.result);
         } else {
@@ -194,6 +195,7 @@ define(['plugin/PluginConfig',
                     };
 
                     for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+                        // PM: Semi colon.
                         fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
                         fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
                         artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
@@ -226,7 +228,7 @@ define(['plugin/PluginConfig',
             }
 
             counter -= 1;
-
+            // PM: check for counter <= 0 and call it if modeExhangeChildren.length === 0
             if (counter === 0) {
                 callback(error);
             }
@@ -238,6 +240,7 @@ define(['plugin/PluginConfig',
                     var newErrorMessage = fmuName + " had no child objects";
                     loadChildrenErr += newErrorMessage;  //"FMU had no child objects";
                     iterationCallback(loadChildrenErr);
+                    // PM: return;
                 }
 
                 var fmuInstanceNode = self.core.getParent(fmuChildren[0]),
@@ -248,13 +251,14 @@ define(['plugin/PluginConfig',
                     fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource'),
                     relid = self.core.getRelid(fmuInstanceNode),
                     fmuInfo;
-
+                // PM: Move this up.
                 fmuInfo = self.extractFmuInfo(fmuChildren);
 
                 fmuInfo['InstanceName'] = fmuInstanceName;
                 fmuInfo['Priority'] = 1;  // Initialize to 1, 'assignPriority' will overwrite
 
                 if (fmuInstanceAssetHash === fmuBaseAssetHash) {
+                    // PM: Use /, \ only works on windows.
                     fmuInfo['File'] = 'FMUs\\' + fmuBaseName + '.fmu';
                     fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
                 } else {
@@ -279,6 +283,7 @@ define(['plugin/PluginConfig',
 
             // FIXME: this condition is fine now, but will not work correctly if we have a more complicated inheritance
             //        in the meta model.
+            // PM: isMetaTypeOf takes care of the inheritance.
             if (metaTypeNode === FmuMetaTypes.PortComposition) {
 
                 var srcPath = self.core.getPointerPath(meChildNode, 'src'),
@@ -293,6 +298,7 @@ define(['plugin/PluginConfig',
                         srcIds = splitPath.slice(-2).join('/');
                     }
                 } else {
+                    // PM: You need to continue after this call - if that's the intention.
                     iterationCallback("PortComposition has no SrcPointer.");
                 }
                 if (dstPath) {
@@ -301,6 +307,7 @@ define(['plugin/PluginConfig',
                         dstIds = splitPath.slice(-2).join('/');
                     }
                 } else {
+                    // PM: You need to continue after this call - if that's the intention.
                     iterationCallback("PortComposition has no DstPointer");
                 }
 
@@ -329,7 +336,8 @@ define(['plugin/PluginConfig',
     };
 
     FmiExporter.prototype.assignPriorityAndFlatten = function () {
-
+        // PM: There's probably too many variables declared in this method.
+        // Will be more transparent when you move all declarations to the top.
         var self = this,
             fmuMapKeys = Object.keys(self.fmuIdToInfoMap),
             connMapKeys = Object.keys(self.connectionMap),
@@ -341,6 +349,7 @@ define(['plugin/PluginConfig',
             i;
 
         for (i = 0; i < fmuMapKeys.length; i += 1) {
+            // PM: Comma should only be used in declarations, i.e. var a, b, c;
             fmuId = fmuMapKeys[i],
             fmu = self.fmuIdToInfoMap[fmuId],
             fmuHash = fmu.Asset,
@@ -488,7 +497,14 @@ define(['plugin/PluginConfig',
                 outputs.push(fmuChildNodeName);
             }
         }
-
+        // PM: Use the below. (Otherwise you're modifying the object multiple times.)
+        // (There is no need to initialize it then.)
+        // fmuInfo = {
+        //    Parameters: parameters,
+        //    Inputs: inputs,
+        //      ...
+        //  };
+        // You can also return the object directly.
         fmuInfo['Parameters'] = parameters;
         fmuInfo['Inputs'] = inputs;
         fmuInfo['InputMap'] = inputMap;
