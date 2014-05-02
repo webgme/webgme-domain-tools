@@ -8,12 +8,7 @@
     "license": "MIT",
     "dependencies": {
         "webgme": "https://github.com/webgme/webgme/tarball/master",
-        "requirejs": "=2.1.11",
-        "ejs": ">=0.8.5",
-        "commander": ">=2.1.0",
-        "node-fs-extra": ">=0.8.1",
-        "walk": ">=2.3.1",
-        "xml2json": ">=0.4.0"
+        "requirejs": "=2.1.11"
     },
     "devDependencies": {
         "mocha": ">=1.17.1",
@@ -26,7 +21,9 @@
         "karma-chai": "~0.1",
         "karma-chrome-launcher": "~0.1",
         "karma-requirejs": "~0.2",
-        "karma-coverage": "~0.2"
+        "karma-coverage": "~0.2",
+        "commander": ">=2.1.0",
+        "walk": ">=2.3.1"
     },
     "engines": {
         "node": ">=0.10.0"

@@ -13,10 +13,6 @@ After everything is setup. See running WebGME server and Executing plugin sectio
 
 * [webgme](http://webgme.org) - using [directly](https://github.com/webgme/webgme) from GitHub master branch
 * requirejs - load modules on server and client side
-* ejs - templating library to generate files or source code
-* commander - command line argument parser
-* node-fs-extra - ?
-* walk - ?
 
 Updating `webgme` only use `npm install webgme`
 
