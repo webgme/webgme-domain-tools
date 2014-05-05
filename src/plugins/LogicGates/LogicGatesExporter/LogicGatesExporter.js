@@ -188,10 +188,15 @@ define(['plugin/PluginConfig',
                 }
             };
 
-            for (i = 0; i < children.length; i += 1) {
-                self.atNode(children[i], function (err, node) {
-                    self.visitAllChildrenRec(node, counter, itrCallback);
-                });
+            if (children.length === 0) {
+                itrCallback(null);
+            } else {
+
+                for (i = 0; i < children.length; i += 1) {
+                    self.atNode(children[i], function (err, node) {
+                        self.visitAllChildrenRec(node, counter, itrCallback);
+                    });
+                }
             }
         };
         // load root's children
@@ -291,7 +296,6 @@ define(['plugin/PluginConfig',
                     callback(error);
                     return;
                 }
-                shouldPush = true;
                 if (shouldPush) {
                     parentCircuitPath = core.getPath(core.getParent(nodeObj));
                     srcID = self.idLUT[src];
@@ -358,7 +362,7 @@ define(['plugin/PluginConfig',
                     pushWire(err, true);
                 });
             } else {
-                pushWire(null, false);
+                pushWire(null, true);
             }
         };
         core.loadByPath(self.rootNode, src, afterLoadingSrc);
@@ -403,7 +407,7 @@ define(['plugin/PluginConfig',
                     pushWire(err, true);
                 });
             } else {
-                pushWire(null, false);
+                pushWire(null, true);
             }
         };
         core.loadByPath(self.rootNode, dst, afterLoadingDst);
