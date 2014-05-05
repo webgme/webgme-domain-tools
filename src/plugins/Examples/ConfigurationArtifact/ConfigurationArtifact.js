@@ -126,8 +126,7 @@ define(['plugin/PluginConfig',
             xml2json = new Converter.Xml2json({
                 attrTag: '@',
                 textTag: '#text',
-                skipWSText: true,
-                arrayElements: {}
+                skipWSText: true
             }),
             json2xml = new Converter.Json2xml({
                 attrTag: '@',
@@ -136,7 +135,7 @@ define(['plugin/PluginConfig',
             }),
             addFilesAndSaveArtifact = function (xmlAsJson) {
                 var filesToAdd = {
-                        'xmlConverted.json': JSON.stringify(xmlAsJson, null, '4'),
+                        'xmlConverted.json': JSON.stringify(xmlAsJson, null, 4),
                         'jsonConverted.xml': json2xml.convertToString(xmlAsJson)
                     },
                     artifact = self.blobClient.createArtifact('xmlAndJson');
@@ -167,8 +166,8 @@ define(['plugin/PluginConfig',
         self.logger.info('Color          = ' + currentConfig.color);
         self.logger.info('XML File       = ' + currentConfig.xmlFile);
 
-        if (currentConfig.myAsset) {
-            self.blobClient.getObject(currentConfig.myAsset, function (err, content) {
+        if (currentConfig.xmlFile) {
+            self.blobClient.getObject(currentConfig.xmlFile, function (err, content) {
                 var xmlAsJson = xml2json.convertFromBuffer(content);
                 if (xmlAsJson instanceof Error) {
                     self.createMessage(null, 'Parsing provided xml returned with error :' + xmlAsJson.message);
@@ -194,7 +193,7 @@ define(['plugin/PluginConfig',
             '  <RootContainer Name="Wheel">' +
             '    <Property Name="DamperCoeff">' +
             '      <Value DimensionType="Scalar" DataType="String">' +
-            '        <ValueExpression xsi:type="q1:FixedValue">' +
+            '        <ValueExpression type="FixedValue">' +
             '          <Value>2</Value>' +
             '        </ValueExpression>' +
             '      </Value>' +
