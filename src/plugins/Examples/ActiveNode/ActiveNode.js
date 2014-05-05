@@ -23,7 +23,6 @@ define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, Plu
         self.logger.debug('Plugin started.');
         self.logger.info('Project is: ' + self.projectName);
         if (!self.activeNode) {
-            self.result.setSuccess(false);
             self.logger.error('No activeNode given');
             self.createMessage(self.rootNode, 'No activeNode given.');
             callback('No activeNode given', self.result);
