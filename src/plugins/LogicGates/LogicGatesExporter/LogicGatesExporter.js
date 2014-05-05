@@ -4,7 +4,7 @@
 
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
-    'json2xml'], function (PluginConfig, PluginBase, Json2Xml) {
+    'xmljsonconverter'], function (PluginConfig, PluginBase, Converter) {
 
     'use strict';
 
@@ -183,7 +183,7 @@ define(['plugin/PluginConfig',
                 error = err ? error += err : error;
                 counter.visits -= 1;
                 self.logger.warning(counter.visits.toString());
-                if (counter.visits === 0) {
+                if (counter.visits <= 0) {
                     callback(error);
                 }
             };
@@ -495,7 +495,7 @@ define(['plugin/PluginConfig',
             i = 0,
             parentPath,
             diagram,
-            j2x,
+            json2xml = new Converter.Json2xml(),
             output;
 
         for (parentPath in self.circuits) {
@@ -513,9 +513,7 @@ define(['plugin/PluginConfig',
                 diagram.circuits.Circuit.Gates.Gate = self.circuits[parentPath].Gate;
                 diagram.circuits.Circuit.Wires.Wire = self.circuits[parentPath].Wire;
                 self.circuit.push(diagram);
-
-                j2x = new Json2Xml();
-                output = j2x.convert(diagram);
+                output = json2xml.convertToString(diagram);
                 self.outputFiles["output" + i + ".gcg"] = output;
             }
             i += 1;
