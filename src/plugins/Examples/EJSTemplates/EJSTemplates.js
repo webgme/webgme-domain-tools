@@ -53,10 +53,19 @@ define(['plugin/PluginConfig',
     */
     EJSTemplates.prototype.main = function (callback) {
         var self = this,
-            templatePy = ejs.render(TEMPLATES['Python.py.ejs'], {a: 'a', b: 'b'}),
-            templateFileName = 'generatedFiles/subDir/Python.py',
-            artifact = self.blobClient.createArtifact('templateFiles');
-        artifact.addFile(templateFileName, templatePy, function (err, hash) {
+            templateData = {
+                mainName: 'A Python Example',
+                dataObjects: [
+                    {a: 'a1', b: 'b1'},
+                    {a: 'a2', b: 'b2'},
+                    {a: 'a3', b: 'b3'}
+                ]
+            },
+            templateContent = ejs.render(TEMPLATES['Python.py.ejs'], templateData),
+            templateFileName = 'print_data.py',
+            artifact = self.blobClient.createArtifact('pythonFiles');
+        self.logger.info('Converted Template:\n' + templateContent);
+        artifact.addFile(templateFileName, templateContent, function (err, hash) {
             if (err) {
                 self.result.setSuccess(false);
                 return callback('Could not add file : err' + err.toString(), self.result);
