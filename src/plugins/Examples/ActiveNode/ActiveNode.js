@@ -4,18 +4,40 @@
 define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, PluginBase) {
     'use strict';
 
+    /**
+     * Initializes a new instance of ActiveNode.
+     * @class
+     * @augments {PluginBase}
+     * @classdesc This class represents the plugin ActiveNode.
+     * @constructor
+     */
     var ActiveNode = function () {
         // Call base class's constructor
         PluginBase.call(this);
     };
 
+    // Prototypal inheritance from PluginBase.
     ActiveNode.prototype = Object.create(PluginBase.prototype);
     ActiveNode.prototype.constructor = ActiveNode;
 
+    /**
+     * Gets the name of the ActiveNode.
+     * @returns {string} The name of the plugin.
+     * @public
+     */
     ActiveNode.prototype.getName = function () {
         return "Active Node";
     };
 
+    /**
+     * Main function for the plugin to execute. This will perform the execution.
+     * Notes:
+     * - Always log with the provided logger.[error,warning,info,debug].
+     * - Do NOT put any user interaction logic UI, etc. inside this method.
+     * - callback always has to be called even if error happened.
+     *
+     * @param {function(string, plugin.PluginResult)} callback - the result callback
+     */
     ActiveNode.prototype.main = function (callback) {
         var self = this,
             activeNodeName;
