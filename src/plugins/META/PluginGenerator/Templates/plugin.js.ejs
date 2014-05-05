@@ -193,10 +193,9 @@ if (templateType) {%>
     * @returns {boolean} - True if the given object was of the META type.
     */
     <%= pluginID %>.prototype.isMetaTypeOf = function (node, metaNode) {
-        var self = this,
-            metaGuid = self.core.getGuid(metaNode);
+        var self = this;
         while (node) {
-            if (self.core.getGuid(node) === metaGuid) {
+            if (node === metaNode) {
                 return true;
             }
             node = self.core.getBase(node);
@@ -214,7 +213,7 @@ if (templateType) {%>
             name;
         while (node) {
             name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
+            if (self.META.hasOwnProperty(name) && self.META[name] === node) {
                 break;
             }
             node = self.core.getBase(node);
@@ -229,14 +228,14 @@ if (templateType) {%>
     */
     <%= pluginID %>.prototype.baseIsMeta = function (node) {
         var self = this,
-        baseName,
-        baseNode = self.core.getBase(node);
+            baseName,
+            baseNode = self.core.getBase(node);
         if (!baseNode) {
             // FCO does not have a base node, by definition function returns true.
             return true;
         }
         baseName = self.core.getAttribute(baseNode, 'name');
-        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
+        return self.META.hasOwnProperty(baseName) && self.META[baseName] === baseNode;
     };
 
     return <%= pluginID %>;
