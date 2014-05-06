@@ -1,13 +1,14 @@
 /*
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
- * 
- * Author: Robert Kereskenyi
+ *
+ * Authors: Robert Kereskenyi
+ *          Dana Zhang
  */
 
 "use strict";
 
 define(['js/Panels/ModelEditor/ModelEditorControl',
-        'js/Constants'], function (ModelEditorControl, CONSTANTS) {
+    'js/Constants'], function (ModelEditorControl, CONSTANTS) {
 
     var NetLabelControl;
 
@@ -26,12 +27,21 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             CONSTS =  CONSTANTS, // CONSTANTS can only be loaded by assigning it to a var
             gmeClient = self._client,
             connectionObj = gmeClient.getNode(gmeID),
-            srcID = connectionObj.getPointer(CONSTANTS.POINTER_SOURCE),
-            dstID = connectionObj.getPointer(CONSTANTS.POINTER_TARGET);
+            srcID = connectionObj.getPointer(CONSTANTS.POINTER_SOURCE).to,
+            dstID = connectionObj.getPointer(CONSTANTS.POINTER_TARGET).to,
+            srcObj = gmeClient.getNode(srcID),
+            dstObj = gmeClient.getNode(dstID),
+            srcName = srcObj.getAttribute('name'),
+            dstName = dstObj.getAttribute('name'),
+            srcParentId = srcObj.getParentId(),
+            dstParentId = dstObj.getParentId(),
+            srcParentName = gmeClient.getNode(srcParentId).getAttribute('name'),
+            dstParentName = gmeClient.getNode(dstParentId).getAttribute('name'),
+            srcText = srcID.match(/\//g).length > 3 ? srcParentName + "." + srcName : srcName,
+            dstText = dstID.match(/\//g).length > 3 ? dstParentName + "." + dstName : dstName;
 
-
-        return {'srcText': 'BLA-SRC',
-                'dstText': 'BLA-DST'};
+        return {'srcText': srcText,
+                'dstText': dstText};
     };
 
     return NetLabelControl;
