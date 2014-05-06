@@ -227,40 +227,5 @@ define(['plugin/PluginConfig',
         return false;
     };
 
-    /**
-    * Finds and returns the node object defining the meta type for the given node.
-    * @param node - Node to be checked for type.
-    * @returns {Object} - Node object defining the meta type of node.
-    */
-    ConfigurationArtifact.prototype.getMetaType = function (node) {
-        var self = this,
-            name;
-        while (node) {
-            name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.META[name] === node) {
-                break;
-            }
-            node = self.core.getBase(node);
-        }
-        return node;
-    };
-
-    /**
-    * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
-    * @param node - Node to be checked.
-    * @returns {boolean}
-    */
-    ConfigurationArtifact.prototype.baseIsMeta = function (node) {
-        var self = this,
-            baseName,
-            baseNode = self.core.getBase(node);
-        if (!baseNode) {
-            // FCO does not have a base node, by definition function returns true.
-            return true;
-        }
-        baseName = self.core.getAttribute(baseNode, 'name');
-        return self.META.hasOwnProperty(baseName) && self.META[baseName] === baseNode;
-    };
-
     return ConfigurationArtifact;
 });
