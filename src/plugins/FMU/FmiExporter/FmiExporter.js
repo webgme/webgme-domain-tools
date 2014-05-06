@@ -21,7 +21,7 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
-        this.path2fmu = {};
+        this.pathToFmuInfo = {};
         this.path2port = {};
         this.path2node = {};
 
@@ -242,6 +242,10 @@ define(['plugin/PluginConfig',
             }
 
             self.logger.info('All nodes have been loaded.');
+
+            self.buildModelExchangeConfig();
+
+            self.logger.info('meConfig');
         };
 
         var nodeCount = 0;
@@ -253,6 +257,8 @@ define(['plugin/PluginConfig',
             thisNode,
             thisNodeName,
             thisNodePath,
+            parentFmuPath,
+            parentFmuInfo,
             connSrcPath,
             connDstPath;
 
@@ -265,12 +271,12 @@ define(['plugin/PluginConfig',
                 connSrcPath = self.core.getPointerPath(thisNode, 'src');
                 connDstPath = self.core.getPointerPath(thisNode, 'dst');
 
-                if (srcPath && dstPath) {
-                    if (self.connectionMap.hasOwnProperty(srcPath)) {
-                        self.connectionMap[srcPath].push(dstPath);   // append to existing list of destinations
+                if (connSrcPath && connDstPath) {
+                    if (self.connectionMap.hasOwnProperty(connSrcPath)) {
+                        self.connectionMap[connSrcPath].push(connDstPath);   // append to existing list of destinations
 
                     } else {
-                        self.connectionMap[srcPath] = [dstPath];
+                        self.connectionMap[connSrcPath] = [connDstPath];
                     }
                 } else {
                     var portCompositionPath = self.core.getPath(thisNode);
@@ -279,17 +285,86 @@ define(['plugin/PluginConfig',
                 }
 
             } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU)) {
-                // asynchronous call to get parameter and port information
-                self.core.loadChildren(thisNode, loadFmuChildrenCallbackFunction(meChildName, meChildNode));
+                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                    self.getFmuInfo(thisNodePath, thisNode, thisNodeName);
+                }
 
+            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Parameter)) {
+                parentFmuPath = self.getParentPath(thisNodePath);
+
+                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
+                } else {
+                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                }
+
+                parentFmuInfo.Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Input)) {
+                parentFmuPath = self.getParentPath(thisNodePath);
+
+                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
+                } else {
+                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                }
+
+                parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                parentFmuInfo.Inputs[thisNodePath] = thisNodeName;
+            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Output)) {
+                parentFmuPath = self.getParentPath(thisNodePath);
+
+                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
+                } else {
+                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                }
+
+                parentFmuInfo.Outputs[thisNodePath] = thisNodeName;
             } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.SimulationParameter)) {
                 if (self.simulationInfo.hasOwnProperty(meChildName)) {
                     self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
                 }
-
-                iterationCallback(null);
             }
         }
+    };
+
+    FmiExporter.prototype.getFmuInfo = function (fmuNodePath, fmuNode, fmuNodeName) {
+        var self = this;
+        fmuNode = fmuNode || self.path2node(fmuNodePath);
+        fmuNodeName = fmuNodeName || self.core.getAttribute(fmuNode, 'name');
+
+        var fmuInstanceAssetHash = self.core.getAttribute(fmuNode, 'resource'),
+            fmuBaseNode = self.core.getBase(fmuNode),
+            fmuBaseName = self.core.getAttribute(fmuBaseNode, 'name'),
+            fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource'),
+            fmuInfo = {
+                'InstanceName': fmuNodeName,
+                'Priority': 1,
+                'Parameters': {},
+                'Inputs': {},
+                'Outputs': {}
+            };
+
+        if (fmuInstanceAssetHash === fmuBaseAssetHash) {
+            fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
+            fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
+        } else {
+            fmuInfo['File'] = 'FMUs/' + fmuNodeName + '.fmu';
+            fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
+        }
+
+        self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
+        self.pathToFmuInfo[fmuNodePath] = fmuInfo;
+
+        return fmuInfo;
+    };
+
+    FmiExporter.prototype.getParentPath = function (childPath) {
+        var splitPath = childPath.split('/'),
+            slicedPath = splitPath.slice(0, -1),
+            parentPath = slicedPath.join('/');
+
+        return parentPath;
     };
 
     FmiExporter.prototype.loadAllNodesRecursive = function (parentNode, nodeCount, errors, callback) {
@@ -372,7 +447,7 @@ define(['plugin/PluginConfig',
                 self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
 
                 self.fmuIdToInfoMap[fmuInstancePath] = fmuInfo;
-                self.path2fmu[fmuInstancePath] = fmuInfo;
+                self.pathToFmuInfo[fmuInstancePath] = fmuInfo;
 
                 iterationCallback(loadChildrenErr);
             };
@@ -426,8 +501,8 @@ define(['plugin/PluginConfig',
             fmuPath,
             i;
 
-        for (fmuPath in self.path2fmu) {
-            fmu = self.path2fmu[fmuPath];
+        for (fmuPath in self.pathToFmuInfo) {
+            fmu = self.pathToFmuInfo[fmuPath];
             fmuHash = fmu.Asset;
             fmuPriority = fmu.Priority;
 
@@ -569,42 +644,6 @@ define(['plugin/PluginConfig',
             InputMap: inputMap,
             OutputMap: outputMap
         };
-    };
-
-    /**
-    * Checks if the given node is of the given meta-type.
-    * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-    * @param node - Node to be check for type.
-    * @param metaTypeObj - Node object defining the meta type.
-    * @returns {boolean} - True if the given object was of the META type.
-    */
-    FmiExporter.prototype.isMetaTypeOf = function (node, metaTypeObj) {
-        var self = this;
-        while (node) {
-            if (self.core.getGuid(node) === self.core.getGuid(metaTypeObj)) {
-                return true;
-            }
-            node = self.core.getBase(node);
-        }
-        return false;
-    };
-
-    /**
-    * Finds and returns the node object defining the meta type for the given node.
-    * @param node - Node to be check for type.
-    * @returns {Object} - Node object defining the meta type of node.
-    */
-    FmiExporter.prototype.getMetaType = function (node) {
-        var self = this,
-            name;
-        while (node) {
-            name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
-                break;
-            }
-            node = self.core.getBase(node);
-        }
-        return node;
     };
 
     return FmiExporter;
