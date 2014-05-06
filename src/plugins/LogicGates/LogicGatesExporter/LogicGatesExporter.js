@@ -123,46 +123,24 @@ define(['plugin/PluginConfig',
 
     LogicGatesExporterPlugin.prototype.saveResults = function (callback) {
         var self = this,
-            i,
-            error = '',
-            afterFileAdded,
-            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput'),
-            fileKeys = Object.keys(self.outputFiles),
-            nbrOfFiles = fileKeys.length;
+            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput');
 
-        if (nbrOfFiles === 0) {
-            callback(null, self.result);
-            return;
-        }
-
-        afterFileAdded = function (err, hash) {
-            var afterSavingArtifact;
-
-            afterSavingArtifact = function (err, hashes) {
+        artifact.addFiles(self.outputFiles, function (err, hashes) {
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
+            self.logger.warning(hashes.toString());
+            artifact.save(function (err, hash) {
                 if (err) {
                     callback(err, self.result);
                     return;
                 }
-                self.result.addArtifact(hashes[0]);
-                self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                self.result.addArtifact(hash);
                 self.result.setSuccess(true);
                 callback(null, self.result);
-            };
-
-            error = err ? error + err : error;
-            nbrOfFiles -= 1;
-            if (nbrOfFiles === 0) {
-                if (error) {
-                    callback('Something went wrong when adding files: ' + err, self.result); // if only using err, then it is only err on the last one
-                    return;
-                }
-                self.blobClient.saveAllArtifacts(afterSavingArtifact);
-            }
-        };
-
-        for (i = 0; i < fileKeys.length; i += 1) {
-            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], afterFileAdded);
-        }
+            });
+        });
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildren = function (node, callback) {
