@@ -145,9 +145,7 @@ define(['plugin/PluginConfig',
             i = 0,
             output,
             json2xml = new Converter.Json2xml(),
-            artifact = self.blobClient.createArtifact('PetriNetExporterOutput'),
-            fileKeys,
-            nbrOfFiles;
+            artifact = self.blobClient.createArtifact('PetriNetExporterOutput');
 
         for (diagramPath in self.petriNetDiagrams) {
             if (self.petriNetDiagrams.hasOwnProperty(diagramPath) && i > 0) {
@@ -166,7 +164,6 @@ define(['plugin/PluginConfig',
                 self.diagram.petrinet.page.place = self.petriNetDiagrams[diagramPath].places;
                 self.diagram.petrinet.page.transition = self.petriNetDiagrams[diagramPath].transitions;
                 self.diagram.petrinet.page.arc = self.petriNetDiagrams[diagramPath].arcs;
-
                 self.diagrams.push(self.diagram);
             }
             i += 1;
@@ -175,36 +172,25 @@ define(['plugin/PluginConfig',
         for (i = 0; i < this.diagrams.length; i += 1) {
 
             output = json2xml.convertToString(self.diagrams[i]);
-            this.outputFiles['output' + i + '.xml'] = output;
+            self.outputFiles['output' + i + '.xml'] = output;
         }
 
-        fileKeys = Object.keys(this.outputFiles);
-        nbrOfFiles = fileKeys.length;
-        if (nbrOfFiles === 0) {
-            callback(null, self.result);
-            return;
-        }
-        for (i = 0; i < fileKeys.length; i += 1) {
-            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], function (err, hash) {
-                nbrOfFiles -= 1;
-                if (nbrOfFiles === 0) {
-                    if (err) {
-                        callback('Something went wrong when adding files: ' + err, self.result);
-                        return;
-                    }
-                    self.blobClient.saveAllArtifacts(function (err, hashes) {
-                        if (err) {
-                            callback(err, self.result);
-                            return;
-                        }
-                        self.result.addArtifact(hashes[0]);
-                        self.logger.info('Artifacts are saved here: ' + hashes.toString());
-                        self.result.setSuccess(true);
-                        callback(null, self.result);
-                    });
+        artifact.addFiles(self.outputFiles, function (err, hashes) {
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
+            self.logger.warning(hashes.toString());
+            artifact.save(function (err, hash) {
+                if (err) {
+                    callback(err, self.result);
+                    return;
                 }
+                self.result.addArtifact(hash);
+                self.result.setSuccess(true);
+                callback(null, self.result);
             });
-        }
+        });
     };
 
     PetriNetExporterPlugin.prototype.addComponent = function (nodeObj) {
