@@ -21,6 +21,10 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
+        this.path2fmu = {};
+        this.path2port = {};
+        this.path2node = {};
+
         this.fmuIdToInfoMap = {};
         this.fmus = [];
         this.fmuPackageHashMap = {};
@@ -45,7 +49,7 @@ define(['plugin/PluginConfig',
     * @public
     */
     FmiExporter.prototype.getName = function () {
-        return "FMI ModelExchange Exporter";
+        return 'FMI ModelExchange Exporter';
     };
 
     /**
@@ -54,7 +58,7 @@ define(['plugin/PluginConfig',
     * @public
     */
     FmiExporter.prototype.getDescription = function () {
-        return "Generates a model_exchange_config.json for simulating a FMI system";
+        return 'Generates a model_exchange_config.json for simulating a FMI system';
     };
 
     /**
@@ -63,22 +67,157 @@ define(['plugin/PluginConfig',
     * @public
     */
     FmiExporter.prototype.getVersion = function () {
-        return "0.1.0";
+        return '0.1.0';
     };
 
-    /**
-    * Main function for the plugin to execute. This will perform the execution.
-    * Notes:
-    * - Always log with the provided logger.[error,warning,info,debug].
-    * - Do NOT put any user interaction logic UI, etc. inside this method.
-    * - callback always have to be called even if error happened.
-    *
-    * @param {function(string, plugin.PluginResult)} callback - the result callback
-    */
+//    /**
+//    * Main function for the plugin to execute. This will perform the execution.
+//    * Notes:
+//    * - Always log with the provided logger.[error,warning,info,debug].
+//    * - Do NOT put any user interaction logic UI, etc. inside this method.
+//    * - callback always have to be called even if error happened.
+//    *
+//    * @param {function(string, plugin.PluginResult)} callback - the result callback
+//    */
+//    FmiExporter.prototype.main = function (callback) {
+//        var self = this,
+//            selectedNode = self.activeNode,
+//            modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
+//            modelExchangeNode;
+//
+//        if (!selectedNode) {
+//            callback('selectedNode is not defined', self.result);
+//            return;
+//        }
+//
+//        this.updateMETA(FmuMetaTypes);
+//
+//        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
+//            modelExchangeNode = selectedNode;
+//        } else {
+//            callback('SelectedNode is not a ModelExchange!', self.result);
+//            return;
+//        }
+//
+//        var loadModelExchangeChildrenCallbackFunction = function (err, childNodes) {
+//            if (err) {
+//                var msg = "Something went wrong getting child nodes";
+//                self.logger.error(msg);
+//                callback(msg, self.result);
+//                return;
+//            }
+//
+//            var extractMeConfigInfoCallback = function (err) {
+//                if (err) {
+//                    self.result.setSuccess(false);
+//                    callback(err, self.result);
+//                    return;
+//                }
+//
+//                self.assignPriorityAndFlatten();
+//                //self.runTarjans();
+//
+//                var artifact = self.blobClient.createArtifact(modelExchangeName);
+//
+//                self.modelExchangeConfig['Connections'] = self.connections;
+//                self.modelExchangeConfig['FMUs'] = self.fmus;
+//                self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
+//                var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
+//
+//                var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
+//                var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
+//                var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+//                var tt4 = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
+//
+//                self.filesToSave['model_exchange_config.json'] = fileInfo;
+//                self.filesToSave['fmi_wrapper.py'] = tt1;
+//                self.filesToSave['jmodelica_model_exchange.py'] = tt2;
+//                self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
+//                self.filesToSave['ReadMe.txt'] = tt4;
+//
+//                var addFilesCallback = function (err, fileHashes) {
+//                    if (err) {
+//                        self.result.setSuccess(false);
+//                        callback(err, self.result);
+//                        return;
+//                    }
+//
+//                    var i,
+//                        fmuPackageName,
+//                        fmuPathWithinArtifact,
+//                        fmuHash,
+//                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
+//                        addHashesError,
+//                        addHashesCounter = fmuPackageHashMapKeys.length;
+//
+//                    var addHashCounterCallback = function (addHashCallbackError, addedHash) {
+//                        if (addHashCallbackError) {
+//                            addHashesError += addHashCallbackError;
+//                        }
+//
+//                        fileHashes.push(addedHash);
+//                        addHashesCounter -= 1;
+//
+//                        if (addHashesCounter === 0) {
+//
+//                            if (addHashesError) {
+//                                self.result.setSuccess(false);
+//                                callback(addHashesError, self.result);
+//                                return;
+//                            }
+//
+//                            var artifactSaveCallback = function (err, artifactHash) {
+//                                if (err) {
+//                                    self.result.setSuccess(false);
+//                                    callback(err, self.result);
+//                                    return;
+//                                }
+//
+//                                self.logger.info('Saved artifact hashes are: ' + artifactHash);
+//
+//                                self.result.addArtifact(artifactHash);
+//
+//                                self.result.setSuccess(true);
+//
+//                                // This will save the changes. If you don't want to save;
+//                                // exclude self.save and call callback directly from this scope.
+//                                self.save('Finished FmiExporter', function (err) {
+//                                    if (err) {
+//                                        self.result.setSuccess(false);
+//                                        callback(err, self.result);
+//                                        return;
+//                                    }
+//
+//                                    callback(null, self.result);
+//                                });
+//                            };
+//
+//                            artifact.save(artifactSaveCallback);
+//                        }
+//                    };
+//
+//                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+//                        // PM: Semi colon.
+//                        fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
+//                        fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
+//                        artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+//                    }
+//                };
+//
+//                artifact.addFiles(self.filesToSave, addFilesCallback);
+//            };
+//
+//            self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
+//        };
+//
+//        self.core.loadChildren(modelExchangeNode, loadModelExchangeChildrenCallbackFunction);
+//    };
+//
+
+
     FmiExporter.prototype.main = function (callback) {
         var self = this,
             selectedNode = self.activeNode,
-            modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
             modelExchangeNode;
 
         if (!selectedNode) {
@@ -95,118 +234,88 @@ define(['plugin/PluginConfig',
             return;
         }
 
-        var loadModelExchangeChildrenCallbackFunction = function (err, childNodes) {
+        var nodesAreLoadedCallbackFunction = function (err) {
             if (err) {
-                var msg = "Something went wrong getting child nodes";
+                var msg = 'Something went wrong getting loading child nodes';
                 self.logger.error(msg);
-                callback(msg, self.result);
-                return;
+                return callback(msg, self.result);
             }
 
-            var extractMeConfigInfoCallback = function (err) {
-                if (err) {
-                    self.result.setSuccess(false);
-                    callback(err, self.result);
-                    return;
-                }
-
-                //self.assignPriorityAndFlatten();
-                self.runTarjans();
-
-                var artifact = self.blobClient.createArtifact(modelExchangeName);
-
-                self.modelExchangeConfig['Connections'] = self.connections;
-                self.modelExchangeConfig['FMUs'] = self.fmus;
-                self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
-                var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
-
-                var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
-                var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-                var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-                var tt4 = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
-
-                self.filesToSave['model_exchange_config.json'] = fileInfo;
-                self.filesToSave['fmi_wrapper.py'] = tt1;
-                self.filesToSave['jmodelica_model_exchange.py'] = tt2;
-                self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
-                self.filesToSave['ReadMe.txt'] = tt4;
-
-                var addFilesCallback = function (err, fileHashes) {
-                    if (err) {
-                        self.result.setSuccess(false);
-                        callback(err, self.result);
-                        return;
-                    }
-
-                    var i,
-                        fmuPackageName,
-                        fmuPathWithinArtifact,
-                        fmuHash,
-                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
-                        addHashesError,
-                        addHashesCounter = fmuPackageHashMapKeys.length;
-
-                    var addHashCounterCallback = function (addHashCallbackError, addedHash) {
-                        if (addHashCallbackError) {
-                            addHashesError += addHashCallbackError;
-                        }
-
-                        fileHashes.push(addedHash);
-                        addHashesCounter -= 1;
-
-                        if (addHashesCounter === 0) {
-
-                            if (addHashesError) {
-                                self.result.setSuccess(false);
-                                callback(addHashesError, self.result);
-                                return;
-                            }
-
-                            var artifactSaveCallback = function (err, artifactHash) {
-                                if (err) {
-                                    self.result.setSuccess(false);
-                                    callback(err, self.result);
-                                    return;
-                                }
-
-                                self.logger.info('Saved artifact hashes are: ' + artifactHash);
-
-                                self.result.addArtifact(artifactHash);
-
-                                self.result.setSuccess(true);
-
-                                // This will save the changes. If you don't want to save;
-                                // exclude self.save and call callback directly from this scope.
-                                self.save('Finished FmiExporter', function (err) {
-                                    if (err) {
-                                        self.result.setSuccess(false);
-                                        callback(err, self.result);
-                                        return;
-                                    }
-
-                                    callback(null, self.result);
-                                });
-                            };
-
-                            artifact.save(artifactSaveCallback);
-                        }
-                    };
-
-                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-                        // PM: Semi colon.
-                        fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
-                        fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
-                        artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
-                    }
-                };
-
-                artifact.addFiles(self.filesToSave, addFilesCallback);
-            };
-
-            self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
+            self.logger.info('All nodes have been loaded.');
         };
 
-        self.core.loadChildren(modelExchangeNode, loadModelExchangeChildrenCallbackFunction);
+        var nodeCount = 0;
+        self.loadAllNodesRecursive(modelExchangeNode, nodeCount, null, nodesAreLoadedCallbackFunction);
+    }
+
+    FmiExporter.prototype.buildModelExchangeConfig = function () {
+        var self = this,
+            thisNode,
+            thisNodeName,
+            thisNodePath,
+            connSrcPath,
+            connDstPath;
+
+        for (thisNodePath in self.path2node) {
+            thisNode = self.path2node[thisNodePath];
+            thisNodeName = self.core.getAttribute(thisNode, 'name');
+
+            if (self.isMetaTypeOf(thisNode, FmuMetaTypes.PortComposition)) {
+
+                connSrcPath = self.core.getPointerPath(thisNode, 'src');
+                connDstPath = self.core.getPointerPath(thisNode, 'dst');
+
+                if (srcPath && dstPath) {
+                    if (self.connectionMap.hasOwnProperty(srcPath)) {
+                        self.connectionMap[srcPath].push(dstPath);   // append to existing list of destinations
+
+                    } else {
+                        self.connectionMap[srcPath] = [dstPath];
+                    }
+                } else {
+                    var portCompositionPath = self.core.getPath(thisNode);
+                    iterationCallback('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
+                    continue;
+                }
+
+            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU)) {
+                // asynchronous call to get parameter and port information
+                self.core.loadChildren(thisNode, loadFmuChildrenCallbackFunction(meChildName, meChildNode));
+
+            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.SimulationParameter)) {
+                if (self.simulationInfo.hasOwnProperty(meChildName)) {
+                    self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
+                }
+
+                iterationCallback(null);
+            }
+        }
+    };
+
+    FmiExporter.prototype.loadAllNodesRecursive = function (parentNode, nodeCount, errors, callback) {
+        var self = this;
+
+        var loadChildrenCallbackFunction = function (err, children) {
+            if (err) {
+                errors += err;
+            }
+
+            var childNodes = children;
+
+            nodeCount += childNodes.length;
+
+            if (nodeCount === 0) {
+                callback(errors);
+            }
+
+            for (var i = 0; i < childNodes.length; i += 1) {
+                self.path2node[self.core.getPath(childNodes[i])] = childNodes[i];
+                nodeCount -= 1;
+                self.loadAllNodesRecursive(childNodes[i], nodeCount, errors, callback)
+            }
+        };
+
+        self.core.loadChildren(parentNode, loadChildrenCallbackFunction);
     };
 
     // An asynchronous function to iterate over the ModelExchange children and extract info
@@ -215,15 +324,10 @@ define(['plugin/PluginConfig',
             i,
             meChildNode,
             meChildName,
-            metaTypeNode,
-            metaTypePath,
             counter = modelExchangeChildren.length,
             error = '',
             srcPath,
-            dstPath,
-            splitPath,
-            srcIds,
-            dstIds;
+            dstPath;
 
         var iterationCallback = function (err) {
             if (err) {
@@ -231,49 +335,44 @@ define(['plugin/PluginConfig',
             }
 
             counter -= 1;
-            // PM: check for counter <= 0 and call it if modeExhangeChildren.length === 0
+
             if (counter === 0) {
                 callback(error);
             }
         };
 
-        var loadFmuChildrenCallbackFunction = function (fmuName) {
+        var loadFmuChildrenCallbackFunction = function (fmuName, fmuNode) {
             return function (loadChildrenErr, fmuChildren) {
                 if (fmuChildren.length === 0) {
-                    var newErrorMessage = fmuName + " had no child objects";
+                    var newErrorMessage = fmuName + ' had no child objects';
                     loadChildrenErr += newErrorMessage;  //"FMU had no child objects";
                     iterationCallback(loadChildrenErr);
-                    // PM: return;
+                    return;
                 }
 
-                var fmuInstanceNode = self.core.getParent(fmuChildren[0]),
-                    fmuInstanceName = self.core.getAttribute(fmuInstanceNode, 'name'),
-                    fmuInstanceAssetHash = self.core.getAttribute(fmuInstanceNode, 'resource'),
-                    fmuBaseNode = self.core.getBase(fmuInstanceNode),
+                var fmuInfo = self.extractFmuInfo(fmuChildren),
+                    fmuInstanceName = self.core.getAttribute(fmuNode, 'name'),
+                    fmuInstancePath = self.core.getPath(fmuNode),
+                    fmuInstanceAssetHash = self.core.getAttribute(fmuNode, 'resource'),
+                    fmuBaseNode = self.core.getBase(fmuNode),
                     fmuBaseName = self.core.getAttribute(fmuBaseNode, 'name'),
-                    fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource'),
-                    //relid = self.core.getRelid(fmuInstanceNode),
-                    fullPath = self.core.getPath(fmuInstanceNode),
-                    fmuInfo;
-                // PM: Move this up.
-                fmuInfo = self.extractFmuInfo(fmuChildren);
+                    fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource');
 
                 fmuInfo['InstanceName'] = fmuInstanceName;
                 fmuInfo['Priority'] = 1;  // Initialize to 1, 'assignPriority' will overwrite
 
                 if (fmuInstanceAssetHash === fmuBaseAssetHash) {
-                    // PM: Use /, \ only works on windows.
-                    fmuInfo['File'] = 'FMUs\\' + fmuBaseName + '.fmu';
+                    fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
                     fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
                 } else {
-                    fmuInfo['File'] = 'FMUs\\' + fmuInstanceName + '.fmu';
-                    fmuInfo['Asset'] = self.core.getAttribute(fmuInstanceNode, 'resource');
+                    fmuInfo['File'] = 'FMUs/' + fmuInstanceName + '.fmu';
+                    fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
                 }
 
                 self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
 
-                //self.fmuIdToInfoMap[relid] = fmuInfo;
-                self.fmuIdToInfoMap[fullPath] = fmuInfo;
+                self.fmuIdToInfoMap[fmuInstancePath] = fmuInfo;
+                self.path2fmu[fmuInstancePath] = fmuInfo;
 
                 iterationCallback(loadChildrenErr);
             };
@@ -283,92 +382,59 @@ define(['plugin/PluginConfig',
 
             meChildNode = modelExchangeChildren[i];
             meChildName = self.core.getAttribute(meChildNode, 'name');
-            metaTypeNode = self.getMetaType(meChildNode);
-            metaTypePath = self.core.getPath(metaTypeNode);
 
-            // FIXME: this condition is fine now, but will not work correctly if we have a more complicated inheritance
-            //        in the meta model.
-            // PM: isMetaTypeOf takes care of the inheritance.
-            if (metaTypeNode === FmuMetaTypes.PortComposition) {
+            if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.PortComposition)) {
 
                 srcPath = self.core.getPointerPath(meChildNode, 'src');
                 dstPath = self.core.getPointerPath(meChildNode, 'dst');
 
-                if (srcPath) {
-                    srcIds = srcPath;
+                if (srcPath && dstPath) {
+                    if (self.connectionMap.hasOwnProperty(srcPath)) {
+                        self.connectionMap[srcPath].push(dstPath);   // append to existing list of destinations
 
-//                    splitPath = srcPath.split('/');
-//                    if (splitPath.length > 2) {
-//                        srcIds = splitPath.slice(-2).join('/');
-//                    }
+                    } else {
+                        self.connectionMap[srcPath] = [dstPath];
+                    }
                 } else {
-                    // PM: You need to continue after this call - if that's the intention.
-                    iterationCallback("PortComposition has no SrcPointer.");
-                }
-                if (dstPath) {
-                    dstIds = dstPath;
-
-//                    splitPath = dstPath.split('/');
-//                    if (splitPath.length > 2) {
-//                        dstIds = splitPath.slice(-2).join('/');
-//                    }
-                } else {
-                    // PM: You need to continue after this call - if that's the intention.
-                    iterationCallback("PortComposition has no DstPointer");
-                }
-
-                if (self.connectionMap.hasOwnProperty(srcIds)) {
-                    self.connectionMap[srcIds].push(dstIds);
-
-                } else {
-                    self.connectionMap[srcIds] = [dstIds];
+                    var portCompositionPath = self.core.getPath(meChildNode);
+                    iterationCallback('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
+                    continue;
                 }
 
                 iterationCallback(null);
 
-            } else if (metaTypeNode === FmuMetaTypes.FMU) {
+            } else if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.FMU)) {
                 // asynchronous call to get parameter and port information
-                self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction(meChildName));
+                self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction(meChildName, meChildNode));
 
-            } else if (metaTypeNode === FmuMetaTypes.SimulationParameter) {
+            } else if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.SimulationParameter)) {
                 if (self.simulationInfo.hasOwnProperty(meChildName)) {
                     self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
                 }
 
                 iterationCallback(null);
             }
-
         }
     };
 
     FmiExporter.prototype.assignPriorityAndFlatten = function () {
-        // PM: There's probably too many variables declared in this method.
-        // Will be more transparent when you move all declarations to the top.
         var self = this,
-            fmuMapKeys = Object.keys(self.fmuIdToInfoMap),
-            connMapKeys = Object.keys(self.connectionMap),
             connMapKey,
-            fmuId,
             fmu,
             fmuHash,
             fmuPriority,
             fmuPath,
             i;
 
-        //for (i = 0; i < fmuMapKeys.length; i += 1) {
-        for (fmuPath in self.fmuIdToInfoMap) {
-            // PM: Comma should only be used in declarations, i.e. var a, b, c;
-            //fmuId = fmuMapKeys[i],
-            //fmu = self.fmuIdToInfoMap[fmuId],
-            fmu = self.fmuIdToInfoMap[fmuPath],
-            fmuHash = fmu.Asset,
+        for (fmuPath in self.path2fmu) {
+            fmu = self.path2fmu[fmuPath];
+            fmuHash = fmu.Asset;
             fmuPriority = fmu.Priority;
 
             if (fmuPriority === 1) {
-                self.followConnsAssignPriority(fmuId, fmu);
+                self.followConnsAssignPriority(fmuPath, fmu);
             }
 
-            //self.fmuPackageHashMap[fmu.Name] = fmuHash;
             self.fmus.push(fmu);
         }
 
@@ -392,12 +458,10 @@ define(['plugin/PluginConfig',
             flatConnInfo,
             j;
 
-        //for (i = 0; i < connMapKeys.length; i += 1) {
         for (srcPortPath in self.connectionMap) {
-            //connMapKey = connMapKeys[i];
             splitKey = connMapKey.split('/');
-            srcFmuId = splitKey[0];
-            srcPortId = splitKey[1];
+            srcFmuId = splitKey[-2];
+            srcPortId = splitKey[-1];
             srcFmu = self.fmuIdToInfoMap[srcFmuId];
             srcFmuName = srcFmu.InstanceName;
             srcPriority = srcFmu.Priority;
@@ -426,7 +490,7 @@ define(['plugin/PluginConfig',
         }
     };
 
-    FmiExporter.prototype.followConnsAssignPriority = function (srcFmuId, srcFmu) {
+    FmiExporter.prototype.followConnsAssignPriority = function (srcFmuPath, srcFmu) {
         var self = this,
             srcFmuName = srcFmu.InstanceName,
             srcFmuOutputs = srcFmu.OutputMap,
@@ -438,17 +502,17 @@ define(['plugin/PluginConfig',
             j;
 
         if (numberOutputs === 0) {
-            self.logger.debug(srcFmu.InstanceName + " has no Outputs.");
+            self.logger.debug(srcFmu.InstanceName + ' has no Outputs.');
             return;
         }
 
         for (i = 0; i < outputIds.length; i += 1) {
             var outputId = outputIds[i],
                 outputName = srcFmuOutputs[outputId],
-                connMapKey = srcFmuId + '/' + outputId;
+                connMapKey = srcFmuPath + '/' + outputId;
 
             if (self.connectionMap.hasOwnProperty(connMapKey) === false) {
-                self.logger.debug("No connections leaving from " + srcFmuName + "." + outputName);
+                self.logger.debug('No connections leaving from ' + srcFmuName + '.' + outputName);
                 continue;
             }
 
@@ -457,8 +521,8 @@ define(['plugin/PluginConfig',
 
             for (j = 0; j < allConnections.length; j += 1) {
                 var connectedInput = allConnections[j],
-                    dstFmuId = connectedInput.split("/")[0],
-                    dstPortId = connectedInput.split("/")[1],
+                    dstFmuId = connectedInput.split('/')[0],
+                    dstPortId = connectedInput.split('/')[1],
                     dstFmu = self.fmuIdToInfoMap[dstFmuId],
                     dstPortName = dstFmu.InputMap[dstPortId];
 
@@ -477,52 +541,34 @@ define(['plugin/PluginConfig',
         var self = this,
             i,
             fmuChildNode,
-            fmuChildNodeRelid,
+            fmuChildNodePath,
             fmuChildNodeName,
-            baseTypeNode,
-            baseTypePath,
             parameters = {},
             inputMap = {},
-            outputMap = {},
-            inputs = [],
-            outputs = [],
-            fmuInfo = {};
+            outputMap = {};
 
         for (i = 0; i < fmuChildren.length; i += 1) {
 
             fmuChildNode = fmuChildren[i];
-            fmuChildNodeRelid = self.core.getRelid(fmuChildNode); // FIXME: getPath?
+            fmuChildNodePath = self.core.getPath(fmuChildNode);
             fmuChildNodeName = self.core.getAttribute(fmuChildNode, 'name');
-            baseTypeNode = self.getMetaType(fmuChildNode);
-            baseTypePath = self.core.getPath(baseTypeNode);
 
-            if (baseTypeNode === FmuMetaTypes.Parameter) {
+            if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Parameter)) {
                 parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
 
-            } else if (baseTypeNode === FmuMetaTypes.Input) {
-                inputMap[fmuChildNodeRelid] = fmuChildNodeName;
-                inputs.push(fmuChildNodeName);
+            } else if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Input)) {
+                inputMap[fmuChildNodePath] = fmuChildNodeName;
 
-            } else if (baseTypeNode === FmuMetaTypes.Output) {
-                outputMap[fmuChildNodeRelid] = fmuChildNodeName;
-                outputs.push(fmuChildNodeName);
+            } else if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Output)) {
+                outputMap[fmuChildNodePath] = fmuChildNodeName;
             }
         }
-        // PM: Use the below. (Otherwise you're modifying the object multiple times.)
-        // (There is no need to initialize it then.)
-        // fmuInfo = {
-        //    Parameters: parameters,
-        //    Inputs: inputs,
-        //      ...
-        //  };
-        // You can also return the object directly.
-        fmuInfo['Parameters'] = parameters;
-        fmuInfo['Inputs'] = inputs;
-        fmuInfo['InputMap'] = inputMap;
-        fmuInfo['Outputs'] = outputs;
-        fmuInfo['OutputMap'] = outputMap;
 
-        return fmuInfo;
+        return {
+            Parameters: parameters,
+            InputMap: inputMap,
+            OutputMap: outputMap
+        };
     };
 
     /**
