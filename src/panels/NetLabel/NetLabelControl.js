@@ -5,10 +5,10 @@
  *          Dana Zhang
  */
 
-"use strict";
-
 define(['js/Panels/ModelEditor/ModelEditorControl',
     'js/Constants'], function (ModelEditorControl, CONSTANTS) {
+
+    "use strict";
 
     var NetLabelControl;
 
@@ -38,10 +38,13 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             srcParentName = gmeClient.getNode(srcParentId).getAttribute('name'),
             dstParentName = gmeClient.getNode(dstParentId).getAttribute('name'),
             srcText = srcID.match(/\//g).length > 3 ? srcParentName + "." + srcName : srcName,
-            dstText = dstID.match(/\//g).length > 3 ? dstParentName + "." + dstName : dstName;
-
+            dstText = dstID.match(/\//g).length > 3 ? dstParentName + "." + dstName : dstName,
+            srcPos = srcObj.getRegistry('position'),
+            dstPos = srcObj.getRegistry('position');
         return {'srcText': srcText,
-                'dstText': dstText};
+                'dstText': dstText,
+                'srcPos': srcPos,
+                'dstPos': dstPos};
     };
 
     return NetLabelControl;
