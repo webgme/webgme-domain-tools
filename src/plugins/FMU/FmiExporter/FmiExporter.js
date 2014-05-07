@@ -5,8 +5,9 @@
 define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/FmiExporter/FmiExporter/FMU',
+        'plugin/FmiExporter/FmiExporter/tarjan',
         'plugin/FmiExporter/FmiExporter/Templates/Templates',
-        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, TEMPLATES, ejs) {
+        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, Tarjan, TEMPLATES, ejs) {
     // PM: This change saves you one indent (or JSLint complaints for each method).
     'use strict';
 
@@ -291,7 +292,7 @@ define(['plugin/PluginConfig',
                 'Outputs': {}
             };
 
-        self.pathToTarjansVertex[fmuNodePath] = new TarjansVertex(fmuNodePath);
+        self.pathToTarjansVertex[fmuNodePath] = new Tarjan.Vertex(fmuNodePath);
 
         if (fmuInstanceAssetHash === fmuBaseAssetHash) {
             fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
@@ -368,7 +369,7 @@ define(['plugin/PluginConfig',
                     ithConnectedInput = connectedInputs[i];
 
                     fmuTargetPath = self.getParentPath(ithConnectedInput);
-                    tarjansVertex.connections.push(self.pathToTarjansVertex[fmuTargetPath]);
+                    tarjansVertex.connectTo(self.pathToTarjansVertex[fmuTargetPath]);
                 }
 
             }
@@ -376,8 +377,8 @@ define(['plugin/PluginConfig',
             tarjansVertices.push(tarjansVertex);
         }
 
-        var tarjansGraph = new TarjansGraph(tarjansVertices),
-            tarjansAlgorithm = new TarjansAlgorithm(tarjansGraph),
+        var tarjansGraph = new Tarjan.Graph(tarjansVertices),
+            tarjansAlgorithm = new Tarjan.Tarjan(tarjansGraph),
             tarjansScc = tarjansAlgorithm.run();
 
         for (i = 0; i < tarjansScc.length; i += 1) {
@@ -391,101 +392,101 @@ define(['plugin/PluginConfig',
 
 //<editor-fold desc="============================ Tarjans Definitions ==================================">
 
-    var TarjansVertex = function (name) {
-        this.name = name || null;
-        this.connections = [];
-        this.index= -1;
-        this.lowlink = -1;
-    };
-
-    TarjansVertex.prototype.equals = function (vertex) {
-        // equality check based on vertex name
-        return (vertex.name && this.name==vertex.name);
-    };
-
-    var TarjansGraph = function (vertices){
-        this.vertices = vertices || [];
-    };
-
-    var TarjansVertexStack = function (vertices) {
-        this.vertices = vertices || [];
-    };
-    TarjansVertexStack.prototype.contains = function (vertex) {
-        var nbrVertices = this.vertices.length,
-            ithVertex;
-
-        for (var i = 0; i < nbrVertices; i += 1) {
-            ithVertex = this.vertices[i];
-            if (ithVertex.equals(vertex)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    var TarjansAlgorithm = function (graph) {
-        this.index = 0;
-        this.stack = new TarjansVertexStack();
-        this.graph = graph;
-        this.scc = [];
-    };
-
-    TarjansAlgorithm.prototype.run = function () {
-        var nbrGraphVertices = this.graph.vertices.length,
-            ithGraphVertex;
-
-        for (var i = 0; i < nbrGraphVertices; i += 1) {
-            ithGraphVertex = this.graph.vertices[i];
-            if (ithGraphVertex.index < 0) {
-                this.strongconnect(ithGraphVertex);
-            }
-        }
-        return this.scc;
-    };
-
-    TarjansAlgorithm.prototype.strongconnect = function (vertex) {
-        var w;
-
-        // Set the depth index for v to the smallest unused index
-        vertex.index = this.index;
-        vertex.lowlink = this.index;
-        this.index = this.index + 1;
-        this.stack.vertices.push(vertex);
-
-        // Consider successors of v
-        // aka... consider each vertex in vertex.connections
-        for (var i in vertex.connections){
-            var v = vertex;
-            w = vertex.connections[i];
-            if (w.index < 0) {
-                // Successor w has not yet been visited; recurse on it
-                this.strongconnect(w);
-                v.lowlink = Math.min(v.lowlink,w.lowlink);
-            } else if (this.stack.contains(w)){
-                // Successor w is in stack S and hence in the current SCC
-                v.lowlink = Math.min(v.lowlink,w.index);
-            }
-        }
-
-        // If v is a root node, pop the stack and generate an SCC
-        if (vertex.lowlink==vertex.index){
-            // start a new strongly connected component
-            var vertices = [];
-            w = null;
-            if (this.stack.vertices.length>0){
-                do {
-                    w = this.stack.vertices.pop();
-                    // add w to current strongly connected component
-                    vertices.push(w);
-                } while (!vertex.equals(w));
-            }
-            // output the current strongly connected component
-            // ... i'm going to push the results to a member scc array variable
-            if (vertices.length>0){
-                this.scc.push(vertices);
-            }
-        }
-    };
+//    var TarjansVertex = function (name) {
+//        this.name = name || null;
+//        this.connections = [];
+//        this.index= -1;
+//        this.lowlink = -1;
+//    };
+//
+//    TarjansVertex.prototype.equals = function (vertex) {
+//        // equality check based on vertex name
+//        return (vertex.name && this.name==vertex.name);
+//    };
+//
+//    var TarjansGraph = function (vertices){
+//        this.vertices = vertices || [];
+//    };
+//
+//    var TarjansVertexStack = function (vertices) {
+//        this.vertices = vertices || [];
+//    };
+//    TarjansVertexStack.prototype.contains = function (vertex) {
+//        var nbrVertices = this.vertices.length,
+//            ithVertex;
+//
+//        for (var i = 0; i < nbrVertices; i += 1) {
+//            ithVertex = this.vertices[i];
+//            if (ithVertex.equals(vertex)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    };
+//
+//    var TarjansAlgorithm = function (graph) {
+//        this.index = 0;
+//        this.stack = new TarjansVertexStack();
+//        this.graph = graph;
+//        this.scc = [];
+//    };
+//
+//    TarjansAlgorithm.prototype.run = function () {
+//        var nbrGraphVertices = this.graph.vertices.length,
+//            ithGraphVertex;
+//
+//        for (var i = 0; i < nbrGraphVertices; i += 1) {
+//            ithGraphVertex = this.graph.vertices[i];
+//            if (ithGraphVertex.index < 0) {
+//                this.strongconnect(ithGraphVertex);
+//            }
+//        }
+//        return this.scc;
+//    };
+//
+//    TarjansAlgorithm.prototype.strongconnect = function (vertex) {
+//        var w;
+//
+//        // Set the depth index for v to the smallest unused index
+//        vertex.index = this.index;
+//        vertex.lowlink = this.index;
+//        this.index = this.index + 1;
+//        this.stack.vertices.push(vertex);
+//
+//        // Consider successors of v
+//        // aka... consider each vertex in vertex.connections
+//        for (var i in vertex.connections){
+//            var v = vertex;
+//            w = vertex.connections[i];
+//            if (w.index < 0) {
+//                // Successor w has not yet been visited; recurse on it
+//                this.strongconnect(w);
+//                v.lowlink = Math.min(v.lowlink,w.lowlink);
+//            } else if (this.stack.contains(w)){
+//                // Successor w is in stack S and hence in the current SCC
+//                v.lowlink = Math.min(v.lowlink,w.index);
+//            }
+//        }
+//
+//        // If v is a root node, pop the stack and generate an SCC
+//        if (vertex.lowlink==vertex.index){
+//            // start a new strongly connected component
+//            var vertices = [];
+//            w = null;
+//            if (this.stack.vertices.length>0){
+//                do {
+//                    w = this.stack.vertices.pop();
+//                    // add w to current strongly connected component
+//                    vertices.push(w);
+//                } while (!vertex.equals(w));
+//            }
+//            // output the current strongly connected component
+//            // ... i'm going to push the results to a member scc array variable
+//            if (vertices.length>0){
+//                this.scc.push(vertices);
+//            }
+//        }
+//    };
 
     //</editor-fold>
 
