@@ -22,11 +22,9 @@ define(['plugin/PluginConfig',
         PluginBase.call(this);
 
         this.pathToFmuInfo = {};
-        this.path2port = {};
+        this.pathToTarjansVertex = {};
+        this.nodeCount = 0;
         this.path2node = {};
-
-        this.fmuIdToInfoMap = {};
-        this.fmus = [];
         this.fmuPackageHashMap = {};
         this.connectionMap = {};
         this.connections = [];
@@ -70,155 +68,11 @@ define(['plugin/PluginConfig',
         return '0.1.0';
     };
 
-//    /**
-//    * Main function for the plugin to execute. This will perform the execution.
-//    * Notes:
-//    * - Always log with the provided logger.[error,warning,info,debug].
-//    * - Do NOT put any user interaction logic UI, etc. inside this method.
-//    * - callback always have to be called even if error happened.
-//    *
-//    * @param {function(string, plugin.PluginResult)} callback - the result callback
-//    */
-//    FmiExporter.prototype.main = function (callback) {
-//        var self = this,
-//            selectedNode = self.activeNode,
-//            modelExchangeName = self.core.getAttribute(selectedNode, 'name'),
-//            modelExchangeNode;
-//
-//        if (!selectedNode) {
-//            callback('selectedNode is not defined', self.result);
-//            return;
-//        }
-//
-//        this.updateMETA(FmuMetaTypes);
-//
-//        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
-//            modelExchangeNode = selectedNode;
-//        } else {
-//            callback('SelectedNode is not a ModelExchange!', self.result);
-//            return;
-//        }
-//
-//        var loadModelExchangeChildrenCallbackFunction = function (err, childNodes) {
-//            if (err) {
-//                var msg = "Something went wrong getting child nodes";
-//                self.logger.error(msg);
-//                callback(msg, self.result);
-//                return;
-//            }
-//
-//            var extractMeConfigInfoCallback = function (err) {
-//                if (err) {
-//                    self.result.setSuccess(false);
-//                    callback(err, self.result);
-//                    return;
-//                }
-//
-//                self.assignPriorityAndFlatten();
-//                //self.runTarjans();
-//
-//                var artifact = self.blobClient.createArtifact(modelExchangeName);
-//
-//                self.modelExchangeConfig['Connections'] = self.connections;
-//                self.modelExchangeConfig['FMUs'] = self.fmus;
-//                self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
-//                var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
-//
-//                var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
-//                var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-//                var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-//                var tt4 = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
-//
-//                self.filesToSave['model_exchange_config.json'] = fileInfo;
-//                self.filesToSave['fmi_wrapper.py'] = tt1;
-//                self.filesToSave['jmodelica_model_exchange.py'] = tt2;
-//                self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
-//                self.filesToSave['ReadMe.txt'] = tt4;
-//
-//                var addFilesCallback = function (err, fileHashes) {
-//                    if (err) {
-//                        self.result.setSuccess(false);
-//                        callback(err, self.result);
-//                        return;
-//                    }
-//
-//                    var i,
-//                        fmuPackageName,
-//                        fmuPathWithinArtifact,
-//                        fmuHash,
-//                        fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
-//                        addHashesError,
-//                        addHashesCounter = fmuPackageHashMapKeys.length;
-//
-//                    var addHashCounterCallback = function (addHashCallbackError, addedHash) {
-//                        if (addHashCallbackError) {
-//                            addHashesError += addHashCallbackError;
-//                        }
-//
-//                        fileHashes.push(addedHash);
-//                        addHashesCounter -= 1;
-//
-//                        if (addHashesCounter === 0) {
-//
-//                            if (addHashesError) {
-//                                self.result.setSuccess(false);
-//                                callback(addHashesError, self.result);
-//                                return;
-//                            }
-//
-//                            var artifactSaveCallback = function (err, artifactHash) {
-//                                if (err) {
-//                                    self.result.setSuccess(false);
-//                                    callback(err, self.result);
-//                                    return;
-//                                }
-//
-//                                self.logger.info('Saved artifact hashes are: ' + artifactHash);
-//
-//                                self.result.addArtifact(artifactHash);
-//
-//                                self.result.setSuccess(true);
-//
-//                                // This will save the changes. If you don't want to save;
-//                                // exclude self.save and call callback directly from this scope.
-//                                self.save('Finished FmiExporter', function (err) {
-//                                    if (err) {
-//                                        self.result.setSuccess(false);
-//                                        callback(err, self.result);
-//                                        return;
-//                                    }
-//
-//                                    callback(null, self.result);
-//                                });
-//                            };
-//
-//                            artifact.save(artifactSaveCallback);
-//                        }
-//                    };
-//
-//                    for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-//                        // PM: Semi colon.
-//                        fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
-//                        fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
-//                        artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
-//                    }
-//                };
-//
-//                artifact.addFiles(self.filesToSave, addFilesCallback);
-//            };
-//
-//            self.extractModelExchangeConfigInfo(childNodes, extractMeConfigInfoCallback);
-//        };
-//
-//        self.core.loadChildren(modelExchangeNode, loadModelExchangeChildrenCallbackFunction);
-//    };
-//
-
-
     FmiExporter.prototype.main = function (callback) {
         var self = this,
             selectedNode = self.activeNode,
-            modelExchangeNode;
+            modelExchangeNode,
+            modelExchangeName;
 
         if (!selectedNode) {
             callback('selectedNode is not defined', self.result);
@@ -229,28 +83,116 @@ define(['plugin/PluginConfig',
 
         if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
             modelExchangeNode = selectedNode;
+            modelExchangeName = self.core.getAttribute(modelExchangeNode, 'name');
+            self.nodeCount +=1;
         } else {
             callback('SelectedNode is not a ModelExchange!', self.result);
             return;
         }
 
-        var nodesAreLoadedCallbackFunction = function (err) {
+        var allNodesAreLoadedCallbackFunction = function (err) {
             if (err) {
                 var msg = 'Something went wrong getting loading child nodes';
                 self.logger.error(msg);
                 return callback(msg, self.result);
             }
 
-            self.logger.info('All nodes have been loaded.');
-
             self.buildModelExchangeConfig();
+            var scc = self.runTarjansAlgorithm();
 
-            self.logger.info('meConfig');
+            //=================================================================
+            var artifact = self.blobClient.createArtifact(modelExchangeName);
+
+            self.modelExchangeConfig['ConnectionMap'] = self.connectionMap;
+            self.modelExchangeConfig['FMUs'] = self.pathToFmuInfo;
+            self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
+            var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
+
+            var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
+            var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
+            var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+            var tt4 = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
+
+            self.filesToSave['model_exchange_config.json'] = fileInfo;
+            self.filesToSave['fmi_wrapper.py'] = tt1;
+            self.filesToSave['jmodelica_model_exchange.py'] = tt2;
+            self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
+            self.filesToSave['ReadMe.txt'] = tt4;
+
+            var addFilesCallback = function (err, fileHashes) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    return callback(err, self.result);
+                }
+
+                var i,
+                    fmuPathWithinArtifact,
+                    fmuHash,
+                    fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
+                    addHashesError,
+                    addHashesCounter = fmuPackageHashMapKeys.length;
+
+                var addHashCounterCallback = function (addHashCallbackError, addedHash) {
+                    if (addHashCallbackError) {
+                        addHashesError += addHashCallbackError;
+                    }
+
+                    fileHashes.push(addedHash);
+                    addHashesCounter -= 1;
+
+                    if (addHashesCounter === 0) {
+
+                        if (addHashesError) {
+                            self.result.setSuccess(false);
+                            callback(addHashesError, self.result);
+                            return;
+                        }
+
+                        var artifactSaveCallback = function (err, artifactHash) {
+                            if (err) {
+                                self.result.setSuccess(false);
+                                callback(err, self.result);
+                                return;
+                            }
+
+                            self.logger.info('Saved artifact hashes are: ' + artifactHash);
+
+                            self.result.addArtifact(artifactHash);
+
+                            self.result.setSuccess(true);
+
+                            // This will save the changes. If you don't want to save;
+                            // exclude self.save and call callback directly from this scope.
+                            self.save('Finished FmiExporter', function (err) {
+                                if (err) {
+                                    self.result.setSuccess(false);
+                                    callback(err, self.result);
+                                    return;
+                                }
+
+                                callback(null, self.result);
+                            });
+                        };
+
+                        artifact.save(artifactSaveCallback);
+                    }
+                };
+
+                for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+                    // PM: Semi colon.
+                    fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
+                        fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
+                    artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+                }
+            };
+
+            artifact.addFiles(self.filesToSave, addFilesCallback);
+            //=================================================================
+
         };
 
-        var nodeCount = 0;
-        self.loadAllNodesRecursive(modelExchangeNode, nodeCount, null, nodesAreLoadedCallbackFunction);
-    }
+        self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
+    };
 
     FmiExporter.prototype.buildModelExchangeConfig = function () {
         var self = this,
@@ -260,11 +202,22 @@ define(['plugin/PluginConfig',
             parentFmuPath,
             parentFmuInfo,
             connSrcPath,
-            connDstPath;
+            connDstPath,
+            isFmu,
+            isParam,
+            isInput,
+            isOutput;
 
         for (thisNodePath in self.path2node) {
             thisNode = self.path2node[thisNodePath];
             thisNodeName = self.core.getAttribute(thisNode, 'name');
+
+            // DEBUG
+            isFmu = self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU);
+            isParam = self.isMetaTypeOf(thisNode, FmuMetaTypes.Parameter);
+            isInput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Input);
+            isOutput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Output);
+            //
 
             if (self.isMetaTypeOf(thisNode, FmuMetaTypes.PortComposition)) {
 
@@ -280,49 +233,45 @@ define(['plugin/PluginConfig',
                     }
                 } else {
                     var portCompositionPath = self.core.getPath(thisNode);
-                    iterationCallback('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
+                    self.logger.warning('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
                     continue;
                 }
 
-            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU)) {
-                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+            } else if (isFmu) {
+                if (!self.pathToFmuInfo.hasOwnProperty(thisNodePath)) {
                     self.getFmuInfo(thisNodePath, thisNode, thisNodeName);
                 }
 
-            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Parameter)) {
+            } else if (isParam) {
                 parentFmuPath = self.getParentPath(thisNodePath);
 
                 if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
-                } else {
-                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                    self.getFmuInfo(parentFmuPath);
                 }
 
-                parentFmuInfo.Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
-            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Input)) {
+                self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+
+            } else if (isInput) {
                 parentFmuPath = self.getParentPath(thisNodePath);
 
                 if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
-                } else {
-                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                    self.getFmuInfo(parentFmuPath);
                 }
 
-                parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
-                parentFmuInfo.Inputs[thisNodePath] = thisNodeName;
-            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.Output)) {
+                self.pathToFmuInfo[parentFmuPath].Inputs[thisNodePath] = thisNodeName;
+
+            } else if (isOutput) {
                 parentFmuPath = self.getParentPath(thisNodePath);
 
                 if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    parentFmuInfo = self.getFmuInfo(parentFmuPath);
-                } else {
-                    parentFmuInfo = self.pathToFmuInfo[parentFmuPath];
+                    self.getFmuInfo(parentFmuPath);
                 }
 
-                parentFmuInfo.Outputs[thisNodePath] = thisNodeName;
+                self.pathToFmuInfo[parentFmuPath].Outputs[thisNodePath] = thisNodeName;
+
             } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.SimulationParameter)) {
-                if (self.simulationInfo.hasOwnProperty(meChildName)) {
-                    self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
+                if (self.simulationInfo.hasOwnProperty(thisNodeName)) {
+                    self.simulationInfo[thisNodeName] = self.core.getAttribute(thisNode, 'value');
                 }
             }
         }
@@ -345,6 +294,8 @@ define(['plugin/PluginConfig',
                 'Outputs': {}
             };
 
+        self.pathToTarjansVertex[fmuNodePath] = new TarjansVertex(fmuNodePath);
+
         if (fmuInstanceAssetHash === fmuBaseAssetHash) {
             fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
             fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
@@ -355,8 +306,6 @@ define(['plugin/PluginConfig',
 
         self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
         self.pathToFmuInfo[fmuNodePath] = fmuInfo;
-
-        return fmuInfo;
     };
 
     FmiExporter.prototype.getParentPath = function (childPath) {
@@ -367,284 +316,175 @@ define(['plugin/PluginConfig',
         return parentPath;
     };
 
-    FmiExporter.prototype.loadAllNodesRecursive = function (parentNode, nodeCount, errors, callback) {
-        var self = this;
+    FmiExporter.prototype.loadAllNodesRecursive = function (parentNode, errors, callback) {
+        var self = this,
+            loadChildrenCallbackFunction,
+            parentName = self.core.getAttribute(parentNode, 'name');
 
-        var loadChildrenCallbackFunction = function (err, children) {
+        loadChildrenCallbackFunction = function (err, children) {
             if (err) {
                 errors += err;
             }
 
+            self.nodeCount -= 1;
+
             var childNodes = children;
+            self.nodeCount += childNodes.length;
 
-            nodeCount += childNodes.length;
-
-            if (nodeCount === 0) {
+            if (self.nodeCount === 0) {
                 callback(errors);
             }
 
             for (var i = 0; i < childNodes.length; i += 1) {
                 self.path2node[self.core.getPath(childNodes[i])] = childNodes[i];
-                nodeCount -= 1;
-                self.loadAllNodesRecursive(childNodes[i], nodeCount, errors, callback)
+                self.loadAllNodesRecursive(childNodes[i], errors, callback)
             }
         };
 
         self.core.loadChildren(parentNode, loadChildrenCallbackFunction);
     };
 
-    // An asynchronous function to iterate over the ModelExchange children and extract info
-    FmiExporter.prototype.extractModelExchangeConfigInfo = function (modelExchangeChildren, callback) {
+    FmiExporter.prototype.runTarjansAlgorithm = function() {
         var self = this,
-            i,
-            meChildNode,
-            meChildName,
-            counter = modelExchangeChildren.length,
-            error = '',
-            srcPath,
-            dstPath;
-
-        var iterationCallback = function (err) {
-            if (err) {
-                error += err;
-            }
-
-            counter -= 1;
-
-            if (counter === 0) {
-                callback(error);
-            }
-        };
-
-        var loadFmuChildrenCallbackFunction = function (fmuName, fmuNode) {
-            return function (loadChildrenErr, fmuChildren) {
-                if (fmuChildren.length === 0) {
-                    var newErrorMessage = fmuName + ' had no child objects';
-                    loadChildrenErr += newErrorMessage;  //"FMU had no child objects";
-                    iterationCallback(loadChildrenErr);
-                    return;
-                }
-
-                var fmuInfo = self.extractFmuInfo(fmuChildren),
-                    fmuInstanceName = self.core.getAttribute(fmuNode, 'name'),
-                    fmuInstancePath = self.core.getPath(fmuNode),
-                    fmuInstanceAssetHash = self.core.getAttribute(fmuNode, 'resource'),
-                    fmuBaseNode = self.core.getBase(fmuNode),
-                    fmuBaseName = self.core.getAttribute(fmuBaseNode, 'name'),
-                    fmuBaseAssetHash = self.core.getAttribute(fmuBaseNode, 'resource');
-
-                fmuInfo['InstanceName'] = fmuInstanceName;
-                fmuInfo['Priority'] = 1;  // Initialize to 1, 'assignPriority' will overwrite
-
-                if (fmuInstanceAssetHash === fmuBaseAssetHash) {
-                    fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
-                    fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
-                } else {
-                    fmuInfo['File'] = 'FMUs/' + fmuInstanceName + '.fmu';
-                    fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
-                }
-
-                self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
-
-                self.fmuIdToInfoMap[fmuInstancePath] = fmuInfo;
-                self.pathToFmuInfo[fmuInstancePath] = fmuInfo;
-
-                iterationCallback(loadChildrenErr);
-            };
-        };
-
-        for (i = 0; i < modelExchangeChildren.length; i += 1) {
-
-            meChildNode = modelExchangeChildren[i];
-            meChildName = self.core.getAttribute(meChildNode, 'name');
-
-            if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.PortComposition)) {
-
-                srcPath = self.core.getPointerPath(meChildNode, 'src');
-                dstPath = self.core.getPointerPath(meChildNode, 'dst');
-
-                if (srcPath && dstPath) {
-                    if (self.connectionMap.hasOwnProperty(srcPath)) {
-                        self.connectionMap[srcPath].push(dstPath);   // append to existing list of destinations
-
-                    } else {
-                        self.connectionMap[srcPath] = [dstPath];
-                    }
-                } else {
-                    var portCompositionPath = self.core.getPath(meChildNode);
-                    iterationCallback('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
-                    continue;
-                }
-
-                iterationCallback(null);
-
-            } else if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.FMU)) {
-                // asynchronous call to get parameter and port information
-                self.core.loadChildren(meChildNode, loadFmuChildrenCallbackFunction(meChildName, meChildNode));
-
-            } else if (self.isMetaTypeOf(meChildNode, FmuMetaTypes.SimulationParameter)) {
-                if (self.simulationInfo.hasOwnProperty(meChildName)) {
-                    self.simulationInfo[meChildName] = self.core.getAttribute(meChildNode, 'value');
-                }
-
-                iterationCallback(null);
-            }
-        }
-    };
-
-    FmiExporter.prototype.assignPriorityAndFlatten = function () {
-        var self = this,
-            connMapKey,
-            fmu,
-            fmuHash,
-            fmuPriority,
+            tarjansVertex,
+            tarjansVertices = [],
             fmuPath,
+            fmuInfo,
+            fmuTargetPath,
+            outputPath,
+            connectedInputs,
+            ithConnectedInput,
             i;
 
-        for (fmuPath in self.pathToFmuInfo) {
-            fmu = self.pathToFmuInfo[fmuPath];
-            fmuHash = fmu.Asset;
-            fmuPriority = fmu.Priority;
 
-            if (fmuPriority === 1) {
-                self.followConnsAssignPriority(fmuPath, fmu);
-            }
+        for (fmuPath in self.pathToTarjansVertex) {
+            fmuInfo = self.pathToFmuInfo[fmuPath];
+            tarjansVertex = self.pathToTarjansVertex[fmuPath];
 
-            self.fmus.push(fmu);
-        }
+            for (outputPath in fmuInfo.Outputs) {
+                if (!self.connectionMap.hasOwnProperty(outputPath)) {
+                    continue;
+                }
+                connectedInputs = self.connectionMap[outputPath];
+                
+                for (i = 0; i < connectedInputs.length; i += 1) {
+                    ithConnectedInput = connectedInputs[i];
 
-        var splitKey,
-            srcFmu,
-            srcPriority,
-            srcFmuId,
-            srcFmuName,
-            srcPortId,
-            srcPortPath,
-            srcPortName,
-            dstConnections,
-            dstConnIds,
-            splitIds,
-            dstFmu,
-            dstPriority,
-            dstFmuId,
-            dstFmuName,
-            dstPortId,
-            dstPortName,
-            flatConnInfo,
-            j;
-
-        for (srcPortPath in self.connectionMap) {
-            splitKey = connMapKey.split('/');
-            srcFmuId = splitKey[-2];
-            srcPortId = splitKey[-1];
-            srcFmu = self.fmuIdToInfoMap[srcFmuId];
-            srcFmuName = srcFmu.InstanceName;
-            srcPriority = srcFmu.Priority;
-            srcPortName = srcFmu.OutputMap[srcPortId];
-            dstConnections = self.connectionMap[connMapKey];
-
-            for (j = 0; j < dstConnections.length; j += 1) {
-                dstConnIds = dstConnections[j];
-                splitIds = dstConnIds.split('/');
-                dstFmuId = splitIds[0];
-                dstPortId = splitIds[1];
-                dstFmu = self.fmuIdToInfoMap[dstFmuId];
-                dstFmuName = dstFmu.InstanceName;
-                dstPriority = dstFmu.Priority;
-                dstPortName = dstFmu.InputMap[dstPortId];
-
-                flatConnInfo = {
-                    'Source': srcFmuName + '.' + srcPortName,
-                    'Destination': dstFmuName + '.' + dstPortName,
-                    'SrcPriority': srcPriority,
-                    'DstPriority': dstPriority
-                };
-
-                self.connections.push(flatConnInfo);
-            }
-        }
-    };
-
-    FmiExporter.prototype.followConnsAssignPriority = function (srcFmuPath, srcFmu) {
-        var self = this,
-            srcFmuName = srcFmu.InstanceName,
-            srcFmuOutputs = srcFmu.OutputMap,
-            outputIds = Object.keys(srcFmuOutputs),
-            srcPriority = srcFmu.Priority,
-            dstPriority = srcPriority + 1,
-            numberOutputs = outputIds.length,
-            i,
-            j;
-
-        if (numberOutputs === 0) {
-            self.logger.debug(srcFmu.InstanceName + ' has no Outputs.');
-            return;
-        }
-
-        for (i = 0; i < outputIds.length; i += 1) {
-            var outputId = outputIds[i],
-                outputName = srcFmuOutputs[outputId],
-                connMapKey = srcFmuPath + '/' + outputId;
-
-            if (self.connectionMap.hasOwnProperty(connMapKey) === false) {
-                self.logger.debug('No connections leaving from ' + srcFmuName + '.' + outputName);
-                continue;
-            }
-
-            // Could be multiple connections leaving this port
-            var allConnections = self.connectionMap[connMapKey];
-
-            for (j = 0; j < allConnections.length; j += 1) {
-                var connectedInput = allConnections[j],
-                    dstFmuId = connectedInput.split('/')[0],
-                    dstPortId = connectedInput.split('/')[1],
-                    dstFmu = self.fmuIdToInfoMap[dstFmuId],
-                    dstPortName = dstFmu.InputMap[dstPortId];
-
-                if (dstFmu.Priority < dstPriority) {
-                    dstFmu.Priority = dstPriority;
+                    fmuTargetPath = self.getParentPath(ithConnectedInput);
+                    tarjansVertex.connections.push(self.pathToTarjansVertex[fmuTargetPath]);
                 }
 
-                // dst becomes src, repeat
-                self.followConnsAssignPriority(dstFmuId, dstFmu);
+            }
+            
+            tarjansVertices.push(tarjansVertex);
+        }
+
+        var tarjansGraph = new TarjansGraph(tarjansVertices),
+            tarjansAlgorithm = new TarjansAlgorithm(tarjansGraph),
+            tarjansScc = tarjansAlgorithm.run();
+
+        for (i = 0; i < tarjansScc.length; i += 1) {
+            if (tarjansScc[i].length === 1) {
+                self.pathToFmuInfo[tarjansScc[i][0].name].Priority = tarjansScc.length - i;
+            } else {
+                self.logger.error("Tarjan's algorithm detected a loop with fmu " + tarjansScc[i][0].name);
             }
         }
     };
 
-    // a Synchronous helper function to get FMU Parameters, Inputs, and Outputs
-    FmiExporter.prototype.extractFmuInfo = function (fmuChildren) {
-        var self = this,
-            i,
-            fmuChildNode,
-            fmuChildNodePath,
-            fmuChildNodeName,
-            parameters = {},
-            inputMap = {},
-            outputMap = {};
+//<editor-fold desc="============================ Tarjans Definitions ==================================">
 
-        for (i = 0; i < fmuChildren.length; i += 1) {
+    var TarjansVertex = function (name) {
+        this.name = name || null;
+        this.connections = [];
+        this.index= -1;
+        this.lowlink = -1;
+    };
 
-            fmuChildNode = fmuChildren[i];
-            fmuChildNodePath = self.core.getPath(fmuChildNode);
-            fmuChildNodeName = self.core.getAttribute(fmuChildNode, 'name');
+    TarjansVertex.prototype = {
+        equals: function(vertex){
+            // equality check based on vertex name
+            return (vertex.name && this.name==vertex.name);
+        }
+    };
 
-            if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Parameter)) {
-                parameters[fmuChildNodeName] = self.core.getAttribute(fmuChildNode, 'value');
+    var TarjansGraph = function (vertices){
+        this.vertices = vertices || [];
+    }
 
-            } else if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Input)) {
-                inputMap[fmuChildNodePath] = fmuChildNodeName;
+    var TarjansVertexStack = function (vertices) {
+        this.vertices = vertices || [];
+    }
+    TarjansVertexStack.prototype = {
+        contains: function(vertex){
+            for (var i in this.vertices){
+                if (this.vertices[i].equals(vertex)){
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
-            } else if (self.isMetaTypeOf(fmuChildNode, FmuMetaTypes.Output)) {
-                outputMap[fmuChildNodePath] = fmuChildNodeName;
+    function TarjansAlgorithm(graph) {
+        this.index = 0;
+        this.stack = new TarjansVertexStack();
+        this.graph = graph;
+        this.scc = [];
+    }
+    TarjansAlgorithm.prototype = {
+        run: function(){
+            for (var i in this.graph.vertices){
+                if (this.graph.vertices[i].index<0){
+                    this.strongconnect(this.graph.vertices[i]);
+                }
+            }
+            return this.scc;
+        },
+        strongconnect: function(vertex){
+            // Set the depth index for v to the smallest unused index
+            vertex.index = this.index;
+            vertex.lowlink = this.index;
+            this.index = this.index + 1;
+            this.stack.vertices.push(vertex);
+
+            // Consider successors of v
+            // aka... consider each vertex in vertex.connections
+            for (var i in vertex.connections){
+                var v = vertex;
+                var w = vertex.connections[i];
+                if (w.index<0){
+                    // Successor w has not yet been visited; recurse on it
+                    this.strongconnect(w);
+                    v.lowlink = Math.min(v.lowlink,w.lowlink);
+                } else if (this.stack.contains(w)){
+                    // Successor w is in stack S and hence in the current SCC
+                    v.lowlink = Math.min(v.lowlink,w.index);
+                }
+            }
+
+            // If v is a root node, pop the stack and generate an SCC
+            if (vertex.lowlink==vertex.index){
+                // start a new strongly connected component
+                var vertices = [];
+                var w = null;
+                if (this.stack.vertices.length>0){
+                    do {
+                        w = this.stack.vertices.pop();
+                        // add w to current strongly connected component
+                        vertices.push(w);
+                    } while (!vertex.equals(w));
+                }
+                // output the current strongly connected component
+                // ... i'm going to push the results to a member scc array variable
+                if (vertices.length>0){
+                    this.scc.push(vertices);
+                }
             }
         }
-
-        return {
-            Parameters: parameters,
-            InputMap: inputMap,
-            OutputMap: outputMap
-        };
     };
+
+    //</editor-fold>
 
     return FmiExporter;
 });
