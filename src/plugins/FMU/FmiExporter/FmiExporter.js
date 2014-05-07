@@ -6,7 +6,7 @@ define(['plugin/PluginConfig',
         'plugin/PluginBase',
         'plugin/FmiExporter/FmiExporter/FMU',
         'plugin/FmiExporter/FmiExporter/Templates/Templates',
-        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, ejs, TEMPLATES) {
+        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, TEMPLATES, ejs) {
     // PM: This change saves you one indent (or JSLint complaints for each method).
     'use strict';
 
