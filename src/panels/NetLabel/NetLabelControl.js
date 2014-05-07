@@ -39,10 +39,14 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             dstParentName = gmeClient.getNode(dstParentId).getAttribute('name'),
             srcText = srcID.match(/\//g).length > 3 ? srcParentName + "." + srcName : srcName,
             dstText = dstID.match(/\//g).length > 3 ? dstParentName + "." + dstName : dstName,
+            retSrcId = srcID.match(/\//g).length > 3 ? srcParentId + " " + srcID : srcID,
+            retDstId = dstID.match(/\//g).length > 3 ? dstParentId + " " + dstID : dstID,
             srcPos = srcObj.getRegistry('position'),
             dstPos = srcObj.getRegistry('position');
         return {'srcText': srcText,
                 'dstText': dstText,
+                'srcID': retSrcId.replace(/\//g, '-'),
+                'dstID': retDstId.replace(/\//g, '-'),
                 'srcPos': srcPos,
                 'dstPos': dstPos};
     };

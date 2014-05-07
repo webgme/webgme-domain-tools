@@ -2,18 +2,19 @@
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  *
  * Author: Robert Kereskenyi
+ *         Dana Zhang
  */
-"use strict";
 
 define(['js/PanelBase/PanelBaseWithHeader',
     'js/PanelManager/IActivePanel',
     'widgets/NetLabel/NetLabelWidget',
     './NetLabelControl'
-], function (PanelBaseWithHeader,
+    ], function (PanelBaseWithHeader,
              IActivePanel,
              NetLabelWidget,
              NetLabelControl) {
 
+    "use strict";
     var NetLabelPanel;
 
     NetLabelPanel = function (layoutManager, params) {

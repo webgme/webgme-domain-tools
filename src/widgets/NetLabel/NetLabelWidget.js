@@ -2,15 +2,16 @@
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  *
  * Author: Robert Kereskenyi
+ *         Dana Zhang
  */
 
-"use strict";
 
 define(['js/Widgets/ModelEditor/ModelEditorWidget',
         'js/Widgets/DiagramDesigner/ConnectionRouteManagerBasic',
         './NetLabelConnection'], function (ModelEditorWidget,
                                            ConnectionRouteManagerBasic,
                                            NetLabelConnection) {
+    "use strict";
 
     var NetLabelWidget;
 

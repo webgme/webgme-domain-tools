@@ -19,18 +19,40 @@ define(['js/Widgets/DiagramDesigner/Connection',
     _.extend(NetLabelConnection.prototype, Connection.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
-        var self = this;
+        var self = this,
+            netLabel = $('<div class="netLabel"></div>');
         //this.paper   is a RaphaelJS papers
         this._segPoints = segPoints.slice(0);
-//        var _toolTipBase = $('<div class="port_info"><span class="class_name">CLASS NAME</span><span class="name">NAME</span></div>');
-        var _toolTipBaseSrc = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
-        var _toolTipBaseDst = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
-        _toolTipBase.css({"position": "absolute",
-            "top": this.srcPos.y,
-            "left": this.srcPos.x});
+        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + this.srcID)[0],
+            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + this.dstID)[0];
 
-        _toolTipBase.html(this.srcText + " " + this.dstText);
-        self.diagramDesigner.skinParts.$itemsContainer.append(_toolTipBase);
+        if (!srcPort) {
+            srcPort = self._toolTipBase.clone()[0];
+            srcPort.setAttribute("id", this.srcID);
+        }
+
+        if (!dstPort) {
+            dstPort = self._toolTipBase.clone()[0];
+            dstPort.setAttribute("id", this.dstID);
+        }
+        var srcLabel = netLabel.clone();
+        srcLabel.text(this.srcText);
+        var dstLabel = netLabel.clone();
+        dstLabel.text(this.dstText);
+
+        $(dstPort).append(srcLabel);
+        self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
+        $(srcPort).append(dstLabel);
+        self.diagramDesigner.skinParts.$itemsContainer.append(srcPort);
+
+
+//        var _toolTipBase = $('<div class="port_info"><span class="class_name">CLASS NAME</span><span class="name">NAME</span></div>');
+
+//        _toolTipBase.css({"position": "absolute",
+//            "top": this.srcPos.y,
+//            "left": this.srcPos.x});
+//
+//        _toolTipBase.html(this.srcText + " " + this.dstText);
         self.logger.warning(this.srcText);
         self.logger.warning(this.dstText);
 
@@ -39,19 +61,29 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     };
 
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
+
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
         this.dstText = objDescriptor.dstText;
+        this.srcID = objDescriptor.srcID;
+        this.dstID = objDescriptor.dstID;
         this.srcPos = objDescriptor.srcPos;
         this.dstPos = objDescriptor.dstPos;
         this.name = objDescriptor.name;/* || this.id;*/
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
         this.dstTextEdit = objDescriptor.dstTextEdit || false;
-
+        this.netLabelList = {};
         this.segmentPoints = [];
+        if (!this.netLabelList.hasOwnProperty(this.srcID)) {
+            this.netLabelList[this.srcID] = [];
+        }
+        if (!this.netLabelList.hasOwnProperty(this.dstID)) {
+            this.netLabelList[this.dstID] = [];
+        }
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
