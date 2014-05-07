@@ -42,7 +42,7 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             retSrcId = srcID.match(/\//g).length > 3 ? srcParentId + " " + srcID : srcID,
             retDstId = dstID.match(/\//g).length > 3 ? dstParentId + " " + dstID : dstID,
             srcPos = srcObj.getRegistry('position'),
-            dstPos = srcObj.getRegistry('position');
+            dstPos = dstObj.getRegistry('position');
         return {'srcText': srcText,
                 'dstText': dstText,
                 'srcID': retSrcId.replace(/\//g, '-'),

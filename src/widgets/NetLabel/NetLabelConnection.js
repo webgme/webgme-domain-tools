@@ -29,11 +29,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPort) {
             srcPort = self._toolTipBase.clone()[0];
             srcPort.setAttribute("id", this.srcID);
+            srcPort.style.position = "absolute";
+            srcPort.style.left = (this.srcPos.x + 75).toString() + "px";
+            srcPort.style.top = this.srcPos.y.toString() + "px";
         }
 
         if (!dstPort) {
             dstPort = self._toolTipBase.clone()[0];
             dstPort.setAttribute("id", this.dstID);
+            dstPort.style.position = "absolute";
+            dstPort.style.left = (this.dstPos.x + 75).toString() + "px";
+            dstPort.style.top = this.dstPos.y.toString() + "px";
         }
         var srcLabel = netLabel.clone();
         srcLabel.text(this.srcText);
@@ -45,23 +51,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
         $(srcPort).append(dstLabel);
         self.diagramDesigner.skinParts.$itemsContainer.append(srcPort);
 
-
-//        var _toolTipBase = $('<div class="port_info"><span class="class_name">CLASS NAME</span><span class="name">NAME</span></div>');
-
-//        _toolTipBase.css({"position": "absolute",
-//            "top": this.srcPos.y,
-//            "left": this.srcPos.x});
-//
-//        _toolTipBase.html(this.srcText + " " + this.dstText);
         self.logger.warning(this.srcText);
         self.logger.warning(this.dstText);
-
-//        self.logger.error("!!!! CONNECTION DRAWING NOT YET IMPLEMENTED: " + JSON.stringify(segPoints));
-
-
     };
 
-    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: 50px; height: 100px;"></div>');
 
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
