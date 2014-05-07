@@ -2,6 +2,7 @@
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  * 
  * Author: Robert Kereskenyi
+ *         Dana Zhang
  */
 
 "use strict";
@@ -18,28 +19,39 @@ define(['js/Widgets/DiagramDesigner/Connection',
     _.extend(NetLabelConnection.prototype, Connection.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
-
+        var self = this;
+        //this.paper   is a RaphaelJS papers
         this._segPoints = segPoints.slice(0);
-        self.logger.debug(CONSTANTS.POINTER_SOURCE);
-        //this.paper   is a RaphaelJS paper
+//        var _toolTipBase = $('<div class="port_info"><span class="class_name">CLASS NAME</span><span class="name">NAME</span></div>');
+        var _toolTipBaseSrc = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
+        var _toolTipBaseDst = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
+        _toolTipBase.css({"position": "absolute",
+            "top": this.srcPos.y,
+            "left": this.srcPos.x});
 
-//        var _toolTipBase = $('<div class="port_info"> \
-//            <span class="class_name">CLASS NAME</span> \
-//            <span class="name">NAME</span> \
-//        </div>');
-        var _toolTipBase = $('<div class="port_info"></div>');
-//        this.skinParts.srcDragPoint.css({"position": "absolute",
-//            "top": this.sourceCoordinates.y,
-//            "left": this.sourceCoordinates.x});
+        _toolTipBase.html(this.srcText + " " + this.dstText);
+        self.diagramDesigner.skinParts.$itemsContainer.append(_toolTipBase);
+        self.logger.warning(this.srcText);
+        self.logger.warning(this.dstText);
 
-        _toolTipBase.html('abcdefg');
-        this.diagramDesigner.skinParts.$itemsContainer.append(_toolTipBase);
-        this.logger.debug(this.srcText);
-        this.logger.debug(this.dstText);
-
-        this.logger.error("!!!! CONNECTION DRAWING NOT YET IMPLEMENTED: " + JSON.stringify(segPoints));
+//        self.logger.error("!!!! CONNECTION DRAWING NOT YET IMPLEMENTED: " + JSON.stringify(segPoints));
 
 
+    };
+
+    NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
+        this.reconnectable = objDescriptor.reconnectable === true;
+        this.editable = !!objDescriptor.editable;
+        this.srcText = objDescriptor.srcText;
+        this.dstText = objDescriptor.dstText;
+        this.srcPos = objDescriptor.srcPos;
+        this.dstPos = objDescriptor.dstPos;
+        this.name = objDescriptor.name;/* || this.id;*/
+        this.nameEdit = objDescriptor.nameEdit || false;
+        this.srcTextEdit = objDescriptor.srcTextEdit || false;
+        this.dstTextEdit = objDescriptor.dstTextEdit || false;
+
+        this.segmentPoints = [];
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
