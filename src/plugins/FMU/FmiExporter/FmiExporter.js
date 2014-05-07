@@ -416,7 +416,7 @@ define(['plugin/PluginConfig',
 
         for (var i = 0; i < nbrVertices; i += 1) {
             ithVertex = this.vertices[i];
-            if (ithVertex.equals(vertex)){
+            if (ithVertex.equals(vertex)) {
                 return true;
             }
         }
@@ -431,9 +431,13 @@ define(['plugin/PluginConfig',
     };
 
     TarjansAlgorithm.prototype.run = function () {
-        for (var i in this.graph.vertices) {
-            if (this.graph.vertices[i].index<0){
-                this.strongconnect(this.graph.vertices[i]);
+        var nbrGraphVertices = this.graph.vertices.length,
+            ithGraphVertex;
+
+        for (var i = 0; i < nbrGraphVertices; i += 1) {
+            ithGraphVertex = this.graph.vertices[i];
+            if (ithGraphVertex.index < 0) {
+                this.strongconnect(ithGraphVertex);
             }
         }
         return this.scc;
@@ -453,7 +457,7 @@ define(['plugin/PluginConfig',
         for (var i in vertex.connections){
             var v = vertex;
             w = vertex.connections[i];
-            if (w.index<0){
+            if (w.index < 0) {
                 // Successor w has not yet been visited; recurse on it
                 this.strongconnect(w);
                 v.lowlink = Math.min(v.lowlink,w.lowlink);
