@@ -438,7 +438,7 @@ define(['plugin/PluginConfig',
         return this.scc;
     };
 
-    TarjansAlgorithm.prototype.strongconnect = function () {
+    TarjansAlgorithm.prototype.strongconnect = function (vertex) {
         // Set the depth index for v to the smallest unused index
         vertex.index = this.index;
         vertex.lowlink = this.index;
