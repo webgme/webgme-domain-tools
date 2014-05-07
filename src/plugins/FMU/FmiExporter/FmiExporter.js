@@ -179,9 +179,8 @@ define(['plugin/PluginConfig',
                 };
 
                 for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-                    // PM: Semi colon.
-                    fmuPathWithinArtifact = fmuPackageHashMapKeys[i],
-                        fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
+                    fmuPathWithinArtifact = fmuPackageHashMapKeys[i];
+                    fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
                     artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
                 }
             };
@@ -200,7 +199,6 @@ define(['plugin/PluginConfig',
             thisNodeName,
             thisNodePath,
             parentFmuPath,
-            parentFmuInfo,
             connSrcPath,
             connDstPath,
             isFmu,
@@ -234,7 +232,6 @@ define(['plugin/PluginConfig',
                 } else {
                     var portCompositionPath = self.core.getPath(thisNode);
                     self.logger.warning('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
-                    continue;
                 }
 
             } else if (isFmu) {
@@ -414,8 +411,12 @@ define(['plugin/PluginConfig',
         this.vertices = vertices || [];
     };
     TarjansVertexStack.prototype.contains = function (vertex) {
-        for (var i in this.vertices){
-            if (this.vertices[i].equals(vertex)){
+        var nbrVertices = this.vertices.length,
+            ithVertex;
+
+        for (var i = 0; i < nbrVertices; i += 1) {
+            ithVertex = this.vertices[i];
+            if (ithVertex.equals(vertex)){
                 return true;
             }
         }
@@ -430,7 +431,7 @@ define(['plugin/PluginConfig',
     };
 
     TarjansAlgorithm.prototype.run = function () {
-        for (var i in this.graph.vertices){
+        for (var i in this.graph.vertices) {
             if (this.graph.vertices[i].index<0){
                 this.strongconnect(this.graph.vertices[i]);
             }
@@ -439,6 +440,8 @@ define(['plugin/PluginConfig',
     };
 
     TarjansAlgorithm.prototype.strongconnect = function (vertex) {
+        var w;
+
         // Set the depth index for v to the smallest unused index
         vertex.index = this.index;
         vertex.lowlink = this.index;
@@ -449,7 +452,7 @@ define(['plugin/PluginConfig',
         // aka... consider each vertex in vertex.connections
         for (var i in vertex.connections){
             var v = vertex;
-            var w = vertex.connections[i];
+            w = vertex.connections[i];
             if (w.index<0){
                 // Successor w has not yet been visited; recurse on it
                 this.strongconnect(w);
@@ -464,7 +467,7 @@ define(['plugin/PluginConfig',
         if (vertex.lowlink==vertex.index){
             // start a new strongly connected component
             var vertices = [];
-            var w = null;
+            w = null;
             if (this.stack.vertices.length>0){
                 do {
                     w = this.stack.vertices.pop();
