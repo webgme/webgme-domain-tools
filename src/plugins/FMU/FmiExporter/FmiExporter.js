@@ -98,7 +98,7 @@ define(['plugin/PluginConfig',
             }
 
             self.buildModelExchangeConfig();
-            var scc = self.runTarjansAlgorithm();
+            self.runTarjansAlgorithm();
 
             //=================================================================
             var artifact = self.blobClient.createArtifact(modelExchangeName);
@@ -415,15 +415,13 @@ define(['plugin/PluginConfig',
     var TarjansVertexStack = function (vertices) {
         this.vertices = vertices || [];
     }
-    TarjansVertexStack.prototype = {
-        contains: function(vertex){
-            for (var i in this.vertices){
-                if (this.vertices[i].equals(vertex)){
-                    return true;
-                }
+    TarjansVertexStack.prototype.contains = function (vertex) {
+        for (var i in this.vertices){
+            if (this.vertices[i].equals(vertex)){
+                return true;
             }
-            return false;
         }
+        return false;
     };
 
     function TarjansAlgorithm(graph) {
