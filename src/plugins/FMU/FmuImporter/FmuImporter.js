@@ -65,9 +65,9 @@ define(['plugin/PluginConfig',
                 "name": "UploadedArtifact",
                 "displayName": "FMUs",
                 "description": "Click and drag existing compiled FMU(s)",
-                "value": "167d532ae62ec4ce73f085fffba2091ac29f487b", // multiple txt.zip in zip
+                //"value": "167d532ae62ec4ce73f085fffba2091ac29f487b", // multiple txt.zip in zip
                 //"value": "46f9efe35185b3f19cfeeefbf98d22107bbd1b8f", // multiple fmus in zip
-                //"value": "0101da04257bf60436b20beb44433b6a45b84e77", // single fmu
+                "value": "0101da04257bf60436b20beb44433b6a45b84e77", // single fmu
                 "valueType": "asset",
                 "readOnly": false
             }
@@ -338,7 +338,7 @@ define(['plugin/PluginConfig',
 
         var self = this,
             converter = new Converter.Xml2json({skipWSText: true}),
-            obj = converter.convertFromStr(modelDescriptionXml);
+            obj = converter.convertFromString(modelDescriptionXml);
 
         return obj;
     };
