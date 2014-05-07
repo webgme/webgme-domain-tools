@@ -55,7 +55,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self.logger.warning(this.dstText);
     };
 
-    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: 50px; height: 100px;"></div>');
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: 100px; height: 100px;"></div>');
 
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
