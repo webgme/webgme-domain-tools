@@ -28,6 +28,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstLabel = netLabel.clone(),
             dstLabelID = 'L' + dstID,
             OFFSET = 5,
+        // special way to get decor-container, since data-id contains special character "/"
             srcWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').width(),
             srcHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
             dstWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.dstID + '"]').width(),
@@ -46,6 +47,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             // give it an id attr
             srcPort = self._toolTipBase.clone()[0];
             srcPort.setAttribute("id", srcID);
+            srcPort.setAttribute("objName", self.srcText);
             // style it
             srcPort.style.position = "absolute";
             srcPort.style.left = srcXPos.toString() + "px";
@@ -62,6 +64,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!dstPort) {
             dstPort = self._toolTipBase.clone()[0];
             dstPort.setAttribute("id", dstID);
+            srcPort.setAttribute("objName", self.dstText);
             dstPort.style.position = "absolute";
             dstPort.style.left = dstXPos.toString() + "px";
             dstPort.style.top = dstYPos.toString() + "px";
@@ -102,14 +105,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
         this.dstTextEdit = objDescriptor.dstTextEdit || false;
-        this.netLabelList = {};
         this.segmentPoints = [];
-        if (!this.netLabelList.hasOwnProperty(this.srcID)) {
-            this.netLabelList[this.srcID] = [];
-        }
-        if (!this.netLabelList.hasOwnProperty(this.dstID)) {
-            this.netLabelList[this.dstID] = [];
-        }
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
