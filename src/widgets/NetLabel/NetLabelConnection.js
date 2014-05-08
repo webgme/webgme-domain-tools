@@ -27,7 +27,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcLabelID = 'L' + srcID,
             dstLabel = netLabel.clone(),
             dstLabelID = 'L' + dstID,
-            srcWidth = self.diagramDesigner.skinParts.$itemsContainer;
+            OFFSET = 5,
+            srcWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').width(),
+            srcHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
+            dstWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.dstID + '"]').width(),
+            dstHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
+            srcXPos = self.srcPos.x + srcWidth + OFFSET,
+            srcYPos = self.srcPos.y,
+            dstXPos = self.dstPos.x + dstWidth + OFFSET,
+            dstYPos = self.dstPos.y;
+
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
         var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + srcID)[0],
@@ -39,8 +48,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPort.setAttribute("id", srcID);
             // style it
             srcPort.style.position = "absolute";
-            srcPort.style.left = (self.srcPos.x + 75).toString() + "px";
-            srcPort.style.top = self.srcPos.y.toString() + "px";
+            srcPort.style.left = srcXPos.toString() + "px";
+            srcPort.style.top = srcYPos.toString() + "px";
         }
 
         dstLabel.text(self.dstText);
@@ -54,8 +63,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPort = self._toolTipBase.clone()[0];
             dstPort.setAttribute("id", dstID);
             dstPort.style.position = "absolute";
-            dstPort.style.left = (self.dstPos.x + 75).toString() + "px";
-            dstPort.style.top = self.dstPos.y.toString() + "px";
+            dstPort.style.left = dstXPos.toString() + "px";
+            dstPort.style.top = dstYPos.toString() + "px";
         }
 
         srcLabel.text(self.srcText);
