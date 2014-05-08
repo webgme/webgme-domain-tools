@@ -62,6 +62,7 @@ def read_model_exchange_config(model_exchange_config_file):
         config_dict = json.load(f_in)
 
     return config_dict
+    
 
 def run_explicit_euler(fmi_me_object):
 
@@ -188,56 +189,98 @@ def run_explicit_euler(fmi_me_object):
 
         time_for_result.append(time_at_step_i)
     
-    # Save results .csv file
+    #  Save results
+    logger.debug("Saving .csv and.svg files")   
+
+    save_results(fmi_me_object.fmu_map, time_for_result, results_data)
+    
+    
+def save_results(fmu_map, time_for_result, results_data):
+
+    if not os.path.isdir('Results'):
+        os.mkdir('Results')
+        
+    os.chdir('Results')
+    
     name_plus_data = ['time'] + time_for_result
     
     with open('results.csv', 'ab') as result_file:
         csv_writer = csv.writer(result_file)
         csv_writer.writerow(name_plus_data)
 
-    #  PLOTTING
-    logger.debug("Saving .svg files for all inputs/outputs")   
-    
     plot_index = 1
 
-    if not os.path.isdir('Plots'):
-        os.mkdir('Plots')
+    webgme_path_2_plot_path = dict()
 
-    for fmu_path, fmu in fmi_me_object.fmu_map.iteritems():
+    for fmu_path, fmu in fmu_map.iteritems():
     
         plt.figure(plot_index)
-        plt.title(fmu.name)
+        plt.title(fmu.name + ' - Time-changing Variables')
         plt.xlabel('Time (s)')
-        
+        plot_index += 1
+    
         # Save all time-varying results to csv
         for value_ref in fmu.time_varying_refs:
+        
             value_ref_index = fmu.time_varying_refs.index(value_ref)
-            variable_name = fmu.name + '.' + fmu.pyfmi_fmu.get_variable_by_valueref(value_ref)
+            variable_name = fmu.pyfmi_fmu.get_variable_by_valueref(value_ref)
+            full_name = fmu.name + '.' + variable_name
             data_series = N.array(results_data[fmu.name])[:,value_ref_index]
             data_series_list = data_series.tolist()
-            name_plus_data_series = [variable_name] + data_series_list
+            plt.plot(time_for_result, data_series, label=variable_name)
+            name_plus_data_series = [full_name] + data_series_list
             with open('results.csv', 'ab') as result_file:
                 csv_writer = csv.writer(result_file)
                 csv_writer.writerow(name_plus_data_series)
+
+        plt.legend(loc=0)
+        plot_name = fmu.name + '_All.svg'
+        plt.savefig(plot_name)
+        plt.close()
         
-        for path, input_object in fmu.input_map.iteritems():
+        webgme_path_2_plot_path[fmu_path] = plot_name
+                
+        for webgme_path, input_object in fmu.input_map.iteritems():
+        
+            plt.figure(plot_index)
+            plt.title(input_object.csv_row_header)
+            plt.xlabel('Time (s)')
+            plot_index += 1
+        
             input_valueref = input_object.value_ref
             var_to_plot_index = fmu.time_varying_refs.index(input_valueref)
             data_series = N.array(results_data[fmu.name])[:,var_to_plot_index]
             plt.plot(time_for_result, data_series, label=input_object.name)
-        for path, output_object in fmu.output_map.iteritems():
+            
+            plot_name = fmu.name + '_' + input_object.name + '.svg'
+            plt.savefig(plot_name)
+            plt.close()
+            
+            webgme_path_2_plot_path[webgme_path] = plot_name
+            
+        for webgme_path, output_object in fmu.output_map.iteritems():
+        
+            plt.figure(plot_index)
+            plt.title(output_object.csv_row_header)
+            plt.xlabel('Time (s)')
+            plot_index += 1
+        
             output_valueref = output_object.value_ref
             var_to_plot_index = fmu.time_varying_refs.index(output_valueref)
             data_series = N.array(results_data[fmu.name])[:,var_to_plot_index]
             plt.plot(time_for_result, data_series, label=output_object.name)
 
-        plt.legend(loc=0)
-        plot_name = fmu.name + '_InputsOutputs.svg'
-        plot_path = os.path.join('Plots', plot_name)
-        plt.savefig(plot_path)
-        plt.close()
-        plot_index += 1
-
+            plot_name = fmu.name + '_' + output_object.name + '.svg'
+            plt.savefig(plot_name)
+            plt.close()
+            
+            webgme_path_2_plot_path[webgme_path] = plot_name
+        
+    with open('plot_map.json', 'wb') as plot_map_file:
+        json.dump(webgme_path_2_plot_path, plot_map_file)
+        
+    os.chdir('..')
+    
 
 def get_parent_fmu_path(fmu_input_path):
 
@@ -246,6 +289,7 @@ def get_parent_fmu_path(fmu_input_path):
     parent_fmu_path = '/'.join(parent_split_path)
     
     return parent_fmu_path
+    
             
 def main():
 

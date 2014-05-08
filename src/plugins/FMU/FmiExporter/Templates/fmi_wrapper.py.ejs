@@ -59,7 +59,7 @@ class FMU(object):
     
         for path, name in path_name_map.iteritems():
             v_ref = self.pyfmi_fmu.get_variable_valueref(name)
-            input = INPUT(name, v_ref)
+            input = INPUT(name, v_ref, self.name)
             input_map[path] = input
 
         return input_map
@@ -70,7 +70,7 @@ class FMU(object):
     
         for path, name in path_name_map.iteritems():
             v_ref = self.pyfmi_fmu.get_variable_valueref(name)
-            output = OUTPUT(name, v_ref)
+            output = OUTPUT(name, v_ref, self.name)
             output_map[path] = output
 
         return output_map
@@ -93,14 +93,16 @@ class FMU(object):
 
 class INPUT(object):
 
-    def __init__(self, name, value_ref):
+    def __init__(self, input_name, value_ref, fmu_name):
     
-        self.name = name
+        self.name = input_name
         self.value_ref = value_ref
+        self.csv_row_header = fmu_name + '.' + input_name
         
 class OUTPUT(object):
 
-    def __init__(self, name, value_ref):
+    def __init__(self, output_name, value_ref, fmu_name):
     
-        self.name = name
+        self.name = output_name
         self.value_ref = value_ref
+        self.csv_row_header = fmu_name + '.' + output_name
