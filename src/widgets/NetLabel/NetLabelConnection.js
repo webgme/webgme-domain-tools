@@ -42,7 +42,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPort.style.top = this.dstPos.y.toString() + "px";
         }
         var srcLabel = netLabel.clone(),
-            srcLabelID = 'L' + this.srcID;
+            srcLabelID = this._generateHash(this.srcID);
         srcLabel.text(this.srcText);
         srcLabel[0].setAttribute('id', srcLabelID);
         if (!$(dstPort).find('#' + srcLabelID)[0]) {
@@ -51,7 +51,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         var dstLabel = netLabel.clone(),
-            dstLabelID = 'L' + this.dstID;
+            dstLabelID = this._generateHash(this.dstID);
         dstLabel.text(this.dstText);
         dstLabel[0].setAttribute('id', dstLabelID);
         if (!$(srcPort).find('#' + dstLabelID)[0]) {
@@ -63,8 +63,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self.logger.warning(this.dstText);
     };
 
-    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: 60px; border: 1px solid black; text-align: center"></div>');
+    NetLabelConnection.prototype._generateHash = function (str) {
+        var hash = 0,
+            i,
+            chr;
+        for (i = 0; i < str.length; i += 1) {
+            chr   = str.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    };
 
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; text-align: center"></div>');
+    // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
@@ -132,7 +144,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.update = function (objDescriptor) {
         //read props coming from the DataBase or DiagramDesigner
         this._initializeConnectionProps(objDescriptor);
-        this.diagramDesigner.skinParts.$itemsContainer.find("connList").remove();
     };
 
     NetLabelConnection.prototype._renderTexts = function () {
