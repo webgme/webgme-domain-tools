@@ -45,8 +45,8 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             dstPos = dstObj.getRegistry('position');
         return {'srcText': srcText,
                 'dstText': dstText,
-                'srcID': retSrcId.replace(/\//g, '-'),
-                'dstID': retDstId.replace(/\//g, '-'),
+                'srcID': retSrcId,
+                'dstID': retDstId,
                 'srcPos': srcPos,
                 'dstPos': dstPos};
     };

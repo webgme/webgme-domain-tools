@@ -20,47 +20,50 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
-            netLabel = $('<div class="netLabel"></div>');
+            netLabel = $('<div class="netLabel"></div>'),
+            srcID = self._generateHash(self.srcID),
+            dstID = self._generateHash(self.dstID),
+            srcLabel = netLabel.clone(),
+            srcLabelID = 'L' + srcID,
+            dstLabel = netLabel.clone(),
+            dstLabelID = 'L' + dstID,
+            srcWidth = self.diagramDesigner.skinParts.$itemsContainer;
         //this.paper   is a RaphaelJS papers
-        this._segPoints = segPoints.slice(0);
-        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + this.srcID)[0],
-            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + this.dstID)[0];
+        self._segPoints = segPoints.slice(0);
+        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + srcID)[0],
+            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + dstID)[0];
 
         if (!srcPort) {
+            // give it an id attr
             srcPort = self._toolTipBase.clone()[0];
-            srcPort.setAttribute("id", this.srcID);
+            srcPort.setAttribute("id", srcID);
+            // style it
             srcPort.style.position = "absolute";
-            srcPort.style.left = (this.srcPos.x + 75).toString() + "px";
-            srcPort.style.top = this.srcPos.y.toString() + "px";
+            srcPort.style.left = (self.srcPos.x + 75).toString() + "px";
+            srcPort.style.top = self.srcPos.y.toString() + "px";
         }
 
-        if (!dstPort) {
-            dstPort = self._toolTipBase.clone()[0];
-            dstPort.setAttribute("id", this.dstID);
-            dstPort.style.position = "absolute";
-            dstPort.style.left = (this.dstPos.x + 75).toString() + "px";
-            dstPort.style.top = this.dstPos.y.toString() + "px";
-        }
-        var srcLabel = netLabel.clone(),
-            srcLabelID = this._generateHash(this.srcID);
-        srcLabel.text(this.srcText);
-        srcLabel[0].setAttribute('id', srcLabelID);
-        if (!$(dstPort).find('#' + srcLabelID)[0]) {
-            $(dstPort).append(srcLabel);
-            self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
-        }
-
-        var dstLabel = netLabel.clone(),
-            dstLabelID = this._generateHash(this.dstID);
-        dstLabel.text(this.dstText);
+        dstLabel.text(self.dstText);
         dstLabel[0].setAttribute('id', dstLabelID);
         if (!$(srcPort).find('#' + dstLabelID)[0]) {
             $(srcPort).append(dstLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(srcPort);
         }
 
-        self.logger.warning(this.srcText);
-        self.logger.warning(this.dstText);
+        if (!dstPort) {
+            dstPort = self._toolTipBase.clone()[0];
+            dstPort.setAttribute("id", dstID);
+            dstPort.style.position = "absolute";
+            dstPort.style.left = (self.dstPos.x + 75).toString() + "px";
+            dstPort.style.top = self.dstPos.y.toString() + "px";
+        }
+
+        srcLabel.text(self.srcText);
+        srcLabel[0].setAttribute('id', srcLabelID);
+        if (!$(dstPort).find('#' + srcLabelID)[0]) {
+            $(dstPort).append(srcLabel);
+            self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
+        }
     };
 
     NetLabelConnection.prototype._generateHash = function (str) {
