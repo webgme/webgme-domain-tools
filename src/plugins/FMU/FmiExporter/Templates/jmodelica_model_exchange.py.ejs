@@ -9,6 +9,12 @@ import sys
 import json
 import csv
 import logging
+import zipfile
+try:
+    import zlib
+    zip_compression = zipfile.ZIP_DEFLATED
+except:
+    zip_compression = zipfile.ZIP_STORED
 
 import matplotlib.pyplot as plt
 import numpy as N
@@ -280,6 +286,17 @@ def save_results(fmu_map, time_for_result, results_data):
         json.dump(webgme_path_2_plot_path, plot_map_file)
         
     os.chdir('..')
+    
+    with zipfile.ZipFile('Results.zip', 'w', zip_compression) as results_zip:
+        os.chdir('Results')
+
+        results_zip.write('plot_map.json')
+        results_zip.write('results.csv')
+        
+        for webgme_path, file_name in webgme_path_2_plot_path.iteritems():
+            results_zip.write(file_name)
+            
+        os.chdir('..')
     
 
 def get_parent_fmu_path(fmu_input_path):
