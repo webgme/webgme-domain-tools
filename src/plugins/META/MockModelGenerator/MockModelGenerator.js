@@ -384,59 +384,5 @@ define(['plugin/PluginConfig', 'plugin/PluginBase', 'ejs', 'plugin/MockModelGene
         });
     };
 
-    /**
-    * Checks if the given node is of the given meta-type.
-    * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-    * @param node - Node to be checked for type.
-    * @param metaNode - Node object defining the meta type.
-    * @returns {boolean} - True if the given object was of the META type.
-    */
-    MockModelGenerator.prototype.isMetaTypeOf = function (node, metaNode) {
-        var self = this,
-            metaGuid = self.core.getGuid(metaNode);
-        while (node) {
-            if (self.core.getGuid(node) === metaGuid) {
-                return true;
-            }
-            node = self.core.getBase(node);
-        }
-        return false;
-    };
-
-    /**
-    * Finds and returns the node object defining the meta type for the given node.
-    * @param node - Node to be checked for type.
-    * @returns {Object} - Node object defining the meta type of node.
-    */
-    MockModelGenerator.prototype.getMetaType = function (node) {
-        var self = this,
-            name;
-        while (node) {
-            name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
-                break;
-            }
-            node = self.core.getBase(node);
-        }
-        return node;
-    };
-
-    /**
-    * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
-    * @param node - Node to be checked.
-    * @returns {boolean}
-    */
-    MockModelGenerator.prototype.baseIsMeta = function (node) {
-        var self = this,
-            baseName,
-            baseNode = self.core.getBase(node);
-        if (!baseNode) {
-            // FCO does not have a base node, by definition function returns true.
-            return true;
-        }
-        baseName = self.core.getAttribute(baseNode, 'name');
-        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
-    };
-
     return MockModelGenerator;
 });

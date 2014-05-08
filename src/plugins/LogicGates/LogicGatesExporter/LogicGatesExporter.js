@@ -4,7 +4,7 @@
 
 define(['plugin/PluginConfig',
     'plugin/PluginBase',
-    'json2xml'], function (PluginConfig, PluginBase, Json2Xml) {
+    'xmljsonconverter'], function (PluginConfig, PluginBase, Converter) {
 
     'use strict';
 
@@ -123,46 +123,24 @@ define(['plugin/PluginConfig',
 
     LogicGatesExporterPlugin.prototype.saveResults = function (callback) {
         var self = this,
-            i,
-            error = '',
-            afterFileAdded,
-            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput'),
-            fileKeys = Object.keys(self.outputFiles),
-            nbrOfFiles = fileKeys.length;
+            artifact = self.blobClient.createArtifact('LogicGatesExporterOutput');
 
-        if (nbrOfFiles === 0) {
-            callback(null, self.result);
-            return;
-        }
-
-        afterFileAdded = function (err, hash) {
-            var afterSavingArtifact;
-
-            afterSavingArtifact = function (err, hashes) {
+        artifact.addFiles(self.outputFiles, function (err, hashes) {
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
+            self.logger.warning(hashes.toString());
+            artifact.save(function (err, hash) {
                 if (err) {
                     callback(err, self.result);
                     return;
                 }
-                self.result.addArtifact(hashes[0]);
-                self.logger.info('Artifacts are saved here: ' + hashes.toString());
+                self.result.addArtifact(hash);
                 self.result.setSuccess(true);
                 callback(null, self.result);
-            };
-
-            error = err ? error + err : error;
-            nbrOfFiles -= 1;
-            if (nbrOfFiles === 0) {
-                if (error) {
-                    callback('Something went wrong when adding files: ' + err, self.result); // if only using err, then it is only err on the last one
-                    return;
-                }
-                self.blobClient.saveAllArtifacts(afterSavingArtifact);
-            }
-        };
-
-        for (i = 0; i < fileKeys.length; i += 1) {
-            artifact.addFile(fileKeys[i], self.outputFiles[fileKeys[i]], afterFileAdded);
-        }
+            });
+        });
     };
 
     LogicGatesExporterPlugin.prototype.visitAllChildren = function (node, callback) {
@@ -183,15 +161,20 @@ define(['plugin/PluginConfig',
                 error = err ? error += err : error;
                 counter.visits -= 1;
                 self.logger.warning(counter.visits.toString());
-                if (counter.visits === 0) {
+                if (counter.visits <= 0) {
                     callback(error);
                 }
             };
 
-            for (i = 0; i < children.length; i += 1) {
-                self.atNode(children[i], function (err, node) {
-                    self.visitAllChildrenRec(node, counter, itrCallback);
-                });
+            if (children.length === 0) {
+                itrCallback(null);
+            } else {
+
+                for (i = 0; i < children.length; i += 1) {
+                    self.atNode(children[i], function (err, node) {
+                        self.visitAllChildrenRec(node, counter, itrCallback);
+                    });
+                }
             }
         };
         // load root's children
@@ -291,7 +274,6 @@ define(['plugin/PluginConfig',
                     callback(error);
                     return;
                 }
-                shouldPush = true;
                 if (shouldPush) {
                     parentCircuitPath = core.getPath(core.getParent(nodeObj));
                     srcID = self.idLUT[src];
@@ -358,7 +340,7 @@ define(['plugin/PluginConfig',
                     pushWire(err, true);
                 });
             } else {
-                pushWire(null, false);
+                pushWire(null, true);
             }
         };
         core.loadByPath(self.rootNode, src, afterLoadingSrc);
@@ -403,7 +385,7 @@ define(['plugin/PluginConfig',
                     pushWire(err, true);
                 });
             } else {
-                pushWire(null, false);
+                pushWire(null, true);
             }
         };
         core.loadByPath(self.rootNode, dst, afterLoadingDst);
@@ -491,7 +473,7 @@ define(['plugin/PluginConfig',
             i = 0,
             parentPath,
             diagram,
-            j2x,
+            json2xml = new Converter.Json2xml(),
             output;
 
         for (parentPath in self.circuits) {
@@ -509,69 +491,11 @@ define(['plugin/PluginConfig',
                 diagram.circuits.Circuit.Gates.Gate = self.circuits[parentPath].Gate;
                 diagram.circuits.Circuit.Wires.Wire = self.circuits[parentPath].Wire;
                 self.circuit.push(diagram);
-
-                j2x = new Json2Xml();
-                output = j2x.convert(diagram);
+                output = json2xml.convertToString(diagram);
                 self.outputFiles["output" + i + ".gcg"] = output;
             }
             i += 1;
         }
-    };
-
-    /**
-     * Checks if the given node is of the given meta-type.
-     * Usage: <tt>self.isMetaTypeOf(aNode, self.META['FCO']);</tt>
-     * @param node - Node to be checked for type.
-     * @param metaNode - Node object defining the meta type.
-     * @returns {boolean} - True if the given object was of the META type.
-     */
-    LogicGatesExporterPlugin.prototype.isMetaTypeOf = function (node, metaNode) {
-        var self = this,
-            metaGuid = self.core.getGuid(metaNode);
-        while (node) {
-            if (self.core.getGuid(node) === metaGuid) {
-                return true;
-            }
-            node = self.core.getBase(node);
-        }
-        return false;
-    };
-
-    /**
-     * Finds and returns the node object defining the meta type for node.
-     * @param node - Node to be checked for type.
-     * @returns {Object} - Node object defining the meta type of node.
-     */
-    LogicGatesExporterPlugin.prototype.getMetaType = function (node) {
-        var self = this,
-            name;
-        while (node) {
-            name = self.core.getAttribute(node, 'name');
-            if (self.META.hasOwnProperty(name) && self.core.getPath(self.META[name]) === self.core.getPath(node)) {
-                break;
-            }
-            node = self.core.getBase(node);
-        }
-        return node;
-    };
-
-    /**
-     * Returns true if node is a direct instance of a meta-type node (or a meta-type node itself).
-     * @param node - Node to be checked.
-     * @returns {boolean}
-     */
-    LogicGatesExporterPlugin.prototype.isBaseMeta = function (node) {
-        var self = this,
-            baseName,
-            baseNode = self.core.getBase(node);
-
-        if (!baseNode) {
-            // FCO does not have a base node, by definition function returns true.
-            return true;
-        }
-
-        baseName = self.core.getAttribute(baseNode, 'name');
-        return self.META.hasOwnProperty(baseName) && self.core.getPath(self.META[baseName]) === self.core.getPath(baseNode);
     };
 
     return LogicGatesExporterPlugin;

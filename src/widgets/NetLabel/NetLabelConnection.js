@@ -2,6 +2,7 @@
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  * 
  * Author: Robert Kereskenyi
+ *         Dana Zhang
  */
 
 "use strict";
@@ -18,28 +19,93 @@ define(['js/Widgets/DiagramDesigner/Connection',
     _.extend(NetLabelConnection.prototype, Connection.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
+        var self = this,
+            netLabel = $('<div class="netLabel"></div>'),
+            srcID = self._generateHash(self.srcID),
+            dstID = self._generateHash(self.dstID),
+            srcLabel = netLabel.clone(),
+            srcLabelID = 'L' + srcID,
+            dstLabel = netLabel.clone(),
+            dstLabelID = 'L' + dstID,
+            OFFSET = 5,
+        // special way to get decor-container, since data-id contains special character "/"
+            srcWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').width(),
+            srcHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
+            dstWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.dstID + '"]').width(),
+            dstHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
+            srcXPos = self.srcPos.x + srcWidth + OFFSET,
+            srcYPos = self.srcPos.y,
+            dstXPos = self.dstPos.x + dstWidth + OFFSET,
+            dstYPos = self.dstPos.y;
 
-        this._segPoints = segPoints.slice(0);
-        self.logger.debug(CONSTANTS.POINTER_SOURCE);
-        //this.paper   is a RaphaelJS paper
+        //this.paper   is a RaphaelJS papers
+        self._segPoints = segPoints.slice(0);
+        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + srcID)[0],
+            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + dstID)[0];
 
-//        var _toolTipBase = $('<div class="port_info"> \
-//            <span class="class_name">CLASS NAME</span> \
-//            <span class="name">NAME</span> \
-//        </div>');
-        var _toolTipBase = $('<div class="port_info"></div>');
-//        this.skinParts.srcDragPoint.css({"position": "absolute",
-//            "top": this.sourceCoordinates.y,
-//            "left": this.sourceCoordinates.x});
+        if (!srcPort) {
+            // give it an id attr
+            srcPort = self._toolTipBase.clone()[0];
+            srcPort.setAttribute("id", srcID);
+            srcPort.setAttribute("objName", self.srcText);
+            // style it
+            srcPort.style.position = "absolute";
+            srcPort.style.left = srcXPos.toString() + "px";
+            srcPort.style.top = srcYPos.toString() + "px";
+        }
 
-        _toolTipBase.html('abcdefg');
-        this.diagramDesigner.skinParts.$itemsContainer.append(_toolTipBase);
-        this.logger.debug(this.srcText);
-        this.logger.debug(this.dstText);
+        dstLabel.text(self.dstText);
+        dstLabel[0].setAttribute('id', dstLabelID);
+        if (!$(srcPort).find('#' + dstLabelID)[0]) {
+            $(srcPort).append(dstLabel);
+            self.diagramDesigner.skinParts.$itemsContainer.append(srcPort);
+        }
 
-        this.logger.error("!!!! CONNECTION DRAWING NOT YET IMPLEMENTED: " + JSON.stringify(segPoints));
+        if (!dstPort) {
+            dstPort = self._toolTipBase.clone()[0];
+            dstPort.setAttribute("id", dstID);
+            srcPort.setAttribute("objName", self.dstText);
+            dstPort.style.position = "absolute";
+            dstPort.style.left = dstXPos.toString() + "px";
+            dstPort.style.top = dstYPos.toString() + "px";
+        }
 
+        srcLabel.text(self.srcText);
+        srcLabel[0].setAttribute('id', srcLabelID);
+        if (!$(dstPort).find('#' + srcLabelID)[0]) {
+            $(dstPort).append(srcLabel);
+            self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
+        }
+    };
 
+    NetLabelConnection.prototype._generateHash = function (str) {
+        var hash = 0,
+            i,
+            chr;
+        for (i = 0; i < str.length; i += 1) {
+            chr   = str.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    };
+
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; text-align: center"></div>');
+    // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
+    NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
+        this.reconnectable = objDescriptor.reconnectable === true;
+        this.editable = !!objDescriptor.editable;
+        this.srcText = objDescriptor.srcText;
+        this.dstText = objDescriptor.dstText;
+        this.srcID = objDescriptor.srcID;
+        this.dstID = objDescriptor.dstID;
+        this.srcPos = objDescriptor.srcPos;
+        this.dstPos = objDescriptor.dstPos;
+        this.name = objDescriptor.name;/* || this.id;*/
+        this.nameEdit = objDescriptor.nameEdit || false;
+        this.srcTextEdit = objDescriptor.srcTextEdit || false;
+        this.dstTextEdit = objDescriptor.dstTextEdit || false;
+        this.segmentPoints = [];
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {

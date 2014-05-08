@@ -103,7 +103,6 @@ describe("Test PluginResult/Message/NodeDescription", function() {
         expect(serialized.message).to.equal(serializedPostDeserialized.message);
         expect(serialized.activeNode.name).to.equal(serializedPostDeserialized.activeNode.name);
         expect(serialized.activeNode.id).to.equal(serializedPostDeserialized.activeNode.id);
-        expect(serialized.activeSelection.length).to.equal(serializedPostDeserialized.activeSelection.length);
 
     });
 

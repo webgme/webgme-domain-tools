@@ -1,46 +1,64 @@
 /**
  * Created by pmeijer on 3/26/2014.
  */
-define(['plugin/PluginConfig', 'plugin/PluginBase', 'xmljsonconverter'], function (PluginConfig, PluginBase, Converter) {
+define(['plugin/PluginConfig', 'plugin/PluginBase'], function (PluginConfig, PluginBase) {
     'use strict';
 
-    var Logger = function () {
+    /**
+     * Initializes a new instance of ActiveNode.
+     * @class
+     * @augments {PluginBase}
+     * @classdesc This class represents the plugin ActiveNode.
+     * @constructor
+     */
+    var ActiveNode = function () {
         // Call base class's constructor
         PluginBase.call(this);
     };
 
-    Logger.prototype = Object.create(PluginBase.prototype);
+    // Prototypal inheritance from PluginBase.
+    ActiveNode.prototype = Object.create(PluginBase.prototype);
+    ActiveNode.prototype.constructor = ActiveNode;
 
-    Logger.prototype.constructor = Logger;
-
-    Logger.prototype.getName = function () {
+    /**
+     * Gets the name of the ActiveNode.
+     * @returns {string} The name of the plugin.
+     * @public
+     */
+    ActiveNode.prototype.getName = function () {
         return "Active Node";
     };
 
-    Logger.prototype.main = function (callback) {
+    /**
+     * Main function for the plugin to execute. This will perform the execution.
+     * Notes:
+     * - Always log with the provided logger.[error,warning,info,debug].
+     * - Do NOT put any user interaction logic UI, etc. inside this method.
+     * - callback always has to be called even if error happened.
+     *
+     * @param {function(string, plugin.PluginResult)} callback - the result callback
+     */
+    ActiveNode.prototype.main = function (callback) {
         var self = this,
-            xml2json = new Converter.Xml2json({skipWSText: true, arrayElements: {ttt: true}}),
-            convertedObj = xml2json.convertFromStr('<xml>Hello, <who name="world">world<ttt attr="4"> \n\r  </ttt></who>!</xml>');
-        if (convertedObj instanceof Error) {
-            self.result.setSuccess(false);
-            callback('Xml parsing failed with error: ' + convertedObj.message, self.result);
-            return;
-        }
-        self.logger.info(JSON.stringify(convertedObj, null, 4));
+            activeNodeName;
 
+        self.logger.debug('Plugin started.');
+        self.logger.info('Project is: ' + self.projectName);
         if (!self.activeNode) {
-            self.result.setSuccess(false);
-            callback('no activeNode given', self.result);
+            self.logger.error('No activeNode given');
+            self.createMessage(self.rootNode, 'No activeNode given.');
+            callback('No activeNode given', self.result);
             return;
         }
+        activeNodeName = self.core.getAttribute(self.activeNode, 'name');
+        self.logger.info('name: ' + activeNodeName);
+        self.logger.warning('path: ' + self.core.getPath(self.activeNode));
+        self.logger.warn('GUID: ' + self.core.getGuid(self.activeNode));
 
-        self.logger.info('name : ' + self.core.getAttribute(self.activeNode, 'name'));
-        self.logger.info('path : ' + self.core.getPath(self.activeNode));
-        self.logger.info('GUID : ' + self.core.getGuid(self.activeNode));
-        self.createMessage(self.activeNode, JSON.stringify(convertedObj, null, 0));
+        self.createMessage(self.activeNode, 'Active node had name ' + activeNodeName + '.');
         self.result.setSuccess(true);
         callback(null, self.result);
     };
 
-    return Logger;
+    return ActiveNode;
 });

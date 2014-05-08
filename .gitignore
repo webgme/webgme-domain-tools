@@ -1,4 +1,4 @@
-#server logs
+# server logs
 server.log
 
 # WebStorm
@@ -13,17 +13,8 @@ out
 # ignore coverage files
 coverage
 
-# ignore generated domain specific APIs
-src/plugins/*/DSML/*.js*
-
-# ignore generated files and directories by plugins
-*-output.zip
-*-output
-
+# ignore the storage
 blob-local-storage
-
-src/examples/jsbasic/asyncExamples_jk.js
-src/plugins/FMU/FmiExporter/FmiExporter - Copy.js
 
 # ignore all temp files
 *.tmp

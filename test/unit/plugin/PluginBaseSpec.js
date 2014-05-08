@@ -20,8 +20,8 @@ if (typeof window === 'undefined') {
 var semanticVersionPattern = /^\d+\.\d+\.\d+$/;
 
 var pluginList = [
-    'plugin/Children/Children/Children',
-    'plugin/ChildrenConfig/ChildrenConfig/ChildrenConfig'];
+    'plugin/ActiveNode/ActiveNode/ActiveNode',
+    'plugin/ConfigurationArtifact/ConfigurationArtifact/ConfigurationArtifact'];
 
 describe("PluginBase API", function () {
 
