@@ -20,23 +20,18 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
-            netLabel = $('<div class="netLabel"></div>'),
+            netLabel = $('<div class="netLabel"></div>'),// todo: style the netlabels
             srcID = self._generateHash(self.srcID),
             dstID = self._generateHash(self.dstID),
             srcLabel = netLabel.clone(),
-            srcLabelID = 'L' + srcID,
+            srcLabelID = self.id,//'L' + srcID,
             dstLabel = netLabel.clone(),
-            dstLabelID = 'L' + dstID,
+            dstLabelID = self.id, //'L' + dstID,
             OFFSET = 5,
-        // special way to get decor-container, since data-id contains special character "/"
-            srcWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').width(),
-            srcHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
-            dstWidth = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.dstID + '"]').width(),
-            dstHeight = self.diagramDesigner.skinParts.$itemsContainer.find('[data-id^="' + self.srcID + '"]').height(),
-            srcXPos = self.srcPos.x + srcWidth + OFFSET,
-            srcYPos = self.srcPos.y,
-            dstXPos = self.dstPos.x + dstWidth + OFFSET,
-            dstYPos = self.dstPos.y;
+            srcXPos = segPoints[0].x,
+            srcYPos = segPoints[0].y,
+            dstXPos = segPoints[segPoints.length - 1].x,
+            dstYPos = segPoints[segPoints.length - 1].y;
 
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
@@ -51,10 +46,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPort.setAttribute("objName", self.srcText);
             srcPort.setAttribute("OjbID", self.srcID); // used to highlight actual object
             // style it
+            // todo: style the objects with css style in separate file
             srcPort.style.position = "absolute";
-            srcPort.style.left = srcXPos.toString() + "px";
-            srcPort.style.top = srcYPos.toString() + "px";
         }
+        srcPort.style.left = srcXPos.toString() + "px";
+        srcPort.style.top = srcYPos.toString() + "px";
 
         dstLabel.text(self.dstText);
         dstLabel[0].setAttribute('id', dstLabelID);
@@ -70,9 +66,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPort.setAttribute("objName", self.dstText);
             srcPort.setAttribute("OjbID", self.dstID);
             dstPort.style.position = "absolute";
-            dstPort.style.left = dstXPos.toString() + "px";
-            dstPort.style.top = dstYPos.toString() + "px";
         }
+        dstPort.style.left = dstXPos.toString() + "px";
+        dstPort.style.top = dstYPos.toString() + "px";
 
         srcLabel.text(self.srcText);
         srcLabel[0].setAttribute('id', srcLabelID);
@@ -80,6 +76,28 @@ define(['js/Widgets/DiagramDesigner/Connection',
             $(dstPort).append(srcLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
         }
+    };
+
+    NetLabelConnection.prototype.destroy = function () {
+        this._destroying = true;
+        this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
+
+//        this._hideSegmentPoints();
+//        this.hideEndReconnectors();
+
+//        this._removeEditModePath();
+
+        //remove from DOM
+//        this._removePath();
+//        this._removePathShadow();
+//
+//        this._hideConnectionAreaMarker();
+//        this.hideSourceConnectors();
+//        this.hideEndConnectors();
+//
+//        this._hideTexts();
+
+        this.logger.debug("Destroyed");
     };
 
     NetLabelConnection.prototype._generateHash = function (str) {
@@ -98,7 +116,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
-        this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
+//        this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
