@@ -21,12 +21,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
             netLabel = $('<div class="netLabel"></div>'),// todo: style the netlabels
-            srcID = self._generateHash(self.srcID),
-            dstID = self._generateHash(self.dstID),
             srcLabel = netLabel.clone(),
-            srcLabelID = self.id,//'L' + srcID,
+            srcID = self._generateHash(self.srcID),
+            srcLabelID = 'L' + srcID,
             dstLabel = netLabel.clone(),
-            dstLabelID = self.id, //'L' + dstID,
+            dstID = self._generateHash(self.dstID),
+            dstLabelID = 'L' + dstID,//self.id
             OFFSET = 5,
             srcXPos = segPoints[0].x,
             srcYPos = segPoints[0].y,
@@ -35,8 +35,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
-        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + srcID)[0],
-            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('#' + dstID)[0];
+        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
+            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
 
         if (!srcPort) {
             // give it an id attr
@@ -44,7 +44,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPort = self._pathBase.clone()[0];
             srcPort.setAttribute("id", self.registeredSrcId);
             srcPort.setAttribute("objName", self.srcText);
-            srcPort.setAttribute("OjbID", self.srcID); // used to highlight actual object
+            srcPort.setAttribute("obj-gmeid", srcID); // used to highlight actual object
             // style it
             // todo: style the objects with css style in separate file
             srcPort.style.position = "absolute";
@@ -63,8 +63,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 //            dstPort = self._toolTipBase.clone()[0];
             dstPort = self._pathBase.clone()[0];
             dstPort.setAttribute("id", self.registeredDstId);
-            srcPort.setAttribute("objName", self.dstText);
-            srcPort.setAttribute("OjbID", self.dstID);
+            dstPort.setAttribute("objName", self.dstText);
+            dstPort.setAttribute("obj-gmeid", dstID);
             dstPort.style.position = "absolute";
         }
         dstPort.style.left = dstXPos.toString() + "px";
