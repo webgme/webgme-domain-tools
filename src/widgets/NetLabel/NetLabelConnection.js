@@ -48,6 +48,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPort = self._toolTipBase.clone()[0];
             srcPort.setAttribute("id", srcID);
             srcPort.setAttribute("objName", self.srcText);
+            srcPort.setAttribute("OjbID", self.srcID); // used to highlight actual object
             // style it
             srcPort.style.position = "absolute";
             srcPort.style.left = srcXPos.toString() + "px";
@@ -65,6 +66,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPort = self._toolTipBase.clone()[0];
             dstPort.setAttribute("id", dstID);
             srcPort.setAttribute("objName", self.dstText);
+            srcPort.setAttribute("OjbID", self.dstID);
             dstPort.style.position = "absolute";
             dstPort.style.left = dstXPos.toString() + "px";
             dstPort.style.top = dstYPos.toString() + "px";
@@ -90,7 +92,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return hash;
     };
 
-    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; text-align: center"></div>');
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
@@ -127,6 +129,22 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.onSelect = function (multiSelection) {
 
+        this.selected = true;
+        this.selectedInMultiSelection = multiSelection;
+
+        this._highlightPath();
+
+        //in edit mode and when not participating in a multiple selection,
+        //show endpoint connectors
+        if (this.selectedInMultiSelection === true) {
+            this._setEditMode(false);
+        } else {
+            //in edit mode and when not participating in a multiple selection,
+            //show connectors
+            if (this.diagramDesigner.mode === this.diagramDesigner.OPERATING_MODES.DESIGN) {
+                this._setEditMode(true);
+            }
+        }
     };
 
     NetLabelConnection.prototype.onDeselect = function () {
