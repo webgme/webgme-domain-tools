@@ -42,8 +42,6 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             dstText = dstID.match(/\//g).length > 3 ? dstParentName + "." + dstName : dstName;
         return {'srcText': srcText,
                 'dstText': dstText,
-                'registeredSrcId': gmeID + "-src",
-                'registeredDstId': gmeID + "-dst",
                 'srcID': srcID,
                 'dstID': dstID};
     };

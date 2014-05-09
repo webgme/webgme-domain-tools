@@ -59,6 +59,10 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
 
         // todo: need to register connectionID-src and connectionID-dst in this.items
         newComponent = this.items[connectionId] = new NetLabelConnection(connectionId);
+        this.items[connectionId + '-src'] = new NetLabelConnection(connectionId + '-src');
+        this.items[connectionId + '-dst'] = new NetLabelConnection(connectionId + '-dst');
+        objDescriptor.registeredSrcId = connectionId + '-src';
+        objDescriptor.registeredDstId = connectionId + '-dst';
         newComponent._initialize(objDescriptor);
         // todo: need to register event-handlers, e.g. this._listenForEvents or something and then create such event handling method
         return newComponent;

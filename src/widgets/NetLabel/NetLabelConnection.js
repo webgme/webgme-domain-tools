@@ -42,7 +42,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             // give it an id attr
 //            srcPort = self._toolTipBase.clone()[0];
             srcPort = self._pathBase.clone()[0];
-            srcPort.setAttribute("id", srcID);
+            srcPort.setAttribute("id", self.registeredSrcId);
             srcPort.setAttribute("objName", self.srcText);
             srcPort.setAttribute("OjbID", self.srcID); // used to highlight actual object
             // style it
@@ -62,7 +62,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!dstPort) {
 //            dstPort = self._toolTipBase.clone()[0];
             dstPort = self._pathBase.clone()[0];
-            dstPort.setAttribute("id", dstID);
+            dstPort.setAttribute("id", self.registeredDstId);
             srcPort.setAttribute("objName", self.dstText);
             srcPort.setAttribute("OjbID", self.dstID);
             dstPort.style.position = "absolute";
@@ -81,22 +81,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.destroy = function () {
         this._destroying = true;
         this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
-
-//        this._hideSegmentPoints();
-//        this.hideEndReconnectors();
-
-//        this._removeEditModePath();
-
-        //remove from DOM
-//        this._removePath();
-//        this._removePathShadow();
-//
-//        this._hideConnectionAreaMarker();
-//        this.hideSourceConnectors();
-//        this.hideEndConnectors();
-//
-//        this._hideTexts();
-
         this.logger.debug("Destroyed");
     };
 
@@ -123,6 +107,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.dstText = objDescriptor.dstText;
         this.srcID = objDescriptor.srcID;
         this.dstID = objDescriptor.dstID;
+        this.registeredSrcId = objDescriptor.registeredSrcId;
+        this.registeredDstId = objDescriptor.registeredDstId;
         this.srcPos = objDescriptor.srcPos;
         this.dstPos = objDescriptor.dstPos;
         this.name = objDescriptor.name;/* || this.id;*/
