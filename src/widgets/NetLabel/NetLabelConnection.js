@@ -45,7 +45,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (!srcPort) {
             // give it an id attr
-            srcPort = self._toolTipBase.clone()[0];
+//            srcPort = self._toolTipBase.clone()[0];
+            srcPort = self._pathBase.clone()[0];
             srcPort.setAttribute("id", srcID);
             srcPort.setAttribute("objName", self.srcText);
             srcPort.setAttribute("OjbID", self.srcID); // used to highlight actual object
@@ -63,7 +64,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         if (!dstPort) {
-            dstPort = self._toolTipBase.clone()[0];
+//            dstPort = self._toolTipBase.clone()[0];
+            dstPort = self._pathBase.clone()[0];
             dstPort.setAttribute("id", dstID);
             srcPort.setAttribute("objName", self.dstText);
             srcPort.setAttribute("OjbID", self.dstID);
@@ -92,9 +94,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return hash;
     };
 
+    NetLabelConnection.prototype._pathBase = $('<path fill="none" stroke="#b9dcf7" d="M815.5,274.5L886.5,274.5L886.5,413.5L1026.5,413.5" class="designer-connection" stroke-width="5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); "></path>');
     NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
+        this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
