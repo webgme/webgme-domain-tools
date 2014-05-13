@@ -80,11 +80,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.destroy = function () {
         this._destroying = true;
-//        if (this.diagramDesigner) {
+        if (this.diagramDesigner) {
 
             this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
             this.logger.debug("Destroyed");
-//        }
+        }
     };
 
     NetLabelConnection.prototype._generateHash = function (str) {
