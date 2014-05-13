@@ -27,10 +27,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstLabel = netLabel.clone(),
             dstID = self._generateHash(self.dstID),
             dstLabelID = 'L' + dstID,//self.id
-            OFFSET = 5,
+            OFFSET = self.dstText.length >= 11 ? 60 : 20,
             srcXPos = segPoints[0].x,
             srcYPos = segPoints[0].y,
-            dstXPos = segPoints[segPoints.length - 1].x,
+            dstXPos = segPoints[segPoints.length - 1].x - OFFSET,
             dstYPos = segPoints[segPoints.length - 1].y;
 
         //this.paper   is a RaphaelJS papers
