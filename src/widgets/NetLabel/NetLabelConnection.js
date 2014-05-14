@@ -42,7 +42,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             // give it an id attr
 //            srcPort = self._toolTipBase.clone()[0];
             srcPort = self._pathBase.clone()[0];
-            srcPort.setAttribute("id", self.registeredSrcId);
+            srcPort.setAttribute("id", self.id);
             srcPort.setAttribute("objName", self.srcText);
             srcPort.setAttribute("obj-gmeid", srcID); // used to highlight actual object
             // style it
@@ -62,7 +62,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!dstPort) {
 //            dstPort = self._toolTipBase.clone()[0];
             dstPort = self._pathBase.clone()[0];
-            dstPort.setAttribute("id", self.registeredDstId);
+            dstPort.setAttribute("id", self.id);
             dstPort.setAttribute("objName", self.dstText);
             dstPort.setAttribute("obj-gmeid", dstID);
             dstPort.style.position = "absolute";
@@ -97,6 +97,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
             hash |= 0; // Convert to 32bit integer
         }
         return hash;
+    };
+
+    // todo: implement this to create shadow for highlighted netlabel lists
+    NetLabelConnection.prototype._createPathShadow = function (segPoints) {
+
+    };
+    NetLabelConnection.prototype._highlightPath = function () {
+
     };
 
     NetLabelConnection.prototype._pathBase = $('<path fill="none" stroke="#b9dcf7" d="M815.5,274.5L886.5,274.5L886.5,413.5L1026.5,413.5" class="designer-connection" stroke-width="5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); "></path>');
@@ -153,7 +161,18 @@ define(['js/Widgets/DiagramDesigner/Connection',
             //in edit mode and when not participating in a multiple selection,
             //show connectors
             if (this.diagramDesigner.mode === this.diagramDesigner.OPERATING_MODES.DESIGN) {
-                this._setEditMode(true);
+                this._setEditMode(false); // todo: set it to false for debugging purpose
+            }
+        }
+    };
+
+    // todo: edit this method to highlight the actual connector port instead of the connection path
+    NetLabelConnection.prototype._setEditMode = function (editMode) {
+        if (this._readOnly === false && this._editMode !== editMode) {
+            this._editMode = editMode;
+            this.setConnectionRenderData(this._pathPoints);
+            if (this._editMode === false) {
+                this.hideEndReconnectors();
             }
         }
     };
