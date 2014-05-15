@@ -61,7 +61,7 @@ var main = function () {
             console.info(fileName);
             if (isEjsFile(fileName)) {
                 console.info('Was ejs -> added!');
-                content[fileName] = fs.readFileSync(fileName, {'encoding': 'utf-8'});
+                content[fileName.substring(2)] = fs.readFileSync(fileName, {'encoding': 'utf-8'});
             }
         }
 
