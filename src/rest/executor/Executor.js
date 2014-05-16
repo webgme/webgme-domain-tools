@@ -12,7 +12,8 @@ define(['logManager',
     'blob/BlobFSBackend',
     'fs',
     'path',
-    'unzip'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path, unzip) {
+    'unzip',
+    'child_process'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path, unzip, child_process) {
 
     //here you can define global variables for your middleware
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
@@ -66,10 +67,30 @@ define(['logManager',
                 fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
 
                 // TODO: start job
+                var exec = child_process.exec;
 
+                jobInfo.startTime = new Date().toISOString();
 
-                // TODO: on finish upload artifacts, set results hash and finish time
+                // FIXME: get cmd file dynamically.
+                var child = exec('run_jmodelica_model_exchange.cmd', {cwd: jobDir},
+                    function (error, stdout, stderr) {
 
+                        jobInfo.finishTime = new Date().toISOString();
+
+                        logger.debug('stdout: ' + stdout);
+                        logger.error('stderr: ' + stderr);
+
+                        if (error !== null) {
+                            logger.error('exec error: ' + error);
+                            jobInfo.status = 'FAILED';
+                        } else {
+                            jobInfo.status = 'SUCCESS';
+
+                            // TODO: zip results and upload
+
+                            // TODO: delete artifacts.
+                        }
+                    });
             });
         });
     };
