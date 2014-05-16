@@ -19,6 +19,9 @@
         "./src/plugins/TestCore"
     ],
 
+    "rextrast": {
+        "executor": "./src/rest/executor/Executor"
+    },
 
     "paths": {
         "ejs": "./support/ejs/ejs.min",
