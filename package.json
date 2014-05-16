@@ -8,7 +8,8 @@
     "license": "MIT",
     "dependencies": {
         "webgme": "https://github.com/webgme/webgme/tarball/master",
-        "requirejs": "=2.1.11"
+        "requirejs": "=2.1.11",
+        "unzip": "=0.1.8"
     },
     "devDependencies": {
         "mocha": ">=1.17.1",

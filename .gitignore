@@ -15,6 +15,7 @@ coverage
 
 # ignore the storage
 blob-local-storage
+executor-temp
 
 # ignore all temp files
 *.tmp

@@ -7,10 +7,15 @@
  */
 
 
-define(['logManager', 'blob/BlobRunPluginClient', 'blob/BlobFSBackend' , 'fs', 'path'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path) {
+define(['logManager',
+    'blob/BlobRunPluginClient',
+    'blob/BlobFSBackend',
+    'fs',
+    'path',
+    'unzip'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path, unzip) {
+
     //here you can define global variables for your middleware
-    var counter = 0,
-        logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
+    var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
     var executorBackend = null;
 
@@ -52,12 +57,16 @@ define(['logManager', 'blob/BlobRunPluginClient', 'blob/BlobFSBackend' , 'fs', '
                 fs.mkdirSync(jobDir);
             }
 
-            fs.writeFile(path.join(jobDir, 'source.zip'), content, function (err) {
+            var zipPath = path.join(jobDir, 'source.zip');
+
+            fs.writeFile(zipPath, content, function (err) {
                 // TODO: handle errors
 
                 // TODO: unzip file
+                fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
 
                 // TODO: start job
+
 
                 // TODO: on finish upload artifacts, set results hash and finish time
 
