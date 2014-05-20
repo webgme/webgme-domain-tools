@@ -15,6 +15,45 @@ define(['logManager',
     'unzip',
     'child_process'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path, unzip, child_process) {
 
+
+    var walk = function(dir, done) {
+        var results = [];
+        fs.readdir(dir, function(err, list) {
+            if (err) return done(err);
+            var i = 0;
+            (function next() {
+                var file = list[i++];
+                if (!file) return done(null, results);
+                file = dir + '/' + file;
+                fs.stat(file, function(err, stat) {
+                    if (stat && stat.isDirectory()) {
+                        walk(file, function(err, res) {
+                            results = results.concat(res);
+                            next();
+                        });
+                    } else {
+                        results.push(file);
+                        next();
+                    }
+                });
+            })();
+        });
+    };
+
+    var deleteFolderRecursive = function(path) {
+        if( fs.existsSync(path) ) {
+            fs.readdirSync(path).forEach(function(file,index){
+                var curPath = path + "/" + file;
+                if(fs.lstatSync(curPath).isDirectory()) { // recurse
+                    deleteFolderRecursive(curPath);
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
+            fs.rmdirSync(path);
+        }
+    };
+
     //here you can define global variables for your middleware
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
@@ -26,6 +65,10 @@ define(['logManager',
         // FIXME: should we use HTTP here?
         var blobBackend = new BlobFSBackend();
         this.blobClient = new BlobRunPluginClient(blobBackend);
+
+        this.sourceFilename = 'source.zip';
+        this.resultFilename = 'execution_results';
+        this.executorConfigFilename = 'executor_config.json';
 
         this.workingDirectory = 'executor-temp';
 
@@ -45,6 +88,7 @@ define(['logManager',
         this.jobList[jobInfo.hash] = jobInfo;
 
         // TODO: download artifacts
+        // TODO: get metadata for hash
 
         self.blobClient.getObject(jobInfo.hash, function (err, content) {
             if (err) {
@@ -52,47 +96,102 @@ define(['logManager',
                 return;
             }
 
-            var jobDir = path.join(self.workingDirectory, jobInfo.hash);
+            var jobDir = path.normalize(path.join(self.workingDirectory, jobInfo.hash));
 
             if (!fs.existsSync(jobDir)) {
                 fs.mkdirSync(jobDir);
             }
 
-            var zipPath = path.join(jobDir, 'source.zip');
+            var zipPath = path.join(jobDir, self.sourceFilename);
 
             fs.writeFile(zipPath, content, function (err) {
                 // TODO: handle errors
 
-                // TODO: unzip file
-                fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
+                // unzip downloaded file
+                var extract = fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
 
-                // TODO: start job
-                var exec = child_process.exec;
+                extract.on('close', function(err) {
+                    // delete downloaded file
+                    fs.unlinkSync(zipPath);
 
-                jobInfo.startTime = new Date().toISOString();
+                    // TODO: start job
+                    var exec = child_process.exec;
 
-                // FIXME: get cmd file dynamically.
-                var child = exec('run_jmodelica_model_exchange.cmd', {cwd: jobDir},
-                    function (error, stdout, stderr) {
+                    jobInfo.startTime = new Date().toISOString();
 
-                        jobInfo.finishTime = new Date().toISOString();
+                    logger.debug('working directory: ' + jobDir);
 
-                        logger.debug('stdout: ' + stdout);
-                        logger.error('stderr: ' + stderr);
+                    // FIXME: get cmd file dynamically from the this.executorConfigFilename file
+                    var child = exec('run_jmodelica_model_exchange.cmd', {cwd: jobDir},
+                        function (error, stdout, stderr) {
 
-                        if (error !== null) {
-                            logger.error('exec error: ' + error);
-                            jobInfo.status = 'FAILED';
-                        } else {
-                            jobInfo.status = 'SUCCESS';
+                            jobInfo.finishTime = new Date().toISOString();
 
-                            // TODO: zip results and upload
+                            logger.debug('stdout: ' + stdout);
+                            logger.error('stderr: ' + stderr);
 
-                            // TODO: delete artifacts.
-                        }
-                    });
+                            if (error !== null) {
+                                logger.error('exec error: ' + error);
+                                jobInfo.status = 'FAILED';
+                            } else {
+                                jobInfo.status = 'SUCCESS';
+                            }
+
+                            // TODO: save stderr and stdout to files.
+
+                            self.saveJobResults(jobInfo, jobDir);
+                        });
+                });
+
             });
         });
+    };
+
+    ExecutorBackend.prototype.saveJobResults = function (jobInfo, directory) {
+        // TODO: list all files and subdirectories
+
+        var self = this;
+
+        var resultArtifact = self.blobClient.createArtifact(self.resultFilename);
+
+        walk(directory, function (err, results) {
+            var i,
+                remaining = results.length;
+
+            for (i = 0; i < results.length; i++) {
+                resultArtifact.addFile(path.relative(directory, results[i]).replace(/\\/g,'/'), fs.createReadStream(results[i]), function(err, hash) {
+                    remaining -= 1;
+
+                    if (err) {
+                        logger.error('Failed to add to blob ' + results[i]);
+                        logger.error(err);
+                    } else {
+
+                    }
+
+                    if (remaining === 0) {
+                        resultArtifact.save(function(err, resultHash) {
+                            if (err) {
+                                logger.error(err);
+                                jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
+                                return;
+                            } else {
+                                // FIXME: This is synchronous
+                                deleteFolderRecursive(directory);
+                            }
+
+                            jobInfo.resultHash = resultHash;
+                        });
+                    }
+
+                });
+            }
+        });
+
+        // TODO: create a result artifact
+
+        // TODO: delete directory
+
     };
 
     ExecutorBackend.prototype.cancelJob = function () {
