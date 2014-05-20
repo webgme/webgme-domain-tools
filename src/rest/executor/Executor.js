@@ -10,10 +10,11 @@
 define(['logManager',
     'blob/BlobRunPluginClient',
     'blob/BlobFSBackend',
+    'blob/BlobMetadata',
     'fs',
     'path',
     'unzip',
-    'child_process'], function(logManager, BlobRunPluginClient, BlobFSBackend, fs, path, unzip, child_process) {
+    'child_process'], function(logManager, BlobRunPluginClient, BlobFSBackend, BlobMetadata, fs, path, unzip, child_process) {
 
 
     var walk = function(dir, done) {
@@ -87,62 +88,102 @@ define(['logManager',
 
         this.jobList[jobInfo.hash] = jobInfo;
 
-        // TODO: download artifacts
-        // TODO: get metadata for hash
 
-        self.blobClient.getObject(jobInfo.hash, function (err, content) {
+        // get metadata for hash
+        self.blobClient.getMetadata(jobInfo.hash, function (err, metadata) {
             if (err) {
-                // TODO: handle errors
+                logger.error(err);
+                jobInfo.status = 'FAILED_TO_GET_SOURCE';
                 return;
             }
 
-            var jobDir = path.normalize(path.join(self.workingDirectory, jobInfo.hash));
-
-            if (!fs.existsSync(jobDir)) {
-                fs.mkdirSync(jobDir);
+            if (metadata.contentType !== BlobMetadata.CONTENT_TYPES.COMPLEX) {
+                jobInfo.status = 'FAILED_SOURCE_IS_NOT_COMPLEX';
+                return;
             }
 
-            var zipPath = path.join(jobDir, self.sourceFilename);
 
-            fs.writeFile(zipPath, content, function (err) {
-                // TODO: handle errors
+//            if (metadata.content.hasOwnProperty(self.executorConfigFilename)) {
+//
+//            } else {
+//                jobInfo.status = 'FAILED_EXECUTOR_CONFIG_DOES_NOT_EXIST';
+//                return;
+//            }
 
-                // unzip downloaded file
-                var extract = fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
+            // download artifacts
+            self.blobClient.getObject(jobInfo.hash, function (err, content) {
+                if (err) {
+                    // TODO: handle errors
+                    return;
+                }
 
-                extract.on('close', function(err) {
-                    // delete downloaded file
-                    fs.unlinkSync(zipPath);
+                var jobDir = path.normalize(path.join(self.workingDirectory, jobInfo.hash));
 
-                    // TODO: start job
-                    var exec = child_process.exec;
+                if (!fs.existsSync(jobDir)) {
+                    fs.mkdirSync(jobDir);
+                }
 
-                    jobInfo.startTime = new Date().toISOString();
+                var zipPath = path.join(jobDir, self.sourceFilename);
 
-                    logger.debug('working directory: ' + jobDir);
+                fs.writeFile(zipPath, content, function (err) {
+                    // TODO: handle errors
 
-                    // FIXME: get cmd file dynamically from the this.executorConfigFilename file
-                    var child = exec('run_jmodelica_model_exchange.cmd', {cwd: jobDir},
-                        function (error, stdout, stderr) {
+                    // unzip downloaded file
+                    var extract = fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
 
-                            jobInfo.finishTime = new Date().toISOString();
+                    extract.on('close', function(err) {
+                        if (err) {
+                            logger.error(err);
+                            jobInfo.status = 'FAILED_UNZIP';
+                            return;
+                        }
 
-                            logger.debug('stdout: ' + stdout);
-                            logger.error('stderr: ' + stderr);
+                        // delete downloaded file
+                        fs.unlinkSync(zipPath);
 
-                            if (error !== null) {
-                                logger.error('exec error: ' + error);
-                                jobInfo.status = 'FAILED';
-                            } else {
-                                jobInfo.status = 'SUCCESS';
+                        // TODO: start job
+                        var exec = child_process.exec;
+
+                        jobInfo.startTime = new Date().toISOString();
+
+                        // get cmd file dynamically from the this.executorConfigFilename file
+                        fs.readFile(path.join(jobDir, self.executorConfigFilename), 'utf8', function (err, data) {
+                            if (err) {
+                                logger.error(err);
+                                jobInfo.status = 'FAILED_EXECUTOR_CONFIG';
+                                //return;
                             }
 
-                            // TODO: save stderr and stdout to files.
+//                            var executorConfig = JSON.parse(data);
+                            var cmd = 'run_jmodelica_model_exchange.cmd'; //executorConfig.cmd;
 
-                            self.saveJobResults(jobInfo, jobDir);
+                            logger.debug('working directory: ' + jobDir + ' executing: ' + cmd);
+
+                            var child = exec(cmd, {cwd: jobDir},
+                                function (error, stdout, stderr) {
+
+                                    jobInfo.finishTime = new Date().toISOString();
+
+                                    logger.debug('stdout: ' + stdout);
+
+                                    if (stderr) {
+                                        logger.error('stderr: ' + stderr);
+                                    }
+
+                                    if (error !== null) {
+                                        logger.error('exec error: ' + error);
+                                        jobInfo.status = 'FAILED';
+                                    } else {
+                                        jobInfo.status = 'SUCCESS';
+                                    }
+
+                                    // TODO: save stderr and stdout to files.
+
+                                    self.saveJobResults(jobInfo, jobDir);
+                                });
                         });
+                    });
                 });
-
             });
         });
     };
