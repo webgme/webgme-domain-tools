@@ -4,17 +4,17 @@
  * Authors:
  */
 
-"use strict";
 
 define(['js/Decorators/DecoratorBase',
     './DiagramDesigner/<%= decorator.name %>Decorator.DiagramDesignerWidget',
-    './PartBrowser/<%= decorator.name %>Decorator.PartBrowserWidget'], function (
-                                                           DecoratorBase,
-                                                           <%= decorator.name %>DecoratorDiagramDesignerWidget,
-                                                           <%= decorator.name %>DecoratorPartBrowserWidget) {
+    './PartBrowser/<%= decorator.name %>Decorator.PartBrowserWidget'], function (DecoratorBase,
+        <%= decorator.name %>DecoratorDiagramDesignerWidget,
+        <%= decorator.name %>DecoratorPartBrowserWidget
+    ) {
+    'use strict';
 
     /**
-    * A module representing a decorator for the PN Modeling Language.
+    * A module representing a decorator for the <%= decorator.name %> Modeling Language.
     * @exports <%= decorator.name %>Decorator
     * @version 1.0
     */

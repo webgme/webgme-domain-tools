@@ -23,7 +23,7 @@ for (i = 0; i < metaNodes.length; i += 1) {
     //META ASPECT TYPE CHECKING
 <%for (i = 0; i < metaNodes.length; i += 1) {
         metaNodeInfo = metaNodes[i];
-%>    var _is<%=metaNodeInfo.name%> = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.<%=metaNodeInfo.name%>) };
+%>    var _is<%=metaNodeInfo.name%> = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.<%=metaNodeInfo.name%>); };
 <%}%>
 
     var _queryMetaTypes = function () {

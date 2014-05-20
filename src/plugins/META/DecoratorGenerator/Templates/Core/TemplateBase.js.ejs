@@ -3,7 +3,6 @@
  *
  */
 
-"use strict";
 
 define(['js/NodePropertyNames',
         'js/Utils/METAAspectHelper',
@@ -11,11 +10,13 @@ define(['js/NodePropertyNames',
         './<%= decorator.name %>.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
-                                   <%= decorator.name %>DecoratorConstants,
-                                   <%= decorator.name %>META,
-                                   DiagramDesignerWidgetConstants,
-                                   CONSTANTS) {
+            METAAspectHelper,
+            <%= decorator.name %>DecoratorConstants,
+            <%= decorator.name %>META,
+            DiagramDesignerWidgetConstants,
+            CONSTANTS
+    ) {
+    'use strict';
 
     /**
      * A module representing <%= decorator.name %>Base decorator functionality for the <%= decorator.name %>ModelingLanguage.
@@ -37,47 +38,46 @@ define(['js/NodePropertyNames',
      * @private
      */
     <%= decorator.name %>Base.prototype._updatePorts = function () {
-        var portId,
+        var self = this,
+            portId,
             len = 4,
-            gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = <%= decorator.name %>META.META_TYPES, 
-            SVGWidth = parseInt(this.skinParts.$svg.attr('width')),
-            SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
+            gmeID = self._metaInfo[CONSTANTS.GME_ID],
+            META_TYPES = <%= decorator.name %>META.META_TYPES,
+            SVGWidth = parseInt(this.skinParts.$svg.attr('width'), 10),
+            SVGHeight = parseInt(this.skinParts.$svg.attr('height'), 10),
             PortWidth = <%= decorator.name %>DecoratorConstants.PORT_WIDTH;
 
         // reinitialize the port coordinates with an empty object
-        this._connectionAreas = {};    
-        this.skinParts.$connectorContainer.empty();
+        self._connectionAreas = {};
+        self.skinParts.$connectorContainer.empty();
 
-    	// positioning the connectors' connection areas
+        // positioning the connectors' connection areas
 
          // TOP
-        this._connectionAreas[0] = {
-            "x1": SVGWidth / 2,
-            "y1": 0
-        }
+        self._connectionAreas[0] = {
+            x1: SVGWidth / 2,
+            y1: 0
+        };
         // BOTTOM
-        this._connectionAreas[1] = {
-            "x1": SVGWidth / 2,
-            "y1": SVGHeight
-        }   
+        self._connectionAreas[1] = {
+            x1: SVGWidth / 2,
+            y1: SVGHeight
+        };
         // LEFT
-        this._connectionAreas[2] = {
-            "x1": 0,
-            "y1": SVGHeight / 2
-        }
+        self._connectionAreas[2] = {
+            x1: 0,
+            y1: SVGHeight / 2
+        };
         // RIGHT
-        this._connectionAreas[3] = {
-            "x1": SVGWidth,
-            "y1": SVGHeight / 2
-        }
+        self._connectionAreas[3] = {
+            x1: SVGWidth,
+            y1: SVGHeight / 2
+        };
 
-        while(len--) {
-            
-            portId = 3 - len;
+        while (len--) {
             // render connector
-            var connectorE = $('<div/>', {'class': DiagramDesignerWidgetConstants.CONNECTOR_CLASS});
-
+            var connectorE = $('<div/>', {class: DiagramDesignerWidgetConstants.CONNECTOR_CLASS});
+            portId = 3 - len;
             if (portId === 3) {
                 connectorE.addClass(<%= decorator.name %>DecoratorConstants.RIGHT_PORT_CLASS);
             } else if (portId === 2) {
@@ -89,20 +89,19 @@ define(['js/NodePropertyNames',
             }
 
             connectorE.css({
-                    'top': this._connectionAreas[portId].y1 - PortWidth,
-                    'left': this._connectionAreas[portId].x1 - PortWidth
-                });
+                top: self._connectionAreas[portId].y1 - PortWidth,
+                left: self._connectionAreas[portId].x1 - PortWidth
+            });
 
-            if (this._displayConnectors) {
-
+            if (self._displayConnectors) {
                 // register connectors for creating connections
-                if (this.hostDesignerItem) {
-                    this.hostDesignerItem.registerConnectors(connectorE);
+                if (self.hostDesignerItem) {
+                    self.hostDesignerItem.registerConnectors(connectorE);
                 } else {
-                    this.logger.error("Decorator's hostDesignerItem is not set");
+                    self.logger.error("Decorator's hostDesignerItem is not set");
                 }
 
-                this.skinParts.$connectorContainer.append(connectorE);
+                self.skinParts.$connectorContainer.append(connectorE);
             }
         }
     };
@@ -123,31 +122,29 @@ define(['js/NodePropertyNames',
      * @returns {Array} Connection areas to/from connections can be drawn.
      */
     <%= decorator.name %>Base.prototype.getConnectionAreas = function (id/*, isEnd, connectionMetaInfo*/) {
-
-    	var result = [],
+        var self = this,
+            result = [],
+            i,
             LEN = 10, // length of stem that can stick out of the connector before connections can turn 
             ANGLES = [270, 90, 180, 0], // L, R, T, B
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
             META_TYPES = <%= decorator.name %>META.META_TYPES;
 
         //by default return the bounding box edges midpoints
-
         if (id === undefined || id === this.hostDesignerItem.id) {
-            
-            for (var i = 0; i < ANGLES.length; i++) {
-
-                result.push( {"id": i,
-                    "x1": this._connectionAreas[i].x1, // x's and y's determine the lines where connections can be drawn on
-                    "y1": this._connectionAreas[i].y1,
-                    "x2": this._connectionAreas[i].x1,
-                    "y2": this._connectionAreas[i].y1,
-                    "angle1": ANGLES[i], // angles determine from which direction between two angles connections can be drawn
-                    "angle2": ANGLES[i],
-                    "len": LEN} );
-            } 
-            
+            for (i = 0; i < ANGLES.length; i += 1) {
+                result.push({id: i,
+                    x1: self._connectionAreas[i].x1, // xs and ys determine the lines where connections can be drawn on
+                    y1: self._connectionAreas[i].y1,
+                    x2: self._connectionAreas[i].x1,
+                    y2: self._connectionAreas[i].y1,
+                    angle1: ANGLES[i], // angles determine from which direction between two angles connections can be drawn
+                    angle2: ANGLES[i],
+                    len: LEN
+                    });
+            }
         }
-        
+
         return result;
     };
 
