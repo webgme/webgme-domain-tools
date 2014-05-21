@@ -239,7 +239,7 @@ define(['logManager',
 
                 if (archive) {
                     // archive the given file
-                    resultArtifact.addFile(filename, fs.createReadStream(results[i]), function (err, hash) {
+                    resultArtifact.addFileAsSoftLink(filename, fs.createReadStream(results[i]), function (err, hash) {
                         remaining -= 1;
 
                         if (err) {

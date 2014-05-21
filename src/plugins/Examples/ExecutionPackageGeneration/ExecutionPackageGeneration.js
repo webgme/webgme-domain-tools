@@ -88,11 +88,6 @@ define(['plugin/PluginConfig',
             activeNodePath = self.core.getPath(self.activeNode),
             executor_config = {
                 cmd: 'C:/Python27/python.exe ' + 'generate_name.py ' + activeNodePath,
-                projectName: self.projectName,
-                branchName: self.branchName,
-                branchHash: self.branchHash,
-                commitHash: self.commitHash,
-                currentHash: self.currentHash,
                 results: null
             },
             filesToAdd = {
@@ -120,7 +115,6 @@ define(['plugin/PluginConfig',
                     return;
                 }
                 self.result.addArtifact(hash);
-                self.result.setSuccess(true);
 
                 // FIXME: this will work only on client side...
                 var executorClient = new ExecutorClient();
@@ -144,15 +138,14 @@ define(['plugin/PluginConfig',
                                 // TODO: assign hash to the model??
                                 self.logger.debug(jInfo.resultHash);
                                 self.result.addArtifact(jInfo.resultHash);
-
                             } else {
                                 // TODO: check status, failed?
 
                             }
-
+                            self.result.setSuccess(true);
                             callback(null, self.result);
                         });
-                    }, 20);
+                    }, 400);
                 });
             });
         });
