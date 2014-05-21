@@ -129,7 +129,9 @@ define(['logManager',
                     // TODO: handle errors
 
                     // unzip downloaded file
-                    var extract = fs.createReadStream(zipPath).pipe(unzip.Extract({ path: jobDir }));
+
+                    var extract = unzip.Extract({ path: jobDir });
+                    fs.createReadStream(zipPath).pipe(extract);
 
                     extract.on('close', function(err) {
                         if (err) {
