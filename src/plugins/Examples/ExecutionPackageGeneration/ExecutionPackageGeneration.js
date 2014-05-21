@@ -6,7 +6,8 @@ define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'ejs',
     'plugin/ExecutionPackageGeneration/ExecutionPackageGeneration/Templates/Templates',
-    'executor/ExecutorClient'], function (PluginConfig, PluginBase, ejs, TEMPLATES, ExecutorClient) {
+    'executor/ExecutorClient',
+    'jszip'], function (PluginConfig, PluginBase, ejs, TEMPLATES, ExecutorClient, JSZip) {
     'use strict';
 
     /**
@@ -120,30 +121,51 @@ define(['plugin/PluginConfig',
                 var executorClient = new ExecutorClient();
 
                 executorClient.createJob(hash, function (err, jobInfo) {
-                    // TODO: if err?
+                    var intervalID,
+                        atSucceedJob;
+                    if (err) {
+                        return callback('Creating job failed: ' + err.toString(), self.result);
+                    }
                     self.logger.debug(jobInfo);
+                    atSucceedJob = function (jInfo) {
+                        self.blobClient.getObject(jInfo.resultHash, function (err, content) {
+                            var results = new JSZip(content),
+                                newName,
+                                key;
+                            if (err) {
+                                return callback('Getting results_artifacts failed: ' + err.toString(), self.result);
+                            }
+                            newName = JSON.parse(results.file('new_name.json').asText());
+                            for (key in newName) {
+                                if (newName.hasOwnProperty(key)) {
+                                    self.core.setAttribute(self.activeNode, 'name', newName[key]);
+                                }
+                            }
+                            self.result.addArtifact(jInfo.resultHash);
+                            self.result.setSuccess(true);
+                            self.save('Updated new name from execution', function (err) {
+                                callback(null, self.result);
+                            });
+                        });
 
-                    var intervalID = setInterval(function () {
+                    };
+
+                    intervalID = setInterval(function () {
+                        // Get the job-info at intervals and check for a non-CREATED status.
                         executorClient.getInfo(hash, function (err, jInfo) {
-                            // TODO: if err?
-
                             self.logger.info(JSON.stringify(jInfo, null, 4));
                             if (jInfo.status === 'CREATED') {
                                 // The job is still running..
                                 return;
                             }
-                            clearInterval(intervalID);
-                            // TODO: check status, failed?
-                            if (jInfo.resultHash) {
-                                // TODO: assign hash to the model??
-                                self.logger.debug(jInfo.resultHash);
-                                self.result.addArtifact(jInfo.resultHash);
-                            } else {
-                                // TODO: check status, failed?
 
+                            clearInterval(intervalID);
+                            if (jInfo.status === 'SUCCESS') {
+                                atSucceedJob(jInfo);
+                            } else {
+                                self.result.addArtifact(jInfo.resultHash);
+                                callback('Job execution failed', self.result);
                             }
-                            self.result.setSuccess(true);
-                            callback(null, self.result);
                         });
                     }, 400);
                 });
