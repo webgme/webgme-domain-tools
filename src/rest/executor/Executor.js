@@ -188,7 +188,7 @@ define(['logManager',
 
                                     // TODO: save stderr and stdout to files.
 
-                                    self.saveJobResults(jobInfo, jobDir);
+                                    self.saveJobResults(jobInfo, jobDir, executorConfig);
                                 });
                         });
                     });
@@ -197,7 +197,7 @@ define(['logManager',
         });
     };
 
-    ExecutorBackend.prototype.saveJobResults = function (jobInfo, directory) {
+    ExecutorBackend.prototype.saveJobResults = function (jobInfo, directory, executorConfig) {
         // TODO: list all files and subdirectories
 
         var self = this;
@@ -209,32 +209,69 @@ define(['logManager',
                 remaining = results.length;
 
             for (i = 0; i < results.length; i++) {
-                resultArtifact.addFile(path.relative(directory, results[i]).replace(/\\/g,'/'), fs.createReadStream(results[i]), function(err, hash) {
+
+                var archive = true;
+                var filename = path.relative(directory, results[i]).replace(/\\/g,'/');
+
+                var filePatterns = executorConfig.results.files;
+                var dirPatterns = executorConfig.results.dirs;
+
+                if (filePatterns.length + dirPatterns.length === 0) {
+                    archive = true;
+
+                } else {
+                    // decide if we should archive the file
+
+                    // TODO: we should support glob patterns?
+                    if (filePatterns.indexOf(filename) > -1) {
+                        archive = true;
+                    } else {
+                        archive = false;
+
+                        // check for dir
+                        for (var j = 0; j < dirPatterns.length; j += 1) {
+                            if (filename.indexOf(dirPatterns[j]) === 0) {
+                                archive = true;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                if (archive) {
+                    // archive the given file
+                    resultArtifact.addFile(filename, fs.createReadStream(results[i]), function (err, hash) {
+                        remaining -= 1;
+
+                        if (err) {
+                            logger.error(err);
+                        } else {
+
+                        }
+
+                        if (remaining === 0) {
+                            resultArtifact.save(function (err, resultHash) {
+                                if (err) {
+                                    logger.error(err);
+                                    jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
+                                    return;
+                                } else {
+                                    // FIXME: This is synchronous
+                                    deleteFolderRecursive(directory);
+                                }
+
+                                jobInfo.resultHash = resultHash;
+                            });
+                        }
+
+                    });
+
+                } else {
+                    // skip it
                     remaining -= 1;
 
-                    if (err) {
-                        logger.error('Failed to add to blob ' + results[i]);
-                        logger.error(err);
-                    } else {
-
-                    }
-
-                    if (remaining === 0) {
-                        resultArtifact.save(function(err, resultHash) {
-                            if (err) {
-                                logger.error(err);
-                                jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
-                                return;
-                            } else {
-                                // FIXME: This is synchronous
-                                deleteFolderRecursive(directory);
-                            }
-
-                            jobInfo.resultHash = resultHash;
-                        });
-                    }
-
-                });
+                }
             }
         });
 
