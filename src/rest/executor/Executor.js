@@ -182,8 +182,6 @@ define(['logManager',
                                     if (error !== null) {
                                         logger.error('exec error: ' + error);
                                         jobInfo.status = 'FAILED';
-                                    } else {
-                                        jobInfo.status = 'SUCCESS';
                                     }
 
                                     // TODO: save stderr and stdout to files.
@@ -262,6 +260,9 @@ define(['logManager',
                                 }
 
                                 jobInfo.resultHash = resultHash;
+                                if (jobInfo.status === 'CREATED') {
+                                    jobInfo.status = 'SUCCESS';
+                                }
                             });
                         }
 

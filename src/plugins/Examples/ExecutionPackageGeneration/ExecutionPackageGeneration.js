@@ -125,20 +125,22 @@ define(['plugin/PluginConfig',
                 // FIXME: this will work only on client side...
                 var executorClient = new ExecutorClient();
 
-                executorClient.createJob(hash, function(err, jobInfo) {
+                executorClient.createJob(hash, function (err, jobInfo) {
                     // TODO: if err?
                     self.logger.debug(jobInfo);
 
-                    setTimeout(function () {
-                        // TODO: this should be called in a setTimeinterval until the job finishes.
+                    var intervalID = setInterval(function () {
                         executorClient.getInfo(hash, function (err, jInfo) {
                             // TODO: if err?
 
-                            self.logger.info(jInfo);
-
+                            self.logger.info(JSON.stringify(jInfo, null, 4));
+                            if (jInfo.status === 'CREATED') {
+                                // The job is still running..
+                                return;
+                            }
+                            clearInterval(intervalID);
                             // TODO: check status, failed?
                             if (jInfo.resultHash) {
-
                                 // TODO: assign hash to the model??
                                 self.logger.debug(jInfo.resultHash);
                                 self.result.addArtifact(jInfo.resultHash);
@@ -150,7 +152,7 @@ define(['plugin/PluginConfig',
 
                             callback(null, self.result);
                         });
-                    }, 2000);
+                    }, 20);
                 });
             });
         });
