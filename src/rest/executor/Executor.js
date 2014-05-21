@@ -4,8 +4,11 @@
  * http://localhost:8888/rest/external/executor/
  * http://localhost:8888/rest/external/executor/create/[validhash]
  *
+ * THIS IS A THROW AWAY CODE AND IMPLEMENTATION.
+ *
+ * TEMPORARY CODE AND IMPLEMENTATION.
+ *
  */
-
 
 define(['logManager',
     'blob/BlobRunPluginClient',
@@ -266,8 +269,17 @@ define(['logManager',
         if (url.length === 2) {
             //next should be always called / the response should be sent otherwise this thread will stop without and end
 
-            // TODO: send status
             res.send(jobList);
+
+            // TODO: send status
+            // FIXME: this path will not be safe
+//            res.sendfile(path.join('src', 'rest', 'executor', 'index2.html'), function (err) {
+//                if (err) {
+//                    logger.error(err);
+//                    res.send(500);
+//                }
+//            });
+
         } else {
 
             switch (url[1]) {
@@ -349,10 +361,14 @@ define(['logManager',
 
         var hash = url[2];
 
-        if (jobList.hasOwnProperty(hash)) {
-            res.send(jobList[hash]);
+        if (hash) {
+            if (jobList.hasOwnProperty(hash)) {
+                res.send(jobList[hash]);
+            } else {
+                res.send(500);
+            }
         } else {
-            res.send(500);
+            res.send(jobList);
         }
     };
 
