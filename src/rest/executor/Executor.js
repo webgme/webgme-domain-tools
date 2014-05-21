@@ -96,7 +96,7 @@ define(['logManager',
         self.blobClient.getMetadata(jobInfo.hash, function (err, metadata) {
             if (err) {
                 logger.error(err);
-                jobInfo.status = 'FAILED_TO_GET_SOURCE';
+                jobInfo.status = 'FAILED_TO_GET_SOURCE_METADATA';
                 return;
             }
 
@@ -116,7 +116,8 @@ define(['logManager',
             // download artifacts
             self.blobClient.getObject(jobInfo.hash, function (err, content) {
                 if (err) {
-                    // TODO: handle errors
+                    logger.error('Failed obtaining job source content, err: ' + err.toString());
+                    jobInfo.status = 'FAILED_SOURCE_COULD_NOT_BE_OBTAINED';
                     return;
                 }
 
@@ -129,7 +130,11 @@ define(['logManager',
                 var zipPath = path.join(jobDir, self.sourceFilename);
 
                 fs.writeFile(zipPath, content, function (err) {
-                    // TODO: handle errors
+                    if (err) {
+                        logger.error('Failed creating source zip-file, err: ' + err.toString());
+                        jobInfo.status = 'FAILED_CREATING_SOURCE_ZIP';
+                        return;
+                    }
 
                     // unzip downloaded file
 
@@ -146,7 +151,6 @@ define(['logManager',
                         // delete downloaded file
                         fs.unlinkSync(zipPath);
 
-                        // TODO: start job
                         var exec = child_process.exec;
 
                         jobInfo.startTime = new Date().toISOString();
@@ -154,13 +158,13 @@ define(['logManager',
                         // get cmd file dynamically from the this.executorConfigFilename file
                         fs.readFile(path.join(jobDir, self.executorConfigFilename), 'utf8', function (err, data) {
                             if (err) {
-                                logger.error(err);
+                                logger.error('Could not read ' + self.executorConfigFilename + ' err:' + err);
                                 jobInfo.status = 'FAILED_EXECUTOR_CONFIG';
-                                //return;
+                                return;
                             }
 
-//                            var executorConfig = JSON.parse(data);
-                            var cmd = 'run_jmodelica_model_exchange.cmd'; //executorConfig.cmd;
+                            var executorConfig = JSON.parse(data);
+                            var cmd = executorConfig.cmd;
 
                             logger.debug('working directory: ' + jobDir + ' executing: ' + cmd);
 
