@@ -6,8 +6,7 @@ define(['plugin/PluginConfig',
     'plugin/PluginBase',
     'ejs',
     'plugin/ExecutionPackageGeneration/ExecutionPackageGeneration/Templates/Templates',
-    'executor/ExecutorClient',
-    'jszip'], function (PluginConfig, PluginBase, ejs, TEMPLATES, ExecutorClient, JSZip) {
+    'executor/ExecutorClient'], function (PluginConfig, PluginBase, ejs, TEMPLATES, ExecutorClient) {
     'use strict';
 
     /**
@@ -128,26 +127,33 @@ define(['plugin/PluginConfig',
                     }
                     self.logger.debug(jobInfo);
                     atSucceedJob = function (jInfo) {
-                        self.blobClient.getObject(jInfo.resultHash, function (err, content) {
-                            var results = new JSZip(content),
-                                newName,
-                                key;
+                        self.blobClient.getMetadata(jInfo.resultHash, function (err, metaData) {
+                            var newNameJsonHash;
                             if (err) {
-                                return callback('Getting results_artifacts failed: ' + err.toString(), self.result);
+                                return callback('Getting results metadata failed: ' + err.toString(), self.result);
                             }
-                            newName = JSON.parse(results.file('new_name.json').asText());
-                            for (key in newName) {
-                                if (newName.hasOwnProperty(key)) {
-                                    self.core.setAttribute(self.activeNode, 'name', newName[key]);
+                            newNameJsonHash = metaData.content['new_name.json'].content;
+                            self.blobClient.getObject(newNameJsonHash, function (err, content) {
+                                var results,
+                                    newName,
+                                    key;
+                                if (err) {
+                                    return callback('Getting content failed: ' + err.toString(), self.result);
                                 }
-                            }
-                            self.result.addArtifact(jInfo.resultHash);
-                            self.result.setSuccess(true);
-                            self.save('Updated new name from execution', function (err) {
-                                callback(null, self.result);
+                                results = String.fromCharCode.apply(null, new Uint8Array(content));
+                                newName = JSON.parse(results);
+                                for (key in newName) {
+                                    if (newName.hasOwnProperty(key)) {
+                                        self.core.setAttribute(self.activeNode, 'name', newName[key]);
+                                    }
+                                }
+                                self.result.addArtifact(jInfo.resultHash);
+                                self.result.setSuccess(true);
+                                self.save('Updated new name from execution', function (err) {
+                                    callback(null, self.result);
+                                });
                             });
                         });
-
                     };
 
                     intervalID = setInterval(function () {
