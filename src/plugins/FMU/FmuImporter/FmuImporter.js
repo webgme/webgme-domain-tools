@@ -65,7 +65,7 @@ define(['plugin/PluginConfig',
                 "name": "UploadedArtifact",
                 "displayName": "FMUs",
                 "description": "Click and drag existing compiled FMU(s)",
-                "value": "",  // 51a66b969a18402f4be3a9e8d16abe205bb0a3ce
+                "value": "",  // 9b7ef4bba37a50e615c2fb039c432af4b82e405e sine + add3
                 "valueType": "asset",
                 "readOnly": false
             }
