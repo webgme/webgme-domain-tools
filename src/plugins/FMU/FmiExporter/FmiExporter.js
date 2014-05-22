@@ -7,7 +7,8 @@ define(['plugin/PluginConfig',
         'plugin/FmiExporter/FmiExporter/FMU',
         'plugin/FmiExporter/FmiExporter/tarjan',
         'plugin/FmiExporter/FmiExporter/Templates/Templates',
-        'ejs'], function (PluginConfig, PluginBase, FmuMetaTypes, Tarjan, TEMPLATES, ejs) {
+        'ejs',
+        'executor/ExecutorClient'], function (PluginConfig, PluginBase, FmuMetaTypes, Tarjan, TEMPLATES, ejs, ExecutorClient) {
     // PM: This change saves you one indent (or JSLint complaints for each method).
     'use strict';
 
@@ -70,11 +71,43 @@ define(['plugin/PluginConfig',
         return '0.1.0';
     };
 
+    /**
+     * Gets the configuration structure for the ExecutionPackageGeneration.
+     * The ConfigurationStructure defines the configuration for the plugin
+     * and will be used to populate the GUI when invoking the plugin from webGME.
+     * @returns {object} The version of the plugin.
+     * @public
+     */
+    FmiExporter.prototype.getConfigStructure = function () {
+        return [
+            {
+                'name': 'allFiles',
+                'displayName': 'Return all result files',
+                'description': 'Should the execution return all files?',
+                'value': false,
+                'valueType': 'boolean',
+                'readOnly': false
+            },
+            {
+                'name': 'runSimulation',
+                'displayName': "Run FMI Simulation",
+                'description': "Run FMI Model Exchange Simulation",
+                'value': false,
+                'valueType': 'boolean',
+                'readOnly': false            }
+        ];
+    };
+
     FmiExporter.prototype.main = function (callback) {
         var self = this,
             selectedNode = self.activeNode,
+            config = self.getCurrentConfig(),
             modelExchangeNode,
-            modelExchangeName;
+            modelExchangeName,
+            executor_config = {
+                cmd: 'run_jmodelica_model_exchange.cmd',
+                results: null
+            };
 
         if (!selectedNode) {
             callback('selectedNode is not defined', self.result);
@@ -91,6 +124,18 @@ define(['plugin/PluginConfig',
             callback('SelectedNode is not a ModelExchange!', self.result);
             return;
         }
+
+        if (config.allFiles) {
+            executor_config.results = { files: [], dirs: [] };
+        } else {
+            executor_config.results = {
+                files: [
+                    "jmodelica_model_exchange_py.log"
+                ],
+                dirs: ["Results"]
+            };
+        }
+
 
         var allNodesAreLoadedCallbackFunction = function (err) {
             if (err) {
@@ -109,18 +154,13 @@ define(['plugin/PluginConfig',
             self.modelExchangeConfig['PriorityMap'] = self.priorityMap;
             self.modelExchangeConfig['FMUs'] = self.pathToFmuInfo;
             self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
-            var fileInfo = JSON.stringify(self.modelExchangeConfig, null, 4);
 
-            var tt1 = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
-            var tt2 = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-            var tt3 = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-            var tt4 = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
-
-            self.filesToSave['model_exchange_config.json'] = fileInfo;
-            self.filesToSave['fmi_wrapper.py'] = tt1;
-            self.filesToSave['jmodelica_model_exchange.py'] = tt2;
-            self.filesToSave['run_jmodelica_model_exchange.cmd'] = tt3;
-            self.filesToSave['ReadMe.txt'] = tt4;
+            self.filesToSave['model_exchange_config.json'] = JSON.stringify(self.modelExchangeConfig, null, 4);
+            self.filesToSave['executor_config.json'] = JSON.stringify(executor_config, null, 4);
+            self.filesToSave['fmi_wrapper.py'] = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
+            self.filesToSave['jmodelica_model_exchange.py'] = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
+            self.filesToSave['run_jmodelica_model_exchange.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+            self.filesToSave['ReadMe.txt'] = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
 
             var addFilesCallback = function (err, fileHashes) {
                 if (err) {
@@ -154,27 +194,48 @@ define(['plugin/PluginConfig',
                         var artifactSaveCallback = function (err, artifactHash) {
                             if (err) {
                                 self.result.setSuccess(false);
-                                callback(err, self.result);
-                                return;
+                                return callback(err, self.result);
                             }
 
                             self.logger.info('Saved artifact hashes are: ' + artifactHash);
-
                             self.result.addArtifact(artifactHash);
 
-                            self.result.setSuccess(true);
-
-                            // This will save the changes. If you don't want to save;
-                            // exclude self.save and call callback directly from this scope.
-                            self.save('Finished FmiExporter', function (err) {
+                            var executorClient = new ExecutorClient(),
+                                createJobCallback = function (err, createdJobInfo) {
                                 if (err) {
-                                    self.result.setSuccess(false);
-                                    callback(err, self.result);
-                                    return;
+                                    return callback('Creating job failed: ' + err.toString(), self.result);
                                 }
+                                self.logger.debug(createdJobInfo);
 
-                                callback(null, self.result);
-                            });
+                                var onJobSuccess = function (jobInfo) {
+                                        self.result.addArtifact(jobInfo.resultHash);
+                                        self.result.setSuccess(true);
+                                        self.save("Simulation completed.", function (err) {
+                                            callback(null, self.result);
+                                        });
+
+                                    },
+                                    intervalId = setInterval(function () {
+                                        // Get the job-info at intervals and check for a non-CREATED status.
+                                        executorClient.getInfo(artifactHash, function (err, jInfo) {
+                                            self.logger.info(JSON.stringify(jInfo, null, 4));
+                                            if (jInfo.status === 'CREATED') {
+                                                // The job is still running...
+                                                return;
+                                            }
+
+                                            clearInterval(intervalId);
+                                            if (jInfo.status === 'SUCCESS') {
+                                                onJobSuccess(jInfo);
+                                            } else {
+                                                self.result.addArtifact(jInfo.resultHash);
+                                                callback('Job execution failed', self.result);
+                                            }
+                                        });
+                                    }, 400);
+                            };
+
+                            executorClient.createJob(artifactHash, createJobCallback)
                         };
 
                         artifact.save(artifactSaveCallback);
@@ -195,6 +256,63 @@ define(['plugin/PluginConfig',
 
         self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
     };
+
+//    FmiExporter.prototype.getPlotsAndUpdateModel = function (resultFileHash, callback) {
+//        var self = this;
+//
+//        var blobGetMetadataCallback = function (err, metadata) {
+//            if (err) {
+//                callback(err);
+//                return;
+//            }
+//
+//            var metadataContent = metadata.content;
+//
+//            var blobGetObjectCallback = function (err, objectContent) {
+//                if (err) {
+//                    callback(err);
+//                    return;
+//                }
+//
+//                var zip;
+//
+//                // TODO: what if the content is not a ZIP? TODO: check metadata
+//                zip = new JSZip(objectContent);
+//
+//                if (modelDescriptionXml === null) {
+//                    // we might have a zip with multiple fmus within
+//                    fmusWithinZip = zip.file(/\.fmu/);
+//                    numFmus = fmusWithinZip.length;
+//
+//                    for (i = 0; i < numFmus; i += 1) {
+//                        fmuObject = fmusWithinZip[i];
+//                        fmuContentName = fmuObject.name;
+//                        fmuContent = fmuObject.asArrayBuffer();
+//                        fmuAsZip = new JSZip(fmuContent);
+//                        fmuFileHash = metadataContent[fmuContentName].content;  // blob 'soft-link' hash
+//                        modelDescriptionXml = fmuAsZip.file("modelDescription.xml");
+//                        if (modelDescriptionXml != null) {
+//                            modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+//                            modelDescriptionMap[fmuFileHash] = modelDescriptionJson;
+//                        } else {
+//                            self.logger.error('Could not extract fmu modelDescription');
+//                            continue;
+//                        }
+//                    }
+//                } else {
+//                    modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
+//                    modelDescriptionMap[uploadedFileHash] = modelDescriptionJson;
+//                }
+//
+//
+//                callback(null, modelDescriptionMap);
+//            };
+//
+//            self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
+//        };
+//
+//        self.blobClient.getMetadata(uploadedFileHash, blobGetMetadataCallback);
+//    };
 
     FmiExporter.prototype.buildModelExchangeConfig = function () {
         var self = this,
