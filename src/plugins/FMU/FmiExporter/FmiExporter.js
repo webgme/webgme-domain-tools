@@ -136,7 +136,6 @@ define(['plugin/PluginConfig',
             };
         }
 
-
         var allNodesAreLoadedCallbackFunction = function (err) {
             if (err) {
                 var msg = 'Something went wrong getting loading child nodes';
@@ -147,8 +146,7 @@ define(['plugin/PluginConfig',
             self.buildModelExchangeConfig();
             self.runTarjansAlgorithm();
 
-            //=================================================================
-            var artifact = self.blobClient.createArtifact(modelExchangeName);
+            var executionArtifact = self.blobClient.createArtifact(modelExchangeName);
 
             self.modelExchangeConfig['Connections'] = self.connectionMap;
             self.modelExchangeConfig['PriorityMap'] = self.priorityMap;
@@ -191,73 +189,108 @@ define(['plugin/PluginConfig',
                             return;
                         }
 
-                        var artifactSaveCallback = function (err, artifactHash) {
+                        var artifactSaveCallback = function (err, executionArtifactHash) {
                             if (err) {
                                 self.result.setSuccess(false);
                                 return callback(err, self.result);
                             }
 
-                            self.logger.info('Saved artifact hashes are: ' + artifactHash);
-                            self.result.addArtifact(artifactHash);
+                            self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
+                            self.result.addArtifact(executionArtifactHash);
 
-                            var executorClient = new ExecutorClient(),
-                                createJobCallback = function (err, createdJobInfo) {
-                                if (err) {
-                                    return callback('Creating job failed: ' + err.toString(), self.result);
-                                }
-                                self.logger.debug(createdJobInfo);
+                            if (config.runSimulation) {
+                                var runSimulationCallback = function (err, simulationResultHash) {
+                                    if (err) {
+                                        self.result.setSuccess(false);
+                                        return callback(err, self.result);
+                                    }
 
-                                var onJobSuccess = function (jobInfo) {
-                                        self.result.addArtifact(jobInfo.resultHash);
-                                        self.result.setSuccess(true);
-                                        self.save("Simulation completed.", function (err) {
-                                            callback(null, self.result);
-                                        });
+                                    self.result.addArtifact(simulationResultHash);
+                                    self.result.setSuccess(true);
+                                    self.save("Simulation package generated.", function (err) {
+                                        callback(null, self.result);
+                                    });
+                                };
 
-                                    },
-                                    intervalId = setInterval(function () {
-                                        // Get the job-info at intervals and check for a non-CREATED status.
-                                        executorClient.getInfo(artifactHash, function (err, jInfo) {
-                                            self.logger.info(JSON.stringify(jInfo, null, 4));
-                                            if (jInfo.status === 'CREATED') {
-                                                // The job is still running...
-                                                return;
-                                            }
-
-                                            clearInterval(intervalId);
-                                            if (jInfo.status === 'SUCCESS') {
-                                                onJobSuccess(jInfo);
-                                            } else {
-                                                self.result.addArtifact(jInfo.resultHash);
-                                                callback('Job execution failed', self.result);
-                                            }
-                                        });
-                                    }, 400);
-                            };
-
-                            executorClient.createJob(artifactHash, createJobCallback)
+                                self.runSimulation(executionArtifactHash, runSimulationCallback);
+                            } else {
+                                self.result.setSuccess(true);
+                                self.save("Simulation package generated.", function (err) {
+                                    callback(null, self.result);
+                                });
+                            }
                         };
 
-                        artifact.save(artifactSaveCallback);
+                        executionArtifact.save(artifactSaveCallback);
                     }
                 };
 
                 for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
                     fmuPathWithinArtifact = fmuPackageHashMapKeys[i];
                     fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
-                    artifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+                    executionArtifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
                 }
             };
 
-            artifact.addFiles(self.filesToSave, addFilesCallback);
-            //=================================================================
-
+            executionArtifact.addFiles(self.filesToSave, addFilesCallback);
         };
 
         self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
     };
 
-//    FmiExporter.prototype.getPlotsAndUpdateModel = function (resultFileHash, callback) {
+    FmiExporter.prototype.runSimulation = function (executionPackageHash, callback) {
+        var self = this,
+            executorClient = new ExecutorClient(),
+            createJobCallback = function (err, createdJobInfo) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    return callback('Creating job failed: ' + err.toString(), self.result);
+                }
+                self.logger.debug(createdJobInfo);
+
+                var onJobSuccess = function (completedJobInfo) {
+                        var updateModelCallback = function (err) {
+                            if (err) {
+                                return callback(err, completedJobInfo.resultHash);
+                            }
+
+                            callback(null, completedJobInfo.resultHash);
+                        };
+
+                        callback(null, completedJobInfo.resultHash);
+                        //self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback)
+                    },
+                    intervalId = setInterval(function () {
+                        // Get the job-info at intervals and check for a non-CREATED status.
+
+                        var getInfoCallback = function (err, jobInfo) {
+                            if (err) {
+                                return callback(err, null);
+                            }
+
+                            self.logger.info(JSON.stringify(jobInfo, null, 4));
+                            if (jobInfo.status === 'CREATED') {
+                                // The job is still running...
+                                return;
+                            }
+
+                            clearInterval(intervalId);
+                            if (jobInfo.status === 'SUCCESS') {
+                                //callback(null, jobInfo.resultHash);
+                                onJobSuccess(jobInfo);
+                            } else {
+                                callback('Job execution failed', null);
+                            }
+                        };
+
+                        executorClient.getInfo(executionPackageHash, getInfoCallback);
+                    }, 400);
+            };
+
+        executorClient.createJob(executionPackageHash, createJobCallback)
+    };
+
+//    FmiExporter.prototype.updateModelResultAssets = function (resultFileHash, callback) {
 //        var self = this;
 //
 //        var blobGetMetadataCallback = function (err, metadata) {
