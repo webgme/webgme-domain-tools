@@ -195,9 +195,6 @@ define(['plugin/PluginConfig',
                                 return callback(err, self.result);
                             }
 
-                            self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
-                            self.result.addArtifact(executionArtifactHash);
-
                             if (config.runSimulation) {
                                 var runSimulationCallback = function (err, simulationResultHash) {
                                     if (err) {
@@ -214,8 +211,14 @@ define(['plugin/PluginConfig',
 
                                 self.runSimulation(modelExchangeNode, executionArtifactHash, runSimulationCallback);
                             } else {
-                                self.result.setSuccess(true);
+                                self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
+                                self.result.addArtifact(executionArtifactHash);
                                 self.save("Simulation package generated.", function (err) {
+                                    if (err) {
+                                        self.result.setSuccess(false);
+                                        callback(err, self.result);
+                                    }
+                                    self.result.setSuccess(true);
                                     callback(null, self.result);
                                 });
                             }
@@ -258,9 +261,8 @@ define(['plugin/PluginConfig',
                         };
 
                         self.core.setAttribute(modelExchangeNode, "results", completedJobInfo.resultHash);
-                        callback(null, completedJobInfo.resultHash);
 
-                        //self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
+                        self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
                     },
                     intervalId = setInterval(function () {
                         // Get the job-info at intervals and check for a non-CREATED status.
@@ -297,8 +299,7 @@ define(['plugin/PluginConfig',
 
         var blobGetMetadataCallback = function (err, metadata) {
             if (err) {
-                callback(err);
-                return;
+                return callback(err);
             }
 
             var metadataContent = metadata.content,
@@ -308,8 +309,7 @@ define(['plugin/PluginConfig',
                 objectPath,
                 plotFileName,
                 plotSoftLink,
-                nodeObject,
-                svgCount;
+                nodeObject;
 
             var ab2str_arraymanipulation = function (buf) {
                 var bufView = new Uint8Array(buf);
@@ -321,50 +321,27 @@ define(['plugin/PluginConfig',
             };
 
             var blobGetPlotMapObjectCallback = function (err, content) {
+                if (err) {
+                    return callback(err);
+                }
+
                 plotMapString = ab2str_arraymanipulation(content);
                 plotMap = JSON.parse(plotMapString);
-                svgCount = Object.keys(plotMap).length;
-
-                var setSvgCallback = function (fcoNode) {
-                    return function (err, plotMetadata) {
-                        if (plotMetadata.hasOwnProperty("content")) {
-                            self.core.setAttribute(nodeObject, "svg", plotMetadata.content);
-                            self.logger.debug("Set plot for " + self.core.getAttribute(fcoNode, "name"));
-                        }
-
-                        svgCount -= 1;
-
-                        if (svgCount === 0) {
-                            callback(null);
-                        }
-                    };
-                };
-
-//                var setSvgCallback = function (err, plotMetadata) {
-//                    nodeObject = self.path2node[objectPath];
-//                    if (plotMetadata.hasOwnProperty("content")) {
-//                        self.core.setAttribute(nodeObject, "svg", plotMetadata.content);
-//                        self.logger.debug("Set plot for " + self.core.getAttribute(nodeObject, "name"));
-//                    }
-//
-//                    svgCount -= 1;
-//
-//                    if (svgCount === 0) {
-//                        callback(null);
-//                    }
-//                };
 
                 for (objectPath in plotMap) {
                     if (plotMap.hasOwnProperty(objectPath) === false) {
-                        self.logger.error("Error with " + objectPath);
+                        self.logger.error("Could not set svg for " + objectPath);
+                        continue;
                     }
 
                     plotFileName = plotMap[objectPath];
                     plotSoftLink = metadataContent["Results/" + plotFileName].content;
                     nodeObject = self.path2node[objectPath];
-
-                    self.blobClient.getMetadata(plotSoftLink, setSvgCallback(nodeObject));
+                    self.core.setAttribute(nodeObject, "svg", plotSoftLink);
+                    self.logger.debug("Set svg for " + self.core.getAttribute(nodeObject, "name"));
                 }
+
+                callback(null);
             };
 
             self.blobClient.getObject(plotMapFileHash, blobGetPlotMapObjectCallback);
