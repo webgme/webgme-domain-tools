@@ -92,7 +92,7 @@ define(['plugin/PluginConfig',
                 'name': 'runSimulation',
                 'displayName': "Run FMI Simulation",
                 'description': "Run FMI Model Exchange Simulation",
-                'value': false,
+                'value': true,
                 'valueType': 'boolean',
                 'readOnly': false            }
         ];
@@ -212,7 +212,7 @@ define(['plugin/PluginConfig',
                                     });
                                 };
 
-                                self.runSimulation(executionArtifactHash, runSimulationCallback);
+                                self.runSimulation(modelExchangeNode, executionArtifactHash, runSimulationCallback);
                             } else {
                                 self.result.setSuccess(true);
                                 self.save("Simulation package generated.", function (err) {
@@ -238,7 +238,7 @@ define(['plugin/PluginConfig',
         self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
     };
 
-    FmiExporter.prototype.runSimulation = function (executionPackageHash, callback) {
+    FmiExporter.prototype.runSimulation = function (modelExchangeNode, executionPackageHash, callback) {
         var self = this,
             executorClient = new ExecutorClient(),
             createJobCallback = function (err, createdJobInfo) {
@@ -257,8 +257,10 @@ define(['plugin/PluginConfig',
                             callback(null, completedJobInfo.resultHash);
                         };
 
+                        self.core.setAttribute(modelExchangeNode, "results", completedJobInfo.resultHash);
                         callback(null, completedJobInfo.resultHash);
-                        //self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback)
+
+                        //self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
                     },
                     intervalId = setInterval(function () {
                         // Get the job-info at intervals and check for a non-CREATED status.
@@ -290,62 +292,86 @@ define(['plugin/PluginConfig',
         executorClient.createJob(executionPackageHash, createJobCallback)
     };
 
-//    FmiExporter.prototype.updateModelResultAssets = function (resultFileHash, callback) {
-//        var self = this;
-//
-//        var blobGetMetadataCallback = function (err, metadata) {
-//            if (err) {
-//                callback(err);
-//                return;
-//            }
-//
-//            var metadataContent = metadata.content;
-//
-//            var blobGetObjectCallback = function (err, objectContent) {
-//                if (err) {
-//                    callback(err);
-//                    return;
-//                }
-//
-//                var zip;
-//
-//                // TODO: what if the content is not a ZIP? TODO: check metadata
-//                zip = new JSZip(objectContent);
-//
-//                if (modelDescriptionXml === null) {
-//                    // we might have a zip with multiple fmus within
-//                    fmusWithinZip = zip.file(/\.fmu/);
-//                    numFmus = fmusWithinZip.length;
-//
-//                    for (i = 0; i < numFmus; i += 1) {
-//                        fmuObject = fmusWithinZip[i];
-//                        fmuContentName = fmuObject.name;
-//                        fmuContent = fmuObject.asArrayBuffer();
-//                        fmuAsZip = new JSZip(fmuContent);
-//                        fmuFileHash = metadataContent[fmuContentName].content;  // blob 'soft-link' hash
-//                        modelDescriptionXml = fmuAsZip.file("modelDescription.xml");
-//                        if (modelDescriptionXml != null) {
-//                            modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
-//                            modelDescriptionMap[fmuFileHash] = modelDescriptionJson;
-//                        } else {
-//                            self.logger.error('Could not extract fmu modelDescription');
-//                            continue;
-//                        }
+    FmiExporter.prototype.updateModelResultAssets = function (resultFileHash, callback) {
+        var self = this;
+
+        var blobGetMetadataCallback = function (err, metadata) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            var metadataContent = metadata.content,
+                plotMapFileHash = metadataContent["Results/plot_map.json"].content,
+                plotMapString,
+                plotMap,
+                objectPath,
+                plotFileName,
+                plotSoftLink,
+                nodeObject,
+                svgCount;
+
+            var ab2str_arraymanipulation = function (buf) {
+                var bufView = new Uint8Array(buf);
+                var unis = [];
+                for (var i = 0; i < bufView.length; i++) {
+                    unis.push(bufView[i]);
+                }
+                return String.fromCharCode.apply(null, unis);
+            };
+
+            var blobGetPlotMapObjectCallback = function (err, content) {
+                plotMapString = ab2str_arraymanipulation(content);
+                plotMap = JSON.parse(plotMapString);
+                svgCount = Object.keys(plotMap).length;
+
+                var setSvgCallback = function (fcoNode) {
+                    return function (err, plotMetadata) {
+                        if (plotMetadata.hasOwnProperty("content")) {
+                            self.core.setAttribute(nodeObject, "svg", plotMetadata.content);
+                            self.logger.debug("Set plot for " + self.core.getAttribute(fcoNode, "name"));
+                        }
+
+                        svgCount -= 1;
+
+                        if (svgCount === 0) {
+                            callback(null);
+                        }
+                    };
+                };
+
+//                var setSvgCallback = function (err, plotMetadata) {
+//                    nodeObject = self.path2node[objectPath];
+//                    if (plotMetadata.hasOwnProperty("content")) {
+//                        self.core.setAttribute(nodeObject, "svg", plotMetadata.content);
+//                        self.logger.debug("Set plot for " + self.core.getAttribute(nodeObject, "name"));
 //                    }
-//                } else {
-//                    modelDescriptionJson = self.convertXml2Json(modelDescriptionXml.asText());
-//                    modelDescriptionMap[uploadedFileHash] = modelDescriptionJson;
-//                }
 //
+//                    svgCount -= 1;
 //
-//                callback(null, modelDescriptionMap);
-//            };
-//
-//            self.blobClient.getObject(uploadedFileHash, blobGetObjectCallback);
-//        };
-//
-//        self.blobClient.getMetadata(uploadedFileHash, blobGetMetadataCallback);
-//    };
+//                    if (svgCount === 0) {
+//                        callback(null);
+//                    }
+//                };
+
+                for (objectPath in plotMap) {
+                    if (plotMap.hasOwnProperty(objectPath) === false) {
+                        self.logger.error("Error with " + objectPath);
+                    }
+
+                    plotFileName = plotMap[objectPath];
+                    plotSoftLink = metadataContent["Results/" + plotFileName].content;
+                    nodeObject = self.path2node[objectPath];
+
+                    self.blobClient.getMetadata(plotSoftLink, setSvgCallback(nodeObject));
+                }
+            };
+
+            self.blobClient.getObject(plotMapFileHash, blobGetPlotMapObjectCallback);
+        };
+
+        self.blobClient.getMetadata(resultFileHash, blobGetMetadataCallback);
+    };
 
     FmiExporter.prototype.buildModelExchangeConfig = function () {
         var self = this,
