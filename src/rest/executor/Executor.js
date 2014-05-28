@@ -17,8 +17,9 @@ define(['logManager',
     'fs',
     'path',
     'unzip',
-    'child_process'], function(logManager, BlobRunPluginClient, BlobFSBackend, BlobMetadata, fs, path, unzip, child_process) {
-
+    'child_process',
+    'minimatch'],
+    function (logManager, BlobRunPluginClient, BlobFSBackend, BlobMetadata, fs, path, unzip, child_process, minimatch) {
 
     var walk = function(dir, done) {
         var results = [];
@@ -198,43 +199,33 @@ define(['logManager',
     ExecutorBackend.prototype.saveJobResults = function (jobInfo, directory, executorConfig) {
         // TODO: list all files and subdirectories
 
-        var self = this;
-
-        var resultArtifact = self.blobClient.createArtifact(self.resultFilename);
+        var self = this,
+            patterns = executorConfig.resultPatterns instanceof Array ? executorConfig.resultPatterns : [],
+            resultArtifact = self.blobClient.createArtifact(self.resultFilename);
 
         walk(directory, function (err, results) {
-            var i,
-                remaining = results.length;
-
+            var i, j,
+                remaining = results.length,
+                archive = false,
+                filename;
             for (i = 0; i < results.length; i++) {
+                archive = false;
+                filename = path.relative(directory, results[i]).replace(/\\/g,'/');
 
-                var archive = true;
-                var filename = path.relative(directory, results[i]).replace(/\\/g,'/');
-
-                var filePatterns = executorConfig.results.files;
-                var dirPatterns = executorConfig.results.dirs;
-
-                if (filePatterns.length + dirPatterns.length === 0) {
+                if (patterns.length === 0) {
                     archive = true;
-
                 } else {
-                    // decide if we should archive the file
+                    // Decide if we should archive the file based on match to any of the patterns.
+                    for (j = 0; j < patterns.length; j += 1) {
 
-                    // TODO: we should support glob patterns?
-                    if (filePatterns.indexOf(filename) > -1) {
-                        archive = true;
-                    } else {
-                        archive = false;
-
-                        // check for dir
-                        for (var j = 0; j < dirPatterns.length; j += 1) {
-                            if (filename.indexOf(dirPatterns[j]) === 0) {
-                                archive = true;
-                                break;
-                            }
+                        var matched = minimatch(filename, patterns[j]);
+                        //console.log('filename: "' + filename + '", pattern: "' + patterns[j] + '"');
+                        //console.log('Match : ' + matched.toString());
+                        if (matched) {
+                            archive = true;
+                            break;
                         }
                     }
-
                 }
 
                 if (archive) {

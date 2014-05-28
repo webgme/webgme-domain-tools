@@ -88,7 +88,7 @@ define(['plugin/PluginConfig',
             activeNodePath = self.core.getPath(self.activeNode),
             executor_config = {
                 cmd: 'C:/Python27/python.exe ' + 'generate_name.py ' + activeNodePath,
-                results: null
+                resultPatterns: ['new_name.json', 'log/**/*']
             },
             filesToAdd = {
                 'generate_name.py': ejs.render(TEMPLATES['generate_name.py.ejs'])
@@ -96,13 +96,9 @@ define(['plugin/PluginConfig',
             artifact = self.blobClient.createArtifact('executionFiles');
 
         if (config.allFiles) {
-            executor_config.results = { files: [], dirs: [] };
-        } else {
-            executor_config.results = {
-                files: ['new_name.json'],
-                dirs: ['log']
-            };
+            executor_config.resultPatterns = null;
         }
+
         filesToAdd['executor_config.json'] = JSON.stringify(executor_config, null, 4);
         artifact.addFiles(filesToAdd, function (err) {
             if (err) {

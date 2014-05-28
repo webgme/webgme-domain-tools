@@ -9,7 +9,8 @@
     "dependencies": {
         "webgme": "https://github.com/webgme/webgme/tarball/master",
         "requirejs": "=2.1.11",
-        "unzip": "=0.1.8"
+        "unzip": "=0.1.8",
+        "minimatch": ">=0.3.0"
     },
     "devDependencies": {
         "mocha": ">=1.17.1",
