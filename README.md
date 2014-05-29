@@ -2,7 +2,7 @@
 
 Domain specific tools for WebGME.
 
-* Install nodejs
+* Install nodejs.
 * Install mongodb _if_ you use a local database (not always necessary)
 * Clone the repository (requires some git client)
 * Install dependencies `npm install` (requires nodejs)
