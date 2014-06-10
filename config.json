@@ -16,7 +16,8 @@
         "./src/plugins/FMU",
         "./src/plugins/PetriNet",
         "./src/plugins/LogicGates",
-        "./src/plugins/TestCore"
+        "./src/plugins/TestCore",
+        "./src/plugins/PortHamiltonianSystem"
     ],
 
     "rextrast": {
