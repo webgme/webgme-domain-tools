@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import logging
+import time
 
 ## Setup a logger
 # Create logger with 'spam_application'.
@@ -38,3 +39,8 @@ if __name__ == '__main__':
     with open('new_name.json', 'wb') as f_out:
         json.dump({active_node_path: 'ThisIsANewName'}, f_out)
     logger.info('created new_name.json')
+    logger.info('Going to sleep for {0} seconds.. zzZzZZ'.format(<%=sleepTime%>))
+    time.sleep(<%=sleepTime%>)
+    logger.info('Good Morning!')
+    logger.info('Will exit with code {0}'.format(<%=exitCode%>))
+    sys.exit(<%=exitCode%>)
