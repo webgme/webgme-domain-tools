@@ -114,7 +114,7 @@ define(['plugin/PluginConfig',
         var self = this,
             config = self.getCurrentConfig(),
             exitCode = config.success ? 0 : 1,
-            activeNodePath = self.core.getPath(self.activeNode),
+            activeNodePath = self.activeNode ? self.core.getPath(self.activeNode) : 'dummy',
             executor_config = {
                 cmd: 'C:/Python27/python.exe ' + 'generate_name.py ' + activeNodePath,
                 resultPatterns: ['new_name.json', 'log/**/*']
