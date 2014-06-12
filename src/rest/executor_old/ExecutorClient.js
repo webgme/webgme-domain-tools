@@ -27,7 +27,7 @@ define([], function () {
         }
 
         // TODO: TOKEN???
-        this.executorUrl = '/rest/external/executor_old/'; // TODO: any ways to ask for this or get it from the configuration?
+        this.executorUrl = '/rest/external/executor/'; // TODO: any ways to ask for this or get it from the configuration?
     };
 
     ExecutorClient.prototype.getInfoURL = function (hash) {

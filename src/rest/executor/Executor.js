@@ -16,6 +16,7 @@
 //console.log(require.s.contexts)
 //require('nedb');
 //console.log(require.s.contexts._.config.paths)
+    /*
 var reqTwoo = require.config({
     context: "version2",
     paths: require.s.contexts._.config.paths,
@@ -29,10 +30,9 @@ var reqTwo = require.config({
     baseUrl: "C:\\Users\\kevin\\Documents\\META\\WebGME\\node_modules\\webgme-domain-tools\\",
     nodeRequire: require,
 });
-
+*/
 //reqTwo
-require
-(['logManager',
+define(['logManager',
     'blob/BlobRunPluginClient',
     'blob/BlobFSBackend',
     'blob/BlobMetadata',
@@ -40,8 +40,8 @@ require
     'path',
     'unzip',
     'child_process',
-    'minimatch',
-    'nedb'
+    'minimatch'
+    //'nedb'
     ],
     function (logManager, BlobRunPluginClient, BlobFSBackend, BlobMetadata, fs, path, unzip, child_process, minimatch, Datastore) {
 

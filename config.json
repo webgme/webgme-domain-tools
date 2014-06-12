@@ -21,7 +21,7 @@
     ],
 
     "rextrast": {
-        "executor": "./src/rest/executor/Executor"
+        "executor": "./src/rest/executor/Executor_old123"
     },
 
     "paths": {
