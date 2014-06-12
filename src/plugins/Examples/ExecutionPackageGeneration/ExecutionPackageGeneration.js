@@ -114,9 +114,8 @@ define(['plugin/PluginConfig',
         var self = this,
             config = self.getCurrentConfig(),
             exitCode = config.success ? 0 : 1,
-            activeNodePath = self.activeNode ? self.core.getPath(self.activeNode) : 'dummy',
             executor_config = {
-                cmd: 'C:/Python27/python.exe ' + 'generate_name.py ' + activeNodePath,
+                cmd: 'C:/Python27/python.exe ' + 'generate_name.py ',
                 resultPatterns: ['new_name.json', 'log/**/*']
             },
             filesToAdd = {
@@ -126,6 +125,14 @@ define(['plugin/PluginConfig',
                 })
             },
             artifact = self.blobClient.createArtifact('executionFiles');
+        if (config.update) {
+            if (!self.activeNode) {
+                return callback('No activeNode specified! Set update to false or provide one.', self.result);
+            }
+            executor_config.cmd += self.core.getPath(self.activeNode);
+        } else {
+            executor_config.cmd += 'dummy';
+        }
 
         if (config.allFiles) {
             executor_config.resultPatterns = null;
@@ -176,12 +183,17 @@ define(['plugin/PluginConfig',
                                             self.core.setAttribute(self.activeNode, 'name', newName[key]);
                                         }
                                     }
-                                }
-                                self.result.addArtifact(jInfo.resultHash);
-                                self.result.setSuccess(true);
-                                self.save('Updated new name from execution', function (err) {
+                                    self.result.addArtifact(jInfo.resultHash);
+                                    self.result.setSuccess(true);
+                                    self.save('Updated new name from execution', function (err) {
+                                        callback(null, self.result);
+                                    });
+                                } else {
+                                    self.result.addArtifact(jInfo.resultHash);
+                                    self.result.setSuccess(true);
                                     callback(null, self.result);
-                                });
+                                }
+
                             });
                         });
                     };

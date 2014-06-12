@@ -7,9 +7,24 @@
  *
  */
 
+var isNode = (typeof window === 'undefined');
+
 define([], function () {
 
     var ExecutorClient = function () {
+
+        //console.log(isNode);
+
+        if (isNode) {
+            var config = webGMEGlobal.getConfig();
+            this.server = '127.0.0.1';
+            this.serverPort = config.port;
+            this.httpsecure = config.httpsecure;
+
+            this._clientSession = null; // parameters.sessionId;;
+
+            this.http = this.httpsecure ? require('https') : require('http'); // or https
+        }
 
         // TODO: TOKEN???
         this.executorUrl = '/rest/external/executor_old/'; // TODO: any ways to ask for this or get it from the configuration?
@@ -35,45 +50,123 @@ define([], function () {
     };
 
     ExecutorClient.prototype.createJob = function (hash, callback) {
-        var oReq = new XMLHttpRequest();
-        oReq.open("POST", this.getCreateURL(hash), true);
-        oReq.onload = function (oEvent) {
-            // Uploaded.
-            var response = JSON.parse(oEvent.target.response);
-            callback(null, response);
-        };
+        this.sendHttpRequest('POST', this.getCreateURL(hash), function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
 
-        // data is a file object or blob
-        oReq.send();
+            callback(null, JSON.parse(response));
+        });
     };
 
 
     ExecutorClient.prototype.getInfo = function (hash, callback) {
-        var oReq = new XMLHttpRequest();
-        oReq.open("GET", this.getInfoURL(hash), true);
-        oReq.onload = function (oEvent) {
-            // Uploaded.
-            var response = JSON.parse(oEvent.target.response);
-            // TODO: handle error
-            callback(null, response);
-        };
 
-        // data is a file object or blob
-        oReq.send();
+        this.sendHttpRequest('GET', this.getInfoURL(hash), function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            callback(null, JSON.parse(response));
+        });
     };
 
     ExecutorClient.prototype.getAllInfo = function (callback) {
-        var oReq = new XMLHttpRequest();
-        oReq.open("GET", this.getInfoURL(), true);
-        oReq.onload = function (oEvent) {
-            // Uploaded.
-            var response = JSON.parse(oEvent.target.response);
-            // TODO: handle error
-            callback(null, response);
-        };
 
-        // data is a file object or blob
-        oReq.send();
+        this.sendHttpRequest('GET', this.getInfoURL(), function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            callback(null, JSON.parse(response));
+        });
+    };
+
+    ExecutorClient.prototype.sendHttpRequest = function (method, url, callback) {
+
+        if (isNode) {
+            var options = {
+                hostname: this.server,
+                port: this.serverPort,
+                path: url,
+                method: method
+            };
+
+            this._sendHttpRequestWithContent(options, null, callback);
+
+        } else {
+            var oReq = new XMLHttpRequest();
+            oReq.open(method, url, true);
+            oReq.onload = function (oEvent) {
+                // Uploaded.
+                var response = oEvent.target.response;
+                // TODO: handle error
+                callback(null, response);
+            };
+
+            // data is a file object or blob
+            oReq.send();
+        }
+    };
+
+    ExecutorClient.prototype._ensureAuthenticated = function (options, callback) {
+        //this function enables the session of the client to be authenticated
+        //TODO currently this user does not have a session, so it has to upgrade the options always!!!
+//        if (options.headers) {
+//            options.headers.webgmeclientsession = this._clientSession;
+//        } else {
+//            options.headers = {
+//                'webgmeclientsession': this._clientSession
+//            }
+//        }
+        callback(null, options);
+    };
+
+
+    ExecutorClient.prototype._sendHttpRequestWithContent = function (options, data, callback) {
+        var self = this;
+        self._ensureAuthenticated(options, function (err, updatedOptions) {
+            if (err) {
+                callback(err);
+            } else {
+                self.__sendHttpRequestWithContent(updatedOptions, data, callback);
+            }
+        });
+    };
+
+    ExecutorClient.prototype.__sendHttpRequestWithContent = function (options, data, callback) {
+        // TODO: use the http or https
+        var req = this.http.request(options, function (res) {
+            //    console.log('STATUS: ' + res.statusCode);
+            //    console.log('HEADERS: ' + JSON.stringify(res.headers));
+            //    res.setEncoding('utf8');
+            var d = '';
+            res.on('data', function (chunk) {
+                d += chunk;
+            });
+
+            res.on('end', function () {
+                if (res.statusCode === 200) {
+                    callback(null, d);
+                } else {
+                    callback(res.statusCode, d);
+                }
+            });
+        });
+
+        req.on('error', function (e) {
+            callback(e);
+        });
+
+        if (data) {
+            // write data to request body
+            req.write(data);
+        }
+
+        req.end();
     };
 
     return ExecutorClient;
