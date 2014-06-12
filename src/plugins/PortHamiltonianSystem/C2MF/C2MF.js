@@ -64,23 +64,94 @@ define(['plugin/PluginConfig',
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
         var self = this,
-            componentInfo,
-            mFileString = '';
+            mFileString,
+            mFileName,
+            getComponentInfoCallback,
+            artifact,
+            filesToAdd = {},
+            addFilesCallback;
 
         self.updateMETA(self.metaTypes);
 
-        componentInfo = self.getElementsAndConnections(self.activeNode);
-
-        for (var id in componentInfo.elements) {
-            var element = componentInfo.elements[id];
-            for (var key in element) {
-                var value = element[key];
-                // add the (key, value) info to to the mFileString
+        getComponentInfoCallback = function (err, componentInfo) {
+            if (err) {
+                self.result.setSuccess(false);
+                return callback(err, self.result);
             }
-        }
+
+            mFileString = self.buildMatlabScript(componentInfo);
+            mFileName = componentInfo.name + '.m';
+
+            filesToAdd[mFileName] = mFileString;
+
+            artifact = self.blobClient.createArtifact(componentInfo.name);
+
+            addFilesCallback = function (err, fileHashes) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    return callback(err, self.result);
+                }
+
+                var artifactSaveCallback = function (err, artifactHash) {
+                    if (err) {
+                        self.result.setSuccess(false);
+                        return callback(err, self.result);
+                    }
+
+                    self.result.setSuccess(true);
+                    self.result.addArtifact(artifactHash);
+                    callback(null, self.result);
+                };
+
+                artifact.save(artifactSaveCallback);
+            }
+
+            artifact.addFiles(filesToAdd, addFilesCallback);
+        };
+
+        self.getComponentInfo(self.activeNode, getComponentInfoCallback);
     };
 
-    C2MF.prototype.getElementsAndConnections = function (componentNode, errors, callback) {
+    C2MF.prototype.buildMatlabScript = function (componentInfo) {
+        var self = this,
+            mFileString = '',
+            itemNumber,
+            element,
+            key,
+            value,
+            bond;
+
+        for (itemNumber in componentInfo.elements) {
+            element = componentInfo.elements[itemNumber];
+            for (key in element) {
+                value = element[key];
+
+                if (typeof value === 'number') {
+                    mFileString += 'element(' + itemNumber + ').' + key + ' = ' + value + ';';
+                } else {
+                    mFileString += 'element(' + itemNumber + ').' + key + ' = \'' + value + '\';';
+                }
+
+                mFileString += '\n';
+            }
+
+            mFileString += '\n';
+        }
+
+        for (itemNumber in componentInfo.bonds) {
+            bond = componentInfo.bonds[itemNumber];
+
+            mFileString += 'bond(' + itemNumber + ').src = \'' + bond.src + '\';';
+            mFileString += '\n';
+            mFileString += 'bond(' + itemNumber + ').dst = \'' + bond.dst + '\';';
+
+            mFileString += '\n\n';
+        }
+
+        return mFileString;
+    };
+
+    C2MF.prototype.getComponentInfo = function (componentNode, callback) {
         var self = this,
             childNode,
             metaNode,
@@ -91,13 +162,14 @@ define(['plugin/PluginConfig',
             elementCount = 0,
             bondCount = 0,
             componentInfo = {
+                name: self.core.getAttribute(componentNode, 'name'),
                 elements: {},
                 bonds: {}
             };
 
         loadChildrenCallbackFunction = function (err, children) {
             if (err) {
-                callback(err);
+                callback(err, null);
             }
 
             for (var i = 0; i < children.length; i += 1) {
@@ -117,12 +189,12 @@ define(['plugin/PluginConfig',
                 } else {
                     elementCount += 1;
                     element = {
-                        ID: self.core.getPath(childNode),
+                        ID: self.core.getGuid(childNode),
                         Name: self.core.getAttribute(childNode, 'name'),
                         Type: metaName,
                         Equation: 'N/A',
-                        Ratio: 0,
-                        Bond: ''
+                        Ratio: 0
+                        //Bond: ''
                     };
 
                     if (metaNode === self.metaTypes.ControlPort ||
@@ -132,14 +204,14 @@ define(['plugin/PluginConfig',
                     }
                     if (metaNode === self.metaTypes.Gyrator ||
                         metaNode === self.metaTypes.Transformer) {
-                        element.Ratio = self.core.getAttribute(childNode, 'Ratio');
+                        element.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
                     }
 
                     componentInfo.elements[elementCount] = element;
                 }
             }
 
-            return componentInfo;
+            callback(null, componentInfo);
         };
 
         self.core.loadChildren(componentNode, loadChildrenCallbackFunction);
