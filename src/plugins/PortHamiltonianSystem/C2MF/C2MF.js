@@ -67,46 +67,56 @@ define(['plugin/PluginConfig',
             mFileString,
             mFileName,
             getComponentInfoCallback,
-            artifact,
-            filesToAdd = {},
+            resultArtifact,
+            generatedFilesToAdd = {},
             addFilesCallback;
 
         self.updateMETA(self.metaTypes);
 
+        if (self.isMetaTypeOf(self.activeNode, MetaTypes.Component) === false) {
+            self.createMessage(self.activeNode, 'SelectedNode is not a Component!');
+            return callback(null, self.result);
+        }
+
         getComponentInfoCallback = function (err, componentInfo) {
             if (err) {
                 self.result.setSuccess(false);
+                var msg = 'Failed to get component info from ' + self.core.getName(self.activeNode);
+                self.createMessage(self.activeNode, msg);
                 return callback(err, self.result);
             }
 
             mFileString = self.buildMatlabScript(componentInfo);
             mFileName = componentInfo.name + '.m';
 
-            filesToAdd[mFileName] = mFileString;
+            generatedFilesToAdd[mFileName] = mFileString;
 
-            artifact = self.blobClient.createArtifact(componentInfo.name);
+            resultArtifact = self.blobClient.createArtifact(componentInfo.name);
 
             addFilesCallback = function (err, fileHashes) {
                 if (err) {
                     self.result.setSuccess(false);
+                    self.createMessage(self.activeNode, 'Failed to add files to result artifact.');
                     return callback(err, self.result);
                 }
 
                 var artifactSaveCallback = function (err, artifactHash) {
                     if (err) {
                         self.result.setSuccess(false);
+                        self.createMessage(self.activeNode, 'Failed to save result artifact.');
                         return callback(err, self.result);
                     }
 
                     self.result.setSuccess(true);
+                    self.createMessage(self.activeNode, 'Generated .m-file for ' + componentInfo.name);
                     self.result.addArtifact(artifactHash);
                     callback(null, self.result);
                 };
 
-                artifact.save(artifactSaveCallback);
+                resultArtifact.save(artifactSaveCallback);
             }
 
-            artifact.addFiles(filesToAdd, addFilesCallback);
+            resultArtifact.addFiles(generatedFilesToAdd, addFilesCallback);
         };
 
         self.getComponentInfo(self.activeNode, getComponentInfoCallback);
@@ -115,103 +125,157 @@ define(['plugin/PluginConfig',
     C2MF.prototype.buildMatlabScript = function (componentInfo) {
         var self = this,
             mFileString = '',
-            itemNumber,
+            nodePath,
+            itemNumber = 1,
             element,
-            key,
-            value,
+            propertyName,
+            propertyValue,
             bond;
 
-        for (itemNumber in componentInfo.elements) {
-            element = componentInfo.elements[itemNumber];
-            for (key in element) {
-                value = element[key];
+        for (nodePath in componentInfo.elements) {
+            element = componentInfo.elements[nodePath];
 
-                if (typeof value === 'number') {
-                    mFileString += 'element(' + itemNumber + ').' + key + ' = ' + value + ';';
+            mFileString += '%% WebGmePath = ' + nodePath;
+            mFileString += '\n';
+
+            for (propertyName in element) {
+                propertyValue = element[propertyName];
+
+                if (propertyName === 'Bond') {
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = [\'';
+                    mFileString += propertyValue.join('\',\'');
+                    mFileString += '\']';
+                } else if (typeof propertyValue === 'number') {
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = ' + propertyValue + ';';
                 } else {
-                    mFileString += 'element(' + itemNumber + ').' + key + ' = \'' + value + '\';';
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = \'' + propertyValue + '\';';
                 }
 
                 mFileString += '\n';
             }
 
+            itemNumber += 1;
             mFileString += '\n';
         }
 
-        for (itemNumber in componentInfo.bonds) {
-            bond = componentInfo.bonds[itemNumber];
+        itemNumber = 1;
 
+        for (nodePath in componentInfo.bonds) {
+            bond = componentInfo.bonds[nodePath];
+
+            mFileString += '%% WebGmePath = ' + nodePath;
+            mFileString += '\n';
+            mFileString += 'bond(' + itemNumber + ').ID = \'' + bond.ID + '\';';
+            mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').src = \'' + bond.src + '\';';
             mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').dst = \'' + bond.dst + '\';';
 
+            itemNumber += 1;
             mFileString += '\n\n';
         }
 
         return mFileString;
     };
 
+    C2MF.prototype.createNewElementObject = function () {
+        return {
+            ID: '',
+            Name: '',
+            Type: '',
+            Equation: 'N/A',
+            Ratio: 0,
+            Bond: []
+        };
+    };
+
     C2MF.prototype.getComponentInfo = function (componentNode, callback) {
         var self = this,
             childNode,
-            metaNode,
-            metaName,
+            nodePath,
+            nodeGuid,
+            metaTypeNode,
+            metaTypeName,
             loadChildrenCallbackFunction,
-            element,
-            bond,
-            elementCount = 0,
-            bondCount = 0,
-            componentInfo = {
-                name: self.core.getAttribute(componentNode, 'name'),
-                elements: {},
-                bonds: {}
-            };
+            bondNodes = [],
+            elementObject,
+            bondObject,
+            bondSrcNodePath,
+            bondDstNodePath,
+            path2elementMap = {},
+            path2bondMap = {},
+            i;
 
         loadChildrenCallbackFunction = function (err, children) {
             if (err) {
                 callback(err, null);
             }
 
-            for (var i = 0; i < children.length; i += 1) {
+            for (i = 0; i < children.length; i += 1) {
                 childNode = children[i];
-                metaNode = self.getMetaType(childNode);
-                metaName = self.core.getAttribute(metaNode, 'name');
+                metaTypeNode = self.getMetaType(childNode);
+                metaTypeName = self.core.getAttribute(metaTypeNode, 'name');
 
-                //if (metaNode === self.metaTypes.ComponentConnection) {
                 if (self.isMetaTypeOf(childNode, self.metaTypes.ComponentConnection)) {
-                    bondCount += 1;
-                    bond = {
-                        src: self.core.getPointerPath(childNode, 'src'),
-                        dst: self.core.getPointerPath(childNode, 'dst')
-                    };
-
-                    componentInfo.bonds[bondCount] = bond;
+                    // defer bond nodes; handle them after element node info is complete
+                    bondNodes.push(childNode);
                 } else {
-                    elementCount += 1;
-                    element = {
-                        ID: self.core.getGuid(childNode),
-                        Name: self.core.getAttribute(childNode, 'name'),
-                        Type: metaName,
-                        Equation: 'N/A',
-                        Ratio: 0
-                        //Bond: ''
-                    };
+                    nodePath = self.core.getPath(childNode);
+                    nodeGuid = self.core.getGuid(childNode);
 
-                    if (metaNode === self.metaTypes.ControlPort ||
-                        metaNode === self.metaTypes.ResistivePort ||
-                        metaNode === self.metaTypes.StoragePort) {
-                        element.Equation = self.core.getAttribute(childNode, 'Equation');
+                    elementObject = self.createNewElementObject();
+                    elementObject.ID = self.core.getGuid(childNode);
+                    elementObject.Name = self.core.getAttribute(childNode, 'name');
+                    elementObject.Type = metaTypeName;
+
+                    if (metaTypeNode === self.metaTypes.ControlPort ||
+                        metaTypeNode === self.metaTypes.ResistivePort ||
+                        metaTypeNode === self.metaTypes.StoragePort) {
+                        elementObject.Equation = self.core.getAttribute(childNode, 'Equation');
                     }
-                    if (metaNode === self.metaTypes.Gyrator ||
-                        metaNode === self.metaTypes.Transformer) {
-                        element.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
+                    if (metaTypeNode === self.metaTypes.Gyrator ||
+                        metaTypeNode === self.metaTypes.Transformer) {
+                        elementObject.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
                     }
 
-                    componentInfo.elements[elementCount] = element;
+                    path2elementMap[nodePath] = elementObject;
                 }
             }
 
-            callback(null, componentInfo);
+            for (i = 0; i < bondNodes.length; i += 1) {
+                childNode = bondNodes[i];
+
+                nodePath = self.core.getPath(childNode);
+                nodeGuid = self.core.getGuid(childNode);
+                bondSrcNodePath = self.core.getPointerPath(childNode, 'src');
+                bondDstNodePath = self.core.getPointerPath(childNode, 'dst');
+
+                bondObject = {};
+
+                bondObject.ID = nodeGuid;
+
+                if (path2elementMap.hasOwnProperty(bondSrcNodePath)) {
+                    path2elementMap[bondSrcNodePath].Bond.push(nodeGuid);
+                    bondObject.src = path2elementMap[bondSrcNodePath].ID;
+                } else {
+                    bondObject.src = 'error: ' + bondSrcNodePath;
+                }
+
+                if (path2elementMap.hasOwnProperty(bondDstNodePath)) {
+                    path2elementMap[bondDstNodePath].Bond.push(nodeGuid);
+                    bondObject.dst = path2elementMap[bondDstNodePath].ID;
+                } else {
+                    bondObject.dst = 'error: ' + bondDstNodePath;
+                }
+
+                path2bondMap[nodePath] = bondObject;
+            }
+
+            callback(null, {
+                name: self.core.getAttribute(componentNode, 'name'),
+                elements: path2elementMap,
+                bonds: path2bondMap
+            });
         };
 
         self.core.loadChildren(componentNode, loadChildrenCallbackFunction);
