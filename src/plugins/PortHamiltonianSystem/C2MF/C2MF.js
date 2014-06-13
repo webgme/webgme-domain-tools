@@ -115,18 +115,27 @@ define(['plugin/PluginConfig',
     C2MF.prototype.buildMatlabScript = function (componentInfo) {
         var self = this,
             mFileString = '',
-            itemNumber,
+            itemPath,
+            itemNumber = 1,
             element,
             key,
             value,
             bond;
 
-        for (itemNumber in componentInfo.elements) {
-            element = componentInfo.elements[itemNumber];
+        for (itemPath in componentInfo.elements) {
+            element = componentInfo.elements[itemPath];
+
+            mFileString += '%% WebGmePath = ' + itemPath;
+            mFileString += '\n';
+
             for (key in element) {
                 value = element[key];
 
-                if (typeof value === 'number') {
+                if (key === 'Bond') {
+                    mFileString += 'element(' + itemNumber + ').' + key + ' = [\'';
+                    mFileString += value.join('\',\'');
+                    mFileString += '\']';
+                } else if (typeof value === 'number') {
                     mFileString += 'element(' + itemNumber + ').' + key + ' = ' + value + ';';
                 } else {
                     mFileString += 'element(' + itemNumber + ').' + key + ' = \'' + value + '\';';
@@ -135,67 +144,79 @@ define(['plugin/PluginConfig',
                 mFileString += '\n';
             }
 
+            itemNumber += 1;
             mFileString += '\n';
         }
 
-        for (itemNumber in componentInfo.bonds) {
-            bond = componentInfo.bonds[itemNumber];
+        itemNumber = 1;
 
+        for (itemPath in componentInfo.bonds) {
+            bond = componentInfo.bonds[itemPath];
+
+            mFileString += '%% WebGmePath = ' + itemPath;
+            mFileString += '\n';
+            mFileString += 'bond(' + itemNumber + ').ID = \'' + bond.ID + '\';';
+            mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').src = \'' + bond.src + '\';';
             mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').dst = \'' + bond.dst + '\';';
 
+            itemNumber += 1;
             mFileString += '\n\n';
         }
 
         return mFileString;
     };
 
+    C2MF.prototype.createElementObject = function () {
+        return {
+            ID: '',
+            Name: '',
+            Type: '',
+            Equation: 'N/A',
+            Ratio: 0,
+            //Bond: ''
+            Bond: []
+        };
+    };
+
     C2MF.prototype.getComponentInfo = function (componentNode, callback) {
         var self = this,
             childNode,
+            path,
+            guid,
             metaNode,
             metaName,
             loadChildrenCallbackFunction,
+            bondNodes = [],
             element,
             bond,
-            elementCount = 0,
-            bondCount = 0,
-            componentInfo = {
-                name: self.core.getAttribute(componentNode, 'name'),
-                elements: {},
-                bonds: {}
-            };
+            bondSrcPath,
+            bondDstPath,
+            elements = {},
+            bonds = {},
+            i;
 
         loadChildrenCallbackFunction = function (err, children) {
             if (err) {
                 callback(err, null);
             }
 
-            for (var i = 0; i < children.length; i += 1) {
+            for (i = 0; i < children.length; i += 1) {
                 childNode = children[i];
                 metaNode = self.getMetaType(childNode);
                 metaName = self.core.getAttribute(metaNode, 'name');
 
-                //if (metaNode === self.metaTypes.ComponentConnection) {
                 if (self.isMetaTypeOf(childNode, self.metaTypes.ComponentConnection)) {
-                    bondCount += 1;
-                    bond = {
-                        src: self.core.getPointerPath(childNode, 'src'),
-                        dst: self.core.getPointerPath(childNode, 'dst')
-                    };
-
-                    componentInfo.bonds[bondCount] = bond;
+                    bondNodes.push(childNode);
                 } else {
-                    elementCount += 1;
-                    element = {
-                        ID: self.core.getGuid(childNode),
-                        Name: self.core.getAttribute(childNode, 'name'),
-                        Type: metaName,
-                        Equation: 'N/A',
-                        Ratio: 0
-                        //Bond: ''
-                    };
+                    path = self.core.getPath(childNode);
+                    guid = self.core.getGuid(childNode);
+
+                    element = self.createElementObject();
+                    element.ID = self.core.getGuid(childNode);
+                    element.Name = self.core.getAttribute(childNode, 'name');
+                    element.Type = metaName;
 
                     if (metaNode === self.metaTypes.ControlPort ||
                         metaNode === self.metaTypes.ResistivePort ||
@@ -207,11 +228,44 @@ define(['plugin/PluginConfig',
                         element.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
                     }
 
-                    componentInfo.elements[elementCount] = element;
+                    elements[path] = element;
                 }
             }
 
-            callback(null, componentInfo);
+            for (i = 0; i < bondNodes.length; i += 1) {
+                childNode = bondNodes[i];
+
+                path = self.core.getPath(childNode);
+                guid = self.core.getGuid(childNode);
+                bondSrcPath = self.core.getPointerPath(childNode, 'src');
+                bondDstPath = self.core.getPointerPath(childNode, 'dst');
+
+                bond = {};
+
+                bond.ID = guid;
+
+                if (elements.hasOwnProperty(bondSrcPath)) {
+                    elements[bondSrcPath].Bond.push(guid);
+                    bond.src = elements[bondSrcPath].ID;
+                } else {
+                    bond.src = 'error: ' + bondSrcPath;
+                }
+
+                if (elements.hasOwnProperty(bondDstPath)) {
+                    elements[bondDstPath].Bond.push(guid);
+                    bond.dst = elements[bondDstPath].ID;
+                } else {
+                    bond.dst = 'error: ' + bondDstPath;
+                }
+
+                bonds[path] = bond;
+            }
+
+            callback(null, {
+                name: self.core.getAttribute(componentNode, 'name'),
+                elements: elements,
+                bonds: bonds
+            });
         };
 
         self.core.loadChildren(componentNode, loadChildrenCallbackFunction);
