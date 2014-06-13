@@ -67,8 +67,8 @@ define(['plugin/PluginConfig',
             mFileString,
             mFileName,
             getComponentInfoCallback,
-            artifact,
-            filesToAdd = {},
+            resultArtifact,
+            generatedFilesToAdd = {},
             addFilesCallback;
 
         self.updateMETA(self.metaTypes);
@@ -81,25 +81,29 @@ define(['plugin/PluginConfig',
         getComponentInfoCallback = function (err, componentInfo) {
             if (err) {
                 self.result.setSuccess(false);
+                var msg = 'Failed to get component info from ' + self.core.getName(self.activeNode)
+                self.result.createMessage(self.activeNode, msg);
                 return callback(err, self.result);
             }
 
             mFileString = self.buildMatlabScript(componentInfo);
             mFileName = componentInfo.name + '.m';
 
-            filesToAdd[mFileName] = mFileString;
+            generatedFilesToAdd[mFileName] = mFileString;
 
-            artifact = self.blobClient.createArtifact(componentInfo.name);
+            resultArtifact = self.blobClient.createArtifact(componentInfo.name);
 
             addFilesCallback = function (err, fileHashes) {
                 if (err) {
                     self.result.setSuccess(false);
+                    self.result.createMessage(self.activeNode, 'Failed to add files to result artifact.');
                     return callback(err, self.result);
                 }
 
                 var artifactSaveCallback = function (err, artifactHash) {
                     if (err) {
                         self.result.setSuccess(false);
+                        self.result.createMessage(self.activeNode, 'Failed to save result artifact.');
                         return callback(err, self.result);
                     }
 
@@ -109,10 +113,10 @@ define(['plugin/PluginConfig',
                     callback(null, self.result);
                 };
 
-                artifact.save(artifactSaveCallback);
+                resultArtifact.save(artifactSaveCallback);
             }
 
-            artifact.addFiles(filesToAdd, addFilesCallback);
+            resultArtifact.addFiles(generatedFilesToAdd, addFilesCallback);
         };
 
         self.getComponentInfo(self.activeNode, getComponentInfoCallback);
@@ -121,30 +125,30 @@ define(['plugin/PluginConfig',
     C2MF.prototype.buildMatlabScript = function (componentInfo) {
         var self = this,
             mFileString = '',
-            itemPath,
+            nodePath,
             itemNumber = 1,
             element,
-            key,
-            value,
+            propertyName,
+            propertyValue,
             bond;
 
-        for (itemPath in componentInfo.elements) {
-            element = componentInfo.elements[itemPath];
+        for (nodePath in componentInfo.elements) {
+            element = componentInfo.elements[nodePath];
 
-            mFileString += '%% WebGmePath = ' + itemPath;
+            mFileString += '%% WebGmePath = ' + nodePath;
             mFileString += '\n';
 
-            for (key in element) {
-                value = element[key];
+            for (propertyName in element) {
+                propertyValue = element[propertyName];
 
-                if (key === 'Bond') {
-                    mFileString += 'element(' + itemNumber + ').' + key + ' = [\'';
-                    mFileString += value.join('\',\'');
+                if (propertyName === 'Bond') {
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = [\'';
+                    mFileString += propertyValue.join('\',\'');
                     mFileString += '\']';
-                } else if (typeof value === 'number') {
-                    mFileString += 'element(' + itemNumber + ').' + key + ' = ' + value + ';';
+                } else if (typeof propertyValue === 'number') {
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = ' + propertyValue + ';';
                 } else {
-                    mFileString += 'element(' + itemNumber + ').' + key + ' = \'' + value + '\';';
+                    mFileString += 'element(' + itemNumber + ').' + propertyName + ' = \'' + propertyValue + '\';';
                 }
 
                 mFileString += '\n';
@@ -156,10 +160,10 @@ define(['plugin/PluginConfig',
 
         itemNumber = 1;
 
-        for (itemPath in componentInfo.bonds) {
-            bond = componentInfo.bonds[itemPath];
+        for (nodePath in componentInfo.bonds) {
+            bond = componentInfo.bonds[nodePath];
 
-            mFileString += '%% WebGmePath = ' + itemPath;
+            mFileString += '%% WebGmePath = ' + nodePath;
             mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').ID = \'' + bond.ID + '\';';
             mFileString += '\n';
@@ -174,14 +178,13 @@ define(['plugin/PluginConfig',
         return mFileString;
     };
 
-    C2MF.prototype.createElementObject = function () {
+    C2MF.prototype.createNewElementObject = function () {
         return {
             ID: '',
             Name: '',
             Type: '',
             Equation: 'N/A',
             Ratio: 0,
-            //Bond: ''
             Bond: []
         };
     };
@@ -189,18 +192,18 @@ define(['plugin/PluginConfig',
     C2MF.prototype.getComponentInfo = function (componentNode, callback) {
         var self = this,
             childNode,
-            path,
-            guid,
-            metaNode,
-            metaName,
+            nodePath,
+            nodeGuid,
+            metaTypeNode,
+            metaTypeName,
             loadChildrenCallbackFunction,
             bondNodes = [],
-            element,
-            bond,
-            bondSrcPath,
-            bondDstPath,
-            elements = {},
-            bonds = {},
+            elementObject,
+            bondObject,
+            bondSrcNodePath,
+            bondDstNodePath,
+            path2elementMap = {},
+            path2bondMap = {},
             i;
 
         loadChildrenCallbackFunction = function (err, children) {
@@ -210,67 +213,68 @@ define(['plugin/PluginConfig',
 
             for (i = 0; i < children.length; i += 1) {
                 childNode = children[i];
-                metaNode = self.getMetaType(childNode);
-                metaName = self.core.getAttribute(metaNode, 'name');
+                metaTypeNode = self.getMetaType(childNode);
+                metaTypeName = self.core.getAttribute(metaTypeNode, 'name');
 
                 if (self.isMetaTypeOf(childNode, self.metaTypes.ComponentConnection)) {
+                    // defer bond nodes; handle them after element node info is complete
                     bondNodes.push(childNode);
                 } else {
-                    path = self.core.getPath(childNode);
-                    guid = self.core.getGuid(childNode);
+                    nodePath = self.core.getPath(childNode);
+                    nodeGuid = self.core.getGuid(childNode);
 
-                    element = self.createElementObject();
-                    element.ID = self.core.getGuid(childNode);
-                    element.Name = self.core.getAttribute(childNode, 'name');
-                    element.Type = metaName;
+                    elementObject = self.createNewElementObject();
+                    elementObject.ID = self.core.getGuid(childNode);
+                    elementObject.Name = self.core.getAttribute(childNode, 'name');
+                    elementObject.Type = metaTypeName;
 
-                    if (metaNode === self.metaTypes.ControlPort ||
-                        metaNode === self.metaTypes.ResistivePort ||
-                        metaNode === self.metaTypes.StoragePort) {
-                        element.Equation = self.core.getAttribute(childNode, 'Equation');
+                    if (metaTypeNode === self.metaTypes.ControlPort ||
+                        metaTypeNode === self.metaTypes.ResistivePort ||
+                        metaTypeNode === self.metaTypes.StoragePort) {
+                        elementObject.Equation = self.core.getAttribute(childNode, 'Equation');
                     }
-                    if (metaNode === self.metaTypes.Gyrator ||
-                        metaNode === self.metaTypes.Transformer) {
-                        element.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
+                    if (metaTypeNode === self.metaTypes.Gyrator ||
+                        metaTypeNode === self.metaTypes.Transformer) {
+                        elementObject.Ratio = parseFloat(self.core.getAttribute(childNode, 'Ratio'));
                     }
 
-                    elements[path] = element;
+                    path2elementMap[nodePath] = elementObject;
                 }
             }
 
             for (i = 0; i < bondNodes.length; i += 1) {
                 childNode = bondNodes[i];
 
-                path = self.core.getPath(childNode);
-                guid = self.core.getGuid(childNode);
-                bondSrcPath = self.core.getPointerPath(childNode, 'src');
-                bondDstPath = self.core.getPointerPath(childNode, 'dst');
+                nodePath = self.core.getPath(childNode);
+                nodeGuid = self.core.getGuid(childNode);
+                bondSrcNodePath = self.core.getPointerPath(childNode, 'src');
+                bondDstNodePath = self.core.getPointerPath(childNode, 'dst');
 
-                bond = {};
+                bondObject = {};
 
-                bond.ID = guid;
+                bondObject.ID = nodeGuid;
 
-                if (elements.hasOwnProperty(bondSrcPath)) {
-                    elements[bondSrcPath].Bond.push(guid);
-                    bond.src = elements[bondSrcPath].ID;
+                if (path2elementMap.hasOwnProperty(bondSrcNodePath)) {
+                    path2elementMap[bondSrcNodePath].Bond.push(nodeGuid);
+                    bondObject.src = path2elementMap[bondSrcNodePath].ID;
                 } else {
-                    bond.src = 'error: ' + bondSrcPath;
+                    bondObject.src = 'error: ' + bondSrcNodePath;
                 }
 
-                if (elements.hasOwnProperty(bondDstPath)) {
-                    elements[bondDstPath].Bond.push(guid);
-                    bond.dst = elements[bondDstPath].ID;
+                if (path2elementMap.hasOwnProperty(bondDstNodePath)) {
+                    path2elementMap[bondDstNodePath].Bond.push(nodeGuid);
+                    bondObject.dst = path2elementMap[bondDstNodePath].ID;
                 } else {
-                    bond.dst = 'error: ' + bondDstPath;
+                    bondObject.dst = 'error: ' + bondDstNodePath;
                 }
 
-                bonds[path] = bond;
+                path2bondMap[nodePath] = bondObject;
             }
 
             callback(null, {
                 name: self.core.getAttribute(componentNode, 'name'),
-                elements: elements,
-                bonds: bonds
+                elements: path2elementMap,
+                bonds: path2bondMap
             });
         };
 
