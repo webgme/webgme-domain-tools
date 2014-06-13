@@ -73,6 +73,11 @@ define(['plugin/PluginConfig',
 
         self.updateMETA(self.metaTypes);
 
+        if (self.isMetaTypeOf(self.activeNode, MetaTypes.Component) === false) {
+            self.result.createMessage(self.activeNode, 'SelectedNode is not a Component!')
+            return callback(null, self.result);
+        }
+
         getComponentInfoCallback = function (err, componentInfo) {
             if (err) {
                 self.result.setSuccess(false);
@@ -99,6 +104,7 @@ define(['plugin/PluginConfig',
                     }
 
                     self.result.setSuccess(true);
+                    self.result.createMessage(self.activeNode, 'Generated .m-file for ' + componentInfo.name);
                     self.result.addArtifact(artifactHash);
                     callback(null, self.result);
                 };
