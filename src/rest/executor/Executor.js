@@ -301,7 +301,7 @@ define(['logManager',
                 archive,
                 filename,
                 matched;
-            console.log('Walking the walk..');
+            //console.log('Walking the walk..');
             for (i = 0; i < results.length; i++) {
                 archive = false;
                 filename = path.relative(directory, results[i]).replace(/\\/g,'/');
