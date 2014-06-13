@@ -244,11 +244,11 @@ define(['logManager',
         };
 
         addObjectHashesAndSaveArtifact = function (resultArtifact) {
-            counter -= 1;
             resultArtifact.artifact.addMetadataHashes(resultArtifact.files, function (err, hashes) {
                 if (err) {
                     error += err;
                     pendingStatus = jobInfo.status = 'FAILED_TO_ADD_OBJECT_HASHES';
+                    counter -= 1;
                     if (counter == 0) {
                         logger.error(error);
                         jobInfo.status = pendingStatus;
@@ -259,6 +259,7 @@ define(['logManager',
                     if (err) {
                         error += err;
                         pendingStatus = 'FAILED_TO_SAVE_ARTIFACT';
+                        counter -= 1;
                         if (counter == 0) {
                             logger.error(error);
                             jobInfo.status = pendingStatus;
@@ -266,6 +267,7 @@ define(['logManager',
                         return;
                     }
                     jobInfo.resultHashes[resultArtifact.name] = resultHash;
+                    counter -= 1;
                     if (counter === 0) {
                         if (error) {
                             logger.error(error);
