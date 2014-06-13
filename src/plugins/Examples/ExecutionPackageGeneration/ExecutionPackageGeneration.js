@@ -64,14 +64,6 @@ define(['plugin/PluginConfig',
     ExecutionPackageGeneration.prototype.getConfigStructure = function () {
         return [
             {
-                'name': 'allFiles',
-                'displayName': 'Return all files',
-                'description': 'Should the execution return all files?',
-                'value': false,
-                'valueType': 'boolean',
-                'readOnly': false
-            },
-            {
                 'name': 'update',
                 'displayName': 'Write back to model',
                 'description': 'If false no need to provide active node.',
@@ -116,7 +108,20 @@ define(['plugin/PluginConfig',
             exitCode = config.success ? 0 : 1,
             executor_config = {
                 cmd: 'C:/Python27/python.exe ' + 'generate_name.py ',
-                resultPatterns: ['new_name.json', 'log/**/*']
+                resultArtifacts: [
+                    {
+                        name: 'all',
+                        resultPatterns: []
+                    },
+                    {
+                        name: 'logs',
+                        resultPatterns: ['log/**/*']
+                    },
+                    {
+                        name: 'resultFile',
+                        resultPatterns: ['new_name.json']
+                    }
+                ]
             },
             filesToAdd = {
                 'generate_name.py': ejs.render(TEMPLATES['generate_name.py.ejs'], {
@@ -132,10 +137,6 @@ define(['plugin/PluginConfig',
             executor_config.cmd += self.core.getPath(self.activeNode);
         } else {
             executor_config.cmd += 'dummy';
-        }
-
-        if (config.allFiles) {
-            executor_config.resultPatterns = null;
         }
 
         filesToAdd['executor_config.json'] = JSON.stringify(executor_config, null, 4);
@@ -162,7 +163,7 @@ define(['plugin/PluginConfig',
                     }
                     self.logger.debug(jobInfo);
                     atSucceedJob = function (jInfo) {
-                        self.blobClient.getMetadata(jInfo.resultHash, function (err, metaData) {
+                        self.blobClient.getMetadata(jInfo.resultHashes.resultFile, function (err, metaData) {
                             var newNameJsonHash;
                             if (err) {
                                 return callback('Getting results metadata failed: ' + err.toString(), self.result);
@@ -183,13 +184,21 @@ define(['plugin/PluginConfig',
                                             self.core.setAttribute(self.activeNode, 'name', newName[key]);
                                         }
                                     }
-                                    self.result.addArtifact(jInfo.resultHash);
+                                    for (key in jInfo.resultHashes) {
+                                        if (jInfo.resultHashes.hasOwnProperty(key)) {
+                                            self.result.addArtifact(jInfo.resultHashes[key]);
+                                        }
+                                    }
                                     self.result.setSuccess(true);
                                     self.save('Updated new name from execution', function (err) {
                                         callback(null, self.result);
                                     });
                                 } else {
-                                    self.result.addArtifact(jInfo.resultHash);
+                                    for (key in jInfo.resultHashes) {
+                                        if (jInfo.resultHashes.hasOwnProperty(key)) {
+                                            self.result.addArtifact(jInfo.resultHashes[key]);
+                                        }
+                                    }
                                     self.result.setSuccess(true);
                                     callback(null, self.result);
                                 }
@@ -201,6 +210,7 @@ define(['plugin/PluginConfig',
                     intervalID = setInterval(function () {
                         // Get the job-info at intervals and check for a non-CREATED status.
                         executorClient.getInfo(hash, function (err, jInfo) {
+                            var key;
                             self.logger.info(JSON.stringify(jInfo, null, 4));
                             if (jInfo.status === 'CREATED') {
                                 // The job is still running..
@@ -211,7 +221,11 @@ define(['plugin/PluginConfig',
                             if (jInfo.status === 'SUCCESS') {
                                 atSucceedJob(jInfo);
                             } else {
-                                self.result.addArtifact(jInfo.resultHash);
+                                for (key in jInfo.resultHashes) {
+                                    if (jInfo.resultHashes.hasOwnProperty(key)) {
+                                        self.result.addArtifact(jInfo.resultHashes[key]);
+                                    }
+                                }
                                 callback('Job execution failed', self.result);
                             }
                         });
