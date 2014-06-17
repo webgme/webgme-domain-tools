@@ -135,7 +135,7 @@ define(['plugin/PluginConfig',
         for (nodePath in componentInfo.elements) {
             element = componentInfo.elements[nodePath];
 
-            mFileString += '%% WebGmePath = ' + nodePath;
+            mFileString += '% element(' + itemNumber + ') WebGmePath = ' + nodePath;
             mFileString += '\n';
 
             for (propertyName in element) {
@@ -144,7 +144,7 @@ define(['plugin/PluginConfig',
                 if (propertyName === 'Bond') {
                     mFileString += 'element(' + itemNumber + ').' + propertyName + ' = [\'';
                     mFileString += propertyValue.join('\',\'');
-                    mFileString += '\']';
+                    mFileString += '\'];';
                 } else if (typeof propertyValue === 'number') {
                     mFileString += 'element(' + itemNumber + ').' + propertyName + ' = ' + propertyValue + ';';
                 } else {
@@ -163,7 +163,7 @@ define(['plugin/PluginConfig',
         for (nodePath in componentInfo.bonds) {
             bond = componentInfo.bonds[nodePath];
 
-            mFileString += '%% WebGmePath = ' + nodePath;
+            mFileString += '% bond(' + itemNumber + ') WebGmePath = ' + nodePath;
             mFileString += '\n';
             mFileString += 'bond(' + itemNumber + ').ID = \'' + bond.ID + '\';';
             mFileString += '\n';
