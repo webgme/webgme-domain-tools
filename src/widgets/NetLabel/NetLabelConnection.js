@@ -8,7 +8,7 @@
 "use strict";
 
 define(['js/Widgets/DiagramDesigner/Connection',
-        'js/Constants'], function (Connection, CONSTANTS) {
+    'js/Constants'], function (Connection, CONSTANTS) {
 
     var NetLabelConnection;
 
@@ -21,60 +21,61 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
             netLabel = $('<div class="netLabel"></div>'),// todo: style the netlabels
-            srcLabel = netLabel.clone(),
+            srcPortLabel = netLabel.clone(),
+            dstPortLabel = netLabel.clone(),
             srcID = self._generateHash(self.srcID),
-            srcLabelID = 'L' + srcID,
-            dstLabel = netLabel.clone(),
             dstID = self._generateHash(self.dstID),
-            dstLabelID = 'L' + dstID,//self.id
+            srcLabelID = self.srcID,
+            dstLabelID = self.dstID,
             OFFSET = self.dstText.length >= 11 ? 60 : 20,
             srcXPos = segPoints[0].x,
             srcYPos = segPoints[0].y,
             dstXPos = segPoints[segPoints.length - 1].x - OFFSET,
-            dstYPos = segPoints[segPoints.length - 1].y;
+            dstYPos = segPoints[segPoints.length - 1].y,
+            srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
+            dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
 
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
-        var srcPort = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
-            dstPort = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
 
-        if (!srcPort) {
+        if (!srcPortLabelList) {
             // give it an id attr
-//            srcPort = self._toolTipBase.clone()[0];
-            srcPort = self._toolTipBase.clone()[0];
-            srcPort.setAttribute("id", self.id);
-            srcPort.setAttribute("objName", self.srcText);
-            srcPort.setAttribute("obj-gmeid", srcID); // used to highlight actual object
-            // style it
+            srcPortLabelList = self._toolTipBase.clone()[0];
+            srcPortLabelList.setAttribute("id", self.id);
+            srcPortLabelList.setAttribute("objName", self.srcText);
+            srcPortLabelList.setAttribute("obj-gmeid", srcID); // used to highlight actual object
             // todo: style the objects with css style in separate file
-            srcPort.style.position = "absolute";
+            srcPortLabelList.style.position = "absolute";
         }
-        srcPort.style.left = srcXPos.toString() + "px";
-        srcPort.style.top = srcYPos.toString() + "px";
+        srcPortLabelList.style.left = srcXPos.toString() + "px";
+        srcPortLabelList.style.top = srcYPos.toString() + "px";
 
-        dstLabel.text(self.dstText);
-        dstLabel[0].setAttribute('id', dstLabelID);
-        if (!$(srcPort).find('#' + dstLabelID)[0]) {
-            $(srcPort).append(dstLabel);
-            self.diagramDesigner.skinParts.$itemsContainer.append(srcPort);
+        srcPortLabel.text(self.dstText);
+        srcPortLabel[0].setAttribute('id', dstLabelID);
+        srcPortLabel[0].setAttribute('connId', self.connectionId);
+        if (!$(srcPortLabelList).find('[id^="' + dstLabelID + '"]')[0]) {
+            $(srcPortLabelList).append(srcPortLabel);
+            self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
         }
 
-        if (!dstPort) {
-//            dstPort = self._toolTipBase.clone()[0];
-            dstPort = self._toolTipBase.clone()[0];
-            dstPort.setAttribute("id", self.id);
-            dstPort.setAttribute("objName", self.dstText);
-            dstPort.setAttribute("obj-gmeid", dstID);
-            dstPort.style.position = "absolute";
+        if (!dstPortLabelList) {
+//            dstPortLabelList = self._toolTipBase.clone()[0];
+            dstPortLabelList = self._toolTipBase.clone()[0];
+            dstPortLabelList.setAttribute("id", self.id);
+            dstPortLabelList.setAttribute("objName", self.dstText);
+            dstPortLabelList.setAttribute("obj-gmeid", dstID);
+            dstPortLabelList.style.position = "absolute";
         }
-        dstPort.style.left = dstXPos.toString() + "px";
-        dstPort.style.top = dstYPos.toString() + "px";
+        dstPortLabelList.style.left = dstXPos.toString() + "px";
+        dstPortLabelList.style.top = dstYPos.toString() + "px";
 
-        srcLabel.text(self.srcText);
-        srcLabel[0].setAttribute('id', srcLabelID);
-        if (!$(dstPort).find('#' + srcLabelID)[0]) {
-            $(dstPort).append(srcLabel);
-            self.diagramDesigner.skinParts.$itemsContainer.append(dstPort);
+        dstPortLabel.text(self.srcText);
+        dstPortLabel[0].setAttribute('id', srcLabelID);
+        dstPortLabel[0].setAttribute('connId', self.connectionId);
+
+        if (!$(dstPortLabelList).find('[id^="' + srcLabelID + '"]')[0]) {
+            $(dstPortLabelList).append(dstPortLabel);
+            self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
     };
 
@@ -111,13 +112,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
-//        this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
         this.dstText = objDescriptor.dstText;
         this.srcID = objDescriptor.srcID;
         this.dstID = objDescriptor.dstID;
+        this.connectionId = objDescriptor.connectionId;
         this.registeredSrcId = objDescriptor.registeredSrcId;
         this.registeredDstId = objDescriptor.registeredDstId;
         this.srcPos = objDescriptor.srcPos;
@@ -130,15 +131,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var pSrc = this._segPoints[0];
-        var pDst = this._segPoints[this._segPoints.length - 1];
+        var pSrc = this._segPoints[0],
+            pDst = this._segPoints[this._segPoints.length - 1],
+            bBox;
 
-        var bBox = { "x": Math.min(pSrc.x, pDst.x),
-               "y": Math.min(pSrc.y, pDst.y),
-               "x2": Math.max(pSrc.x, pDst.x),
-               "y2": Math.max(pSrc.y, pDst.y),
-               "width": 0,
-               "height": 0 };
+        bBox = { "x": Math.min(pSrc.x, pDst.x),
+                 "y": Math.min(pSrc.y, pDst.y),
+                 "x2": Math.max(pSrc.x, pDst.x),
+                 "y2": Math.max(pSrc.y, pDst.y),
+                 "width": 0,
+                 "height": 0 };
 
         bBox.width = bBox.x2 - bBox.x;
         bBox.height = bBox.y2 - bBox.y;
