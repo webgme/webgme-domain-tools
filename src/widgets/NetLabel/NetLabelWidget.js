@@ -43,6 +43,7 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         this.logger.debug("Creating connection component with parameters: " + JSON.stringify(objDescriptor));
 
         objDescriptor.designerCanvas = this;
+        objDescriptor.connectionId = connectionId;
 
         this.connectionIds.push(connectionId);
 
