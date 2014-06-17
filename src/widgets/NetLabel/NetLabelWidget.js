@@ -8,9 +8,11 @@
 
 define(['js/Widgets/ModelEditor/ModelEditorWidget',
         'js/Widgets/DiagramDesigner/ConnectionRouteManagerBasic',
-        './NetLabelConnection'], function (ModelEditorWidget,
+        './NetLabelConnection',
+        './NetLabelWidget.Mouse'], function (ModelEditorWidget,
                                            ConnectionRouteManagerBasic,
-                                           NetLabelConnection) {
+                                           NetLabelConnection,
+                                           NetLabelWidgetMouse) {
     "use strict";
 
     var NetLabelWidget;
@@ -138,6 +140,7 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
             this.toolbarItems.radioButtonGroupRouteManager.enabled(false);
         }
     };
+    _.extend(NetLabelWidget.prototype, NetLabelWidgetMouse.prototype);
 
     return NetLabelWidget;
 });
