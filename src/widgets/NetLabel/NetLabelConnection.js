@@ -41,7 +41,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPort) {
             // give it an id attr
 //            srcPort = self._toolTipBase.clone()[0];
-            srcPort = self._pathBase.clone()[0];
+            srcPort = self._toolTipBase.clone()[0];
             srcPort.setAttribute("id", self.id);
             srcPort.setAttribute("objName", self.srcText);
             srcPort.setAttribute("obj-gmeid", srcID); // used to highlight actual object
@@ -61,7 +61,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (!dstPort) {
 //            dstPort = self._toolTipBase.clone()[0];
-            dstPort = self._pathBase.clone()[0];
+            dstPort = self._toolTipBase.clone()[0];
             dstPort.setAttribute("id", self.id);
             dstPort.setAttribute("objName", self.dstText);
             dstPort.setAttribute("obj-gmeid", dstID);
