@@ -39,15 +39,17 @@ define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
             }
         });
 
-        //handle click on designer-connections
-        this.$el.on('mousedown.' + EVENT_POSTFIX, 'path[class~="' + NetLabelWidgetConstants.DESIGNER_CONNECTION_CLASS +'"]',  function (event) {
-            var connId = $(this).attr("id").replace(NetLabelWidgetConstants.PATH_SHADOW_ARROW_END_ID_PREFIX, "").replace(NetLabelWidgetConstants.PATH_SHADOW_ID_PREFIX, ""),
+        //handle click on netLabels
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.DESIGNER_CONNECTION_CLASS,  function (event) {
+            var connId = $(this).attr("connId"),
+                portId = $(this).attr("id"),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                // todo: highlight port referenced to by the netlabel
+//                self.onItemMouseDown.call(self, portId, eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
