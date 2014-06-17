@@ -16,7 +16,7 @@ define(['js/Constants'], function (CONSTANTS) {
          * CLASS DEFINITIONS
          */
         DESIGNER_ITEM_CLASS : "designer-item",
-        DESIGNER_CONNECTION_CLASS : "designer-connection",
+        DESIGNER_CONNECTION_CLASS : "netLabel",
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
         CONNECTOR_CLASS : "connector",
         CONNECTION_END_SRC : 'src',
