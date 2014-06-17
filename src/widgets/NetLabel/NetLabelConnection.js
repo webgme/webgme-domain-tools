@@ -59,7 +59,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         if (!dstPortLabelList) {
-//            dstPortLabelList = self._toolTipBase.clone()[0];
             dstPortLabelList = self._toolTipBase.clone()[0];
             dstPortLabelList.setAttribute("id", self.id);
             dstPortLabelList.setAttribute("objName", self.dstText);
@@ -108,7 +107,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     };
 
-    NetLabelConnection.prototype._pathBase = $('<path fill="none" stroke="#b9dcf7" d="M815.5,274.5L886.5,274.5L886.5,413.5L1026.5,413.5" class="designer-connection" stroke-width="5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); "></path>');
     NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
