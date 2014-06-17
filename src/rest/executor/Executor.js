@@ -200,11 +200,9 @@ define(['logManager',
             i,
             jointArtifact = self.blobClient.createArtifact('jobInfo_resultSuperSetHash'),
             resultsArtifacts = [],
-            error = '',
-            counter,
-            pendingStatus = 'SUCCESS',
+            afterWalk,
             archiveFile,
-            afterAllFilesVisited,
+            afterAllFilesArchived,
             addObjectHashesAndSaveArtifact;
         jobInfo.resultHashes = {};
 
@@ -219,22 +217,48 @@ define(['logManager',
                 }
             );
         }
-        counter = executorConfig.resultArtifacts.length;
+
+        afterWalk = function (filesToArchive) {
+            var counter,
+                pendingStatus,
+                i,
+                counterCallback = function (err) {
+                    if (err) {
+                        pendingStatus = err;
+                    }
+                    counter -= 1;
+                    if (counter <= 0) {
+                        if (pendingStatus) {
+                            jobInfo.status = pendingStatus;
+                        } else {
+                            afterAllFilesArchived();
+                        }
+
+                    }
+                };
+            counter = filesToArchive.length;
+            if (counter === 0) {
+                counterCallback(null);
+            }
+            for (i = 0; i < filesToArchive.length; i += 1) {
+                archiveFile(filesToArchive[i].filename, filesToArchive[i].filePath, counterCallback);
+            }
+        };
 
         archiveFile = function (filename, filePath, callback) {
+
             jointArtifact.addFileAsSoftLink(filename, fs.createReadStream(filePath), function (err, hash) {
-                var i;
+                var j;
                 if (err) {
                     logger.error(err);
-                    //console.log('Was error :' + err);
-                    callback(err);
+                    callback('FAILED_TO_ARCHIVE_FILE');
                 } else {
                     // Add the file-hash to the results artifacts containing the filename.
                     //console.log('Filename added : ' + filename);
-                    for (i = 0; i < resultsArtifacts.length; i += 1) {
-                        if (resultsArtifacts[i].files[filename] === true) {
-                            resultsArtifacts[i].files[filename] = hash;
-                            //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[i].name
+                    for (j = 0; j < resultsArtifacts.length; j += 1) {
+                        if (resultsArtifacts[j].files[filename] === true) {
+                            resultsArtifacts[j].files[filename] = hash;
+                            //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[j].name
                             //    + '" with hash: ' + hash);
                         }
                     }
@@ -243,71 +267,70 @@ define(['logManager',
             });
         };
 
-        addObjectHashesAndSaveArtifact = function (resultArtifact) {
-            resultArtifact.artifact.addMetadataHashes(resultArtifact.files, function (err, hashes) {
-                if (err) {
-                    error += err;
-                    pendingStatus = jobInfo.status = 'FAILED_TO_ADD_OBJECT_HASHES';
-                    counter -= 1;
-                    if (counter == 0) {
-                        logger.error(error);
-                        jobInfo.status = pendingStatus;
-                    }
-                    return;
-                }
-                resultArtifact.artifact.save(function (err, resultHash) {
-                    if (err) {
-                        error += err;
-                        pendingStatus = 'FAILED_TO_SAVE_ARTIFACT';
-                        counter -= 1;
-                        if (counter == 0) {
-                            logger.error(error);
-                            jobInfo.status = pendingStatus;
-                        }
-                        return;
-                    }
-                    jobInfo.resultHashes[resultArtifact.name] = resultHash;
-                    counter -= 1;
-                    if (counter === 0) {
-                        if (error) {
-                            logger.error(error);
-                        }
-                        if (jobInfo.status === 'CREATED') {
-                            jobInfo.status = pendingStatus;
-                        }
-                    }
-                });
-            });
-        };
-
-        afterAllFilesVisited = function () {
+        afterAllFilesArchived = function () {
             jointArtifact.save(function (err, resultHash) {
-                var i;
+                var counter,
+                    pendingStatus,
+                    i,
+                    counterCallback;
                 if (err) {
                     logger.error(err);
                     jobInfo.status = 'FAILED_TO_SAVE_JOINT_ARTIFACT';
                 } else {
+                    counterCallback = function (err) {
+                        if (err) {
+                            pendingStatus = err;
+                        }
+                        counter -= 1;
+                        if (counter <= 0) {
+                            if (pendingStatus) {
+                                jobInfo.status = pendingStatus;
+                            } else {
+                                jobInfo.status = 'SUCCESS';
+                            }
+                        }
+                    };
+                    counter = resultsArtifacts.length;
+                    if (counter === 0) {
+                        counterCallback(null);
+                    }
                     // FIXME: This is synchronous
                     deleteFolderRecursive(directory);
                     jobInfo.resultSuperSetHash = resultHash;
                     for (i = 0; i < resultsArtifacts.length; i += 1) {
-                        addObjectHashesAndSaveArtifact(resultsArtifacts[i]);
+                        addObjectHashesAndSaveArtifact(resultsArtifacts[i], counterCallback);
                     }
                 }
+            });
+        };
+
+        addObjectHashesAndSaveArtifact = function (resultArtifact, callback) {
+            resultArtifact.artifact.addMetadataHashes(resultArtifact.files, function (err, hashes) {
+                if (err) {
+                    logger.error(err);
+                    return callback('FAILED_TO_ADD_OBJECT_HASHES');
+                }
+                resultArtifact.artifact.save(function (err, resultHash) {
+                    if (err) {
+                        logger.error(err);
+                        return callback('FAILED_TO_SAVE_ARTIFACT');
+                    }
+                    jobInfo.resultHashes[resultArtifact.name] = resultHash;
+                    callback(null);
+                });
             });
         };
 
         walk(directory, function (err, results) {
             var i, j, a,
-                remaining = results.length,
+                filesToArchive = [],
                 archive,
                 filename,
                 matched;
             //console.log('Walking the walk..');
             for (i = 0; i < results.length; i++) {
-                archive = false;
                 filename = path.relative(directory, results[i]).replace(/\\/g,'/');
-
+                archive = false;
                 for (a = 0; a < resultsArtifacts.length; a += 1) {
                     if (resultsArtifacts[a].patterns.length === 0) {
                         //console.log('Matched! filename: "' + filename + '", artifact "' + resultsArtifacts[a].name + '"');
@@ -325,23 +348,11 @@ define(['logManager',
                         }
                     }
                 }
-
                 if (archive) {
-                    archiveFile(filename, results[i], function (err) {
-                        remaining -= 1;
-                        if (remaining === 0) {
-                            afterAllFilesVisited();
-                        }
-                    })
-                } else {
-                    // skip it
-                    remaining -= 1;
-                    //console.log('Archive was false - Remaining ' + remaining.toString());
-                    if (remaining === 0) {
-                        afterAllFilesVisited();
-                    }
+                    filesToArchive.push({ filename: filename, filePath: results[i]});
                 }
             }
+            afterWalk(filesToArchive);
         });
     };
 
