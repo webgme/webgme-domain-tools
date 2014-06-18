@@ -164,7 +164,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-    // todo: edit this method to highlight the actual connector port instead of the connection path
     NetLabelConnection.prototype._setEditMode = function (editMode) {
         if (this._readOnly === false && this._editMode !== editMode) {
             this._editMode = editMode;
@@ -200,6 +199,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.srcDragPoint.css({"position": "absolute",
+                "background-color" : "red",
                 "top": this.sourceCoordinates.y,
                 "left": this.sourceCoordinates.x});
 
@@ -213,6 +213,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.dstDragPoint.css({"position": "absolute",
+                "background-color" : "blue",
                 "top": this.endCoordinates.y,
                 "left": this.endCoordinates.x});
 
