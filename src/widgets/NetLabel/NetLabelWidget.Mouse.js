@@ -40,7 +40,7 @@ define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
         });
 
         //handle click on netLabels
-        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.DESIGNER_CONNECTION_CLASS,  function (event) {
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS,  function (event) {
             var connId = $(this).attr("connId"),
                 portId = $(this).attr("id"),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
@@ -49,6 +49,7 @@ define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
 
             if (self.onConnectionMouseDown) {
                 // todo: highlight port referenced to by the netlabel
+                $(self).focus();
                 self.onConnectionMouseDown.call(self, connId, eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));

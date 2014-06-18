@@ -8,7 +8,8 @@
 "use strict";
 
 define(['js/Widgets/DiagramDesigner/Connection',
-    'js/Constants'], function (Connection, CONSTANTS) {
+    './NetLabelWidget.Constants',
+    'js/Constants'], function (Connection, NetLabelWidgetConstants, CONSTANTS) {
 
     var NetLabelConnection;
 
@@ -82,7 +83,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this._destroying = true;
         if (this.diagramDesigner) {
 
-            this.diagramDesigner.skinParts.$itemsContainer.find('.designer-connection').remove();
+            this.diagramDesigner.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_CONNECTION_CLASS).remove();
             this.logger.debug("Destroyed");
         }
     };
