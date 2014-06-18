@@ -36,6 +36,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
 
+        self.sourceCoordinates = { "x": -1,
+            "y": -1};
+
+        self.endCoordinates = { "x": -1,
+            "y": -1};
+
+        self.sourceCoordinates.x = srcXPos;
+        self.sourceCoordinates.y = srcYPos;
+        self.endCoordinates.x = segPoints[segPoints.length - 1].x;
+        self.endCoordinates.y = dstYPos;
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
 
@@ -130,19 +140,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var pSrc = this._segPoints[0],
-            pDst = this._segPoints[this._segPoints.length - 1],
-            bBox;
-
-        bBox = { "x": Math.min(pSrc.x, pDst.x),
-                 "y": Math.min(pSrc.y, pDst.y),
-                 "x2": Math.max(pSrc.x, pDst.x),
-                 "y2": Math.max(pSrc.y, pDst.y),
-                 "width": 0,
-                 "height": 0 };
-
-        bBox.width = bBox.x2 - bBox.x;
-        bBox.height = bBox.y2 - bBox.y;
+        var bBox = null;
 
         return bBox;
     };
@@ -152,8 +150,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selected = true;
         this.selectedInMultiSelection = multiSelection;
 
-        this._highlightPath();
-
+        this.showEndReconnectors();
         //in edit mode and when not participating in a multiple selection,
         //show endpoint connectors
         if (this.selectedInMultiSelection === true) {
@@ -179,13 +176,54 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.onDeselect = function () {
+        this.selected = false;
+        this.selectedInMultiSelection = false;
 
+        this.hideEndReconnectors();
+        this._setEditMode(false);
     };
 
     NetLabelConnection.prototype.readOnlyMode = function (readOnly) {
         this._readOnly = readOnly;
         if (readOnly === true) {
             //this._setEditMode(false);
+        }
+    };
+
+    NetLabelConnection.prototype.showEndReconnectors = function () {
+        if (this.reconnectable) {
+            //editor handle at src
+            this.skinParts.srcDragPoint = this.skinParts.srcDragPoint || $('<div/>', {
+                "data-end": NetLabelWidgetConstants.CONNECTION_END_SRC,
+                "data-id": this.id,
+                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_SRC
+            });
+
+            this.skinParts.srcDragPoint.css({"position": "absolute",
+                "top": this.sourceCoordinates.y,
+                "left": this.sourceCoordinates.x});
+
+            this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.srcDragPoint);
+
+
+            this.skinParts.dstDragPoint = this.skinParts.dstDragPoint || $('<div/>', {
+                "data-end": NetLabelWidgetConstants.CONNECTION_END_DST,
+                "data-id": this.id,
+                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_DST
+            });
+
+            this.skinParts.dstDragPoint.css({"position": "absolute",
+                "top": this.endCoordinates.y,
+                "left": this.endCoordinates.x});
+
+            this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.dstDragPoint);
+
+            //resize connectors to connection width
+            var scale = Math.max(1, this.designerAttributes.width / 10); //10px is the width of the connector end
+            this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+        } else {
+            this.hideEndReconnectors();
         }
     };
 

@@ -7,7 +7,8 @@
 
 "use strict";
 
-define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
+define(['./NetLabelWidget.Constants',
+        './NetLabelConnection'], function (NetLabelWidgetConstants, NetLabelConnection) {
 
     var NetLabelWidgetMouse,
         EVENT_POSTFIX = 'NetLabelWidget';
@@ -42,14 +43,13 @@ define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
         //handle click on netLabels
         this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS,  function (event) {
             var connId = $(this).attr("connId"),
-                portId = $(this).attr("id"),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
                 // todo: highlight port referenced to by the netlabel
-                $(self).focus();
+//                self.items[connId].showEndReconnectors();
                 self.onConnectionMouseDown.call(self, connId, eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
@@ -146,6 +146,7 @@ define(['./NetLabelWidget.Constants'], function (NetLabelWidgetConstants) {
             }
         });
     };
+//    _.extend(NetLabelWidgetMouse.prototype, NetLabelConnection.prototype);
 
     return NetLabelWidgetMouse;
 });
