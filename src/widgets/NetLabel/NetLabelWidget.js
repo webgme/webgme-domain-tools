@@ -79,6 +79,7 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
             connectionIDsToUpdate,
             maxWidth = 0,
             maxHeight = 0,
+            itemBBox,
             redrawnConnectionIDs,
             doRenderGetLayout,
             doRenderSetLayout,
@@ -102,12 +103,16 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         //STEP 1: call the inserted and updated items' getRenderLayout
         doRenderGetLayout = function (itemIDList) {
             var i = itemIDList.length,
+                itemBBox,
                 cItem;
 
             while (i--) {
                 cItem = items[itemIDList[i]];
                 cItem.renderGetLayoutInfo();
 
+                itemBBox = cItem.getBoundingBox();
+                maxWidth = Math.max(maxWidth, itemBBox.x2);
+                maxHeight = Math.max(maxHeight, itemBBox.y2);
             }
         };
         doRenderGetLayout(this._insertedDesignerItemIDs);
@@ -163,24 +168,11 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
 
         this.logger.debug('Redrawn/Requested: ' + redrawnConnectionIDs.length + '/' + connectionIDsToUpdate.length);
 
-        i = redrawnConnectionIDs.length;
-
         //adjust the canvas size to the new 'grown' are that the inserted / updated require
         //TODO: canvas size decrease not handled yet
         this._actualSize.w = Math.max(this._actualSize.w, maxWidth + CANVAS_EDGE);
         this._actualSize.h = Math.max(this._actualSize.h, maxHeight + CANVAS_EDGE);
         this._resizeItemContainer();
-
-        //let the selection manager know about deleted items and connections
-        /*i = this._deletedDesignerItemIDs.length;
-         while (i--) {
-         this.dispatchEvent(this.events.ON_COMPONENT_DELETE, this._deletedDesignerItemIDs[i]);
-         }
-
-         i = this._deletedConnectionIDs.length;
-         while (i--) {
-         this.dispatchEvent(this.events.ON_COMPONENT_DELETE, this._deletedConnectionIDs[i]);
-         }*/
 
         /* clear collections */
         this._insertedDesignerItemIDs = [];

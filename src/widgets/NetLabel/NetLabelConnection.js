@@ -140,8 +140,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var bBox = null;
-
+        var bBox;
+        bBox = { "x": -1,
+            "y": -1,
+            "x2": -1,
+            "y2": -1,
+            "width": 0,
+            "height": 0 };
         return bBox;
     };
 
