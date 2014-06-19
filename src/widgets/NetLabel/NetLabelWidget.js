@@ -9,7 +9,8 @@
 define(['js/Widgets/ModelEditor/ModelEditorWidget',
         'js/Widgets/DiagramDesigner/ConnectionRouteManagerBasic',
         './NetLabelConnection',
-        './NetLabelWidget.Mouse'], function (ModelEditorWidget,
+        './NetLabelWidget.Mouse',
+        'css!./NetLabelWidget'], function (ModelEditorWidget,
                                            ConnectionRouteManagerBasic,
                                            NetLabelConnection,
                                            NetLabelWidgetMouse) {
@@ -74,17 +75,15 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
     };
 
     NetLabelWidget.prototype._refreshScreen = function () {
-        var i,
-            CANVAS_EDGE = 100,
+        var CANVAS_EDGE = 100,
             connectionIDsToUpdate,
             maxWidth = 0,
             maxHeight = 0,
-            itemBBox,
             redrawnConnectionIDs,
             doRenderGetLayout,
             doRenderSetLayout,
             items = this.items,
-            affectedItems = [],
+            affectedItems,
             dispatchEvents,
             self = this;
 

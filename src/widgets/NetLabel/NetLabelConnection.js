@@ -140,13 +140,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var bBox;
-        bBox = { "x": -1,
-            "y": -1,
-            "x2": -1,
-            "y2": -1,
-            "width": 0,
-            "height": 0 };
+        var bBox = null;
+//        bBox = { "x": NaN,
+//            "y": NaN,
+//            "x2": NaN,
+//            "y2": NaN,
+//            "width": 0,
+//            "height": 0 };
         return bBox;
     };
 
@@ -204,7 +204,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.srcDragPoint.css({"position": "absolute",
-                "background-color" : "red",
+//                "background-color" : "red",
                 "top": this.sourceCoordinates.y,
                 "left": this.sourceCoordinates.x});
 
@@ -218,7 +218,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.dstDragPoint.css({"position": "absolute",
-                "background-color" : "blue",
+//                "background-color" : "blue",
                 "top": this.endCoordinates.y,
                 "left": this.endCoordinates.x});
 

@@ -1,0 +1,12 @@
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Dana Zhang
+ *
+ */
+.diagram-designer .items .c-d-end.src {
+  background-color: red; }
+.diagram-designer .items .c-d-end.dst {
+  background-color: blue; }
+.diagram-designer .items .connList .netLabel {
+  cursor: pointer; }

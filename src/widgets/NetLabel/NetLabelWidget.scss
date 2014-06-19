@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Dana Zhang
+ *
+ */
+
+$diagram-designer-selection-c-d-end-src-background-color: #FF0000;
+$diagram-designer-selection-c-d-end-dst-background-color: #0000FF;
+$diagram-designer-selection-rubber-band-border-color: #52A8EC;
+$diagram-designer-selection-outline-background-color: rgba(255, 255, 0, 0.05);
+$diagram-designer-selection-outline-border: rgba(0,0,0,0.5) dashed 1px;
+$diagram-designer-selection-outline-shadow-start: rgba(0, 0, 0, 0.075);
+$diagram-designer-selection-outline-shadow-end: rgba(0, 0, 0, 0.6);
+$diagram-designer-selection-outline-s-btn-background-color: #FFFFFF;
+$diagram-designer-selection-outline-s-btn-shadow-start: rgba(0, 0, 0, 0.075);
+$diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
+
+
+.diagram-designer {
+
+
+
+
+  .items {
+    .c-d-end {
+
+    &.src {
+      background-color: $diagram-designer-selection-c-d-end-src-background-color;
+    }
+
+    &.dst {
+      background-color: $diagram-designer-selection-c-d-end-dst-background-color;
+    }
+  }
+    .connList {
+      .netLabel {
+        cursor: pointer;
+      }
+    }
+
+    .selection-outline {
+
+    }
+
+  }
+
+}
