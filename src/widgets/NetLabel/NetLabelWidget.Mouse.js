@@ -48,8 +48,6 @@ define(['./NetLabelWidget.Constants',
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                // todo: highlight port referenced to by the netlabel
-//                self.items[connId].showEndReconnectors();
                 self.onConnectionMouseDown.call(self, connId, eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));

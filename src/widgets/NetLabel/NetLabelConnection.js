@@ -87,6 +87,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
             $(dstPortLabelList).append(dstPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
+
+        self.skinParts.srcNetLabel = srcPortLabel;
+        self.skinParts.dstNetLabel = dstPortLabel;
+        self.skinParts.srcPortLabelList = srcPortLabelList;
+        self.skinParts.dstPortLabelList = dstPortLabelList;
     };
 
     NetLabelConnection.prototype.destroy = function () {
@@ -141,10 +146,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.getBoundingBox = function () {
         var bBox = null;
-//        bBox = { "x": NaN,
-//            "y": NaN,
-//            "x2": NaN,
-//            "y2": NaN,
+//        bBox = { "x": 0,
+//            "y": 0,
+//            "x2": 0,
+//            "y2": 0,
 //            "width": 0,
 //            "height": 0 };
         return bBox;
@@ -156,6 +161,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selectedInMultiSelection = multiSelection;
 
         this.showEndReconnectors();
+        /* Adding Highlight classes */
+        this.highlight();
+
         //in edit mode and when not participating in a multiple selection,
         //show endpoint connectors
         if (this.selectedInMultiSelection === true) {
@@ -184,6 +192,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selectedInMultiSelection = false;
 
         this.hideEndReconnectors();
+        this.unHighlight();
         this._setEditMode(false);
     };
 
@@ -204,7 +213,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.srcDragPoint.css({"position": "absolute",
-//                "background-color" : "red",
                 "top": this.sourceCoordinates.y,
                 "left": this.sourceCoordinates.x});
 
@@ -218,7 +226,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             });
 
             this.skinParts.dstDragPoint.css({"position": "absolute",
-//                "background-color" : "blue",
                 "top": this.endCoordinates.y,
                 "left": this.endCoordinates.x});
 
@@ -228,17 +235,37 @@ define(['js/Widgets/DiagramDesigner/Connection',
             var scale = Math.max(1, this.designerAttributes.width / 10); //10px is the width of the connector end
             this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
             this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+
         } else {
             this.hideEndReconnectors();
+        }
+    };
+
+    NetLabelConnection.prototype.hideEndReconnectors = function () {
+        if (this.skinParts.srcDragPoint) {
+            this.skinParts.srcDragPoint.empty();
+            this.skinParts.srcDragPoint.remove();
+            this.skinParts.srcDragPoint = null;
+        }
+
+        if (this.skinParts.dstDragPoint) {
+            this.skinParts.dstDragPoint.empty();
+            this.skinParts.dstDragPoint.remove();
+            this.skinParts.dstDragPoint = null;
         }
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
     NetLabelConnection.prototype.highlight = function () {
 
+        $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
+        $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.unHighlight = function () {
+
+        $(this.skinParts.srcNetLabel).removeClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
+        $(this.skinParts.dstNetLabel).removeClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
 
     };
 
