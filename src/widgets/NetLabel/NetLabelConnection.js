@@ -21,7 +21,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
-            netLabel = $('<div class="netLabel"></div>'),// todo: style the netlabels
+            netLabelList = $('<div class="connList"></div>'),
+            netLabel = $('<div class="netLabel"></div>'),
             srcPortLabel = netLabel.clone(),
             dstPortLabel = netLabel.clone(),
             srcID = self._generateHash(self.srcID),
@@ -51,7 +52,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (!srcPortLabelList) {
             // give it an id attr
-            srcPortLabelList = self._toolTipBase.clone()[0];
+            srcPortLabelList = netLabelList.clone()[0];
             srcPortLabelList.setAttribute("id", self.id);
             srcPortLabelList.setAttribute("objName", self.srcText);
             srcPortLabelList.setAttribute("obj-gmeid", srcID); // used to highlight actual object
@@ -70,7 +71,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         if (!dstPortLabelList) {
-            dstPortLabelList = self._toolTipBase.clone()[0];
+            dstPortLabelList = netLabelList.clone()[0];
             dstPortLabelList.setAttribute("id", self.id);
             dstPortLabelList.setAttribute("objName", self.dstText);
             dstPortLabelList.setAttribute("obj-gmeid", dstID);
@@ -121,7 +122,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     };
 
-    NetLabelConnection.prototype._toolTipBase = $('<div class="connList" style="width: auto; height: auto; border: 1px solid black; display: block; text-align: center"></div>');
+    NetLabelConnection.prototype._toolTipBase = $('<div class="connList"></div>');
     // max-height = 60 for displaying top 3 port only when nothing is selected; later on adjust height when selected
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;

@@ -17,10 +17,12 @@ $diagram-designer-selection-outline-shadow-end: rgba(0, 0, 0, 0.6);
 $diagram-designer-selection-outline-s-btn-background-color: #FFFFFF;
 $diagram-designer-selection-outline-s-btn-shadow-start: rgba(0, 0, 0, 0.075);
 $diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
-
+$connList-netlabel-border-style: 1px solid #C0C0C0;
+$connList-border-style: 1px groove #4D4D4D;
+$connList-netlabel-background-color: #CDCDCD;
+$connList-top-padding: 5px;
 
 .diagram-designer {
-
 
   .items {
     .c-d-end {
@@ -37,8 +39,15 @@ $diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
       }
     }
     .connList {
+      width: auto;
+      height: auto;
+      padding-top: $connList-top-padding;
+      border: $connList-border-style;
+      text-align: center;
       .netLabel {
         cursor: pointer;
+        border: $connList-netlabel-border-style;
+        background-color: $connList-netlabel-background-color;
 
         &.src-highlighted {
           background-color: $diagram-designer-selection-c-d-end-src-highlight-color;
