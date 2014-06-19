@@ -258,15 +258,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
     NetLabelConnection.prototype.highlight = function () {
 
-        $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
-        $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
+        $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+        $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.unHighlight = function () {
 
-        $(this.skinParts.srcNetLabel).removeClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
-        $(this.skinParts.dstNetLabel).removeClass(NetLabelWidgetConstants.ITEM_HIGHLIGHT_CLASS);
-
+        $(this.skinParts.srcNetLabel).removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+        $(this.skinParts.dstNetLabel).removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.update = function (objDescriptor) {
