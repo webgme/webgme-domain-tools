@@ -4,9 +4,9 @@
  * Author: Dana Zhang
  *
  */
-.diagram-designer .items .c-d-end.src {
+.diagram-designer .items .c-d-end.src.netLabel {
   background-color: red; }
-.diagram-designer .items .c-d-end.dst {
+.diagram-designer .items .c-d-end.dst.netLabel {
   background-color: blue; }
 .diagram-designer .items .connList .netLabel {
   cursor: pointer; }

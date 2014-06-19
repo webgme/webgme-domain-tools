@@ -25,11 +25,15 @@ $diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
   .items {
     .c-d-end {
       &.src {
-        background-color: $diagram-designer-selection-c-d-end-src-background-color;
+        &.netLabel {
+          background-color: $diagram-designer-selection-c-d-end-src-background-color;
+        }
       }
 
       &.dst {
-        background-color: $diagram-designer-selection-c-d-end-dst-background-color;
+        &.netLabel {
+          background-color: $diagram-designer-selection-c-d-end-dst-background-color;
+        }
       }
     }
     .connList {

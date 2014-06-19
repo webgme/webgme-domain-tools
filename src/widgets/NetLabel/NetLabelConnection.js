@@ -206,7 +206,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.srcDragPoint = this.skinParts.srcDragPoint || $('<div/>', {
                 "data-end": NetLabelWidgetConstants.CONNECTION_END_SRC,
                 "data-id": this.id,
-                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_SRC
+                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_SRC +
+                    " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
             });
 
             this.skinParts.srcDragPoint.css({"position": "absolute",
@@ -219,7 +220,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.dstDragPoint = this.skinParts.dstDragPoint || $('<div/>', {
                 "data-end": NetLabelWidgetConstants.CONNECTION_END_DST,
                 "data-id": this.id,
-                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_DST
+                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_DST +
+                    " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
             });
 
             this.skinParts.dstDragPoint.css({"position": "absolute",
