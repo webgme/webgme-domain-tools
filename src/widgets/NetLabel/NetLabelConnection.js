@@ -88,10 +88,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
 
-        self.skinParts.srcNetLabel = srcPortLabel;
-        self.skinParts.dstNetLabel = dstPortLabel;
-        self.skinParts.srcPortLabelList = srcPortLabelList;
-        self.skinParts.dstPortLabelList = dstPortLabelList;
+        self.skinParts.srcNetLabel = $(srcPortLabelList).find('[id^="' + dstLabelID + '"]')[0];
+        self.skinParts.dstNetLabel = $(dstPortLabelList).find('[id^="' + srcLabelID + '"]')[0];
     };
 
     NetLabelConnection.prototype.destroy = function () {
@@ -160,9 +158,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selected = true;
         this.selectedInMultiSelection = multiSelection;
 
-        this.showEndReconnectors();
-        /* Adding Highlight classes */
         this.highlight();
+        this.showEndReconnectors();
 
         //in edit mode and when not participating in a multiple selection,
         //show endpoint connectors
@@ -191,8 +188,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selected = false;
         this.selectedInMultiSelection = false;
 
-        this.hideEndReconnectors();
         this.unHighlight();
+        this.hideEndReconnectors();
         this._setEditMode(false);
     };
 

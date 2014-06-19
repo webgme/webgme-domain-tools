@@ -22,19 +22,16 @@ $diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
 .diagram-designer {
 
 
-
-
   .items {
     .c-d-end {
+      &.src {
+        background-color: $diagram-designer-selection-c-d-end-src-background-color;
+      }
 
-    &.src {
-      background-color: $diagram-designer-selection-c-d-end-src-background-color;
+      &.dst {
+        background-color: $diagram-designer-selection-c-d-end-dst-background-color;
+      }
     }
-
-    &.dst {
-      background-color: $diagram-designer-selection-c-d-end-dst-background-color;
-    }
-  }
     .connList {
       .netLabel {
         cursor: pointer;
@@ -47,11 +44,6 @@ $diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
         }
       }
     }
-
-    .selection-outline {
-
-    }
-
   }
 
 }
