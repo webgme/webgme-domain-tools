@@ -13,11 +13,14 @@
   height: auto;
   padding-top: 5px;
   border: 1px groove #4d4d4d;
-  text-align: center; }
+  text-align: center;
+  line-height: 15px; }
   .diagram-designer .items .connList .netLabel {
     cursor: pointer;
-    border: 1px solid silver;
-    background-color: #cdcdcd; }
+    border-top: 1px dashed #999999;
+    background-color: #f3f3f3;
+    padding-left: 5px;
+    padding-right: 5px; }
     .diagram-designer .items .connList .netLabel.src-highlighted {
       background-color: #ff6666; }
     .diagram-designer .items .connList .netLabel.dst-highlighted {
