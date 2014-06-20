@@ -46,7 +46,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         self.sourceCoordinates.x = srcPos.x;
         self.sourceCoordinates.y = srcPos.y;
-        self.endCoordinates.x = dstPos.x - OFFSET;
+        self.endCoordinates.x = dstPos.x;
         self.endCoordinates.y = dstPos.y;
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
