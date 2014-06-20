@@ -8,8 +8,7 @@
 "use strict";
 
 define(['js/Widgets/DiagramDesigner/Connection',
-    './NetLabelWidget.Constants',
-    'js/Constants'], function (Connection, NetLabelWidgetConstants, CONSTANTS) {
+    './NetLabelWidget.Constants'], function (Connection, NetLabelWidgetConstants) {
 
     var NetLabelConnection;
 

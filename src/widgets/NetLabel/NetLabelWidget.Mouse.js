@@ -43,12 +43,17 @@ define(['./NetLabelWidget.Constants',
         //handle click on netLabels
         this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS,  function (event) {
             var connId = $(this).attr("connId"),
-                eventDetails = self._processMouseEvent(event, true, true, true, true);
+                eventDetails = self._processMouseEvent(event, true, true, true, true),
+                rightClick = event.which === 3;
 
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                if (rightClick) {
+                    // todo: do something here - maybe enable menu-delete
+                } else {
+                    self.onConnectionMouseDown.call(self, connId, eventDetails);
+                }
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }

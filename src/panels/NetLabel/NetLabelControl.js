@@ -7,7 +7,7 @@
 
 define(['js/Panels/ModelEditor/ModelEditorControl',
     'js/Constants',
-    'js/Utils/PreferencesHelper'], function (ModelEditorControl, CONSTANTS, PreferencesHelper) {
+    './NetLabelControl.EventHandlers'], function (ModelEditorControl, CONSTANTS, NetLabelControlEventHandlers) {
 
     "use strict";
 
@@ -15,12 +15,10 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
 
     NetLabelControl = function (options) {
         ModelEditorControl.call(this, options);
-        this.netLabelList = {};
     };
 
-
     _.extend(NetLabelControl.prototype, ModelEditorControl.prototype);
-
+    _.extend(NetLabelControl.prototype, NetLabelControlEventHandlers.prototype);
 
     NetLabelControl.prototype.getConnectionDescriptor = function (gmeID) {
 

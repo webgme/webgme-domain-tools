@@ -1,9 +1,11 @@
-"use strict";
 /*
- * STRING CONSTANT DEFINITIONS USED IN DESIGNER DIAGRAM
+ * Copyright (C) 2014 Vanderbilt University, All rights reserved.
+ *
+ * Author: Dana Zhang
+ * Created on 6/17/2014
  */
-
-define(['js/Constants'], function (CONSTANTS) {
+define([], function () {
+    "use strict";
 
     //return string constants
     return {
