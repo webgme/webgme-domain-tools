@@ -11,6 +11,7 @@
 .diagram-designer .items .connList {
   width: auto;
   height: auto;
+  cursor: pointer;
   padding-top: 5px;
   border: 1px groove #4d4d4d;
   text-align: center;

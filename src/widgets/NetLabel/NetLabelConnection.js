@@ -5,10 +5,11 @@
  *         Dana Zhang
  */
 
-"use strict";
-
 define(['js/Widgets/DiagramDesigner/Connection',
-    './NetLabelWidget.Constants'], function (Connection, NetLabelWidgetConstants) {
+    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Draggable',
+    './NetLabelWidget.Constants'], function (Connection, DiagramDesignerWidgetDraggable, NetLabelWidgetConstants) {
+
+    "use strict";
 
     var NetLabelConnection;
 
@@ -17,6 +18,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
+    _.extend(NetLabelConnection.prototype, DiagramDesignerWidgetDraggable.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -29,10 +31,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcLabelID = self.srcID,
             dstLabelID = self.dstID,
             OFFSET = self.dstText.length >= 11 ? 60 : 20,
-            srcXPos = segPoints[0].x,
-            srcYPos = segPoints[0].y,
-            dstXPos = segPoints[segPoints.length - 1].x - OFFSET,
-            dstYPos = segPoints[segPoints.length - 1].y,
+//            srcPos = self.srcPos === null ? segPoints[0] : self.srcPos,
+//            dstPos = self.dstPos === null ? segPoints[segPoints.length - 1] : self.dstPos,
+            srcPos = segPoints[0],
+            dstPos = segPoints[segPoints.length - 1],
             srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
 
@@ -42,10 +44,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self.endCoordinates = { "x": -1,
             "y": -1};
 
-        self.sourceCoordinates.x = srcXPos;
-        self.sourceCoordinates.y = srcYPos;
-        self.endCoordinates.x = segPoints[segPoints.length - 1].x;
-        self.endCoordinates.y = dstYPos;
+        self.sourceCoordinates.x = srcPos.x;
+        self.sourceCoordinates.y = srcPos.y;
+        self.endCoordinates.x = dstPos.x - OFFSET;
+        self.endCoordinates.y = dstPos.y;
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
 
@@ -58,8 +60,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             // todo: style the objects with css style in separate file
             srcPortLabelList.style.position = "absolute";
         }
-        srcPortLabelList.style.left = srcXPos.toString() + "px";
-        srcPortLabelList.style.top = srcYPos.toString() + "px";
+        srcPortLabelList.style.left = self.sourceCoordinates.x.toString() + "px";
+        srcPortLabelList.style.top = self.sourceCoordinates.y.toString() + "px";
 
         srcPortLabel.text(self.dstText);
         srcPortLabel[0].setAttribute('id', dstLabelID);
@@ -76,8 +78,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList.setAttribute("obj-gmeid", dstID);
             dstPortLabelList.style.position = "absolute";
         }
-        dstPortLabelList.style.left = dstXPos.toString() + "px";
-        dstPortLabelList.style.top = dstYPos.toString() + "px";
+
+        dstPortLabelList.style.left = self.endCoordinates.x.toString() + "px";
+        dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
         dstPortLabel.text(self.srcText);
         dstPortLabel[0].setAttribute('id', srcLabelID);
@@ -144,12 +147,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.getBoundingBox = function () {
         var bBox = null;
-//        bBox = { "x": 0,
-//            "y": 0,
-//            "x2": 0,
-//            "y2": 0,
-//            "width": 0,
-//            "height": 0 };
+        bBox = { "x": 0,
+            "y": 0,
+            "x2": 0,
+            "y2": 0,
+            "width": 0,
+            "height": 0 };
         return bBox;
     };
 

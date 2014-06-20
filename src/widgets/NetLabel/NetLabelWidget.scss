@@ -43,6 +43,7 @@ $connList-line-height: 15px;
     .connList {
       width: auto;
       height: auto;
+      cursor: pointer;
       padding-top: $connList-top-padding;
       border: $connList-border-style;
       text-align: center;
