@@ -5,12 +5,10 @@
  *         Dana Zhang
  */
 
+"use strict";
 
 define(['js/Widgets/DiagramDesigner/Connection',
-    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Draggable',
-    './NetLabelWidget.Constants'], function (Connection, NetLabelWidgetConstants, DiagramDesignerWidgetDraggable) {
-
-    "use strict";
+    './NetLabelWidget.Constants'], function (Connection, NetLabelWidgetConstants) {
 
     var NetLabelConnection;
 
@@ -19,7 +17,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
-    _.extend(NetLabelConnection.prototype, DiagramDesignerWidgetDraggable.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -147,12 +144,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.getBoundingBox = function () {
         var bBox = null;
-        bBox = { "x": 0,
-            "y": 0,
-            "x2": 0,
-            "y2": 0,
-            "width": 0,
-            "height": 0 };
+//        bBox = { "x": 0,
+//            "y": 0,
+//            "x2": 0,
+//            "y2": 0,
+//            "width": 0,
+//            "height": 0 };
         return bBox;
     };
 
