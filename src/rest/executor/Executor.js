@@ -237,7 +237,8 @@ define(['logManager',
                     }
                 };
             counter = filesToArchive.length;
-            if (counter === 0) {
+            if (filesToArchive.length === 0) {
+                logger.info('There was no files to archive..');
                 counterCallback(null);
             }
             for (i = 0; i < filesToArchive.length; i += 1) {
@@ -250,7 +251,7 @@ define(['logManager',
             jointArtifact.addFileAsSoftLink(filename, fs.createReadStream(filePath), function (err, hash) {
                 var j;
                 if (err) {
-                    logger.error(err);
+                    logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
                     callback('FAILED_TO_ARCHIVE_FILE');
                 } else {
                     // Add the file-hash to the results artifacts containing the filename.
@@ -328,7 +329,7 @@ define(['logManager',
                 filename,
                 matched;
             //console.log('Walking the walk..');
-            for (i = 0; i < results.length; i++) {
+            for (i = 0; i < results.length; i += 1) {
                 filename = path.relative(directory, results[i]).replace(/\\/g,'/');
                 archive = false;
                 for (a = 0; a < resultsArtifacts.length; a += 1) {
