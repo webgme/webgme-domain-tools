@@ -26,17 +26,18 @@ define(['js/Widgets/DiagramDesigner/Connection',
             netLabel = $('<div class="netLabel"></div>'),
             srcPortLabel = netLabel.clone(),
             dstPortLabel = netLabel.clone(),
-            srcID = self._generateHash(self.srcID),
-            dstID = self._generateHash(self.dstID),
-            srcLabelID = self.srcID,
-            dstLabelID = self.dstID,
+            srcID = self.srcSubCompId || self.srcObjId,
+            dstID = self.dstSubCompId || self.dstObjId,
+            srcLabelID = srcID,
+            dstLabelID = dstID,
             OFFSET = self.dstText.length >= 11 ? 60 : 20,
-//            srcPos = self.srcPos === null ? segPoints[0] : self.srcPos,
-//            dstPos = self.dstPos === null ? segPoints[segPoints.length - 1] : self.dstPos,
+//            srcPos = self.srcSubCompId ? segPoints[0] : self.srcObjPos,
+//            dstPos = self.dstSubCompId ? segPoints[segPoints.length - 1] : self.dstObjPos,
             srcPos = segPoints[0],
             dstPos = segPoints[segPoints.length - 1],
-            srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + srcID + '"]')[0],
-            dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-gmeid^="' + dstID + '"]')[0];
+            srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
+            dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
+            existingLabel;
 
         self.sourceCoordinates = { "x": -1,
             "y": -1};
@@ -56,7 +57,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPortLabelList = netLabelList.clone()[0];
             srcPortLabelList.setAttribute("id", self.id);
             srcPortLabelList.setAttribute("objName", self.srcText);
-            srcPortLabelList.setAttribute("obj-gmeid", srcID); // used to highlight actual object
+            srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
             // todo: style the objects with css style in separate file
             srcPortLabelList.style.position = "absolute";
         }
@@ -66,7 +67,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         srcPortLabel.text(self.dstText);
         srcPortLabel[0].setAttribute('id', dstLabelID);
         srcPortLabel[0].setAttribute('connId', self.connectionId);
-        if (!$(srcPortLabelList).find('[id^="' + dstLabelID + '"]')[0]) {
+
+        existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        if (!existingLabel) {
             $(srcPortLabelList).append(srcPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
         }
@@ -75,24 +78,25 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = netLabelList.clone()[0];
             dstPortLabelList.setAttribute("id", self.id);
             dstPortLabelList.setAttribute("objName", self.dstText);
-            dstPortLabelList.setAttribute("obj-gmeid", dstID);
+            dstPortLabelList.setAttribute("obj-id", dstID);
             dstPortLabelList.style.position = "absolute";
         }
 
-        dstPortLabelList.style.left = self.endCoordinates.x.toString() + "px";
+        dstPortLabelList.style.left = (self.endCoordinates.x - OFFSET).toString() + "px";
         dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
         dstPortLabel.text(self.srcText);
         dstPortLabel[0].setAttribute('id', srcLabelID);
         dstPortLabel[0].setAttribute('connId', self.connectionId);
 
-        if (!$(dstPortLabelList).find('[id^="' + srcLabelID + '"]')[0]) {
+        existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        if (!existingLabel) {
             $(dstPortLabelList).append(dstPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
 
-        self.skinParts.srcNetLabel = $(srcPortLabelList).find('[id^="' + dstLabelID + '"]')[0];
-        self.skinParts.dstNetLabel = $(dstPortLabelList).find('[id^="' + srcLabelID + '"]')[0];
+        self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
     };
 
     NetLabelConnection.prototype.destroy = function () {
@@ -104,19 +108,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-    NetLabelConnection.prototype._generateHash = function (str) {
-        var hash = 0,
-            i,
-            chr;
-        for (i = 0; i < str.length; i += 1) {
-            chr   = str.charCodeAt(i);
-            hash  = ((hash << 5) - hash) + chr;
-            hash |= 0; // Convert to 32bit integer
-        }
-        return hash;
-    };
-
-    // todo: implement this to create shadow for highlighted netlabel lists
     NetLabelConnection.prototype._createPathShadow = function (segPoints) {
 
     };
@@ -142,6 +133,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
         this.dstTextEdit = objDescriptor.dstTextEdit || false;
+
+        // getting relevant src & dst IDs
+        this.srcObjId = objDescriptor.srcObjId; // designer item ID (etc 'I_')
+        this.srcSubCompId = objDescriptor.srcSubCompId; // port ID, undefined if port nonexistent
+        this.dstObjId = objDescriptor.dstObjId;
+        this.dstSubCompId = objDescriptor.dstSubCompId;
+        // getting src & dst object positions
+        this.srcObjPos = objDescriptor.srcObjPos;
+        this.dstObjPos = objDescriptor.dstObjPos;
+
         this.segmentPoints = [];
     };
 

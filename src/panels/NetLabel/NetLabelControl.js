@@ -38,14 +38,14 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             dstParentName = gmeClient.getNode(dstParentId).getAttribute('name'),
             isSrcAPort = srcID.match(/\//g).length > 3,
             isDstAPort = dstID.match(/\//g).length > 3,
-            srcPos = isSrcAPort ? null : srcObj.getRegistry('position'),
-            dstPos = isDstAPort ? null : dstObj.getRegistry('position'),
+            srcObjPos = srcObj.getRegistry('position'),
+            dstObjPos = dstObj.getRegistry('position'),
             srcText = isSrcAPort ? srcParentName + "." + srcName : srcName,
             dstText = isDstAPort ? dstParentName + "." + dstName : dstName;
         return {'srcText': srcText,
                 'dstText': dstText,
-                'srcPos': srcPos,
-                'dstPos': dstPos,
+                'srcObjPos': srcObjPos,
+                'dstObjPos': dstObjPos,
                 'srcID': srcID,
                 'dstID': dstID};
     };

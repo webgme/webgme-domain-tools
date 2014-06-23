@@ -190,6 +190,28 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         this.logger.debug("_refreshScreen END");
     };
 
+    NetLabelWidget.prototype.onDesignerItemDrag = function (draggedItemId, allDraggedItemIDs) {
+        var i = allDraggedItemIDs.length,
+            connectionIDsToUpdate,
+            redrawnConnectionIDs,
+            maxWidth = 0,
+            maxHeight = 0,
+            itemBBox,
+            items = this.items;
+
+        //get the position and size of all dragged guy and temporarily resize canvas to fit them
+        while (i--) {
+            itemBBox =  items[allDraggedItemIDs[i]].getBoundingBox();
+            maxWidth = Math.max(maxWidth, itemBBox.x2);
+            maxHeight = Math.max(maxHeight, itemBBox.y2);
+        }
+
+        this._actualSize.w = Math.max(this._preDragActualSize.w, maxWidth);
+        this._actualSize.h = Math.max(this._preDragActualSize.h, maxHeight);
+
+        this._resizeItemContainer();
+    };
+
     _.extend(NetLabelWidget.prototype, NetLabelWidgetMouse.prototype);
 
     return NetLabelWidget;
