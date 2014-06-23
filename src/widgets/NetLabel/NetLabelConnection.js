@@ -30,7 +30,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstID = self.dstSubCompId || self.dstObjId,
             srcLabelID = srcID,
             dstLabelID = dstID,
-            OFFSET = self.dstText.length >= 11 ? 60 : 20,
+            OFFSET = self.dstText.length >= 9 ? 60 : 20,
 //            srcPos = self.srcSubCompId ? segPoints[0] : self.srcObjPos,
 //            dstPos = self.dstSubCompId ? segPoints[segPoints.length - 1] : self.dstObjPos,
             srcPos = segPoints[0],
@@ -122,13 +122,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
         this.dstText = objDescriptor.dstText;
-        this.srcID = objDescriptor.srcID;
-        this.dstID = objDescriptor.dstID;
         this.connectionId = objDescriptor.connectionId;
-        this.registeredSrcId = objDescriptor.registeredSrcId;
-        this.registeredDstId = objDescriptor.registeredDstId;
-        this.srcPos = objDescriptor.srcPos;
-        this.dstPos = objDescriptor.dstPos;
         this.name = objDescriptor.name;/* || this.id;*/
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
