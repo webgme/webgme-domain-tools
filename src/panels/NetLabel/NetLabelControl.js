@@ -81,15 +81,18 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
                                 objDesc.aspect = this._selectedAspect;
 
                                 this.designerCanvas.updateDesignerItem(componentID, objDesc);
+
+                                // ***************updating netLabels when components names change*********************
+                                // todo: refinement
                                 var connections2update = this.designerCanvas.connectionIDbyEndID[componentID];
                                 if (connections2update) {
+                                    var counter,
+                                        connComponentId,
+                                        item,
+                                        labels2update,
+                                        ctr;
                                     if (connections2update.__SELF__) {
-                                        var counter = connections2update.__SELF__.length,
-                                            connComponentId,
-                                            item,
-                                            labels2update,
-                                            ctr,
-                                            results;
+                                        counter = connections2update.__SELF__.length;
                                         while (counter--) {
                                             connComponentId = connections2update.__SELF__[counter];
                                             item = this.designerCanvas.items[connComponentId];
@@ -101,9 +104,42 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
                                                 }
                                             }
                                         }
+                                    }
 
+                                    // update label names when a subcomponent's parent name changes
+                                    for (sCompId in connections2update) {
+                                        if (connections2update.hasOwnProperty(sCompId)) {
+                                            var cObjArray = connections2update[sCompId];
+                                            counter = cObjArray.length;
+                                            while (counter--) {
+                                                connComponentId = cObjArray[counter];
+                                                item = this.designerCanvas.items[connComponentId];
+                                                labels2update = item.diagramDesigner.$el.find('[connid^="' + connComponentId + '"]');
+                                                ctr = labels2update.length;
+                                                while (ctr--) {
+                                                    if (labels2update[ctr].getAttribute("id") === sCompId) {
+                                                        var subStr = labels2update[ctr].textContent.substr(labels2update[ctr].textContent.indexOf('.'), labels2update[ctr].textContent.length);
+                                                        labels2update[ctr].textContent = objDesc.name + subStr;
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                    counter = connections2update.length;
+                                    while (counter--) {
+                                        connComponentId = connections2update.__SELF__[counter];
+                                        item = this.designerCanvas.items[connComponentId];
+                                        labels2update = item.diagramDesigner.$el.find('[connid^="' + connComponentId + '"]');
+                                        ctr = labels2update.length;
+                                        while (ctr--) {
+                                            if (labels2update[ctr].getAttribute("id") === componentID) {
+                                                labels2update[ctr].textContent = objDesc.name;
+                                            }
+                                        }
                                     }
                                 }
+                                // ***********************************************************************************
                             }
                         }
                     }
