@@ -29,13 +29,18 @@ define(['logManager',
     NetLabelControlEventHandlers.prototype._onSelectionDelete = function (idList) {
         var objIdList = [],
             i = idList.length,
+            compID,
+            itemDeleting,
             objID;
 
         while (i--) {
-            objID = this._ComponentID2GmeID[idList[i]];
+            compID = idList[i];
+            objID = this._ComponentID2GmeID[compID];
             //temporary fix to not allow deleting ROOT AND FCO
             if (GMEConcepts.canDeleteNode(objID)) {
                 objIdList.pushUnique(objID);
+                itemDeleting = this.designerCanvas.items[compID];
+                itemDeleting.hideEndReconnectors();
             } else {
                 this.logger.warning('Can not delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');
             }
