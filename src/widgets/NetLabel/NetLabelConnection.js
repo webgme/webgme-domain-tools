@@ -24,13 +24,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
         var self = this,
             netLabelList = $('<div class="connList"></div>'),
             netLabel = $('<div class="netLabel"></div>'),
+            showAll = $('<div class="show-all-labels">...</div>'),
             srcPortLabel = netLabel.clone(),
             dstPortLabel = netLabel.clone(),
             srcID = self.srcSubCompId || self.srcObjId,
             dstID = self.dstSubCompId || self.dstObjId,
             srcLabelID = srcID,
             dstLabelID = dstID,
-            OFFSET = self.dstText.length >= 9 ? 60 : 20,
+            OFFSET = self.srcText.length >= 9 ? 80 : 20,
 //            srcPos = self.srcSubCompId ? segPoints[0] : self.srcObjPos,
 //            dstPos = self.dstSubCompId ? segPoints[segPoints.length - 1] : self.dstObjPos,
             srcPos = segPoints[0],
@@ -64,9 +65,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
         srcPortLabelList.style.left = self.sourceCoordinates.x.toString() + "px";
         srcPortLabelList.style.top = self.sourceCoordinates.y.toString() + "px";
 
-        srcPortLabel.text(self.dstText);
-        srcPortLabel[0].setAttribute('id', dstLabelID);
-        srcPortLabel[0].setAttribute('connId', self.connectionId);
+        if (self.dstText.indexOf('!') === 0) {
+            srcPortLabel.text(self.dstText.slice(1));
+            srcPortLabel.css("text-decoration", "overline");
+        } else {
+            srcPortLabel.text(self.dstText);
+            srcPortLabel.css("text-decoration", "none");
+        }
+        srcPortLabel.attr('id', dstLabelID);
+        srcPortLabel.attr('connId', self.connectionId);
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         if (!existingLabel) {
@@ -85,9 +92,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
         dstPortLabelList.style.left = (self.endCoordinates.x - OFFSET).toString() + "px";
         dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
-        dstPortLabel.text(self.srcText);
-        dstPortLabel[0].setAttribute('id', srcLabelID);
-        dstPortLabel[0].setAttribute('connId', self.connectionId);
+        if (self.srcText.indexOf('!') === 0) {
+            dstPortLabel.text(self.srcText.slice(1));
+            dstPortLabel.css('text-decoration', 'overline');
+        } else {
+            dstPortLabel.text(self.srcText);
+            dstPortLabel.css('text-decoration', 'none');
+        }
+        dstPortLabel.attr('id', srcLabelID);
+        dstPortLabel.attr('connId', self.connectionId);
 
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
         if (!existingLabel) {
@@ -97,6 +110,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+
+        // check if connLists need to be collapsed:
+
+//        if (srcPortLabelList.children.length > 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
+//            $(srcPortLabelList).append(showAll);
+//        }
+//        if (dstPortLabelList.children.length > 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
+//            $(dstPortLabelList).append(showAll);
+//        }
     };
 
     NetLabelConnection.prototype.destroy = function () {

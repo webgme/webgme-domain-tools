@@ -169,7 +169,13 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
                     ctr = labels2update.length;
                     while (ctr--) {
                         if (labels2update[ctr].getAttribute("id") === componentID) {
-                            labels2update[ctr].textContent = objDesc.name;
+                            if (objDesc.name.indexOf('!') === 0) {
+                                labels2update[ctr].textContent = objDesc.name.slice(1);
+                                labels2update[ctr].style['text-decoration'] = 'overline';
+                            } else {
+                                labels2update[ctr].textContent = objDesc.name;
+                                labels2update[ctr].style['text-decoration'] = 'none';
+                            }
                         }
                     }
                 }
