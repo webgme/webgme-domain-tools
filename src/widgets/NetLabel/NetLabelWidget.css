@@ -26,3 +26,6 @@
       background-color: #ff6666; }
     .diagram-designer .items .connList .netLabel.dst-highlighted {
       background-color: #00ccff; }
+  .diagram-designer .items .connList .show-all-labels {
+    cursor: pointer;
+    background-color: #f3f3f3; }

@@ -29,8 +29,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabel = netLabel.clone(),
             srcID = self.srcSubCompId || self.srcObjId,
             dstID = self.dstSubCompId || self.dstObjId,
-            srcLabelID = srcID,
-            dstLabelID = dstID,
             OFFSET = self.srcText.length >= 9 ? 80 : 20,
 //            srcPos = self.srcSubCompId ? segPoints[0] : self.srcObjPos,
 //            dstPos = self.dstSubCompId ? segPoints[segPoints.length - 1] : self.dstObjPos,
@@ -38,7 +36,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPos = segPoints[segPoints.length - 1],
             srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
-            existingLabel;
+            existingLabel,
+            nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
+            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0;
 
         self.sourceCoordinates = { "x": -1,
             "y": -1};
@@ -56,7 +56,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPortLabelList) {
             // give it an id attr
             srcPortLabelList = netLabelList.clone()[0];
-            srcPortLabelList.setAttribute("id", self.id);
             srcPortLabelList.setAttribute("objName", self.srcText);
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
             // todo: style the objects with css style in separate file
@@ -72,18 +71,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPortLabel.text(self.dstText);
             srcPortLabel.css("text-decoration", "none");
         }
-        srcPortLabel.attr('id', dstLabelID);
-        srcPortLabel.attr('connId', self.connectionId);
+        srcPortLabel.attr('id', dstID);
+        srcPortLabel.attr('connId', self.id);
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         if (!existingLabel) {
+            if (nbrOfSrcLabels > 3) {
+                srcPortLabel.hide();
+            }
             $(srcPortLabelList).append(srcPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
         }
 
         if (!dstPortLabelList) {
             dstPortLabelList = netLabelList.clone()[0];
-            dstPortLabelList.setAttribute("id", self.id);
             dstPortLabelList.setAttribute("objName", self.dstText);
             dstPortLabelList.setAttribute("obj-id", dstID);
             dstPortLabelList.style.position = "absolute";
@@ -99,11 +100,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabel.text(self.srcText);
             dstPortLabel.css('text-decoration', 'none');
         }
-        dstPortLabel.attr('id', srcLabelID);
-        dstPortLabel.attr('connId', self.connectionId);
+        dstPortLabel.attr('id', srcID);
+        dstPortLabel.attr('connId', self.id);
 
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
         if (!existingLabel) {
+            if (nbrOfDstLabels > 3) {
+                dstPortLabel.hide();
+            }
             $(dstPortLabelList).append(dstPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
@@ -113,12 +117,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         // check if connLists need to be collapsed:
 
-//        if (srcPortLabelList.children.length > 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
-//            $(srcPortLabelList).append(showAll);
-//        }
-//        if (dstPortLabelList.children.length > 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
-//            $(dstPortLabelList).append(showAll);
-//        }
+        if (srcPortLabelList.children.length >= 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
+            var showallSrcLabels = showAll.clone()[0];
+            showallSrcLabels.setAttribute('id', srcID);
+            $(srcPortLabelList).append(showallSrcLabels);
+        }
+        if (dstPortLabelList.children.length >= 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
+            var showallDstLabels = showAll.clone()[0];
+            showallSrcLabels.setAttribute('id', dstID);
+            $(dstPortLabelList).append(showallDstLabels);
+        }
     };
 
     NetLabelConnection.prototype.destroy = function () {
@@ -144,7 +152,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.editable = !!objDescriptor.editable;
         this.srcText = objDescriptor.srcText;
         this.dstText = objDescriptor.dstText;
-        this.connectionId = objDescriptor.connectionId;
         this.name = objDescriptor.name;/* || this.id;*/
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;

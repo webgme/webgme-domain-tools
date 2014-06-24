@@ -73,6 +73,25 @@ define(['./NetLabelWidget.Constants',
             }
         });
 
+        //handle click on show-all-labels class
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL,  function (event) {
+            var connId = $(this).attr("connId"),
+                eventDetails = self._processMouseEvent(event, true, true, true, true),
+                rightClick = event.which === 3;
+
+            logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+
+            if (self.onConnectionMouseDown) {
+                if (rightClick) {
+                    // todo: do something here - maybe enable menu
+                } else {
+                    self._showAllLabels(this);
+                }
+            } else {
+                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+            }
+        });
+
         //handle mouse down on background
         this.$el.on('mousedown.' + EVENT_POSTFIX, function (event) {
             var eventDetails = self._processMouseEvent(event, true, true, true, true);
@@ -105,6 +124,20 @@ define(['./NetLabelWidget.Constants',
             event.preventDefault();
             event.stopImmediatePropagation();
         });
+    };
+
+    NetLabelWidgetMouse.prototype._showAllLabels = function (node) {
+        var self = this,
+            parentContainer = node.parentNode.children,
+            len = parentContainer.length,
+            item;
+        $(node).hide();
+        while (len--) {
+            item = parentContainer[len];
+            if (item.className !== NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
+                $(item).show();
+            }
+        }
     };
 
     NetLabelWidgetMouse.prototype._processMouseEvent = function (event, triggerUIActivity, preventDefault, stopPropagation, stopImmediatePropagation) {

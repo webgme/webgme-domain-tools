@@ -62,6 +62,11 @@ $connList-line-height: 15px;
           background-color: $diagram-designer-selection-c-d-end-dst-highlight-color;
         }
       }
+      .show-all-labels {
+        cursor: pointer;
+//        border-top: $connList-netlabel-border-top;
+        background-color: $connList-netlabel-background-color;
+      }
     }
   }
 

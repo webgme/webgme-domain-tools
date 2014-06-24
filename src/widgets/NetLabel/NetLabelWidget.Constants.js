@@ -20,6 +20,7 @@ define([], function () {
         DESIGNER_ITEM_CLASS : "designer-item",
         DESIGNER_CONNECTION_CLASS: "connList",
         DESIGNER_NETLABEL_CLASS : "netLabel",
+        NETLABEL_SHOW_ALL: "show-all-labels",
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
         CONNECTOR_CLASS : "connector",
         CONNECTION_END_SRC : 'src',
