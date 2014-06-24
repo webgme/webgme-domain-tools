@@ -40,6 +40,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
             nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0;
 
+        // setting end connectors positions
         self.sourceCoordinates = { "x": -1,
             "y": -1};
 
@@ -53,28 +54,42 @@ define(['js/Widgets/DiagramDesigner/Connection',
         //this.paper   is a RaphaelJS papers
         self._segPoints = segPoints.slice(0);
 
+        // check if connLists need to be collapsed:
+        if (nbrOfSrcLabels > 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
+            var showallSrcLabels = showAll.clone()[0];
+            showallSrcLabels.setAttribute('id', srcID);
+            $(srcPortLabelList).append(showallSrcLabels);
+        }
+        if (nbrOfSrcLabels > 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
+            var showallDstLabels = showAll.clone()[0];
+            showallSrcLabels.setAttribute('id', dstID);
+            $(dstPortLabelList).append(showallDstLabels);
+        }
+
+        // create a label list for the src object or src port
         if (!srcPortLabelList) {
-            // give it an id attr
             srcPortLabelList = netLabelList.clone()[0];
             srcPortLabelList.setAttribute("objName", self.srcText);
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-            // todo: style the objects with css style in separate file
             srcPortLabelList.style.position = "absolute";
         }
         srcPortLabelList.style.left = self.sourceCoordinates.x.toString() + "px";
         srcPortLabelList.style.top = self.sourceCoordinates.y.toString() + "px";
 
-        if (self.dstText.indexOf('!') === 0) {
-            srcPortLabel.text(self.dstText.slice(1));
-            srcPortLabel.css("text-decoration", "overline");
-        } else {
-            srcPortLabel.text(self.dstText);
-            srcPortLabel.css("text-decoration", "none");
-        }
+        // this should be done by the decorator -- if name is negated, show overline
+//        if (self.dstText.indexOf('!') === 0) {
+//            srcPortLabel.text(self.dstText.slice(1));
+//            srcPortLabel.css("text-decoration", "overline");
+//        } else {
+//            srcPortLabel.text(self.dstText);
+//            srcPortLabel.css("text-decoration", "none");
+//        }
+
         srcPortLabel.attr('id', dstID);
         srcPortLabel.attr('connId', self.id);
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if dst of the current connection hasn't been added, add it to the list of src object
         if (!existingLabel) {
             if (nbrOfSrcLabels > 3) {
                 srcPortLabel.hide();
@@ -83,6 +98,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
         }
 
+        // create a label list for the dst object or dst port
         if (!dstPortLabelList) {
             dstPortLabelList = netLabelList.clone()[0];
             dstPortLabelList.setAttribute("objName", self.dstText);
@@ -93,17 +109,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
         dstPortLabelList.style.left = (self.endCoordinates.x - OFFSET).toString() + "px";
         dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
-        if (self.srcText.indexOf('!') === 0) {
-            dstPortLabel.text(self.srcText.slice(1));
-            dstPortLabel.css('text-decoration', 'overline');
-        } else {
-            dstPortLabel.text(self.srcText);
-            dstPortLabel.css('text-decoration', 'none');
-        }
+        // this should be done by the decorator -- if name is negated, show overline
+//        if (self.srcText.indexOf('!') === 0) {
+//            dstPortLabel.text(self.srcText.slice(1));
+//            dstPortLabel.css('text-decoration', 'overline');
+//        } else {
+//            dstPortLabel.text(self.srcText);
+//            dstPortLabel.css('text-decoration', 'none');
+//        }
+
         dstPortLabel.attr('id', srcID);
         dstPortLabel.attr('connId', self.id);
 
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if src of the current connection hasn't been added, add it to the list of dst object
         if (!existingLabel) {
             if (nbrOfDstLabels > 3) {
                 dstPortLabel.hide();
@@ -112,21 +131,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
         }
 
+        // create some globals
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
-
-        // check if connLists need to be collapsed:
-
-        if (srcPortLabelList.children.length >= 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
-            var showallSrcLabels = showAll.clone()[0];
-            showallSrcLabels.setAttribute('id', srcID);
-            $(srcPortLabelList).append(showallSrcLabels);
-        }
-        if (dstPortLabelList.children.length >= 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
-            var showallDstLabels = showAll.clone()[0];
-            showallSrcLabels.setAttribute('id', dstID);
-            $(dstPortLabelList).append(showallDstLabels);
-        }
     };
 
     NetLabelConnection.prototype.destroy = function () {
