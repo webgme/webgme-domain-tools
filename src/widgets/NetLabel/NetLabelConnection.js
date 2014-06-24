@@ -38,7 +38,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             existingLabel,
             nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
-            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0;
+            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0,
+            existingCollapse,
+            collapsed;
 
         // setting end connectors positions
         self.sourceCoordinates = { "x": -1,
@@ -77,22 +79,26 @@ define(['js/Widgets/DiagramDesigner/Connection',
         srcPortLabelList.style.top = self.sourceCoordinates.y.toString() + "px";
 
         // this should be done by the decorator -- if name is negated, show overline
-//        if (self.dstText.indexOf('!') === 0) {
-//            srcPortLabel.text(self.dstText.slice(1));
-//            srcPortLabel.css("text-decoration", "overline");
-//        } else {
-//            srcPortLabel.text(self.dstText);
-//            srcPortLabel.css("text-decoration", "none");
-//        }
+        if (self.dstText.indexOf('!') === 0) {
+            srcPortLabel.text(self.dstText.slice(1));
+            srcPortLabel.css("text-decoration", "overline");
+        } else {
+            srcPortLabel.text(self.dstText);
+            srcPortLabel.css("text-decoration", "none");
+        }
 
         srcPortLabel.attr('id', dstID);
         srcPortLabel.attr('connId', self.id);
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        // if dst of the current connection hasn't been added, add it to the list of src object
+        // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
         if (!existingLabel) {
             if (nbrOfSrcLabels > 3) {
-                srcPortLabel.hide();
+                existingCollapse = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
+                collapsed = existingCollapse ? existingCollapse.style.display === "none" : false;
+                if (!collapsed) {
+                    srcPortLabel.hide();
+                }
             }
             $(srcPortLabelList).append(srcPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
@@ -110,13 +116,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
         dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
         // this should be done by the decorator -- if name is negated, show overline
-//        if (self.srcText.indexOf('!') === 0) {
-//            dstPortLabel.text(self.srcText.slice(1));
-//            dstPortLabel.css('text-decoration', 'overline');
-//        } else {
-//            dstPortLabel.text(self.srcText);
-//            dstPortLabel.css('text-decoration', 'none');
-//        }
+        if (self.srcText.indexOf('!') === 0) {
+            dstPortLabel.text(self.srcText.slice(1));
+            dstPortLabel.css('text-decoration', 'overline');
+        } else {
+            dstPortLabel.text(self.srcText);
+            dstPortLabel.css('text-decoration', 'none');
+        }
 
         dstPortLabel.attr('id', srcID);
         dstPortLabel.attr('connId', self.id);
@@ -125,7 +131,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // if src of the current connection hasn't been added, add it to the list of dst object
         if (!existingLabel) {
             if (nbrOfDstLabels > 3) {
-                dstPortLabel.hide();
+                existingCollapse = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
+                collapsed = existingCollapse ? existingCollapse.style.display === "none" : false;
+                if (!collapsed) {
+                    dstPortLabel.hide();
+                }
             }
             $(dstPortLabelList).append(dstPortLabel);
             self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);

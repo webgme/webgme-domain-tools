@@ -86,6 +86,7 @@ define(['./NetLabelWidget.Constants',
                     // todo: do something here - maybe enable menu
                 } else {
                     self._showAllLabels(this);
+                    self.selectionManager._clearSelection();
                 }
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
