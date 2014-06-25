@@ -48,7 +48,7 @@ define(['./NetLabelWidget.Constants',
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                self.selectionManager._clearSelection();
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -76,18 +76,28 @@ define(['./NetLabelWidget.Constants',
         //handle click on show-all-labels class
         this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL,  function (event) {
             var connId = $(this).attr("connId"),
-                eventDetails = self._processMouseEvent(event, true, true, true, true),
-                rightClick = event.which === 3;
+                eventDetails = self._processMouseEvent(event, true, true, true, true);
 
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                if (rightClick) {
-                    // todo: do something here - maybe enable menu
-                } else {
-                    self._showAllLabels(this);
-                    self.selectionManager._clearSelection();
-                }
+                self._showAllLabels(this);
+                self.selectionManager._clearSelection();
+            } else {
+                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+            }
+        });
+
+        // handle click on collapse-labels class
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.COLLAPSE_LABELS,  function (event) {
+            var connId = $(this).attr("connId"),
+                eventDetails = self._processMouseEvent(event, true, true, true, true);
+
+            logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+
+            if (self.onConnectionMouseDown) {
+                self.selectionManager._clearSelection();
+                self._hideLabels(this);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -129,16 +139,43 @@ define(['./NetLabelWidget.Constants',
 
     NetLabelWidgetMouse.prototype._showAllLabels = function (node) {
         var self = this,
-            parentContainer = node.parentNode.children,
-            len = parentContainer.length,
-            item;
+            parentNode = node.parentNode,
+            childElements = parentNode.children,
+            len = childElements.length,
+            item,
+            collapseLabel = $('<div class="collapse-labels">&#9650</div>'),
+            existingLabel;
+
         $(node).hide();
         while (len--) {
-            item = parentContainer[len];
+            item = childElements[len];
             if (item.className !== NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
                 $(item).show();
             }
         }
+        existingLabel = $(parentNode).find('.' + NetLabelWidgetConstants.COLLAPSE_LABELS)[0];
+        if (!existingLabel) {
+            parentNode.appendChild(collapseLabel[0]);
+        } else if (existingLabel.style.display === "none") {
+            existingLabel.show();
+        }
+    };
+
+    NetLabelWidgetMouse.prototype._hideLabels = function (node) {
+        var self = this,
+            parentNode = node.parentNode,
+            childElements = parentNode.children, // children are elements, childNodes are nodes including textContent
+            len = childElements.length,
+            i,
+            expandDiv;
+
+        // expand overflown labels
+        for (i = NetLabelWidgetConstants.COLLAPSE_DIV_INDEX; i < len; i += 1) {
+            $(childElements[i]).hide();
+        }
+        // show expand div
+        expandDiv = $(parentNode).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL);
+        expandDiv.show();
     };
 
     NetLabelWidgetMouse.prototype._processMouseEvent = function (event, triggerUIActivity, preventDefault, stopPropagation, stopImmediatePropagation) {

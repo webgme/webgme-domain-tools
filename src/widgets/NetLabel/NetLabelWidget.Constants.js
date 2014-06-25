@@ -21,6 +21,8 @@ define([], function () {
         DESIGNER_CONNECTION_CLASS: "connList",
         DESIGNER_NETLABEL_CLASS : "netLabel",
         NETLABEL_SHOW_ALL: "show-all-labels",
+        COLLAPSE_LABELS: "collapse-labels",
+        COLLAPSE_DIV_INDEX: 4,
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
         CONNECTOR_CLASS : "connector",
         CONNECTION_END_SRC : 'src',

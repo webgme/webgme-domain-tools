@@ -23,6 +23,8 @@ $connList-border-style: 1px groove #4D4D4D;
 $connList-netlabel-background-color: #f3f3f3;
 $connList-top-padding: 5px;
 $connList-line-height: 15px;
+$collapse-label-font-size: 7px;
+$collapse-label-line-height: 11px;
 
 .diagram-designer {
 
@@ -66,6 +68,12 @@ $connList-line-height: 15px;
         cursor: pointer;
 //        border-top: $connList-netlabel-border-top;
         background-color: $connList-netlabel-background-color;
+      }
+      .collapse-labels {
+        cursor: pointer;
+        background-color: $connList-netlabel-background-color;
+        font-size: $collapse-label-font-size;
+        line-height: $collapse-label-line-height;
       }
     }
   }

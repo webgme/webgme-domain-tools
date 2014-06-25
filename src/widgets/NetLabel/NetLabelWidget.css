@@ -29,3 +29,8 @@
   .diagram-designer .items .connList .show-all-labels {
     cursor: pointer;
     background-color: #f3f3f3; }
+  .diagram-designer .items .connList .collapse-labels {
+    cursor: pointer;
+    background-color: #f3f3f3;
+    font-size: 7px;
+    line-height: 11px; }
