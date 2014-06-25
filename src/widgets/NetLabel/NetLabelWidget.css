@@ -31,6 +31,7 @@
     background-color: #f3f3f3; }
   .diagram-designer .items .connList .collapse-labels {
     cursor: pointer;
+    color: darkgrey;
     background-color: #f3f3f3;
     font-size: 7px;
     line-height: 11px; }

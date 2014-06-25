@@ -24,7 +24,8 @@ $connList-netlabel-background-color: #f3f3f3;
 $connList-top-padding: 5px;
 $connList-line-height: 15px;
 $collapse-label-font-size: 7px;
-$collapse-label-line-height: 11px;
+$collapse-expand-label-line-height: 11px;
+$collapse-label-color: #A9A9A9;
 
 .diagram-designer {
 
@@ -71,9 +72,10 @@ $collapse-label-line-height: 11px;
       }
       .collapse-labels {
         cursor: pointer;
+        color: $collapse-label-color;
         background-color: $connList-netlabel-background-color;
         font-size: $collapse-label-font-size;
-        line-height: $collapse-label-line-height;
+        line-height: $collapse-expand-label-line-height;
       }
     }
   }
