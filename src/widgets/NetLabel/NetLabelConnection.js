@@ -18,7 +18,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
-    _.extend(NetLabelConnection.prototype, DiagramDesignerWidgetDraggable.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -245,39 +244,44 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.showEndReconnectors = function () {
+        var scale = Math.max(1, this.designerAttributes.width / 10);
         if (this.reconnectable) {
-            //editor handle at src
-            this.skinParts.srcDragPoint = this.skinParts.srcDragPoint || $('<div/>', {
-                "data-end": NetLabelWidgetConstants.CONNECTION_END_SRC,
-                "data-id": this.id,
-                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_SRC +
-                    " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
-            });
+            if (this.srcSubCompId) {
 
-            this.skinParts.srcDragPoint.css({"position": "absolute",
-                "top": this.sourceCoordinates.y,
-                "left": this.sourceCoordinates.x});
+                //editor handle at src
+                this.skinParts.srcDragPoint = this.skinParts.srcDragPoint || $('<div/>', {
+                    "data-end": NetLabelWidgetConstants.CONNECTION_END_SRC,
+                    "data-id": this.id,
+                    "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_SRC +
+                        " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
+                });
 
-            this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.srcDragPoint);
+                this.skinParts.srcDragPoint.css({"position": "absolute",
+                    "top": this.sourceCoordinates.y,
+                    "left": this.sourceCoordinates.x});
 
+                this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.srcDragPoint);
+                //resize connectors to connection width
+                this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            }
 
-            this.skinParts.dstDragPoint = this.skinParts.dstDragPoint || $('<div/>', {
-                "data-end": NetLabelWidgetConstants.CONNECTION_END_DST,
-                "data-id": this.id,
-                "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_DST +
-                    " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
-            });
+            if (this.dstSubCompId) {
 
-            this.skinParts.dstDragPoint.css({"position": "absolute",
-                "top": this.endCoordinates.y,
-                "left": this.endCoordinates.x});
+                this.skinParts.dstDragPoint = this.skinParts.dstDragPoint || $('<div/>', {
+                    "data-end": NetLabelWidgetConstants.CONNECTION_END_DST,
+                    "data-id": this.id,
+                    "class": NetLabelWidgetConstants.CONNECTION_DRAGGABLE_END_CLASS + " " + NetLabelWidgetConstants.CONNECTION_END_DST +
+                        " " + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS
+                });
 
-            this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.dstDragPoint);
+                this.skinParts.dstDragPoint.css({"position": "absolute",
+                    "top": this.endCoordinates.y,
+                    "left": this.endCoordinates.x});
 
-            //resize connectors to connection width
-            var scale = Math.max(1, this.designerAttributes.width / 10); //10px is the width of the connector end
-            this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
-            this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+                this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.dstDragPoint);
+                //resize connectors to connection width
+                this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            }
 
         } else {
             this.hideEndReconnectors();
