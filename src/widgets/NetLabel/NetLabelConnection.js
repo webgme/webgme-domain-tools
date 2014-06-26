@@ -7,7 +7,8 @@
 
 define(['js/Widgets/DiagramDesigner/Connection',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Draggable',
-    './NetLabelWidget.Constants'], function (Connection, DiagramDesignerWidgetDraggable, NetLabelWidgetConstants) {
+    './NetLabelWidget.Mouse',
+    './NetLabelWidget.Constants'], function (Connection, DiagramDesignerWidgetDraggable, NetLabelWidgetMouse, NetLabelWidgetConstants) {
 
     "use strict";
 
@@ -18,6 +19,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
+    _.extend(NetLabelConnection.prototype, NetLabelWidgetMouse.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -204,6 +206,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.highlight();
         this.showEndReconnectors();
 
+        if (this.skinParts.srcNetLabel.style.display === "none") {
+            this._showAllLabels(this.skinParts.srcNetLabel);
+        }
+
+        if (this.skinParts.dstNetLabel.style.display === "none") {
+            this._showAllLabels(this.skinParts.dstNetLabel);
+        }
+
         //in edit mode and when not participating in a multiple selection,
         //show endpoint connectors
         if (this.selectedInMultiSelection === true) {
@@ -312,8 +322,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         srcObj = this.diagramDesigner.items[this.srcObjId];
         dstObj = this.diagramDesigner.items[this.dstObjId];
 
-        srcObj.$el.css('background-color', '#FA9393');
-        dstObj.$el.css('background-color', '#93FAFA');
+        srcObj.$el.css('background-color', '#FFD6D6');
+        dstObj.$el.css('background-color', '#CFFAFA');
     };
 
     NetLabelConnection.prototype.unHighlight = function () {

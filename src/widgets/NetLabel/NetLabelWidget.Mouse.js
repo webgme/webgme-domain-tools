@@ -138,21 +138,25 @@ define(['./NetLabelWidget.Constants',
     };
 
     NetLabelWidgetMouse.prototype._showAllLabels = function (node) {
-        var self = this,
-            parentNode = node.parentNode,
+        var parentNode = node.parentNode,
             childElements = parentNode.children,
             len = childElements.length,
             item,
             collapseLabel = $('<div class="collapse-labels">&#9650</div>'),
             existingLabel;
 
-        $(node).hide();
+        if (node.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
+            $(node).hide();
+        }
         while (len--) {
             item = childElements[len];
-            if (item.className !== NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
+            if (item.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
+                $(item).hide();
+            } else {
                 $(item).show();
             }
         }
+        // show the collapse label
         existingLabel = $(parentNode).find('.' + NetLabelWidgetConstants.COLLAPSE_LABELS)[0];
         if (!existingLabel) {
             parentNode.appendChild(collapseLabel[0]);
@@ -162,8 +166,7 @@ define(['./NetLabelWidget.Constants',
     };
 
     NetLabelWidgetMouse.prototype._hideLabels = function (node) {
-        var self = this,
-            parentNode = node.parentNode,
+        var parentNode = node.parentNode,
             childElements = parentNode.children, // children are elements, childNodes are nodes including textContent
             len = childElements.length,
             i,
