@@ -43,6 +43,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
             existingCollapse,
             collapsed;
 
+        // unhighlight background first
+        this.diagramDesigner.items[this.srcObjId].$el.css('background-color', 'initial');
+        this.diagramDesigner.items[this.dstObjId].$el.css('background-color', 'initial');
+
         // setting end connectors positions
         self.sourceCoordinates = { "x": -1,
             "y": -1};
