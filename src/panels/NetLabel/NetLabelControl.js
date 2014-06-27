@@ -46,8 +46,6 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
                 'dstText': dstText,
                 'srcObjPos': srcObjPos,
                 'dstObjPos': dstObjPos,
-                'srcObj': srcObj,
-                'dstObj': dstObj,
                 'srcID': srcID,
                 'dstID': dstID};
     };

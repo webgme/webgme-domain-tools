@@ -28,11 +28,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             showAll = $('<div class="show-all-labels">...</div>'),
             srcPortLabel = netLabel.clone(),
             dstPortLabel = netLabel.clone(),
-            srcText = self.srcObj.getAttribute('name'),
-            dstText = self.dstObj.getAttribute('name'),
             srcID = self.srcSubCompId || self.srcObjId,
             dstID = self.dstSubCompId || self.dstObjId,
-            OFFSET = srcText.length >= 9 ? 80 : 20,
+            OFFSET = self.srcText.length >= 9 ? 80 : 20,
 //            srcPos = self.srcSubCompId ? segPoints[0] : self.srcObjPos,
 //            dstPos = self.dstSubCompId ? segPoints[segPoints.length - 1] : self.dstObjPos,
             srcPos = segPoints[0],
@@ -78,7 +76,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // create a label list for the src object or src port
         if (!srcPortLabelList) {
             srcPortLabelList = netLabelList.clone()[0];
-            srcPortLabelList.setAttribute("objName", srcText);
+            srcPortLabelList.setAttribute("objName", self.srcText);
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
             srcPortLabelList.style.position = "absolute";
         }
@@ -86,11 +84,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
         srcPortLabelList.style.top = self.sourceCoordinates.y.toString() + "px";
 
         // this should be done by the decorator -- if name is negated, show overline
-        if (dstText.indexOf('!') === 0) {
-            srcPortLabel.text(dstText.slice(1));
+        if (self.dstText.indexOf('!') === 0) {
+            srcPortLabel.text(self.dstText.slice(1));
             srcPortLabel.css("text-decoration", "overline");
         } else {
-            srcPortLabel.text(dstText);
+            srcPortLabel.text(self.dstText);
             srcPortLabel.css("text-decoration", "none");
         }
 
@@ -114,7 +112,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // create a label list for the dst object or dst port
         if (!dstPortLabelList) {
             dstPortLabelList = netLabelList.clone()[0];
-            dstPortLabelList.setAttribute("objName", dstText);
+            dstPortLabelList.setAttribute("objName", self.dstText);
             dstPortLabelList.setAttribute("obj-id", dstID);
             dstPortLabelList.style.position = "absolute";
         }
@@ -123,11 +121,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
         dstPortLabelList.style.top = self.endCoordinates.y.toString() + "px";
 
         // this should be done by the decorator -- if name is negated, show overline
-        if (srcText.indexOf('!') === 0) {
-            dstPortLabel.text(srcText.slice(1));
+        if (self.srcText.indexOf('!') === 0) {
+            dstPortLabel.text(self.srcText.slice(1));
             dstPortLabel.css('text-decoration', 'overline');
         } else {
-            dstPortLabel.text(srcText);
+            dstPortLabel.text(self.srcText);
             dstPortLabel.css('text-decoration', 'none');
         }
 
@@ -174,6 +172,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
+        this.srcText = objDescriptor.srcText;
+        this.dstText = objDescriptor.dstText;
         this.name = objDescriptor.name;/* || this.id;*/
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
@@ -187,9 +187,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // getting src & dst object positions
         this.srcObjPos = objDescriptor.srcObjPos;
         this.dstObjPos = objDescriptor.dstObjPos;
-
-        this.srcObj = objDescriptor.srcObj;
-        this.dstObj = objDescriptor.dstObj;
 
         this.segmentPoints = [];
     };
