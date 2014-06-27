@@ -41,6 +41,7 @@ define(['logManager',
                 objIdList.pushUnique(objID);
                 itemDeleting = this.designerCanvas.items[compID];
                 itemDeleting.hideEndReconnectors();
+                itemDeleting.unHighlight();
             } else {
                 this.logger.warning('Can not delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');
             }

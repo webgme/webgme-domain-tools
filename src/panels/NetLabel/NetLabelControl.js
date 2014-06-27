@@ -30,26 +30,15 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             dstID = connectionObj.getPointer(CONSTANTS.POINTER_TARGET).to,
             srcObj = gmeClient.getNode(srcID),
             dstObj = gmeClient.getNode(dstID),
-            srcName = srcObj.getAttribute('name'),
-            dstName = dstObj.getAttribute('name'),
             srcParentId = srcObj.getParentId(),
             dstParentId = dstObj.getParentId(),
-            srcParentName = gmeClient.getNode(srcParentId).getAttribute('name'),
-            dstParentName = gmeClient.getNode(dstParentId).getAttribute('name'),
-            isSrcAPort = srcID.match(/\//g).length > 3,
-            isDstAPort = dstID.match(/\//g).length > 3,
-            srcObjPos = srcObj.getRegistry('position'),
-            dstObjPos = dstObj.getRegistry('position'),
-            srcText = isSrcAPort ? srcParentName + "." + srcName : srcName,
-            dstText = isDstAPort ? dstParentName + "." + dstName : dstName;
-        return {'srcText': srcText,
-                'dstText': dstText,
-                'srcObjPos': srcObjPos,
-                'dstObjPos': dstObjPos,
-                'srcObj': srcObj,
+            srcParentObj = gmeClient.getNode(srcParentId),
+            dstParentObj = gmeClient.getNode(dstParentId);
+
+        return {'srcObj': srcObj,
                 'dstObj': dstObj,
-                'srcID': srcID,
-                'dstID': dstID};
+                'srcParentObj': srcParentObj,
+                'dstParentObj': dstParentObj};
     };
 
     NetLabelControl.prototype._onUpdate = function (gmeID, objDesc) {
@@ -81,7 +70,7 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
                                 objDesc.aspect = this._selectedAspect;
 
                                 this.designerCanvas.updateDesignerItem(componentID, objDesc);
-                                this._onItemNameUpdate(componentID, objDesc);
+                                // this._onItemNameUpdate(componentID, objDesc);
 
                             }
                         }
