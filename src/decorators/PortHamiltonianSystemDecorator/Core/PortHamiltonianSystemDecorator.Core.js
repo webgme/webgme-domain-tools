@@ -307,7 +307,7 @@ define(['js/Constants',
                 // normal text
                 this.skinParts.$name.text(name);
                 this.skinParts.$name.css('text-decoration', 'none');
-                this.skinParts.$name.css('text-align', 'center');
+                this.skinParts.$name.css('text-align', 'left');
             }
         }
     };
