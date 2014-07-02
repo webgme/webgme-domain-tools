@@ -7,27 +7,37 @@
  *
  */
 
-var isNode = (typeof window === 'undefined');
 
 define([], function () {
 
-    var ExecutorClient = function () {
+    var ExecutorClient = function (parameters) {
+        this.isNodeJS = (typeof window === 'undefined') && (typeof process === "object");
+        this.isNodeWebkit = (typeof window === 'object') && (typeof process === "object");
 
         //console.log(isNode);
-
-        if (isNode) {
+        if (this.isNodeJS) {
             var config = webGMEGlobal.getConfig();
             this.server = '127.0.0.1';
             this.serverPort = config.port;
             this.httpsecure = config.httpsecure;
 
             this._clientSession = null; // parameters.sessionId;;
-
-            this.http = this.httpsecure ? require('https') : require('http'); // or https
         }
-
+        if (parameters) {
+            this.server = parameters.server || this.server;
+            this.serverPort = parameters.serverPort || this.serverPort;
+            this.httpsecure = (parameters.httpsecure !== undefined) ? parameters.httpsecure : this.httpsecure;
+        }
+        if (this.isNodeJS) {
+            this.http = this.httpsecure ? require('https') : require('http');
+        }
+        this.executorUrl = '';
+        if (this.httpsecure !== undefined && this.server && this.serverPort) {
+            this.executorUrl = (this.httpsecure ? 'https://' : 'http://') + this.server + ':' + this.serverPort;
+        }
         // TODO: TOKEN???
-        this.executorUrl = '/rest/external/executor/'; // TODO: any ways to ask for this or get it from the configuration?
+        this.executorUrl = this.executorUrl + '/rest/external/executor/'; // TODO: any ways to ask for this or get it from the configuration?
+
     };
 
     ExecutorClient.prototype.getInfoURL = function (hash) {
@@ -60,9 +70,18 @@ define([], function () {
         });
     };
 
+    ExecutorClient.prototype.updateJob = function (jobInfo, callback) {
+        this.sendHttpRequest('POST', this.executorUrl + 'update/' + jobInfo.hash, function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            callback(null, JSON.parse(response));
+        });
+    };
 
     ExecutorClient.prototype.getInfo = function (hash, callback) {
-
         this.sendHttpRequest('GET', this.getInfoURL(hash), function (err, response) {
             if (err) {
                 callback(err);
@@ -85,13 +104,25 @@ define([], function () {
         });
     };
 
+    ExecutorClient.prototype.getInfoByStatus = function (status, callback) {
+
+        this.sendHttpRequest('GET', this.executorUrl + '?status=' + status, function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            callback(null, JSON.parse(response));
+        });
+    };
+
     ExecutorClient.prototype.sendHttpRequest = function (method, url, callback) {
 
-        if (isNode) {
+        if (this.isNodeJS) {
             var options = {
                 hostname: this.server,
                 port: this.serverPort,
-                path: url,
+                path: require('url').parse(url).path,
                 method: method
             };
 
@@ -103,8 +134,11 @@ define([], function () {
             oReq.onload = function (oEvent) {
                 // Uploaded.
                 var response = oEvent.target.response;
-                // TODO: handle error
-                callback(null, response);
+                if (oEvent.target.status > 399) {
+                    callback(oEvent.target.status, response);
+                } else {
+                    callback(null, response);
+                }
             };
 
             // data is a file object or blob

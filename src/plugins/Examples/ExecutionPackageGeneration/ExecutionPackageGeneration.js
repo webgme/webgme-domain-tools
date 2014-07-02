@@ -202,7 +202,7 @@ define(['plugin/PluginConfig',
                         // Get the job-info at intervals and check for a non-CREATED status.
                         executorClient.getInfo(hash, function (err, jInfo) {
                             self.logger.info(JSON.stringify(jInfo, null, 4));
-                            if (jInfo.status === 'CREATED') {
+                            if (jInfo.status === 'CREATED' || jInfo.status ==='RUNNING') { // FIXME
                                 // The job is still running..
                                 return;
                             }

@@ -33,305 +33,55 @@ var reqTwo = require.config({
 */
 //reqTwo
 define(['logManager',
-    'blob/BlobRunPluginClient',
-    'blob/BlobFSBackend',
-    'blob/BlobMetadata',
     'fs',
     'path',
     'unzip',
     'child_process',
-    'minimatch'
-    //'nedb'
+    'minimatch',
+    'nedb',
+    'executor/JobInfo',
+    'executor/WorkerInfo'
     ],
-    function (logManager, BlobRunPluginClient, BlobFSBackend, BlobMetadata, fs, path, unzip, child_process, minimatch, Datastore) {
+    function (logManager, fs, path, unzip, child_process, minimatch, Datastore, JobInfo, WorkerInfo) {
 
-    var walk = function(dir, done) {
-        var results = [];
-        fs.readdir(dir, function(err, list) {
-            if (err) return done(err);
-            var i = 0;
-            (function next() {
-                var file = list[i++];
-                if (!file) return done(null, results);
-                file = dir + '/' + file;
-                fs.stat(file, function(err, stat) {
-                    if (stat && stat.isDirectory()) {
-                        walk(file, function(err, res) {
-                            results = results.concat(res);
-                            next();
-                        });
-                    } else {
-                        results.push(file);
-                        next();
-                    }
-                });
-            })();
-        });
-    };
-
-    var deleteFolderRecursive = function(path) {
-        if( fs.existsSync(path) ) {
-            fs.readdirSync(path).forEach(function(file,index){
-                var curPath = path + "/" + file;
-                if(fs.lstatSync(curPath).isDirectory()) { // recurse
-                    deleteFolderRecursive(curPath);
-                } else { // delete file
-                    fs.unlinkSync(curPath);
-                }
-            });
-            fs.rmdirSync(path);
-        }
-    };
-
-    //here you can define global variables for your middleware
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
-    var executorBackend = null;
-
-    var ExecutorBackend = function (parameters) {
-        // FIXME: should we use HTTP here?
-        var blobBackend = new BlobFSBackend();
-        this.blobClient = new BlobRunPluginClient(blobBackend);
-
-        this.sourceFilename = 'source.zip';
-        this.resultFilename = 'execution_results';
-        this.executorConfigFilename = 'executor_config.json';
-
-        this.workingDirectory = 'executor-temp';
-
-        if (!fs.existsSync(this.workingDirectory)) {
-            fs.mkdirSync(this.workingDirectory);
-        }
-    };
-
-    ExecutorBackend.prototype.startJob = function (jobInfo) {
-        // FIXME: This is the server side implementation of a dumb executor.
-
-        var self = this;
-
-        // TODO: create job
-        // TODO: what if job is already running?
-
-        this.jobList.update({ hash: jobInfo.hash}, jobInfo);
-
-
-        // get metadata for hash
-        self.blobClient.getMetadata(jobInfo.hash, function (err, metadata) {
-            if (err) {
-                logger.error(err);
-                jobInfo.status = 'FAILED_TO_GET_SOURCE_METADATA';
-                return;
-            }
-
-            if (metadata.contentType !== BlobMetadata.CONTENT_TYPES.COMPLEX) {
-                jobInfo.status = 'FAILED_SOURCE_IS_NOT_COMPLEX';
-                return;
-            }
-
-
-//            if (metadata.content.hasOwnProperty(self.executorConfigFilename)) {
-//
-//            } else {
-//                jobInfo.status = 'FAILED_EXECUTOR_CONFIG_DOES_NOT_EXIST';
-//                return;
-//            }
-
-            // download artifacts
-            self.blobClient.getObject(jobInfo.hash, function (err, content) {
-                if (err) {
-                    logger.error('Failed obtaining job source content, err: ' + err.toString());
-                    jobInfo.status = 'FAILED_SOURCE_COULD_NOT_BE_OBTAINED';
-                    return;
-                }
-
-                var jobDir = path.normalize(path.join(self.workingDirectory, jobInfo.hash));
-
-                if (!fs.existsSync(jobDir)) {
-                    fs.mkdirSync(jobDir);
-                }
-
-                var zipPath = path.join(jobDir, self.sourceFilename);
-
-                fs.writeFile(zipPath, content, function (err) {
-                    if (err) {
-                        logger.error('Failed creating source zip-file, err: ' + err.toString());
-                        jobInfo.status = 'FAILED_CREATING_SOURCE_ZIP';
-                        return;
-                    }
-
-                    // unzip downloaded file
-
-                    var extract = unzip.Extract({ path: jobDir });
-                    fs.createReadStream(zipPath).pipe(extract);
-
-                    extract.on('close', function(err) {
-                        if (err) {
-                            logger.error(err);
-                            jobInfo.status = 'FAILED_UNZIP';
-                            return;
-                        }
-
-                        // delete downloaded file
-                        fs.unlinkSync(zipPath);
-
-                        var exec = child_process.exec;
-
-                        jobInfo.startTime = new Date().toISOString();
-
-                        // get cmd file dynamically from the this.executorConfigFilename file
-                        fs.readFile(path.join(jobDir, self.executorConfigFilename), 'utf8', function (err, data) {
-                            if (err) {
-                                logger.error('Could not read ' + self.executorConfigFilename + ' err:' + err);
-                                jobInfo.status = 'FAILED_EXECUTOR_CONFIG';
-                                return;
-                            }
-
-                            var executorConfig = JSON.parse(data);
-                            var cmd = executorConfig.cmd;
-
-                            logger.debug('working directory: ' + jobDir + ' executing: ' + cmd);
-
-                            var child = exec(cmd, {cwd: jobDir},
-                                function (error, stdout, stderr) {
-
-                                    jobInfo.finishTime = new Date().toISOString();
-
-                                    logger.debug('stdout: ' + stdout);
-
-                                    if (stderr) {
-                                        logger.error('stderr: ' + stderr);
-                                    }
-
-                                    if (error !== null) {
-                                        logger.error('exec error: ' + error);
-                                        jobInfo.status = 'FAILED';
-                                    }
-
-                                    // TODO: save stderr and stdout to files.
-
-                                    self.saveJobResults(jobInfo, jobDir, executorConfig);
-                                });
-                        });
-                    });
-                });
-            });
-        });
-    };
-
-    ExecutorBackend.prototype.saveJobResults = function (jobInfo, directory, executorConfig) {
-        // TODO: list all files and subdirectories
-
-        var self = this,
-            patterns = executorConfig.resultPatterns instanceof Array ? executorConfig.resultPatterns : [],
-            resultArtifact = self.blobClient.createArtifact(self.resultFilename);
-
-        walk(directory, function (err, results) {
-            var i, j,
-                remaining = results.length,
-                archive = false,
-                filename;
-            for (i = 0; i < results.length; i++) {
-                archive = false;
-                filename = path.relative(directory, results[i]).replace(/\\/g,'/');
-
-                if (patterns.length === 0) {
-                    archive = true;
-                } else {
-                    // Decide if we should archive the file based on match to any of the patterns.
-                    for (j = 0; j < patterns.length; j += 1) {
-
-                        var matched = minimatch(filename, patterns[j]);
-                        //console.log('filename: "' + filename + '", pattern: "' + patterns[j] + '"');
-                        //console.log('Match : ' + matched.toString());
-                        if (matched) {
-                            archive = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (archive) {
-                    // archive the given file
-                    resultArtifact.addFileAsSoftLink(filename, fs.createReadStream(results[i]), function (err, hash) {
-                        remaining -= 1;
-
-                        if (err) {
-                            logger.error(err);
-                        } else {
-
-                        }
-
-                        if (remaining === 0) {
-                            resultArtifact.save(function (err, resultHash) {
-                                if (err) {
-                                    logger.error(err);
-                                    jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
-                                    return;
-                                } else {
-                                    // FIXME: This is synchronous
-                                    deleteFolderRecursive(directory);
-                                }
-
-                                jobInfo.resultHash = resultHash;
-                                if (jobInfo.status === 'CREATED') {
-                                    jobInfo.status = 'SUCCESS';
-                                }
-                            });
-                        }
-
-                    });
-
-                } else {
-                    // skip it
-                    remaining -= 1;
-
-                }
-            }
-        });
-
-        // TODO: create a result artifact
-
-        // TODO: delete directory
-
-    };
-
-    ExecutorBackend.prototype.cancelJob = function () {
-
-    };
-
-    // TODO: persist this
+        // TODO: persist this
     var jobList = new Datastore();
+    jobList = new Datastore({ filename: 'jobList.nedb', autoload: true });
     jobList.ensureIndex({ fieldName: 'hash', unique: true }, function (err) {});
-
-
-    var JobInfo = function (parameters) {
-        this.hash = parameters.hash;
-        this.resultHash = null;
-        this.userId = [];
-        this.status = 'CREATED'; // TODO: define a constant for this
-        this.startTime = null;
-        this.finishTime = null;
-    };
-
 
     var ExecutorREST = function(req,res,next){
         //global config is accessible via webGMEGlobal.getConfig()
         var config = webGMEGlobal.getConfig();
-        logger.debug('Executor request');
+        // logger.debug('Executor request');
 
+        var url = require('url').parse(req.url);
+        var pathParts = url.pathname.split("/");
 
-        var url = req.url.split('/');
+        if (pathParts.length < 2) {
+            res.send(404);
+            return;
+        }
 
-        if (url.length === 2) {
+        if (pathParts.length === 2 && pathParts[1] === '') {
             //next should be always called / the response should be sent otherwise this thread will stop without and end
 
-            res.find({}, function(err, docs) {
+            var query = {}
+            if (req.query.hasOwnProperty('status')) {
+                query.status = req.query.status;
+            }
+            jobList.find(query, function(err, docs) {
+                if (err) {
+                    res.send(500);
+                    return;
+                }
                 var jobList = {};
                 for (var i = 0; i < docs.length; i++) {
                     jobList[docs[i].hash] = docs[i];
                     delete docs[i]._id;
                 }
-                send(jobList);
+                res.send(jobList);
             });
 
             // TODO: send status
@@ -345,9 +95,12 @@ define(['logManager',
 
         } else {
 
-            switch (url[1]) {
+            switch (pathParts[1]) {
                 case "create":
                     ExecutorRESTCreate(req, res, next);
+                    break;
+                case "worker":
+                    ExecutorRESTWorkerAPI(req, res, next);
                     break;
                 case "cancel":
                     ExecutorRESTCancel(req, res, next);
@@ -357,6 +110,7 @@ define(['logManager',
                     break;
                 default:
                     res.send(404);
+                    break;
             }
 
         }
@@ -364,64 +118,138 @@ define(['logManager',
     };
 
     var ExecutorRESTCreate = function(req, res, next) {
-        // TODO: accept only POST
-
+        if (req.method !== 'POST') {
+            res.send(405);
+        }
         var url = req.url.split('/');
 
         if (url.length < 3 || !url[2]) {
-            res.send(500);
+            res.send(404);
+            return;
         }
-
         var hash = url[2];
-        var jobInfo = new JobInfo({hash:hash});
 
-        // TODO: something smarter
-        jobList.remove({ hash:hash }, { multi: true });
+        var jobInfo = new JobInfo({hash:hash});
         // TODO: check if hash ok
-        jobList.insert(jobInfo);
+        jobList.update({ hash: hash }, jobInfo, { upsert: true }, function(err) {
+            if (err) {
+                res.send(500);
+            } else {
+                delete jobInfo._id;
+                res.send(jobInfo);
+            }
+        });
 
         // TODO: get job description
+    };
 
-        // TODO: schedule job
+    var ExecutorRESTUpdate = function(req, res, next) {
+        if (req.method !== 'POST') {
+            res.send(405);
+        }
+        var url = req.url.split('/');
 
-        if (!executorBackend) {
-            executorBackend = new ExecutorBackend();
+        if (url.length < 3 || !url[2]) {
+            res.send(404);
+            return;
+        }
+        var hash = url[2];
+
+        var jobInfo = new JobInfo(req.body);
+        jobList.update({ hash: hash }, jobInfo, function(err, numReplaced) {
+            if (err) {
+                res.send(500);
+            } else if (numReplaced !== 1) {
+                res.send(404);
+            } else {
+                res.send(200);
+            }
+        });
+    };
+
+    var ExecutorRESTWorkerAPI = function(req, res, next) {
+        if (req.method !== 'POST') {
+            res.send(405);
+            return;
         }
 
-        executorBackend.startJob(jobInfo);
+        var url = require('url').parse(req.url);
+        var pathParts = url.pathname.split("/");
 
-        res.send(jobInfo);
+        if (pathParts.length < 2) {
+            res.send(404);
+            return;
+        }
+
+        var serverResponse = new WorkerInfo.ServerResponse({ refreshPeriod: 5 * 1000 });
+        var clientRequest = new WorkerInfo.ClientRequest(req.body);
+
+        if (clientRequest.availableProcesses) {
+            jobList.find({status: 'CREATED'}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
+                if (err) {
+                    res.send(500);
+                    return; // FIXME need to return 2x
+                }
+                var callback = function (i) {
+                    if (i === docs.length) {
+                        res.send(JSON.stringify(serverResponse));
+                        return;
+                    }
+                    jobList.update({_id: docs[i]._id}, {$set: {status: 'RUNNING'}}, function (err) {
+                        if (err) {
+                            res.send(500);
+                        } else {
+                            serverResponse.jobsToStart.push(docs[i].hash);
+                            callback(i + 1);
+                        }
+                    });
+                };
+                callback(0);
+            });
+        } else {
+            res.send(JSON.stringify(serverResponse));
+        }
     };
 
 
     var ExecutorRESTCancel = function(req, res, next) {
-        // TODO: accept only POST
+        if (req.method !== 'POST') {
+            res.send(405);
+            return;
+        }
+
         var url = req.url.split('/');
 
         if (url.length < 3 || !url[2]) {
             res.send(500);
+            return;
         }
 
         var hash = url[2];
 
-        if (!executorBackend) {
-            res.send(500);
-        } else {
-
+        if (false) {
+            // TODO
             executorBackend.cancelJob(hash);
 
             res.send(200);
+        } else {
+            res.send(500);
         }
+
     };
 
 
     var ExecutorRESTInfo = function(req, res, next) {
-        // TODO: accept only GET
+        if (req.method !== 'GET') {
+            res.send(405);
+            return;
+        }
 
         var url = req.url.split('/');
 
         if (url.length < 3 || !url[2]) {
             res.send(500);
+            return;
         }
 
         var hash = url[2];
@@ -431,7 +259,7 @@ define(['logManager',
                 if (err) {
                     res.send(500);
                 } else if (docs.length) {
-                    res.send(jobList[hash]);
+                    res.send(docs[0]);
                 } else {
                     res.send(404);
                 }
