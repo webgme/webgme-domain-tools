@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebGME executor</title>
+    <script>
+    var node_require = require;
+    </script>
+    <script src="http://kms56:8855/lib/require/require.min.js"></script>
+    <script>
+    requirejs.config({
+        baseUrl: 'http://kms56:8855/',
+        paths: {
+            //WebGME custom modules
+            "logManager": 'common/LogManager',
+            "eventDispatcher": 'common/EventDispatcher',
+            "notificationManager": 'js/NotificationManager',
+            "clientUtil": 'js/util',
+            "loaderCircles": "js/Loader/LoaderCircles",
+            "loaderProgressBar": "js/Loader/LoaderProgressBar",
+
+            "codemirror": 'lib/codemirror/codemirror.amd',
+            "jquery-csszoom": 'lib/jquery/jquery.csszoom',
+
+            "jszip": 'lib/jszip/jszip',
+            "executor": 'extlib/node_modules/webgme-domain-tools/src/rest/executor',
+            "executor_old": 'extlib/node_modules/webgme-domain-tools/src/rest/executor_old'
+            },
+/*        shim: {
+            'fs': {
+                exports: 'fs',
+                init: function () {
+                    return node_require('fs');
+                }
+                }
+            },*/
+
+        nodeRequire: node_require
+    });
+    //requirejs.s.contexts._.defined.fs = function() { return node_require('fs'); }
+    requirejs.s.contexts._.defined.fs = node_require('fs');
+    requirejs.s.contexts._.defined.stream = node_require('stream');
+    requirejs.s.contexts._.defined.path = node_require('path');
+    requirejs.s.contexts._.defined.unzip = node_require('unzip');
+    requirejs.s.contexts._.defined.child_process = node_require('child_process');
+    requirejs.s.contexts._.defined.minimatch = node_require('minimatch');
+    requirejs.s.contexts._.defined.crypto = node_require('crypto');
+    requirejs.s.contexts._.defined.util = node_require('util');
+    requirejs.s.contexts._.defined.mime = node_require('mime');
+    requirejs.s.contexts._.defined.http = node_require('http');
+    requirejs.s.contexts._.defined.https = node_require('https');
+    var eb;
+    requirejs(['executor/ExecutorWorker', 'executor/JobInfo'], function(ExecutorWorker, JobInfo) {
+        eb = new ExecutorWorker({ serverPort: 8855, sessionId: undefined });
+        
+        // document.getElementById('status').onclick = function() { 
+        
+        eb.queryWorkerAPI(function(response) {
+            var refreshPeriod = 60 * 1000;
+            var callback = function(response) {
+                if (response && response.refreshPeriod) {
+                    refreshPeriod = response.refreshPeriod;
+                }
+                var timeoutID = window.setTimeout(function() {
+                    eb.queryWorkerAPI(callback);
+                }, refreshPeriod);
+            };
+            callback(response);
+        });
+    });
+    </script>
+  </head>
+  <body>
+    <div id="main"><div id="status">Connecting...</div></div>
+    <small>node.js <script>document.write(process.version)</script></small>
+  </body>
+</html>
