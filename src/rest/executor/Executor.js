@@ -52,10 +52,18 @@ define(['logManager',
                 if(fs.lstatSync(curPath).isDirectory()) { // recurse
                     deleteFolderRecursive(curPath);
                 } else { // delete file
-                    fs.unlinkSync(curPath);
+                    try {
+                        fs.unlinkSync(curPath);
+                    } catch (err) {
+                        logger.error('Could not delete executor-temp file, err:' + err);
+                    }
                 }
             });
-            fs.rmdirSync(path);
+            try {
+                fs.rmdirSync(path);
+            } catch (err) {
+                logger.error('Could not delete executor-temp directory, err:' + err);
+            }
         }
     };
 
