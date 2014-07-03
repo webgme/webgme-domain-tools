@@ -31,7 +31,6 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
 
     _.extend(NetLabelWidget.prototype, ModelEditorWidget.prototype);
 
-
     NetLabelWidget.prototype.createConnection = function (objD) {
         var connectionId = this._getGuid("C_"),
             objDescriptor = _.extend({}, objD),
@@ -60,7 +59,6 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         this._saveConnectionIDbyEndID(connectionId, sourceId, sourceSubcomponentId);
         this._saveConnectionIDbyEndID(connectionId, targetId, targetSubcomponentId);
 
-        // todo: need to register connectionID-src and connectionID-dst in this.items
         newComponent = this.items[connectionId] = new NetLabelConnection(connectionId);
         newComponent._initialize(objDescriptor);
         return newComponent;

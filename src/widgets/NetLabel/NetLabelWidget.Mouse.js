@@ -5,10 +5,12 @@
  * Author: Dana Zhang
  */
 
-"use strict";
 
 define(['./NetLabelWidget.Constants',
-        './NetLabelConnection'], function (NetLabelWidgetConstants, NetLabelConnection) {
+        'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
+                                                                             DiagramDesignerWidgetConstants) {
+
+    "use strict";
 
     var NetLabelWidgetMouse,
         EVENT_POSTFIX = 'NetLabelWidget';
@@ -37,6 +39,20 @@ define(['./NetLabelWidget.Constants',
                 self.onItemMouseDown.call(self, itemId, eventDetails);
             } else {
                 logger.warning('onItemMouseDown(itemId, eventDetails) is undefined, ItemID: ' + itemId + ' eventDetails: ' + JSON.stringify(eventDetails));
+            }
+        });
+
+        //handle click on designer-connections
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'path[class~="' + DiagramDesignerWidgetConstants.DESIGNER_CONNECTION_CLASS + '"]',  function (event) {
+            var connId = $(this).attr("id").replace(DiagramDesignerWidgetConstants.PATH_SHADOW_ARROW_END_ID_PREFIX, "").replace(DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX, ""),
+                eventDetails = self._processMouseEvent(event, true, true, true, true);
+
+            logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+
+            if (self.onConnectionMouseDown) {
+                self.onConnectionMouseDown.call(self, connId, eventDetails);
+            } else {
+                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
         });
 
@@ -237,7 +253,6 @@ define(['./NetLabelWidget.Constants',
             }
         });
     };
-//    _.extend(NetLabelWidgetMouse.prototype, NetLabelConnection.prototype);
 
     return NetLabelWidgetMouse;
 });

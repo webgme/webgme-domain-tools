@@ -39,6 +39,9 @@ define([], function () {
         DATA_ITEM_ID : 'data-oid',
         DATA_SUBCOMPONENT_ID : 'data-sid',
 
+        /* Show connection as label attribute name*/
+        SHOW_AS_LABEL: 'ShowAsLabel',
+
         /*
          * ROTATINO RESET CONSTANTS
          */

@@ -7,7 +7,13 @@
 
 define(['js/Panels/ModelEditor/ModelEditorControl',
     'js/Constants',
-    './NetLabelControl.EventHandlers', 'js/Utils/PreferencesHelper'], function (ModelEditorControl, CONSTANTS, NetLabelControlEventHandlers, PreferencesHelper) {
+    'widgets/NetLabel/NetLabelWidget.Constants',
+    './NetLabelControl.EventHandlers',
+    'js/Utils/PreferencesHelper'], function (ModelEditorControl,
+                                             CONSTANTS,
+                                             NetLabelWidgetConstants,
+                                             NetLabelControlEventHandlers,
+                                             PreferencesHelper) {
 
     "use strict";
 
@@ -26,6 +32,7 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             CONSTS =  CONSTANTS, // CONSTANTS can only be loaded by assigning it to a var
             gmeClient = self._client,
             connectionObj = gmeClient.getNode(gmeID),
+            showAsLabel = connectionObj.getAttribute(NetLabelWidgetConstants.SHOW_AS_LABEL),
             srcID = connectionObj.getPointer(CONSTANTS.POINTER_SOURCE).to,
             dstID = connectionObj.getPointer(CONSTANTS.POINTER_TARGET).to,
             srcObj = gmeClient.getNode(srcID),
@@ -35,10 +42,13 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             srcParentObj = gmeClient.getNode(srcParentId),
             dstParentObj = gmeClient.getNode(dstParentId);
 
-        return {'srcObj': srcObj,
+        return {'showAsLabel': showAsLabel,
+                'srcObj': srcObj,
                 'dstObj': dstObj,
                 'srcParentObj': srcParentObj,
-                'dstParentObj': dstParentObj};
+                'dstParentObj': dstParentObj,
+                'srcText': '',
+                'dstText': ''};
     };
 
     NetLabelControl.prototype._onUpdate = function (gmeID, objDesc) {
