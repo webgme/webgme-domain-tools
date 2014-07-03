@@ -161,9 +161,11 @@ define(['./NetLabelWidget.Constants',
             collapseLabel = $('<div class="collapse-labels">&#9650</div>'),
             existingLabel;
 
+        // if current node is "expand", hide it
         if (node.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
             $(node).hide();
         }
+        // show all other labels
         while (len--) {
             item = childElements[len];
             if (item.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
@@ -188,8 +190,8 @@ define(['./NetLabelWidget.Constants',
             i,
             expandDiv;
 
-        // expand overflown labels
-        for (i = NetLabelWidgetConstants.COLLAPSE_DIV_INDEX; i < len; i += 1) {
+        // collapse overflown labels
+        for (i = NetLabelWidgetConstants.MAX_LABEL_NUMBER; i < len; i += 1) {
             $(childElements[i]).hide();
         }
         // show expand div

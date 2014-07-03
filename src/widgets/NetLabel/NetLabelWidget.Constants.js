@@ -22,7 +22,7 @@ define([], function () {
         DESIGNER_NETLABEL_CLASS : "netLabel",
         NETLABEL_SHOW_ALL: "show-all-labels",
         COLLAPSE_LABELS: "collapse-labels",
-        COLLAPSE_DIV_INDEX: 4,
+        MAX_LABEL_NUMBER: 1,
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
         CONNECTOR_CLASS : "connector",
         CONNECTION_END_SRC : 'src',

@@ -19,6 +19,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     var NetLabelConnection,
         TEXT_ID_PREFIX = "t_",
+        COLLAPSE_ON_INDEX = NetLabelWidgetConstants.MAX_LABEL_NUMBER - 1,
         MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
         CONNECTION_DEFAULT_WIDTH = 1,
         CONNECTION_DEFAULT_COLOR = "#000000",
@@ -372,7 +373,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             collapsed;
 
         // check if connLists need to be collapsed:
-        if (nbrOfSrcLabels > 3 && !$(srcPortLabelList).find('.show-all-labels')[0]) {
+        if (nbrOfSrcLabels > COLLAPSE_ON_INDEX && !$(srcPortLabelList).find('.show-all-labels')[0]) {
             expandLabel.setAttribute('id', srcID);
             $(srcPortLabelList).append(expandLabel);
         }
@@ -403,7 +404,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
         if (!existingLabel) {
-            if (nbrOfSrcLabels > 3) {
+            if (nbrOfSrcLabels > COLLAPSE_ON_INDEX) {
                 existingCollapseLabel = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
                 collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
                 if (!collapsed) {
@@ -446,7 +447,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             collapsed,
             OFFSET = srcText.length >= 9 ? 80 : 20;
 
-        if (nbrOfDstLabels > 3 && !$(dstPortLabelList).find('.show-all-labels')[0]) {
+        if (nbrOfDstLabels > COLLAPSE_ON_INDEX && !$(dstPortLabelList).find('.show-all-labels')[0]) {
             expandLabel.setAttribute('id', dstID);
             $(dstPortLabelList).append(expandLabel);
         }
@@ -479,7 +480,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
         // if src of the current connection hasn't been added, add it to the list of dst object
         if (!existingLabel) {
-            if (nbrOfDstLabels > 3) {
+            if (nbrOfDstLabels > COLLAPSE_ON_INDEX) {
                 existingCollapseLabel = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
                 collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
                 if (!collapsed) {
