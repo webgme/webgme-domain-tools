@@ -71,7 +71,7 @@ define([], function () {
     };
 
     ExecutorClient.prototype.updateJob = function (jobInfo, callback) {
-        this.sendHttpRequest('POST', this.executorUrl + 'update/' + jobInfo.hash, function (err, response) {
+        this.sendHttpRequestWithData('POST', this.executorUrl + 'update/' + jobInfo.hash, JSON.stringify(jobInfo), function (err, response) {
             if (err) {
                 callback(err);
                 return;
@@ -117,6 +117,10 @@ define([], function () {
     };
 
     ExecutorClient.prototype.sendHttpRequest = function (method, url, callback) {
+        return this.sendHttpRequestWithData(method, url, null, callback);
+    };
+
+    ExecutorClient.prototype.sendHttpRequestWithData = function (method, url, data, callback) {
 
         if (this.isNodeJS) {
             var options = {
@@ -131,6 +135,9 @@ define([], function () {
         } else {
             var oReq = new XMLHttpRequest();
             oReq.open(method, url, true);
+            if (data) {
+                oReq.setRequestHeader('Content-Type', 'application/json');
+            }
             oReq.onload = function (oEvent) {
                 // Uploaded.
                 var response = oEvent.target.response;
@@ -141,8 +148,11 @@ define([], function () {
                 }
             };
 
-            // data is a file object or blob
-            oReq.send();
+            if (data) {
+                oReq.send(data);
+            } else {
+                oReq.send();
+            }
         }
     };
 

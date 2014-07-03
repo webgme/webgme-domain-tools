@@ -64,8 +64,8 @@ define(['logManager',
     //here you can define global variables for your middleware
     var logger = // logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
         function() { };
-    logger.prototype.error = console.log;
-    logger.prototype.debug = console.log;
+    logger.prototype.error = function(x) { console.log(x); };
+    logger.prototype.debug = logger.prototype.error;
     logger = new logger();
 
     var ExecutorWorker = function (parameters) {
@@ -134,17 +134,8 @@ define(['logManager',
 
                     // unzip downloaded file
 
-                    var extract = unzip.Extract({ path: jobDir, verbose:true });
-
-                    fs.createReadStream(zipPath).pipe(extract);
-                    //extract.on('error', function(err) {
-                    //    if (err) {
-                    //        logger.error(err);
-                    //        jobInfo.status = 'FAILED_UNZIP';
-                    //        return;
-                    //    }
-                    //});
-                    extract.on('close', function(err) {
+                    var child = child_process.execFile("c:\\Program Files\\7-Zip\\7z.exe", ["x", "-y", path.basename(zipPath)], {cwd: jobDir},
+                        function (err, stdout, stderr) {
                         if (err) {
                             logger.error(err);
                             jobInfo.status = 'FAILED_UNZIP';
@@ -232,39 +223,42 @@ define(['logManager',
                 }
 
                 if (archive) {
-                    // archive the given file
-                    resultArtifact.addFileAsSoftLink(filename, fs.createReadStream(results[i]), function (err, hash) {
-                        remaining -= 1;
+                    // FIXME: get the blob client to stream
+                    //var stream = fs.createReadStream(results[i]);
+                    fs.readFile(results[i], function(err, data) {
+                        // archive the given file
+                        resultArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
+                            remaining -= 1;
 
-                        if (err) {
-                            logger.error(err);
-                        } else {
+                            // FIXME: handle 'Another content with the same name was already added'
+                            // if (typeof err === "string"
+                            if (err) {
+                                logger.error(err);
+                            } else {
 
-                        }
+                            }
 
-                        if (remaining === 0) {
-                            resultArtifact.save(function (err, resultHash) {
-                                if (err) {
-                                    logger.error(err);
-                                    jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
-                                    return;
-                                } else {
-                                    // FIXME: This is synchronous
-                                    deleteFolderRecursive(directory);
-                                }
+                            if (remaining === 0) {
+                                resultArtifact.save(function (err, resultHash) {
+                                    if (err) {
+                                        logger.error(err);
+                                        jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
+                                        return;
+                                    } else {
+                                        // FIXME: This is synchronous
+                                        deleteFolderRecursive(directory);
+                                    }
 
-                                jobInfo.resultHash = resultHash;
-                                if (jobInfo.status === 'CREATED') {
+                                    jobInfo.resultHash = resultHash;
                                     jobInfo.status = 'SUCCESS';
-                                    self.executorClient.updateJob(jobInfo, function(err) {
+                                    self.executorClient.updateJob(jobInfo, function (err) {
                                         console.log(err); // TODO
                                     });
-                                }
-                            });
-                        }
+                                });
+                            }
 
+                        });
                     });
-
                 } else {
                     // skip it
                     remaining -= 1;

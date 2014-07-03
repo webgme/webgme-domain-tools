@@ -108,6 +108,9 @@ define(['logManager',
                 case "info":
                     ExecutorRESTInfo(req, res, next);
                     break;
+                case "update":
+                    ExecutorRESTUpdate(req, res, next);
+                    break;
                 default:
                     res.send(404);
                     break;
