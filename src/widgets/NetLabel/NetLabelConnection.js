@@ -62,6 +62,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self.endCoordinates.y = dstPos.y;
 
         self._segPoints = segPoints.slice(0);
+        self._pathPoints = segPoints;
 
         if (this.showAsLabel) {
             self._setSrcLabelData(segPoints);
@@ -79,41 +80,32 @@ define(['js/Widgets/DiagramDesigner/Connection',
      * @private
      */
     NetLabelConnection.prototype._setSrcLabelData = function (segPoints) {
-        var LINE_LENGTH = 100,
-            pathDef = [],
-            p,
-            lastP,
+        var pathDef = [],
+            p = segPoints[0], // src-start
+            lastP = segPoints[1], // src-end
             points = [],
             validPath = segPoints && segPoints.length > 1;
 
         if (validPath) {
             //there is at least 2 points given, good to draw
-
-            this._pathPoints = segPoints;
-
-            p = segPoints[0]; // src-start
-            lastP = segPoints[1]; // src-end
-
             pathDef.push("M" + p.x + "," + p.y);
 
             // if connector is on top or bottom draw vertical lines
             if (p.x === lastP.x) {
                 if (p.y <= lastP.y) {
-                    pathDef.push("L" + p.x + "," + (p.y + LINE_LENGTH));
+                    pathDef.push("L" + p.x + "," + (p.y + NetLabelWidgetConstants.MAX_TEXT_WIDTH));
                 } else {
-                    pathDef.push("L" + p.x + "," + (p.y - LINE_LENGTH));
+                    pathDef.push("L" + p.x + "," + (p.y - NetLabelWidgetConstants.MAX_TEXT_WIDTH));
                 }
             } else {
                 if (p.x <= lastP.x) {
-                    pathDef.push("L" + (p.x + LINE_LENGTH) + "," + p.y);
+                    pathDef.push("L" + (p.x + NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
                 } else {
-                    pathDef.push("L" + (p.x - LINE_LENGTH) + "," + p.y);
+                    pathDef.push("L" + (p.x - NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
                 }
             }
 
             //construct the SVG path definition from path-points
-            pathDef = pathDef.join(" ");
-
             //check if the prev pathDef is the same as the new
             //this way the redraw does not need to happen
             if (this.srcPathDef !== pathDef) {
@@ -128,7 +120,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     this.skinParts.srcPath = this.paper.path(pathDef);
 
                     $(this.skinParts.srcPath.node).attr({"id": this.id,
-                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
+                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' src'});
                 }
             }
 
@@ -157,17 +149,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
      * @private
      */
     NetLabelConnection.prototype._setDstLabelData = function (segPoints) {
-        var LINE_LENGTH = 100,
-            pathDef = [],
+        var pathDef = [],
             p = segPoints[segPoints.length - 1], // dst-start
             lastP = segPoints[segPoints.length - 2], // dst-end
-            points = [],
+            points = [],// todo: set value to this later
             validPath = segPoints && segPoints.length > 1;
 
         if (validPath) {
             //there is at least 2 points given, good to draw
-
-            this._pathPoints = segPoints;
 
             pathDef.push("M" + p.x + "," + p.y);
 
@@ -175,20 +164,19 @@ define(['js/Widgets/DiagramDesigner/Connection',
             if (p.x === lastP.x) {
                 if (p.y <= lastP.y) {
                     // top connector
-                    pathDef.push("L" + p.x + "," + (p.y + LINE_LENGTH));
+                    pathDef.push("L" + p.x + "," + (p.y + NetLabelWidgetConstants.MAX_TEXT_WIDTH));
                 } else {
-                    pathDef.push("L" + p.x + "," + (p.y - LINE_LENGTH));
+                    pathDef.push("L" + p.x + "," + (p.y - NetLabelWidgetConstants.MAX_TEXT_WIDTH));
                 }
             } else {
                 if (p.x <= lastP.x) {
-                    pathDef.push("L" + (p.x + LINE_LENGTH) + "," + p.y);
+                    pathDef.push("L" + (p.x + NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
                 } else {
-                    pathDef.push("L" + (p.x - LINE_LENGTH) + "," + p.y);
+                    pathDef.push("L" + (p.x - NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
                 }
             }
 
             //construct the SVG path definition from path-points
-            pathDef = pathDef.join(" ");
 
             //check if the prev pathDef is the same as the new
             //this way the redraw does not need to happen
@@ -204,7 +192,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     this.skinParts.dstPath = this.paper.path(pathDef);
 
                     $(this.skinParts.dstPath.node).attr({"id": this.id,
-                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
+                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' dst'});
                 }
             }
 

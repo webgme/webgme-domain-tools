@@ -24,6 +24,7 @@ define([], function () {
         NETLABEL_SHOW_ALL: "show-all-labels",
         COLLAPSE_LABELS: "collapse-labels",
         MAX_LABEL_NUMBER: 1,
+        MAX_TEXT_WIDTH: 100,
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
         CONNECTOR_CLASS : "connector",
         CONNECTION_END_SRC : 'src',
