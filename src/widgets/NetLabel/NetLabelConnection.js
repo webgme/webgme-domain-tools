@@ -20,6 +20,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     var NetLabelConnection,
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
+        PATH_ID_PREFIX = "p_",
         COLLAPSE_ON_INDEX = NetLabelWidgetConstants.MAX_LABEL_NUMBER - 1,
         MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
         CONNECTION_DEFAULT_WIDTH = 1,
@@ -65,8 +66,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self._pathPoints = segPoints;
 
         if (this.showAsLabel) {
-            self._setSrcLabelData(segPoints);
-            self._setDstLabelData(segPoints);
+            self._setSrcRenderData(segPoints);
+            self._setDstRenderData(segPoints);
         } else {
             self.setLineConnectionRenderData(segPoints);
         }
@@ -77,7 +78,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
      * @param segPoints
      * @private
      */
-    NetLabelConnection.prototype._setSrcLabelData = function (segPoints) {
+    NetLabelConnection.prototype._setSrcRenderData = function (segPoints) {
         // todo: enable clicks & hover on c-text container -- maybe rename to c-text src and c-text dst
         // todo: create title of net-list and the actual list as done in createSrcLabel
         var pathDef = [],
@@ -88,41 +89,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (validPath) {
             //there is at least 2 points given, good to draw
-            pathDef.push("M" + p.x + "," + p.y);
+            pathDef = this._getPathDef(p, lastP);
+            this._createSrcNet(pathDef);
 
-            // if connector is on top or bottom draw vertical lines
-            if (p.x === lastP.x) {
-                if (p.y <= lastP.y) {
-                    pathDef.push("L" + p.x + "," + (p.y + NetLabelWidgetConstants.MAX_TEXT_WIDTH));
-                } else {
-                    pathDef.push("L" + p.x + "," + (p.y - NetLabelWidgetConstants.MAX_TEXT_WIDTH));
-                }
-            } else {
-                if (p.x <= lastP.x) {
-                    pathDef.push("L" + (p.x + NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
-                } else {
-                    pathDef.push("L" + (p.x - NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
-                }
-            }
-
-            //construct the SVG path definition from path-points
-            //check if the prev pathDef is the same as the new
-            //this way the redraw does not need to happen
-            if (this.srcPathDef !== pathDef) {
-                this.srcPathDef = pathDef;
-
-                if (this.skinParts.srcPath) {
-                    this.logger.debug("Recreating connection with ID: '" + this.id + "'");
-                    this.skinParts.srcPath.attr({ "path": pathDef});
-                } else {
-                    this.logger.debug("Creating connection with ID: '" + this.id + "'");
-                    /*CREATE PATH*/
-                    this.skinParts.srcPath = this.paper.path(pathDef);
-
-                    $(this.skinParts.srcPath.node).attr({"id": this.id,
-                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' src'});
-                }
-            }
 
             //in edit mode add edit features
             if (this._editMode === true) {
@@ -133,7 +102,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this._showConnectionAreaMarker();
 
-            this._createSrcLabel();
         } else {
             this.srcPathDef = null;
             this._removePath();
@@ -143,12 +111,98 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
+    NetLabelConnection.prototype._createSrcNet = function (pathDef) {
+        var self = this,
+            srcID = self.srcSubCompId || self.srcObjId,
+            dstID = self.dstSubCompId || self.dstObjId,
+            srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
+            srcPortLabel = self._netLabelBase.clone(),
+            nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
+            expandLabel = self._expandLabelBase.clone()[0],
+            dstText = self._getDstText(),
+            existingLabel,
+            existingCollapseLabel,
+            collapsed;
+
+        // check if connLists need to be collapsed:
+        if (nbrOfSrcLabels > COLLAPSE_ON_INDEX && !$(srcPortLabelList).find('.show-all-labels')[0]) {
+            expandLabel.setAttribute('id', srcID);
+            $(srcPortLabelList).append(expandLabel);
+        }
+
+        // create a label list for the src object or src port
+        if (!srcPortLabelList) {
+            srcPortLabelList = self._netLabelListBase.clone()[0];
+            srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
+
+            self._drawSrcPath(pathDef, srcID);
+        }
+
+        srcPortLabel.text(dstText);
+        srcPortLabel.attr('id', dstID);
+        srcPortLabel.attr('connId', self.id);
+
+        existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
+        if (!existingLabel) {
+            if (nbrOfSrcLabels > COLLAPSE_ON_INDEX) {
+                existingCollapseLabel = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
+                collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
+                if (!collapsed) {
+                    srcPortLabel.hide();
+                }
+            }
+            $(srcPortLabelList).append(srcPortLabel);
+
+        } else if (existingLabel.textContent !== dstText) {
+            // handling the name update case
+            existingLabel.textContent = dstText;
+        }
+
+        self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+
+        self._renderSrcTexts(srcPortLabelList);
+    };
+
+    NetLabelConnection.prototype._getSrcText = function () {
+        var self = this,
+            srcText,
+            srcName = self.srcObj.getAttribute('name'),
+            srcParentName = self.srcParentObj.getAttribute('name');
+
+        srcText = self.srcSubCompId ? srcParentName + "." + srcName : srcName;
+
+        return srcText;
+    };
+
+    NetLabelConnection.prototype._drawSrcPath = function (pathDef, srcId) {
+
+        //construct the SVG path definition from path-points
+        //check if the prev pathDef is the same as the new
+        //this way the redraw does not need to happen
+        if (this.srcPathDef !== pathDef) {
+            this.srcPathDef = pathDef;
+
+            if (this.skinParts.srcPath) {
+                this.logger.debug("Recreating net list base with ID: '" + srcId + "'");
+                this.skinParts.srcPath.attr({ "path": pathDef});
+            } else {
+                this.logger.debug("Creating connection with ID: '" + srcId + "'");
+                /*CREATE PATH*/
+                this.skinParts.srcPath = this.paper.path(pathDef);
+
+                $(this.skinParts.srcPath.node).attr({"id": srcId,
+                    "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
+            }
+        }
+    };
+
     /**
      * Draw connection base starting from dst
      * @param segPoints
      * @private
      */
-    NetLabelConnection.prototype._setDstLabelData = function (segPoints) {
+    NetLabelConnection.prototype._setDstRenderData = function (segPoints) {
         var pathDef = [],
             p = segPoints[segPoints.length - 1], // dst-start
             lastP = segPoints[segPoints.length - 2], // dst-end
@@ -158,43 +212,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (validPath) {
             //there is at least 2 points given, good to draw
 
-            pathDef.push("M" + p.x + "," + p.y);
+            pathDef = this._getPathDef(p, lastP);
 
-            // if connector is on top or bottom draw vertical lines
-            if (p.x === lastP.x) {
-                if (p.y <= lastP.y) {
-                    // top connector
-                    pathDef.push("L" + p.x + "," + (p.y + NetLabelWidgetConstants.MAX_TEXT_WIDTH));
-                } else {
-                    pathDef.push("L" + p.x + "," + (p.y - NetLabelWidgetConstants.MAX_TEXT_WIDTH));
-                }
-            } else {
-                if (p.x <= lastP.x) {
-                    pathDef.push("L" + (p.x + NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
-                } else {
-                    pathDef.push("L" + (p.x - NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
-                }
-            }
-
-            //construct the SVG path definition from path-points
-
-            //check if the prev pathDef is the same as the new
-            //this way the redraw does not need to happen
-            if (this.dstPathDef !== pathDef) {
-                this.dstPathDef = pathDef;
-
-                if (this.skinParts.dstPath) {
-                    this.logger.debug("Recreating connection with ID: '" + this.id + "'");
-                    this.skinParts.dstPath.attr({ "path": pathDef});
-                } else {
-                    this.logger.debug("Creating connection with ID: '" + this.id + "'");
-                    /*CREATE PATH*/
-                    this.skinParts.dstPath = this.paper.path(pathDef);
-
-                    $(this.skinParts.dstPath.node).attr({"id": this.id,
-                        "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' dst'});
-                }
-            }
+            this._createDstNet(pathDef);
 
             //in edit mode add edit features
             if (this._editMode === true) {
@@ -205,7 +225,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this._showConnectionAreaMarker();
 
-            this._createDstLabel();
         } else {
             this.pathDef = null;
             this._removePath();
@@ -215,60 +234,151 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
+    NetLabelConnection.prototype._createDstNet = function (pathDef) {
+        var self = this,
+            srcID = self.srcSubCompId || self.srcObjId,
+            dstID = self.dstSubCompId || self.dstObjId,
+            dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
+            dstPortLabel = self._netLabelBase.clone(),
+            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0,
+            expandLabel = self._expandLabelBase.clone()[0],
+            srcText = self._getSrcText(),
+            existingLabel,
+            existingCollapseLabel,
+            collapsed;
+
+        if (nbrOfDstLabels > COLLAPSE_ON_INDEX && !$(dstPortLabelList).find('.show-all-labels')[0]) {
+            expandLabel.setAttribute('id', dstID);
+            $(dstPortLabelList).append(expandLabel);
+        }
+
+        // create a label list for the dst object or dst port
+        if (!dstPortLabelList) {
+            dstPortLabelList = self._netLabelListBase.clone()[0];
+            dstPortLabelList.setAttribute("obj-id", dstID);
+
+            self._drawDstPath(pathDef, dstID);
+        }
+
+        // making the dstPortLabel
+        dstPortLabel.text(srcText);
+        dstPortLabel.attr('id', srcID);
+        dstPortLabel.attr('connId', self.id);
+
+        existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if src of the current connection hasn't been added, add it to the list of dst object
+        if (!existingLabel) {
+            if (nbrOfDstLabels > COLLAPSE_ON_INDEX) {
+                existingCollapseLabel = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
+                collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
+                if (!collapsed) {
+                    dstPortLabel.hide();
+                }
+            }
+            $(dstPortLabelList).append(dstPortLabel);
+
+        } else if (existingLabel.textContent !== srcText) {
+            // handling the name update case
+            existingLabel.textContent = srcText;
+        }
+        self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        self._renderDstTexts(dstPortLabelList);
+    };
+
+    NetLabelConnection.prototype._getDstText = function () {
+        var self = this,
+            dstText,
+            dstName = self.dstObj.getAttribute('name'),
+            dstParentName = self.dstParentObj.getAttribute('name');
+
+        dstText = self.dstSubCompId ? dstParentName + "." + dstName : dstName;
+
+        return dstText;
+    };
+
+    NetLabelConnection.prototype._drawDstPath = function (pathDef, dstId) {
+        //construct the SVG path definition from path-points
+
+        //check if the prev pathDef is the same as the new
+        //this way the redraw does not need to happen
+        if (this.dstPathDef !== pathDef) {
+            this.dstPathDef = pathDef;
+
+            if (this.skinParts.dstPath) {
+                this.logger.debug("Recreating net list base with ID: '" + dstId + "'");
+                this.skinParts.dstPath.attr({ "path": pathDef});
+            } else {
+                this.logger.debug("Creating net list base with ID: '" + dstId + "'");
+                /*CREATE PATH*/
+                this.skinParts.dstPath = this.paper.path(pathDef);
+
+                $(this.skinParts.dstPath.node).attr({"id": dstId,
+                    "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' dst'});
+            }
+        }
+    };
+
     NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList) {
-        var totalLength = this.skinParts.srcPath.getTotalLength(),
-            pathCenter = this.skinParts.srcPath.getPointAtLength(totalLength / 2),
+        var totalLength,
+            pathCenter,
             id;
 
         this._hideSrcTexts();
 
-        if (srcPortLabelList) {
-            id = TEXT_ID_PREFIX + srcPortLabelList.attributes['obj-id'].value;
-            this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('#' + id)[0];
+        if (this.skinParts.srcPath) {
+            totalLength = this.skinParts.srcPath.getTotalLength();
+            pathCenter = this.skinParts.srcPath.getPointAtLength(totalLength / 2);
 
-            if (!this.skinParts.textContainer1) {
+            if (srcPortLabelList) {
+                id = TEXT_ID_PREFIX + srcPortLabelList.attributes['obj-id'].value;
+                this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
 
-                $(srcPortLabelList).css({'position': 'relative',
-                    'left': '-50%'});
-                this.skinParts.name = this._textNameBase.clone();
-                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                    'left': pathCenter.x});
-                this.skinParts.name.append(srcPortLabelList);
-                this.skinParts.textContainer1 = this._textContainer.clone();
-                this.skinParts.textContainer1.attr('id', id);
-                this.skinParts.textContainer1.append(this.skinParts.name);
-                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
+                if (!this.skinParts.textContainer1) {
+
+                    $(srcPortLabelList).css({'position': 'relative',
+                        'left': '-50%'});
+                    this.skinParts.name = this._textNameBase.clone();
+                    this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                        'left': pathCenter.x});
+                    this.skinParts.name.append(srcPortLabelList);
+                    this.skinParts.textContainer1 = this._textContainer.clone();
+                    this.skinParts.textContainer1.attr('id', id);
+                    this.skinParts.textContainer1.append(this.skinParts.name);
+                    $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
+                }
             }
         }
-
     };
 
     NetLabelConnection.prototype._renderDstTexts = function (dstPortLabelList) {
-        var totalLength = this.skinParts.dstPath.getTotalLength(),
-            pathCenter = this.skinParts.dstPath.getPointAtLength(totalLength / 2),
+        var totalLength,
+            pathCenter,
             id;
 
         this._hideDstTexts();
 
-        if (dstPortLabelList) {
+        if (this.skinParts.dstPath) {
+            totalLength = this.skinParts.dstPath.getTotalLength();
+            pathCenter = this.skinParts.dstPath.getPointAtLength(totalLength / 2);
+            if (dstPortLabelList) {
 
-            id = TEXT_ID_PREFIX + dstPortLabelList.attributes['obj-id'].value;
-            this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('#' + id)[0];
-            if (!this.skinParts.textContainer2) {
+                id = TEXT_ID_PREFIX + dstPortLabelList.attributes['obj-id'].value;
+                this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
+                if (!this.skinParts.textContainer2) {
 
-                $(dstPortLabelList).css({'position': 'relative',
-                    'left': '-50%'});
-                this.skinParts.name = this._textNameBase.clone();
-                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                    'left': pathCenter.x});
-                this.skinParts.name.append(dstPortLabelList);
-                this.skinParts.textContainer2 = this._textContainer.clone();
-                this.skinParts.textContainer2.attr('id', id);
-                this.skinParts.textContainer2.append(this.skinParts.name);
-                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
+                    $(dstPortLabelList).css({'position': 'relative',
+                        'left': '-50%'});
+                    this.skinParts.name = this._textNameBase.clone();
+                    this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                        'left': pathCenter.x});
+                    this.skinParts.name.append(dstPortLabelList);
+                    this.skinParts.textContainer2 = this._textContainer.clone();
+                    this.skinParts.textContainer2.attr('id', id);
+                    this.skinParts.textContainer2.append(this.skinParts.name);
+                    $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
+                }
             }
         }
-
     };
 
     NetLabelConnection.prototype.setLineConnectionRenderData = function (segPoints) {
@@ -543,128 +653,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 //        this.segmentPoints = [];
     };
 
-    NetLabelConnection.prototype._createSrcLabel = function () {
-        var self = this,
-            srcID = self.srcSubCompId || self.srcObjId,
-            dstID = self.dstSubCompId || self.dstObjId,
-            srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
-            srcPortLabel = self._netLabelBase.clone(),
-            nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
-            expandLabel = self._expandLabelBase.clone()[0],
-            dstText = self._getDstText(),
-            existingLabel,
-            existingCollapseLabel,
-            collapsed;
-
-        // check if connLists need to be collapsed:
-        if (nbrOfSrcLabels > COLLAPSE_ON_INDEX && !$(srcPortLabelList).find('.show-all-labels')[0]) {
-            expandLabel.setAttribute('id', srcID);
-            $(srcPortLabelList).append(expandLabel);
-        }
-
-        // create a label list for the src object or src port
-        if (!srcPortLabelList) {
-            srcPortLabelList = self._netLabelListBase.clone()[0];
-            srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-        }
-
-        srcPortLabel.text(dstText);
-        srcPortLabel.attr('id', dstID);
-        srcPortLabel.attr('connId', self.id);
-
-        existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
-        if (!existingLabel) {
-            if (nbrOfSrcLabels > COLLAPSE_ON_INDEX) {
-                existingCollapseLabel = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
-                collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
-                if (!collapsed) {
-                    srcPortLabel.hide();
-                }
-            }
-            $(srcPortLabelList).append(srcPortLabel);
-
-        } else if (existingLabel.textContent !== dstText) {
-            // handling the name update case
-            existingLabel.textContent = dstText;
-        }
-
-        self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
-
-        self._renderSrcTexts(srcPortLabelList);
-    };
-
-    NetLabelConnection.prototype._getSrcText = function () {
-        var self = this,
-            srcText,
-            srcName = self.srcObj.getAttribute('name'),
-            srcParentName = self.srcParentObj.getAttribute('name');
-
-        srcText = self.srcSubCompId ? srcParentName + "." + srcName : srcName;
-
-        return srcText;
-    };
-
-    NetLabelConnection.prototype._createDstLabel = function () {
-        var self = this,
-            srcID = self.srcSubCompId || self.srcObjId,
-            dstID = self.dstSubCompId || self.dstObjId,
-            dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
-            dstPortLabel = self._netLabelBase.clone(),
-            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0,
-            expandLabel = self._expandLabelBase.clone()[0],
-            srcText = self._getSrcText(),
-            existingLabel,
-            existingCollapseLabel,
-            collapsed;
-
-        if (nbrOfDstLabels > COLLAPSE_ON_INDEX && !$(dstPortLabelList).find('.show-all-labels')[0]) {
-            expandLabel.setAttribute('id', dstID);
-            $(dstPortLabelList).append(expandLabel);
-        }
-
-        // create a label list for the dst object or dst port
-        if (!dstPortLabelList) {
-            dstPortLabelList = self._netLabelListBase.clone()[0];
-            dstPortLabelList.setAttribute("obj-id", dstID);
-        }
-
-        // making the dstPortLabel
-        dstPortLabel.text(srcText);
-        dstPortLabel.attr('id', srcID);
-        dstPortLabel.attr('connId', self.id);
-
-        existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        // if src of the current connection hasn't been added, add it to the list of dst object
-        if (!existingLabel) {
-            if (nbrOfDstLabels > COLLAPSE_ON_INDEX) {
-                existingCollapseLabel = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLABEL_SHOW_ALL)[0];
-                collapsed = existingCollapseLabel ? existingCollapseLabel.style.display === "none" : false;
-                if (!collapsed) {
-                    dstPortLabel.hide();
-                }
-            }
-            $(dstPortLabelList).append(dstPortLabel);
-
-        } else if (existingLabel.textContent !== srcText) {
-            // handling the name update case
-            existingLabel.textContent = srcText;
-        }
-        self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        self._renderDstTexts(dstPortLabelList);
-    };
-
-    NetLabelConnection.prototype._getDstText = function () {
-        var self = this,
-            dstText,
-            dstName = self.dstObj.getAttribute('name'),
-            dstParentName = self.dstParentObj.getAttribute('name');
-
-        dstText = self.dstSubCompId ? dstParentName + "." + dstName : dstName;
-
-        return dstText;
-    };
-
     NetLabelConnection.prototype.getBoundingBox = function () {
         var bBox,
             strokeWidthAdjust,
@@ -864,8 +852,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-
-
     NetLabelConnection.prototype._setEditMode = function (editMode) {
         if (this._readOnly === false && this._editMode !== editMode) {
             this._editMode = editMode;
@@ -1009,6 +995,31 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.hideEndConnectors = function () {
     };
     //END OF --- ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
+
+    // HELPER FUNCTIONS //
+    NetLabelConnection.prototype._getPathDef = function (p, lastP) {
+        var pathDef = [];
+
+        // if connector is on top or bottom draw vertical lines
+        pathDef.push("M" + p.x + "," + p.y);
+
+        // if connector is on top or bottom draw vertical lines
+        if (p.x === lastP.x) {
+            if (p.y <= lastP.y) {
+                pathDef.push("L" + p.x + "," + (p.y + NetLabelWidgetConstants.MAX_TEXT_WIDTH));
+            } else {
+                pathDef.push("L" + p.x + "," + (p.y - NetLabelWidgetConstants.MAX_TEXT_WIDTH));
+            }
+        } else {
+            if (p.x <= lastP.x) {
+                pathDef.push("L" + (p.x + NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
+            } else {
+                pathDef.push("L" + (p.x - NetLabelWidgetConstants.MAX_TEXT_WIDTH) + "," + p.y);
+            }
+        }
+        return pathDef;
+    };
+
 
     return NetLabelConnection;
 });
