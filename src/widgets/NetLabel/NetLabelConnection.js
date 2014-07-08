@@ -67,19 +67,19 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (this.showAsLabel) {
             self._setSrcLabelData(segPoints);
             self._setDstLabelData(segPoints);
-//            self._createSrcLabel(self.sourceCoordinates.x, self.sourceCoordinates.y);
-//            self._createDstLabel(self.endCoordinates.x, self.endCoordinates.y);
         } else {
             self.setLineConnectionRenderData(segPoints);
         }
     };
 
     /**
-     * Draw bus-base from src
+     * Draw connection base from src
      * @param segPoints
      * @private
      */
     NetLabelConnection.prototype._setSrcLabelData = function (segPoints) {
+        // todo: enable clicks & hover on c-text container -- maybe rename to c-text src and c-text dst
+        // todo: create title of net-list and the actual list as done in createSrcLabel
         var pathDef = [],
             p = segPoints[0], // src-start
             lastP = segPoints[1], // src-end
@@ -133,7 +133,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this._showConnectionAreaMarker();
 
-            this._renderSrcTexts();
+            this._createSrcLabel();
         } else {
             this.srcPathDef = null;
             this._removePath();
@@ -144,7 +144,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     /**
-     * Draw bus-base starting from dst
+     * Draw connection base starting from dst
      * @param segPoints
      * @private
      */
@@ -205,7 +205,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this._showConnectionAreaMarker();
 
-            this._renderDstTexts();
+            this._createDstLabel();
         } else {
             this.pathDef = null;
             this._removePath();
@@ -215,82 +215,60 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-    NetLabelConnection.prototype._renderSrcTexts = function () {
+    NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList) {
         var totalLength = this.skinParts.srcPath.getTotalLength(),
             pathCenter = this.skinParts.srcPath.getPointAtLength(totalLength / 2),
-            hasText = false,
-            self = this;
+            id;
 
-        this._hideTexts();
+        this._hideSrcTexts();
 
-        this.skinParts.textContainer = this._textContainer.clone();
-        this.skinParts.textContainer.attr('id', TEXT_ID_PREFIX + this.id);
+        if (srcPortLabelList) {
+            id = TEXT_ID_PREFIX + srcPortLabelList.attributes['obj-id'].value;
+            this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('#' + id)[0];
 
-        if (this.name && this.name !== "") {
-            this.skinParts.name = this._textNameBase.clone();
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                'left': pathCenter.x,
-                'color': this.designerAttributes.color});
-            this.skinParts.name.find('span').text(this.name);
-            this.skinParts.textContainer.append(this.skinParts.name);
-            hasText = true;
+            if (!this.skinParts.textContainer1) {
 
-
-            // set title editable on double-click
-            this.skinParts.name.find('span').on("dblclick.editOnDblClick", null, function (event) {
-                if (self.nameEdit === true && self.diagramDesigner.getIsReadOnlyMode() !== true) {
-                    $(this).editInPlace({"class": "",
-                        "onChange": function (oldValue, newValue) {
-                            self._onNameChanged(oldValue, newValue);
-                        }});
-                }
-                event.stopPropagation();
-                event.preventDefault();
-            });
+                $(srcPortLabelList).css({'position': 'relative',
+                    'left': '-50%'});
+                this.skinParts.name = this._textNameBase.clone();
+                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                    'left': pathCenter.x});
+                this.skinParts.name.append(srcPortLabelList);
+                this.skinParts.textContainer1 = this._textContainer.clone();
+                this.skinParts.textContainer1.attr('id', id);
+                this.skinParts.textContainer1.append(this.skinParts.name);
+                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
+            }
         }
 
-
-        if (hasText) {
-            $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer);
-        }
     };
 
-    NetLabelConnection.prototype._renderDstTexts = function () {
+    NetLabelConnection.prototype._renderDstTexts = function (dstPortLabelList) {
         var totalLength = this.skinParts.dstPath.getTotalLength(),
             pathCenter = this.skinParts.dstPath.getPointAtLength(totalLength / 2),
-            hasText = false,
-            self = this;
+            id;
 
-        this._hideTexts();
+        this._hideDstTexts();
 
-        this.skinParts.textContainer = this._textContainer.clone();
-        this.skinParts.textContainer.attr('id', TEXT_ID_PREFIX + this.id);
+        if (dstPortLabelList) {
 
-        if (this.name && this.name !== "") {
-            this.skinParts.name = this._textNameBase.clone();
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET/*+ this.designerAttributes.width / 2*/,
-                'left': pathCenter.x,
-                'color': this.designerAttributes.color});
-            this.skinParts.name.find('span').text(this.name);
-            this.skinParts.textContainer.append(this.skinParts.name);
-            hasText = true;
+            id = TEXT_ID_PREFIX + dstPortLabelList.attributes['obj-id'].value;
+            this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('#' + id)[0];
+            if (!this.skinParts.textContainer2) {
 
-            // set title editable on double-click
-            this.skinParts.name.find('span').on("dblclick.editOnDblClick", null, function (event) {
-                if (self.nameEdit === true && self.diagramDesigner.getIsReadOnlyMode() !== true) {
-                    $(this).editInPlace({"class": "",
-                        "onChange": function (oldValue, newValue) {
-                            self._onNameChanged(oldValue, newValue);
-                        }});
-                }
-                event.stopPropagation();
-                event.preventDefault();
-            });
+                $(dstPortLabelList).css({'position': 'relative',
+                    'left': '-50%'});
+                this.skinParts.name = this._textNameBase.clone();
+                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                    'left': pathCenter.x});
+                this.skinParts.name.append(dstPortLabelList);
+                this.skinParts.textContainer2 = this._textContainer.clone();
+                this.skinParts.textContainer2.attr('id', id);
+                this.skinParts.textContainer2.append(this.skinParts.name);
+                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
+            }
         }
 
-        if (hasText) {
-            $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer);
-        }
     };
 
     NetLabelConnection.prototype.setLineConnectionRenderData = function (segPoints) {
@@ -565,7 +543,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 //        this.segmentPoints = [];
     };
 
-    NetLabelConnection.prototype._createSrcLabel = function (x, y) {
+    NetLabelConnection.prototype._createSrcLabel = function () {
         var self = this,
             srcID = self.srcSubCompId || self.srcObjId,
             dstID = self.dstSubCompId || self.dstObjId,
@@ -588,21 +566,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPortLabelList) {
             srcPortLabelList = self._netLabelListBase.clone()[0];
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-            srcPortLabelList.style.position = "absolute";
         }
 
-        srcPortLabelList.style.left = x.toString() + "px";
-        srcPortLabelList.style.top = y.toString() + "px";
-
-        // this should be done by the decorator -- if name is negated, show overline
-        if (dstText.indexOf('!') === 0) {
-            srcPortLabel.text(dstText.slice(1));
-            srcPortLabel.css("text-decoration", "overline");
-        } else {
-            srcPortLabel.text(dstText);
-            srcPortLabel.css("text-decoration", "none");
-        }
-
+        srcPortLabel.text(dstText);
         srcPortLabel.attr('id', dstID);
         srcPortLabel.attr('connId', self.id);
 
@@ -617,13 +583,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 }
             }
             $(srcPortLabelList).append(srcPortLabel);
-            self.diagramDesigner.skinParts.$itemsContainer.append(srcPortLabelList);
+
         } else if (existingLabel.textContent !== dstText) {
             // handling the name update case
             existingLabel.textContent = dstText;
         }
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+
+        self._renderSrcTexts(srcPortLabelList);
     };
 
     NetLabelConnection.prototype._getSrcText = function () {
@@ -637,7 +605,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return srcText;
     };
 
-    NetLabelConnection.prototype._createDstLabel = function (x, y) {
+    NetLabelConnection.prototype._createDstLabel = function () {
         var self = this,
             srcID = self.srcSubCompId || self.srcObjId,
             dstID = self.dstSubCompId || self.dstObjId,
@@ -648,36 +616,21 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcText = self._getSrcText(),
             existingLabel,
             existingCollapseLabel,
-            collapsed,
-            OFFSET = srcText.length >= 9 ? 80 : 20;
+            collapsed;
 
         if (nbrOfDstLabels > COLLAPSE_ON_INDEX && !$(dstPortLabelList).find('.show-all-labels')[0]) {
             expandLabel.setAttribute('id', dstID);
             $(dstPortLabelList).append(expandLabel);
         }
 
-
         // create a label list for the dst object or dst port
         if (!dstPortLabelList) {
             dstPortLabelList = self._netLabelListBase.clone()[0];
-//            dstPortLabelList.setAttribute("objName", dstText);
             dstPortLabelList.setAttribute("obj-id", dstID);
-            dstPortLabelList.style.position = "absolute";
-        }
-
-        dstPortLabelList.style.left = (x - OFFSET).toString() + "px";
-        dstPortLabelList.style.top = y.toString() + "px";
-
-        // this should be done by the decorator -- if name is negated, show overline
-        if (srcText.indexOf('!') === 0) {
-            dstPortLabel.text(srcText.slice(1));
-            dstPortLabel.css('text-decoration', 'overline');
-        } else {
-            dstPortLabel.text(srcText);
-            dstPortLabel.css('text-decoration', 'none');
         }
 
         // making the dstPortLabel
+        dstPortLabel.text(srcText);
         dstPortLabel.attr('id', srcID);
         dstPortLabel.attr('connId', self.id);
 
@@ -692,12 +645,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 }
             }
             $(dstPortLabelList).append(dstPortLabel);
-            self.diagramDesigner.skinParts.$itemsContainer.append(dstPortLabelList);
+
         } else if (existingLabel.textContent !== srcText) {
             // handling the name update case
             existingLabel.textContent = srcText;
         }
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        self._renderDstTexts(dstPortLabelList);
     };
 
     NetLabelConnection.prototype._getDstText = function () {
@@ -896,6 +850,21 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         }
     };
+
+    NetLabelConnection.prototype._hideSrcTexts = function () {
+        if (this.skinParts.textContainer1) {
+            this.skinParts.textContainer1.remove();
+        }
+    };
+
+    NetLabelConnection.prototype._hideDstTexts = function () {
+
+        if (this.skinParts.textContainer2) {
+            this.skinParts.textContainer2.remove();
+        }
+    };
+
+
 
     NetLabelConnection.prototype._setEditMode = function (editMode) {
         if (this._readOnly === false && this._editMode !== editMode) {

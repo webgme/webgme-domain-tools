@@ -12,26 +12,15 @@
   width: auto;
   height: auto;
   cursor: pointer;
-  padding-top: 5px;
-  border: 1px groove #4d4d4d;
   text-align: center;
   line-height: 15px; }
   .diagram-designer .items .connList .netLabel {
     cursor: pointer;
-    border-top: 1px dashed #999999;
-    background-color: #f3f3f3;
     padding-left: 5px;
     padding-right: 5px; }
-    .diagram-designer .items .connList .netLabel.src-highlighted {
-      background-color: #ff6666; }
-    .diagram-designer .items .connList .netLabel.dst-highlighted {
-      background-color: #00ccff; }
   .diagram-designer .items .connList .show-all-labels {
-    cursor: pointer;
-    background-color: #f3f3f3; }
+    cursor: pointer; }
   .diagram-designer .items .connList .collapse-labels {
     cursor: pointer;
-    color: darkgrey;
-    background-color: #f3f3f3;
     font-size: 7px;
     line-height: 11px; }
