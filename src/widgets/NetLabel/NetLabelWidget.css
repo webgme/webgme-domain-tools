@@ -16,6 +16,7 @@
   line-height: 15px; }
   .diagram-designer .items .connList .netLabel {
     cursor: pointer;
+    border-bottom: black;
     padding-left: 5px;
     padding-right: 5px; }
   .diagram-designer .items .connList .show-all-labels {

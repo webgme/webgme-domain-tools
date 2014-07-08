@@ -53,6 +53,7 @@ $collapse-label-color: #A9A9A9;
       line-height: $connList-line-height;
       .netLabel {
         cursor: pointer;
+        border-bottom: black;
 //        border-top: $connList-netlabel-border-top;
 //        background-color: $connList-netlabel-background-color;
         padding-left: 5px;
