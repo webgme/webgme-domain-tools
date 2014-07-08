@@ -134,8 +134,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPortLabelList) {
             srcPortLabelList = self._netLabelListBase.clone()[0];
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-
-            self._drawSrcPath(pathDef, srcID);
         }
 
         srcPortLabel.text(dstText);
@@ -161,6 +159,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
 
+
+        self._drawSrcPath(pathDef, srcID);
         self._renderSrcTexts(srcPortLabelList);
     };
 
@@ -177,6 +177,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._drawSrcPath = function (pathDef, srcId) {
 
+        var id = PATH_ID_PREFIX + srcId;
+
         //construct the SVG path definition from path-points
         //check if the prev pathDef is the same as the new
         //this way the redraw does not need to happen
@@ -184,14 +186,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.srcPathDef = pathDef;
 
             if (this.skinParts.srcPath) {
-                this.logger.debug("Recreating net list base with ID: '" + srcId + "'");
+                this.logger.debug("Recreating net list base with ID: '" + id + "'");
                 this.skinParts.srcPath.attr({ "path": pathDef});
             } else {
-                this.logger.debug("Creating connection with ID: '" + srcId + "'");
+
+                this._removeExistingPath(id);
+
+                this.logger.debug("Creating connection with ID: '" + id + "'");
                 /*CREATE PATH*/
                 this.skinParts.srcPath = this.paper.path(pathDef);
 
-                $(this.skinParts.srcPath.node).attr({"id": srcId,
+                $(this.skinParts.srcPath.node).attr({"id": id,
                     "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
             }
         }
@@ -256,8 +261,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!dstPortLabelList) {
             dstPortLabelList = self._netLabelListBase.clone()[0];
             dstPortLabelList.setAttribute("obj-id", dstID);
-
-            self._drawDstPath(pathDef, dstID);
         }
 
         // making the dstPortLabel
@@ -282,6 +285,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             existingLabel.textContent = srcText;
         }
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+
+        self._drawDstPath(pathDef, dstID);
         self._renderDstTexts(dstPortLabelList);
     };
 
@@ -297,6 +302,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype._drawDstPath = function (pathDef, dstId) {
+        var id = PATH_ID_PREFIX + dstId,
+            path = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
+
         //construct the SVG path definition from path-points
 
         //check if the prev pathDef is the same as the new
@@ -305,16 +313,25 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.dstPathDef = pathDef;
 
             if (this.skinParts.dstPath) {
-                this.logger.debug("Recreating net list base with ID: '" + dstId + "'");
+                this.logger.debug("Recreating net list base with ID: '" + id + "'");
                 this.skinParts.dstPath.attr({ "path": pathDef});
             } else {
-                this.logger.debug("Creating net list base with ID: '" + dstId + "'");
+
+                this._removeExistingPath(id);
+                this.logger.debug("Creating net list base with ID: '" + id + "'");
                 /*CREATE PATH*/
                 this.skinParts.dstPath = this.paper.path(pathDef);
 
-                $(this.skinParts.dstPath.node).attr({"id": dstId,
+                $(this.skinParts.dstPath.node).attr({"id": id,
                     "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS + ' dst'});
             }
+        }
+    };
+
+    NetLabelConnection.prototype._removeExistingPath = function (id) {
+        var path = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
+        if (path) {
+            path.remove();
         }
     };
 
@@ -329,25 +346,24 @@ define(['js/Widgets/DiagramDesigner/Connection',
             totalLength = this.skinParts.srcPath.getTotalLength();
             pathCenter = this.skinParts.srcPath.getPointAtLength(totalLength / 2);
 
-            if (srcPortLabelList) {
-                id = TEXT_ID_PREFIX + srcPortLabelList.attributes['obj-id'].value;
-                this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
+            id = TEXT_ID_PREFIX + srcPortLabelList.attributes['obj-id'].value;
+            this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
 
-                if (!this.skinParts.textContainer1) {
+            if (!this.skinParts.textContainer1) {
 
-                    $(srcPortLabelList).css({'position': 'relative',
-                        'left': '-50%'});
-                    this.skinParts.name = this._textNameBase.clone();
-                    this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                        'left': pathCenter.x});
-                    this.skinParts.name.append(srcPortLabelList);
-                    this.skinParts.textContainer1 = this._textContainer.clone();
-                    this.skinParts.textContainer1.attr('id', id);
-                    this.skinParts.textContainer1.append(this.skinParts.name);
-                    $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
-                }
+                $(srcPortLabelList).css({'position': 'relative',
+                    'left': '-50%'});
+                this.skinParts.name = this._textNameBase.clone();
+                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                    'left': pathCenter.x});
+                this.skinParts.name.append(srcPortLabelList);
+                this.skinParts.textContainer1 = this._textContainer.clone();
+                this.skinParts.textContainer1.attr('id', id);
+                this.skinParts.textContainer1.append(this.skinParts.name);
+                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
             }
         }
+
     };
 
     NetLabelConnection.prototype._renderDstTexts = function (dstPortLabelList) {
@@ -360,23 +376,21 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (this.skinParts.dstPath) {
             totalLength = this.skinParts.dstPath.getTotalLength();
             pathCenter = this.skinParts.dstPath.getPointAtLength(totalLength / 2);
-            if (dstPortLabelList) {
 
-                id = TEXT_ID_PREFIX + dstPortLabelList.attributes['obj-id'].value;
-                this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
-                if (!this.skinParts.textContainer2) {
+            id = TEXT_ID_PREFIX + dstPortLabelList.attributes['obj-id'].value;
+            this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
+            if (!this.skinParts.textContainer2) {
 
-                    $(dstPortLabelList).css({'position': 'relative',
-                        'left': '-50%'});
-                    this.skinParts.name = this._textNameBase.clone();
-                    this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                        'left': pathCenter.x});
-                    this.skinParts.name.append(dstPortLabelList);
-                    this.skinParts.textContainer2 = this._textContainer.clone();
-                    this.skinParts.textContainer2.attr('id', id);
-                    this.skinParts.textContainer2.append(this.skinParts.name);
-                    $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
-                }
+                $(dstPortLabelList).css({'position': 'relative',
+                    'left': '-50%'});
+                this.skinParts.name = this._textNameBase.clone();
+                this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                    'left': pathCenter.x});
+                this.skinParts.name.append(dstPortLabelList);
+                this.skinParts.textContainer2 = this._textContainer.clone();
+                this.skinParts.textContainer2.attr('id', id);
+                this.skinParts.textContainer2.append(this.skinParts.name);
+                $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
             }
         }
     };
@@ -518,6 +532,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this.diagramDesigner.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS).remove();
             this._hideTexts();
+            this._hideSrcTexts();
+            this._hideDstTexts();
             this.logger.debug("Destroyed");
         }
     };
@@ -996,7 +1012,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
     //END OF --- ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
 
-    // HELPER FUNCTIONS //
+    // HELPER FUNCTIONS
     NetLabelConnection.prototype._getPathDef = function (p, lastP) {
         var pathDef = [];
 
