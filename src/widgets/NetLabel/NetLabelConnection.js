@@ -20,7 +20,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     var NetLabelConnection,
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
-        PATH_ID_PREFIX = "p_",
         COLLAPSE_ON_INDEX = NetLabelWidgetConstants.MAX_LABEL_NUMBER - 1,
         MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
         CONNECTION_DEFAULT_WIDTH = 1,
@@ -182,7 +181,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._drawSrcPath = function (pathDef, srcId) {
 
-        var id = PATH_ID_PREFIX + srcId;
+        var id = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + srcId;
 
         //construct the SVG path definition from path-points
         //check if the prev pathDef is the same as the new
@@ -194,8 +193,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 this.logger.debug("Recreating net list base with ID: '" + id + "'");
                 this.skinParts.srcPath.attr({ "path": pathDef});
             } else {
-
-                this._removeExistingPath(id);
 
                 this.logger.debug("Creating connection with ID: '" + id + "'");
                 /*CREATE PATH*/
@@ -268,7 +265,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype._drawDstPath = function (pathDef, dstId) {
-        var id = PATH_ID_PREFIX + dstId,
+        var id = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + dstId,
             path = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
 
         //construct the SVG path definition from path-points
@@ -304,7 +301,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList, pathDef) {
         var objID = srcPortLabelList.attributes['obj-id'].value,
             id = TEXT_ID_PREFIX + objID,
-            pathCenter = {};
+            pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + objID,
+            pathCenter = {},
+            newPathDef;
 
         this._hideSrcTexts();
 
@@ -326,15 +325,31 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.textContainer1.attr('id', id);
             this.skinParts.textContainer1.append(this.skinParts.name);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
+        } else {
+            this.skinParts.name = $(this.skinParts.textContainer1).find('.' + NetLabelWidgetConstants.CONNECTION_TEXT_CLASS);
+            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                'left': pathCenter.x});
         }
+        //construct the SVG path definition from path-points
+        //check if the prev pathDef is the same as the new
+        //this way the redraw does not need to happen
+        newPathDef = this._getPathDefFromPointObject(pathDef);
+        this._removeExistingPath(pathID);
+        this.logger.debug("Creating connection with ID: '" + id + "'");
+                /*CREATE PATH*/
+                this.skinParts.srcPath = this.paper.path(newPathDef);
 
+                $(this.skinParts.srcPath.node).attr({"id": pathID,
+                    "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
 
     };
 
     NetLabelConnection.prototype._renderDstTexts = function (dstPortLabelList, pathDef) {
         var pathCenter = {},
             objID = dstPortLabelList.attributes['obj-id'].value,
-            id = TEXT_ID_PREFIX + objID;
+            id = TEXT_ID_PREFIX + objID,
+            pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + objID,
+            newPathDef;
 
         this._hideDstTexts();
 
@@ -355,10 +370,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.textContainer2.attr('id', id);
             this.skinParts.textContainer2.append(this.skinParts.name);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
+        } else {
+            this.skinParts.name = $(this.skinParts.textContainer2).find('.' + NetLabelWidgetConstants.CONNECTION_TEXT_CLASS);
+            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+                'left': pathCenter.x});
         }
 
+        newPathDef = this._getPathDefFromPointObject(pathDef);
+        this._removeExistingPath(pathID);
+        this.logger.debug("Creating connection with ID: '" + id + "'");
+        /*CREATE PATH*/
+        this.skinParts.srcPath = this.paper.path(newPathDef);
 
-
+        $(this.skinParts.srcPath.node).attr({"id": pathID,
+            "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
     };
 
     NetLabelConnection.prototype.setLineConnectionRenderData = function (segPoints) {
@@ -1009,6 +1034,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         return pathDef;
     };
+
+    NetLabelConnection.prototype._getPathDefFromPointObject = function (pathDef) {
+        var newPathDef = [];
+
+        newPathDef.push("M" + pathDef.x1 + "," + pathDef.y1);
+        newPathDef.push("L" + pathDef.x2 + "," + pathDef.y2);
+
+        return newPathDef;
+    };
+
 
     return NetLabelConnection;
 });

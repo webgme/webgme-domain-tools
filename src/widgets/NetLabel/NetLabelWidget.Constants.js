@@ -36,6 +36,7 @@ define([], function () {
         DROP_REGION_CLASS: 'drop-region',
         DROP_REGION_ACCEPT_DROPPABLE_CLASS: 'accept-droppable',
         DROP_REGION_REJECT_DROPPABLE_CLASS: 'reject-droppable',
+        CONNECTION_TEXT_CLASS: 'c-text',
 
         /*DOM ELEMENT ATTRIBUTES*/
         DATA_ITEM_ID : 'data-oid',
