@@ -73,8 +73,7 @@ define(['logManager',
     var executorBackend = null;
 
     var ExecutorBackend = function (parameters) {
-        this.jobList = {};
-
+        //this.jobList = {};
         // FIXME: should we use HTTP here?
         var blobBackend = new BlobFSBackend();
         this.blobClient = new BlobRunPluginClient(blobBackend);
@@ -96,9 +95,15 @@ define(['logManager',
 
         // TODO: create job
         // TODO: what if job is already running?
+        //if (this.jobList[jobInfo.hash]) {
+        //    if (jobList[jobInfo.hash]) {
+        //        logger.warning('Job exists in instance AND in global jobList!');
+        //    } else {
+        //        logger.warning('Job exists in instance but NOT in global jobList!');
+        //    }
+        //}
 
-        this.jobList[jobInfo.hash] = jobInfo;
-
+        //this.jobList[jobInfo.hash] = jobInfo;
 
         // get metadata for hash
         self.blobClient.getMetadata(jobInfo.hash, function (err, metadata) {
@@ -436,9 +441,16 @@ define(['logManager',
         }
 
         var hash = url[2];
-        var jobInfo = new JobInfo({hash:hash});
 
         // TODO: check if hash ok
+        if (jobList[hash]) {
+            // Job with exactly the same input was in jobList.
+            // It is either running or done - point to its jobInfo.
+            res.send(jobList[hash]);
+            // console.log('Found job "' + hash + '" in jobList :' + JSON.stringify(jobList[hash], null, 2));
+            return;
+        }
+        var jobInfo = new JobInfo({hash:hash});
         jobList[hash] = jobInfo;
 
         // TODO: get job description
