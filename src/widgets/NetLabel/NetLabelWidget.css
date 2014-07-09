@@ -15,4 +15,4 @@
   .diagram-designer .items div.netlist-container .netlist {
     position: relative;
     left: -50%;
-    cursor: default; }
+    cursor: pointer; }

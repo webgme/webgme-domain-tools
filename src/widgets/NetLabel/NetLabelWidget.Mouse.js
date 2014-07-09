@@ -169,6 +169,7 @@ define(['./NetLabelWidget.Constants',
             }
         });
 
+        // handle mouse leave on netlists
         this.$el.on('mouseleave.' + EVENT_POSTFIX, 'span.' + 'title',  function (event) {
             var objId = $(this).text(),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
@@ -185,9 +186,66 @@ define(['./NetLabelWidget.Constants',
             }
         });
 
-
     };
 
+    NetLabelWidgetMouse.prototype._processMouseEvent = function (event, triggerUIActivity, preventDefault, stopPropagation, stopImmediatePropagation) {
+        //trigger that the user switched to this widget
+        if (triggerUIActivity === true) {
+            this._triggerUIActivity();
+        }
+
+        if (preventDefault === true) {
+            event.preventDefault();
+        }
+
+        if (stopPropagation === true) {
+            event.stopPropagation();
+        }
+
+        if (stopImmediatePropagation === true) {
+            event.stopImmediatePropagation();
+        }
+
+        return this._getMouseEventDetails(event);
+    };
+
+    NetLabelWidgetMouse.prototype._getMouseEventDetails = function (event) {
+        var mousePos = this.getAdjustedMousePos(event),
+            eventDetails = { 'rightClick': event.which === 3,
+                'ctrlKey': event.ctrlKey,
+                'metaKey': event.metaKey,
+                'altKey': event.altKey,
+                'shiftKey': event.shiftKey,
+                'mouseX': mousePos.mX,
+                'mouseY': mousePos.mY };
+
+        return eventDetails;
+    };
+
+    NetLabelWidgetMouse.prototype.trackMouseMoveMouseUp = function (fnMouseMove, fnMouseUp) {
+        var self = this;
+
+        $(document).on('mousemove.' + EVENT_POSTFIX, function (event) {
+            var mouseDetails = self._processMouseEvent(event, false, true, true, true);
+
+            if (fnMouseMove) {
+                fnMouseMove.call(self, mouseDetails);
+            }
+        });
+
+        $(document).on('mouseup.' + EVENT_POSTFIX, function (event) {
+            var mouseDetails = self._processMouseEvent(event, false, true, true, true);
+
+            $(document).off('mousemove.' + EVENT_POSTFIX);
+            $(document).off('mouseup.' + EVENT_POSTFIX);
+
+            if (fnMouseUp) {
+                fnMouseUp.call(self, mouseDetails);
+            }
+        });
+    };
+
+    /** HELPER FUNCTIONS **/
     NetLabelWidgetMouse.prototype._showAllLabels = function (node) {
         var parentNode = node.parentNode,
             childElements = parentNode.children,
@@ -280,63 +338,6 @@ define(['./NetLabelWidget.Constants',
             connObj = this.items[idList[i]];
             connObj.hideEndReconnectors();
         }
-    };
-
-    NetLabelWidgetMouse.prototype._processMouseEvent = function (event, triggerUIActivity, preventDefault, stopPropagation, stopImmediatePropagation) {
-        //trigger that the user switched to this widget
-        if (triggerUIActivity === true) {
-            this._triggerUIActivity();
-        }
-
-        if (preventDefault === true) {
-            event.preventDefault();
-        }
-
-        if (stopPropagation === true) {
-            event.stopPropagation();
-        }
-
-        if (stopImmediatePropagation === true) {
-            event.stopImmediatePropagation();
-        }
-
-        return this._getMouseEventDetails(event);
-    };
-
-    NetLabelWidgetMouse.prototype._getMouseEventDetails = function (event) {
-        var mousePos = this.getAdjustedMousePos(event),
-            eventDetails = { 'rightClick': event.which === 3,
-                'ctrlKey': event.ctrlKey,
-                'metaKey': event.metaKey,
-                'altKey': event.altKey,
-                'shiftKey': event.shiftKey,
-                'mouseX': mousePos.mX,
-                'mouseY': mousePos.mY };
-
-        return eventDetails;
-    };
-
-    NetLabelWidgetMouse.prototype.trackMouseMoveMouseUp = function (fnMouseMove, fnMouseUp) {
-        var self = this;
-
-        $(document).on('mousemove.' + EVENT_POSTFIX, function (event) {
-            var mouseDetails = self._processMouseEvent(event, false, true, true, true);
-
-            if (fnMouseMove) {
-                fnMouseMove.call(self, mouseDetails);
-            }
-        });
-
-        $(document).on('mouseup.' + EVENT_POSTFIX, function (event) {
-            var mouseDetails = self._processMouseEvent(event, false, true, true, true);
-
-            $(document).off('mousemove.' + EVENT_POSTFIX);
-            $(document).off('mouseup.' + EVENT_POSTFIX);
-
-            if (fnMouseUp) {
-                fnMouseUp.call(self, mouseDetails);
-            }
-        });
     };
 
     return NetLabelWidgetMouse;

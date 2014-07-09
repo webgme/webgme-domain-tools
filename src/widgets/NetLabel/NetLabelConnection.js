@@ -842,7 +842,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.srcDragPoint);
                 //resize connectors to connection width
                 this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            } else {
+                this.highlight();
             }
+
 
             if (this.dstSubCompId) {
 
@@ -853,6 +856,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.dstDragPoint);
                 //resize connectors to connection width
                 this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            } else {
+                this.highlight();
             }
 
         } else {
@@ -873,6 +878,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.dstDragPoint = null;
         }
         this._renderEndReconnectors();
+        this.unHighlight();
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
