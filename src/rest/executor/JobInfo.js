@@ -1,7 +1,8 @@
 define([], function() {
     var JobInfo = function (parameters) {
         this.hash = parameters.hash;
-        this.resultHash = parameters.resultHash || null;
+        this.resultHashes = parameters.resultHashes || [];
+        this.resultSuperSet = parameters.resultSuperSet || null;
         this.userId = parameters.userId || [];
         this.status = parameters.status || 'CREATED'; // TODO: define a constant for this
         this.startTime = parameters.startTime || null;
