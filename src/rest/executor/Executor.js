@@ -184,8 +184,6 @@ define(['logManager',
                         res.send(200);
                     }
                 });
-                res.send();
-
             } else {
                 res.send(404);
             }
