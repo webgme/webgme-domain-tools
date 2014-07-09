@@ -151,6 +151,12 @@ define(['./NetLabelWidget.Constants',
             event.preventDefault();
             event.stopImmediatePropagation();
         });
+
+        // handle mouse enter on
+        this.$el.on('mouseenter.' + EVENT_POSTFIX, function (event) {
+            logger.debug('mousedown.background, eventDetails: ');
+
+        })
     };
 
     NetLabelWidgetMouse.prototype._showAllLabels = function (node) {

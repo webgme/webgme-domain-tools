@@ -8,20 +8,11 @@
   background-color: red; }
 .diagram-designer .items .c-d-end.dst.netLabel {
   background-color: blue; }
-.diagram-designer .items .connList {
-  width: auto;
-  height: auto;
-  cursor: pointer;
-  text-align: center;
-  line-height: 15px; }
-  .diagram-designer .items .connList .netLabel {
-    cursor: pointer;
-    border-bottom: black;
-    padding-left: 5px;
-    padding-right: 5px; }
-  .diagram-designer .items .connList .show-all-labels {
-    cursor: pointer; }
-  .diagram-designer .items .connList .collapse-labels {
-    cursor: pointer;
-    font-size: 7px;
-    line-height: 11px; }
+.diagram-designer .items div.netlist-container {
+  position: absolute;
+  font-size: 10px;
+  white-space: nowrap; }
+  .diagram-designer .items div.netlist-container div.connList {
+    position: relative;
+    left: -50%;
+    cursor: default; }

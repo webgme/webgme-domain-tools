@@ -7,13 +7,12 @@
 
 define(['js/Widgets/DiagramDesigner/Connection',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Draggable',
-    './NetLabelWidget.Mouse',
     './NetLabelWidget.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (Connection,
                                                                              DiagramDesignerWidgetDraggable,
-                                                                             NetLabelWidgetMouse,
                                                                              NetLabelWidgetConstants,
                                                                              DiagramDesignerWidgetConstants) {
+// todo: maybe add event handlers here
 
     "use strict";
 
@@ -42,7 +41,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
-    _.extend(NetLabelConnection.prototype, NetLabelWidgetMouse.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -73,6 +71,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPathDef = [],
             p,
             lastP,
+            points = segPoints,
             validPath = segPoints && segPoints.length > 1,
             srcPortLabelList,
             dstPortLabelList;
@@ -174,6 +173,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return srcText;
     };
 
+    // todo: customize these containers-class names, positions
+    NetLabelConnection.prototype._netlistContainer = $('<div class="netlist-container"></div>');
+
     NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList, pathDef) {
         var objID = srcPortLabelList.attributes['obj-id'].value,
             id = TEXT_ID_PREFIX + objID,
@@ -191,27 +193,21 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (!this.skinParts.textContainer1) {
 
-            $(srcPortLabelList).css({'position': 'relative',
-                'left': '-50%'});
-            this.skinParts.name = this._textNameBase.clone();
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            this.skinParts.textContainer1 = this._netlistContainer.clone();
+            this.skinParts.textContainer1.css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
-            this.skinParts.name.append(srcPortLabelList);
-            this.skinParts.textContainer1 = this._textContainer.clone();
             this.skinParts.textContainer1.attr('id', id);
-            this.skinParts.textContainer1.append(this.skinParts.name);
+            this.skinParts.textContainer1.append(srcPortLabelList);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
         } else {
-            this.skinParts.name = $(this.skinParts.textContainer1).find('.' + NetLabelWidgetConstants.CONNECTION_TEXT_CLASS);
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            $(this.skinParts.textContainer1).css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
         }
-        //construct the SVG path definition from path-points
-        //check if the prev pathDef is the same as the new
-        //this way the redraw does not need to happen
-        newPathDef = this._getPathDefFromPointObject(pathDef);
+
+        // remove previous lines drawn for this component/sub-component
         this._removeExistingPath(pathID);
-        this.logger.debug("Creating connection with ID: '" + id + "'");
+        //construct the SVG path definition from pathDef
+        newPathDef = this._getPathDefFromPointObject(pathDef);
         /*CREATE PATH*/
         this.skinParts.srcPath = this.paper.path(newPathDef);
 
@@ -297,19 +293,14 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
         if (!this.skinParts.textContainer2) {
 
-            $(dstPortLabelList).css({'position': 'relative',
-                'left': '-50%'});
-            this.skinParts.name = this._textNameBase.clone();
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            this.skinParts.textContainer2 = this._netlistContainer.clone();
+            this.skinParts.textContainer2.css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
-            this.skinParts.name.append(dstPortLabelList);
-            this.skinParts.textContainer2 = this._textContainer.clone();
             this.skinParts.textContainer2.attr('id', id);
-            this.skinParts.textContainer2.append(this.skinParts.name);
+            this.skinParts.textContainer2.append(dstPortLabelList);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
         } else {
-            this.skinParts.name = $(this.skinParts.textContainer2).find('.' + NetLabelWidgetConstants.CONNECTION_TEXT_CLASS);
-            this.skinParts.name.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            $(this.skinParts.textContainer2).css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
         }
 
@@ -798,7 +789,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             //in edit mode and when not participating in a multiple selection,
             //show connectors
             if (this.diagramDesigner.mode === this.diagramDesigner.OPERATING_MODES.DESIGN) {
-                this._setEditMode(false); // todo: set it to false for debugging purpose
+                this._setEditMode(true); // todo: set it to false for debugging purpose
             }
         }
     };
