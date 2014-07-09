@@ -23,7 +23,12 @@ define(['logManager',
     ],
     function (logManager, BlobClient, BlobMetadata, fs, path, unzip, child_process, minimatch, ExecutorClient, WorkerInfo) {
 
-    var walk = function(dir, done) {
+        // FIXME: test for exe existance
+        // FIXME: detect arch and use different exe and args
+        var UNZIP_EXE = "c:\\Program Files\\7-Zip\\7z.exe";
+        var UNZIP_ARGS = ["x", "-y"];
+
+        var walk = function(dir, done) {
         var results = [];
         fs.readdir(dir, function(err, list) {
             if (err) return done(err);
@@ -99,11 +104,13 @@ define(['logManager',
             if (err) {
                 logger.error(err);
                 jobInfo.status = 'FAILED_TO_GET_SOURCE_METADATA';
+                self.sendJobUpdate(jobInfo);
                 return;
             }
 
             if (metadata.contentType !== BlobMetadata.CONTENT_TYPES.COMPLEX) {
                 jobInfo.status = 'FAILED_SOURCE_IS_NOT_COMPLEX';
+                self.sendJobUpdate(jobInfo);
                 return;
             }
 
@@ -112,6 +119,7 @@ define(['logManager',
                 if (err) {
                     logger.error('Failed obtaining job source content, err: ' + err.toString());
                     jobInfo.status = 'FAILED_SOURCE_COULD_NOT_BE_OBTAINED';
+                    self.sendJobUpdate(jobInfo);
                     return;
                 }
 
@@ -129,16 +137,20 @@ define(['logManager',
                     if (err) {
                         logger.error('Failed creating source zip-file, err: ' + err.toString());
                         jobInfo.status = 'FAILED_CREATING_SOURCE_ZIP';
+                        self.sendJobUpdate(jobInfo);
                         return;
                     }
 
                     // unzip downloaded file
 
-                    var child = child_process.execFile("c:\\Program Files\\7-Zip\\7z.exe", ["x", "-y", path.basename(zipPath)], {cwd: jobDir},
+                    var args = [path.basename(zipPath)];
+                    args.unshift.apply(args, UNZIP_ARGS);
+                    var child = child_process.execFile(UNZIP_EXE, args, {cwd: jobDir},
                         function (err, stdout, stderr) {
                         if (err) {
                             logger.error(err);
                             jobInfo.status = 'FAILED_UNZIP';
+                            self.sendJobUpdate(jobInfo);
                             return;
                         }
 
@@ -154,6 +166,7 @@ define(['logManager',
                             if (err) {
                                 logger.error('Could not read ' + self.executorConfigFilename + ' err:' + err);
                                 jobInfo.status = 'FAILED_EXECUTOR_CONFIG';
+                                self.sendJobUpdate(jobInfo);
                                 return;
                             }
 
@@ -225,40 +238,41 @@ define(['logManager',
                 if (archive) {
                     // FIXME: get the blob client to stream
                     //var stream = fs.createReadStream(results[i]);
-                    fs.readFile(results[i], function(err, data) {
-                        // archive the given file
-                        resultArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
-                            remaining -= 1;
+                    (function (filename) {
+                        fs.readFile(results[i], function (err, data) {
+                            // archive the given file
+                            resultArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
+                                remaining -= 1;
 
-                            // FIXME: handle 'Another content with the same name was already added'
-                            // if (typeof err === "string"
-                            if (err) {
-                                logger.error(err);
-                            } else {
+                                // FIXME: handle 'Another content with the same name was already added'
+                                // if (typeof err === "string"
+                                if (err) {
+                                    logger.error(err);
+                                } else {
 
-                            }
+                                }
 
-                            if (remaining === 0) {
-                                resultArtifact.save(function (err, resultHash) {
-                                    if (err) {
-                                        logger.error(err);
-                                        jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
-                                        return;
-                                    } else {
-                                        // FIXME: This is synchronous
-                                        deleteFolderRecursive(directory);
-                                    }
+                                if (remaining === 0) {
+                                    resultArtifact.save(function (err, resultHash) {
+                                        if (err) {
+                                            logger.error(err);
+                                            jobInfo.status = 'FAILED_TO_SAVE_ARTIFACT';
+                                            self.sendJobUpdate(jobInfo);
+                                            return;
+                                        } else {
+                                            // FIXME: This is synchronous
+                                            deleteFolderRecursive(directory);
+                                        }
 
-                                    jobInfo.resultHash = resultHash;
-                                    jobInfo.status = 'SUCCESS';
-                                    self.executorClient.updateJob(jobInfo, function (err) {
-                                        console.log(err); // TODO
+                                        jobInfo.resultHash = resultHash;
+                                        jobInfo.status = 'SUCCESS';
+                                        self.sendJobUpdate(jobInfo);
                                     });
-                                });
-                            }
+                                }
 
+                            });
                         });
-                    });
+                    })(filename);
                 } else {
                     // skip it
                     remaining -= 1;
@@ -272,12 +286,39 @@ define(['logManager',
 
     };
 
+    ExecutorWorker.prototype.sendJobUpdate = function(jobInfo) {
+        this.executorClient.updateJob(jobInfo, function (err) {
+            if (err) {
+                console.log(err); // TODO
+            }
+        });
+        // TODO: update gui
+    };
+
     ExecutorWorker.prototype.cancelJob = function () {
 
     };
 
+    ExecutorWorker.prototype.checkForUnzipExe = function() {
+        this.checkForUnzipExe = function() { };
+        fs.exists(UNZIP_EXE, function (exists) {
+            if (exists) {
+            } else {
+                alert("Unzip exe \"" + UNZIP_EXE + "\" does not exist. Please install it.");
+            }
+        });
+    };
+
     ExecutorWorker.prototype.queryWorkerAPI = function (callback) {
         var self = this;
+        self.checkForUnzipExe();
+
+        var jobs_table = document.getElementById('jobs_table');
+        if (jobs_table) {
+        } else {
+            document.getElementById('jobs').innerHTML = '<table id="jobs_table"><thead><tr><td>Job</td><td>Status</td></tr></thead></table>';
+        }
+
         var oReq = new XMLHttpRequest();
         oReq.open('POST', this.executorClient.executorUrl + 'worker', true);
         oReq.setRequestHeader('Content-Type', 'application/json');

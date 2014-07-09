@@ -158,16 +158,39 @@ define(['logManager',
         }
         var hash = url[2];
 
-        var jobInfo = new JobInfo(req.body);
-        jobList.update({ hash: hash }, jobInfo, function(err, numReplaced) {
+        if (hash) {
+        } else {
+            res.send(500);
+            return;
+        }
+
+        jobList.find({hash: hash}, function(err, docs) {
             if (err) {
                 res.send(500);
-            } else if (numReplaced !== 1) {
-                res.send(404);
+            } else if (docs.length) {
+                var jobInfo = new JobInfo(docs[0]);
+                var jobInfoUpdate = new JobInfo(req.body);
+                for (var i in jobInfoUpdate) {
+                    if (jobInfoUpdate.hasOwnProperty(i)) {
+                        jobInfo[i] = jobInfoUpdate[i];
+                    }
+                }
+                jobList.update({ hash: hash }, jobInfo, function(err, numReplaced) {
+                    if (err) {
+                        res.send(500);
+                    } else if (numReplaced !== 1) {
+                        res.send(404);
+                    } else {
+                        res.send(200);
+                    }
+                });
+                res.send();
+
             } else {
-                res.send(200);
+                res.send(404);
             }
         });
+
     };
 
     var ExecutorRESTWorkerAPI = function(req, res, next) {

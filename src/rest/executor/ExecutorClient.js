@@ -77,7 +77,7 @@ define([], function () {
                 return;
             }
 
-            callback(null, JSON.parse(response));
+            callback(null, response);
         });
     };
 

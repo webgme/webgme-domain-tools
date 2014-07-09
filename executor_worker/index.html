@@ -52,8 +52,6 @@
     requirejs(['executor/ExecutorWorker', 'executor/JobInfo'], function(ExecutorWorker, JobInfo) {
         eb = new ExecutorWorker({ serverPort: 8855, sessionId: undefined });
         
-        // document.getElementById('status').onclick = function() { 
-        
         eb.queryWorkerAPI(function(response) {
             var refreshPeriod = 60 * 1000;
             var callback = function(response) {
@@ -70,7 +68,10 @@
     </script>
   </head>
   <body>
-    <div id="main"><div id="status">Connecting...</div></div>
+    <div id="main">
+    <div id="status">Connecting...</div>
+    <div id="jobs"></div>
+    </div>
     <small>node.js <script>document.write(process.version)</script></small>
   </body>
 </html>
