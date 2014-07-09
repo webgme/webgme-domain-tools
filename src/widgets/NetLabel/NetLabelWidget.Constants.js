@@ -18,8 +18,8 @@ define([], function () {
          * CLASS DEFINITIONS
          */
         DESIGNER_ITEM_CLASS : "designer-item",
-        DESIGNER_CONNECTION_CLASS: "connList",
-        NETLABEL_CONNECTION_CLASS: "netlabel-connection",
+        DESIGNER_CONNECTION_CLASS: "netlabel-connection",
+        NETLIST: "netlist",
         DESIGNER_NETLABEL_CLASS : "netLabel",
         NETLABEL_SHOW_ALL: "show-all-labels",
         COLLAPSE_LABELS: "collapse-labels",

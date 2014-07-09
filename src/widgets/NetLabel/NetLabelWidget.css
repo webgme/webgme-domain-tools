@@ -12,7 +12,7 @@
   position: absolute;
   font-size: 10px;
   white-space: nowrap; }
-  .diagram-designer .items div.netlist-container div.connList {
+  .diagram-designer .items div.netlist-container .netlist {
     position: relative;
     left: -50%;
     cursor: default; }
