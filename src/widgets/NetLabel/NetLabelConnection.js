@@ -131,28 +131,35 @@ define(['js/Widgets/DiagramDesigner/Connection',
             $(srcPortLabelList).find('span').attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
         }
 
-        srcPortLabel.text(dstText);
         srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
         srcPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
         srcPortLabel.css('display', 'none');
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
+        // if show as label and connection name is different than default name, set netlabel name to new name
         if (!existingLabel) {
+            // if show as label and connection name is different than default name, set netlabel name to new name
+            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+                srcPortLabel.text(self.name);
+            } else {
+                srcPortLabel.text(dstText);
+            }
             $(srcPortLabelList).append(srcPortLabel);
 
-        } else if (existingLabel.textContent !== dstText) {
-            // handling the name update case
-            existingLabel.textContent = dstText;
+        } else {
+            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+                existingLabel.textContent = self.name;
+            }
+            else if (existingLabel.textContent !== dstText) {
+                // handling the name update case
+                existingLabel.textContent = dstText;
+            }
         }
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         self.skinParts.srcNetTitle = $(srcPortLabelList).find('span')[0];
 
-        // if show as label and connection name is different than default name, set netlabel name to new name
-        if (self.showAsLabel) {
-
-        }
         return srcPortLabelList;
     };
 
@@ -215,7 +222,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             dstPortLabel = self._netLabelBase.clone(),
             srcText = self._getSrcText(),
-            existingLabel;
+            existingLabel,
+            _setName; // fn
+
 
         // create a label list for the dst object or dst port
         if (!dstPortLabelList) {
@@ -226,7 +235,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         // making the dstPortLabel
-        dstPortLabel.text(srcText);
+
         dstPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
         dstPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
         dstPortLabel.css('display', 'none');
@@ -234,11 +243,22 @@ define(['js/Widgets/DiagramDesigner/Connection',
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
         // if src of the current connection hasn't been added, add it to the list of dst object
         if (!existingLabel) {
+            // if show as label and connection name is different than default name, set netlabel name to new name
+            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+                dstPortLabel.text(self.name);
+            } else {
+                dstPortLabel.text(srcText);
+            }
             $(dstPortLabelList).append(dstPortLabel);
 
-        } else if (existingLabel.textContent !== srcText) {
-            // handling the name update case
-            existingLabel.textContent = srcText;
+        } else {
+            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+                existingLabel.textContent = self.name;
+            }
+            else if (existingLabel.textContent !== srcText) {
+                // handling the name update case
+                existingLabel.textContent = srcText;
+            }
         }
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
         self.skinParts.dstNetTitle = $(dstPortLabelList).find('span')[0];
@@ -478,6 +498,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._initialize = function (objDescriptor) {
 
+        this.name = objDescriptor.name;
         /*MODELEDITORCONNECTION CONSTANTS***/
         this.showAsLabel = objDescriptor.showAsLabel;
         this.diagramDesigner = objDescriptor.designerCanvas;
@@ -835,7 +856,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selectedInMultiSelection = false;
 
         if (this.showAsLabel) {
-            _hideLabels();
+            // todo: this would have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
+//            _hideLabels();
         } else {
             this._unHighlightPath();
         }
