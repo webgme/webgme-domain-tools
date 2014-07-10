@@ -1,3 +1,4 @@
+/*globals require, console*/
 /**
  * Created by Zsolt on 5/16/2014.
  *

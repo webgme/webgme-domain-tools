@@ -1,3 +1,4 @@
+/*globals require, nodeRequire, process, console*/
 /**
  * Created by Zsolt on 5/16/2014.
  *
@@ -15,13 +16,12 @@ define(['logManager',
         'blob/BlobMetadata',
         'fs',
         'path',
-        'unzip',
         'child_process',
         'minimatch',
         'executor/ExecutorClient',
         'executor/WorkerInfo'
     ],
-    function (logManager, BlobClient, BlobMetadata, fs, path, unzip, child_process, minimatch, ExecutorClient, WorkerInfo) {
+    function (logManager, BlobClient, BlobMetadata, fs, path, child_process, minimatch, ExecutorClient, WorkerInfo) {
 
         // FIXME: test for exe existance
         // FIXME: detect arch and use different exe and args
