@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebGME executor</title>
+    <script>
+    var nodeRequire = require;
+    </script>
+    <script src="http://kms56:8855/lib/require/require.min.js">
+    // TODO: if loading require.min.js fails....
+    </script>
+    <script>
+    requirejs.config({
+        baseUrl: 'http://kms56:8855/',
+        paths: {
+            //WebGME custom modules
+            "logManager": 'common/LogManager',
+            "eventDispatcher": 'common/EventDispatcher',
+            "notificationManager": 'js/NotificationManager',
+            "clientUtil": 'js/util',
+            "loaderCircles": "js/Loader/LoaderCircles",
+            "loaderProgressBar": "js/Loader/LoaderProgressBar",
+
+            "codemirror": 'lib/codemirror/codemirror.amd',
+            "jquery-csszoom": 'lib/jquery/jquery.csszoom',
+
+            "jszip": 'lib/jszip/jszip',
+            "executor": 'extlib/node_modules/webgme-domain-tools/src/rest/executor',
+            "executor_old": 'extlib/node_modules/webgme-domain-tools/src/rest/executor_old'
+            },
+/*        shim: {
+            'fs': {
+                exports: 'fs',
+                init: function () {
+                    return node_require('fs');
+                }
+                }
+            },*/
+
+        nodeRequire: nodeRequire
+    });
+    // FIXME ugly hack for node-webkit
+    var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https'];
+    node_modules.forEach(function(module_name) {
+        requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
+    });
+    var worker;
+    requirejs(['executor/ExecutorWorker', 'executor/JobInfo'], function(ExecutorWorker, JobInfo) {
+        // TODO: authentication?
+        worker = new ExecutorWorker({ serverPort: 8855, sessionId: undefined });
+        
+        worker.queryWorkerAPI(function(response) {
+            var refreshPeriod = 60 * 1000;
+            var callback = function(response) {
+                if (response && response.refreshPeriod) {
+                    refreshPeriod = response.refreshPeriod;
+                }
+                var timeoutID = window.setTimeout(function() {
+                    worker.queryWorkerAPI(callback);
+                }, refreshPeriod);
+            };
+            callback(response);
+        });
+    });
+    </script>
+  </head>
+  <body>
+    <div id="main">
+    <div id="status">Connecting...</div>
+    <div id="jobs"></div>
+    </div>
+    <small>node.js <script>document.write(process.version)</script></small>
+  </body>
+</html>
