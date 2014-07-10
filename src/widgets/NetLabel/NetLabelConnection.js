@@ -124,7 +124,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         var self = this,
             srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
             srcPortLabel = self._netLabelBase.clone(),
-            nbrOfSrcLabels = srcPortLabelList ? (srcPortLabelList.children ? srcPortLabelList.children.length : 0) : 0,
             dstText = self._getDstText(),
             existingLabel;
 
@@ -207,7 +206,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.skinParts.srcPath = this.paper.path(newPathDef);
 
         $(this.skinParts.srcPath.node).attr({"id": pathID,
-            "class": NetLabelWidgetConstants.NETLABEL_CONNECTION_CLASS});
+            "class": NetLabelWidgetConstants.NETLIST});
 
     };
 
@@ -216,7 +215,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         var self = this,
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             dstPortLabel = self._netLabelBase.clone(),
-            nbrOfDstLabels = dstPortLabelList ? (dstPortLabelList.children ? dstPortLabelList.children.length : 0) : 0,
             srcText = self._getSrcText(),
             existingLabel;
 
