@@ -22,8 +22,6 @@ define([], function () {
         NETLIST: "netlist",
         NETLIST_TITLE : "title",
         DESIGNER_NETLABEL_CLASS : "netLabel",
-        NETLABEL_SHOW_ALL: "show-all-labels",
-        COLLAPSE_LABELS: "collapse-labels",
         MAX_LABEL_NUMBER: 1,
         MAX_TEXT_WIDTH: 100,
         CONNECTION_DRAGGABLE_END_CLASS : "c-d-end",
@@ -49,6 +47,10 @@ define([], function () {
         /*
          * ROTATINO RESET CONSTANTS
          */
-        ROTATION_RESET: 'reset'
+        ROTATION_RESET: 'reset',
+
+        /* Netlabel class attributes */
+        NETLIST_ID: 'id',
+        CONNECTION_ID: 'connid'
     };
 });

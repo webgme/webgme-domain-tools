@@ -7,14 +7,11 @@
 
 define(['js/Widgets/DiagramDesigner/Connection',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Draggable',
-    './NetLabelWidget.Mouse',
     './NetLabelWidget.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (Connection,
                                                                              DiagramDesignerWidgetDraggable,
-                                                                             NetLabelWidgetMouse,
                                                                              NetLabelWidgetConstants,
                                                                              DiagramDesignerWidgetConstants) {
-// todo: maybe add event handlers here
 
     "use strict";
 
@@ -43,7 +40,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     _.extend(NetLabelConnection.prototype, Connection.prototype);
-    _.extend(NetLabelConnection.prototype, NetLabelWidgetMouse.prototype);
 
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
@@ -132,12 +128,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPortLabelList = self._netLabelListBase.clone()[0];
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
             $(srcPortLabelList).find('span').text('connections');
-            $(srcPortLabelList).find('span').attr('id', srcID);
+            $(srcPortLabelList).find('span').attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
         }
 
         srcPortLabel.text(dstText);
-        srcPortLabel.attr('id', dstID);
-        srcPortLabel.attr('connId', self.id);
+        srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
+        srcPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
         srcPortLabel.css('display', 'none');
 
         existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
@@ -153,6 +149,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
         self.skinParts.srcNetTitle = $(srcPortLabelList).find('span')[0];
 
+        // if show as label and connection name is different than default name, set netlabel name to new name
+        if (self.showAsLabel) {
+
+        }
         return srcPortLabelList;
     };
 
@@ -167,7 +167,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return srcText;
     };
 
-    // todo: customize these containers-class names, positions
     NetLabelConnection.prototype._netlistContainer = $('<div class="netlist-container"></div>');
 
     NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList, pathDef) {
@@ -190,7 +189,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.textContainer1 = this._netlistContainer.clone();
             this.skinParts.textContainer1.css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
-            this.skinParts.textContainer1.attr('id', id);
+            this.skinParts.textContainer1.attr(NetLabelWidgetConstants.NETLIST_ID, id);
             this.skinParts.textContainer1.append(srcPortLabelList);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
         } else {
@@ -223,13 +222,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = self._netLabelListBase.clone()[0];
             dstPortLabelList.setAttribute("obj-id", dstID);
             $(dstPortLabelList).find('span').text('connections');
-            $(dstPortLabelList).find('span').attr('id', dstID);
+            $(dstPortLabelList).find('span').attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
         }
 
         // making the dstPortLabel
         dstPortLabel.text(srcText);
-        dstPortLabel.attr('id', srcID);
-        dstPortLabel.attr('connId', self.id);
+        dstPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
+        dstPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
         dstPortLabel.css('display', 'none');
 
         existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
@@ -278,7 +277,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.textContainer2 = this._netlistContainer.clone();
             this.skinParts.textContainer2.css({ 'top': pathCenter.y - TEXT_OFFSET,
                 'left': pathCenter.x});
-            this.skinParts.textContainer2.attr('id', id);
+            this.skinParts.textContainer2.attr(NetLabelWidgetConstants.NETLIST_ID, id);
             this.skinParts.textContainer2.append(dstPortLabelList);
             $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
         } else {
@@ -759,23 +758,42 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype.onSelect = function (multiSelection) {
 
+        var self = this,
+            parentNode,
+            children,
+            i,
+            _showLabels; // fn
+
+        _showLabels = function () {
+            if (self.skinParts.srcNetLabel.style.display === "none") {
+                parentNode = self.skinParts.srcNetLabel.parentNode;
+                children = parentNode.childNodes;
+
+                for (i = 1; i < children.length; i += 1) {
+                    $(children[i]).show();
+                }
+            }
+
+            if (self.skinParts.dstNetLabel.style.display === "none") {
+                parentNode = self.skinParts.dstNetLabel.parentNode;
+                children = parentNode.childNodes;
+
+                for (i = 1; i < children.length; i += 1) {
+                    $(children[i]).show();
+                }
+            }
+        };
+
         this.selected = true;
         this.selectedInMultiSelection = multiSelection;
 
-        if (!this.showAsLabel) {
+        if (this.showAsLabel) {
+            _showLabels();
+        } else {
             this._highlightPath();
-            return;
         }
-        this.highlight();
+
         this.showEndReconnectors();
-
-        if (this.skinParts.srcNetLabel.style.display === "none") {
-            this._showAllLabels(this.skinParts.srcNetLabel);
-        }
-
-        if (this.skinParts.dstNetLabel.style.display === "none") {
-            this._showAllLabels(this.skinParts.dstNetLabel);
-        }
 
         //in edit mode and when not participating in a multiple selection,
         //show endpoint connectors
@@ -785,21 +803,42 @@ define(['js/Widgets/DiagramDesigner/Connection',
             //in edit mode and when not participating in a multiple selection,
             //show connectors
             if (this.diagramDesigner.mode === this.diagramDesigner.OPERATING_MODES.DESIGN) {
-                this._setEditMode(true); // todo: set it to false for debugging purpose
+                this._setEditMode(false); // todo: set it to false for debugging purpose
             }
         }
     };
 
     NetLabelConnection.prototype.onDeselect = function () {
+        var self = this,
+            parentNode,
+            children,
+            i,
+            _hideLabels; // fn
+
+        _hideLabels = function () {
+            parentNode = self.skinParts.srcNetLabel.parentNode;
+            children = parentNode.childNodes;
+
+            for (i = 1; i < children.length; i += 1) {
+                $(children[i]).hide();
+            }
+
+            parentNode = self.skinParts.dstNetLabel.parentNode;
+            children = parentNode.childNodes;
+
+            for (i = 1; i < children.length; i += 1) {
+                $(children[i]).hide();
+            }
+        };
+
         this.selected = false;
         this.selectedInMultiSelection = false;
 
-        if (!this.showAsLabel) {
+        if (this.showAsLabel) {
+            _hideLabels();
+        } else {
             this._unHighlightPath();
-            return;
         }
-
-        this.unHighlight();
         this.hideEndReconnectors();
         this._setEditMode(false);
     };
@@ -822,46 +861,71 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.showEndReconnectors = function (id) {
-        var scale = Math.max(1, this.designerAttributes.width / 10);
-        if (this.reconnectable) {
+        var self = this,
+            scale = Math.max(1, this.designerAttributes.width / 10),
+            _showSrcEndReconnector, // fn
+            _showDstEndReconnector; // fn
 
-            if (this.srcSubCompId && this.srcSubCompId !== id) {
+        _showSrcEndReconnector = function (text) {
 
-                this.skinParts.srcDragPoint.css({"position": "absolute",
-                    "top": this.sourceCoordinates.y,
-                    "left": this.sourceCoordinates.x});
+            self.skinParts.srcDragPoint.css({"position": "absolute",
+                "top": self.sourceCoordinates.y,
+                "left": self.sourceCoordinates.x});
 
-                this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.srcDragPoint);
-                //resize connectors to connection width
-                this.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.srcDragPoint);
+            //resize connectors to connection width
+            self.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            if (text) {
 
-            } else if (!this.srcSubCompId && this.srcObjId !== id) {
+                self.skinParts.srcDragPoint.text(text);
+                self.skinParts.srcDragPoint.css('background-color', 'white');
+            }
+        };
 
-                this.highlight(id);
+        _showDstEndReconnector = function (text) {
+
+            self.skinParts.dstDragPoint.css({"position": "absolute",
+                "top": self.endCoordinates.y,
+                "left": self.endCoordinates.x});
+
+            self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.dstDragPoint);
+            //resize connectors to connection width
+            self.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            if (text) {
+
+                self.skinParts.dstDragPoint.text(text);
+                self.skinParts.dstDragPoint.css('background-color', 'white');
+            }
+        };
+
+        if (self.reconnectable) {
+
+            if (self.showAsLabel) {
+                if (self.srcSubCompId && self.srcSubCompId !== id) {
+                    _showSrcEndReconnector();
+
+                } else if (!self.srcSubCompId && self.srcObjId !== id) {
+
+                    self.highlight(id);
+                }
+
+                if (self.dstSubCompId && self.dstSubCompId !== id) {
+                    _showDstEndReconnector();
+
+                } else if (!self.dstSubCompId && self.dstObjId !== id) {
+                    self.highlight(id);
+                }
+            } else {
+                _showSrcEndReconnector('S');
+                _showDstEndReconnector('D');
             }
 
-            if (this.dstSubCompId && this.dstSubCompId !== id) {
-
-                    this.skinParts.dstDragPoint.css({"position": "absolute",
-                        "top": this.endCoordinates.y,
-                        "left": this.endCoordinates.x});
-
-                    this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.dstDragPoint);
-                    //resize connectors to connection width
-                    this.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
-
-
-            } else if (!this.dstSubCompId && this.dstObjId !== id) {
-                this.highlight(id);
-            }
 
         } else {
             this.hideEndReconnectors();
         }
     };
 
-
-    // todo: onselect and onDeselect need to be refined
     NetLabelConnection.prototype.hideEndReconnectors = function () {
         if (this.skinParts.srcDragPoint) {
             this.skinParts.srcDragPoint.empty();
@@ -874,8 +938,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.skinParts.dstDragPoint.remove();
             this.skinParts.dstDragPoint = null;
         }
+
         this._renderEndReconnectors();
-        this.unHighlight();
+        if (this.showAsLabel) {
+
+            this.unHighlight();
+        }
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
@@ -885,17 +953,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (this.srcObjId !== id) {
 
-            $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
             srcObj = this.diagramDesigner.items[this.srcObjId];
             srcObj.$el.css('background-color', '#FFD6D6');
         }
+        $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
 
         if (this.dstObjId !== id) {
 
-            $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
             dstObj = this.diagramDesigner.items[this.dstObjId];
             dstObj.$el.css('background-color', '#CFFAFA');
         }
+        $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.unHighlight = function () {

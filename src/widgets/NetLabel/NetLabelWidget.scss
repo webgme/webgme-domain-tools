@@ -43,42 +43,6 @@ $collapse-label-color: #A9A9A9;
         }
       }
     }
-//    .connList {
-//      width: auto;
-//      height: auto;
-//      cursor: pointer;
-////      padding-top: $connList-top-padding;
-////      border: $connList-border-style;
-//      text-align: center;
-//      line-height: $connList-line-height;
-//      .netLabel {
-//        cursor: pointer;
-//        border-bottom: black;
-////        border-top: $connList-netlabel-border-top;
-////        background-color: $connList-netlabel-background-color;
-//        padding-left: 5px;
-//        padding-right: 5px;
-//
-////        &.src-highlighted {
-////          background-color: $diagram-designer-selection-c-d-end-src-highlight-color;
-////        }
-////        &.dst-highlighted {
-////          background-color: $diagram-designer-selection-c-d-end-dst-highlight-color;
-////        }
-//      }
-//      .show-all-labels {
-//        cursor: pointer;
-////        border-top: $connList-netlabel-border-top;
-////        background-color: $connList-netlabel-background-color;
-//      }
-//      .collapse-labels {
-//        cursor: pointer;
-////        color: $collapse-label-color;
-////        background-color: $connList-netlabel-background-color;
-//        font-size: $collapse-label-font-size;
-//        line-height: $collapse-expand-label-line-height;
-//      }
-//    }
 
     div.netlist-container {
       position: absolute;
@@ -90,6 +54,21 @@ $collapse-label-color: #A9A9A9;
         position: relative;
         left: -50%;
         cursor: pointer;
+              .netLabel {
+                cursor: pointer;
+                border-bottom: black;
+                padding-left: 5px;
+                padding-right: 5px;
+
+                &.src-highlighted {
+                  font-weight: bold;
+                  color: red;
+                }
+                &.dst-highlighted {
+                  font-weight: bold;
+                  color: blue;
+                }
+              }
       }
 
     }

@@ -7,9 +7,11 @@
 
 define(['js/Panels/ModelEditor/ModelEditorControl',
     'js/Constants',
+    'js/NodePropertyNames',
     'widgets/NetLabel/NetLabelWidget.Constants',
     './NetLabelControl.EventHandlers'], function (ModelEditorControl,
                                                   CONSTANTS,
+                                                  NodePropertyNames,
                                                   NetLabelWidgetConstants,
                                                   NetLabelControlEventHandlers) {
 
@@ -30,6 +32,7 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             CONSTS =  CONSTANTS, // CONSTANTS can only be loaded by assigning it to a var
             gmeClient = self._client,
             connectionObj = gmeClient.getNode(gmeID),
+            name = connectionObj.getAttribute(NodePropertyNames.Attributes.name),
             showAsLabel = connectionObj.getAttribute(NetLabelWidgetConstants.SHOW_AS_LABEL),
             srcID = connectionObj.getPointer(CONSTANTS.POINTER_SOURCE).to,
             dstID = connectionObj.getPointer(CONSTANTS.POINTER_TARGET).to,
@@ -40,7 +43,8 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
             srcParentObj = gmeClient.getNode(srcParentId),
             dstParentObj = gmeClient.getNode(dstParentId);
 
-        return {'showAsLabel': showAsLabel,
+        return {'name': name,
+                'showAsLabel': showAsLabel,
                 'srcObj': srcObj,
                 'dstObj': dstObj,
                 'srcParentObj': srcParentObj,

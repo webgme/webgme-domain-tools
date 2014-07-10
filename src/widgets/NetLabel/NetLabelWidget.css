@@ -16,3 +16,14 @@
     position: relative;
     left: -50%;
     cursor: pointer; }
+    .diagram-designer .items div.netlist-container .netlist .netLabel {
+      cursor: pointer;
+      border-bottom: black;
+      padding-left: 5px;
+      padding-right: 5px; }
+      .diagram-designer .items div.netlist-container .netlist .netLabel.src-highlighted {
+        font-weight: bold;
+        color: red; }
+      .diagram-designer .items div.netlist-container .netlist .netLabel.dst-highlighted {
+        font-weight: bold;
+        color: blue; }
