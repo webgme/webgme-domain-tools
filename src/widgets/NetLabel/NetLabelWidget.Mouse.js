@@ -56,8 +56,8 @@ define(['./NetLabelWidget.Constants',
             }
         });
 
-        // handle click on netlists
-        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST,  function (event) {
+        // handle click on netlist title
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var connId = $(this).attr("id"),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
@@ -65,6 +65,9 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self.selectionManager._clearSelection();
+                self._hideAllLabels();
+                self._showAllLabels(this);
+//                self._showAllEndConnectors(this);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -113,7 +116,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self.selectionManager._clearSelection();
-                self._hideLabels(this);
+//                self._hideLabels(this);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -127,6 +130,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onBackgroundMouseDown) {
                 self.onBackgroundMouseDown.call(self, eventDetails);
+                self._hideAllLabels();
             } else {
                 logger.warning('onBackgroundMouseDown(eventDetails) is undefined, eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -153,7 +157,9 @@ define(['./NetLabelWidget.Constants',
         });
 
         // handle mouse enter on netlists
-        this.$el.on('mouseenter.' + EVENT_POSTFIX, 'span.' + 'title',  function (event) {
+        // todo: on hover collapse all labels, on click expand all labels of current obj and collapse all other labels
+        // todo: the labels need to now show collapse-all div
+        this.$el.on('mouseenter.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var objId = $(this).text(),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
@@ -161,7 +167,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self.selectionManager._clearSelection();
-                self._hideLabels(this);
+//                self._hideLabels(this);
                 self._showAllEndConnectors(this);
 
             } else {
@@ -170,7 +176,7 @@ define(['./NetLabelWidget.Constants',
         });
 
         // handle mouse leave on netlists
-        this.$el.on('mouseleave.' + EVENT_POSTFIX, 'span.' + 'title',  function (event) {
+        this.$el.on('mouseleave.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var objId = $(this).text(),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
@@ -178,7 +184,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self.selectionManager._clearSelection();
-                self._hideLabels(this);
+//                self._hideLabels(this);
                 self._hideAllEndConnectors(this);
 
             } else {
@@ -248,32 +254,14 @@ define(['./NetLabelWidget.Constants',
     /** HELPER FUNCTIONS **/
     NetLabelWidgetMouse.prototype._showAllLabels = function (node) {
         var parentNode = node.parentNode,
-            childElements = parentNode.children,
-            len = childElements.length,
-            item,
-            collapseLabel = $('<div class="collapse-labels">&#9650</div>'),
-            existingLabel;
+            children = parentNode.children,
+            i;
 
-        // if current node is "expand", hide it
-        if (node.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
-            $(node).hide();
+        // show all labels for this NetList
+        for (i = 1; i < children.length; i += 1) {
+            $(children[i]).show();
         }
-        // show all other labels
-        while (len--) {
-            item = childElements[len];
-            if (item.className === NetLabelWidgetConstants.NETLABEL_SHOW_ALL) {
-                $(item).hide();
-            } else {
-                $(item).show();
-            }
-        }
-        // show the collapse label
-        existingLabel = $(parentNode).find('.' + NetLabelWidgetConstants.COLLAPSE_LABELS)[0];
-        if (!existingLabel) {
-            parentNode.appendChild(collapseLabel[0]);
-        } else if (existingLabel.style.display === "none") {
-            existingLabel.show();
-        }
+
     };
 
     NetLabelWidgetMouse.prototype._hideLabels = function (node) {
@@ -297,13 +285,15 @@ define(['./NetLabelWidget.Constants',
             childrenCount = children.length,
             i,
             id,
+            nodeId = node.id,
             idList = [],
             connObj;
 
         // first get the connection ids associated with this object
         for (i = 1; i < childrenCount; i += 1) {
             id = children[i].getAttribute('connid');
-            if (id) {
+            // show all end connectors except the current object
+            if (id && id !== nodeId) {
                 // todo: add this to const file and delete the check
                 idList.push(children[i].getAttribute('connid'));
             }
@@ -312,8 +302,14 @@ define(['./NetLabelWidget.Constants',
         // get all the connection objects associated with connid
         for (i = 0; i < idList.length; i += 1) {
             connObj = this.items[idList[i]];
-            connObj.showEndReconnectors();
+            connObj.showEndReconnectors(nodeId);
         }
+    };
+
+    // todo: there has to a better way to do this
+    NetLabelWidgetMouse.prototype._hideAllLabels = function () {
+
+        this.skinParts.$itemsContainer.find('.netLabel').hide()
     };
 
     NetLabelWidgetMouse.prototype._hideAllEndConnectors = function (node) {
@@ -326,6 +322,8 @@ define(['./NetLabelWidget.Constants',
 
         // first get the connection ids associated with this object
         for (i = 1; i < childrenCount; i += 1) {
+            // hide all labels in net list
+//            $(children[i]).hide();
             id = children[i].getAttribute('connid');
             if (id) {
                 // todo: add this to const file and delete the check
@@ -338,6 +336,7 @@ define(['./NetLabelWidget.Constants',
             connObj = this.items[idList[i]];
             connObj.hideEndReconnectors();
         }
+
     };
 
     return NetLabelWidgetMouse;
