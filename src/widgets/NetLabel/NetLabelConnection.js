@@ -855,12 +855,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selected = false;
         this.selectedInMultiSelection = false;
 
-        if (this.showAsLabel) {
-            // todo: this would have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
-//            _hideLabels();
-        } else {
+        if (!this.showAsLabel) {
+
             this._unHighlightPath();
         }
+//        if (this.showAsLabel) {
+//            // todo: this would have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
+////            _hideLabels();
+//        } else {
+//            this._unHighlightPath();
+//        }
         this.hideEndReconnectors();
         this._setEditMode(false);
     };
@@ -927,7 +931,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     _showSrcEndReconnector();
 
                 } else if (!self.srcSubCompId && self.srcObjId !== id) {
-
                     self.highlight(id);
                 }
 
@@ -942,6 +945,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 _showDstEndReconnector('D');
             }
 
+            this._toggleHighlightClass('add');
 
         } else {
             this.hideEndReconnectors();
@@ -966,6 +970,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this.unHighlight();
         }
+        this._toggleHighlightClass('remove');
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
@@ -978,22 +983,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcObj = this.diagramDesigner.items[this.srcObjId];
             srcObj.$el.css('background-color', '#FFD6D6');
         }
-        $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
 
         if (this.dstObjId !== id) {
 
             dstObj = this.diagramDesigner.items[this.dstObjId];
             dstObj.$el.css('background-color', '#CFFAFA');
         }
-        $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.unHighlight = function () {
         var srcObj,
             dstObj;
-
-        $(this.skinParts.srcNetLabel).removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
-        $(this.skinParts.dstNetLabel).removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
 
         srcObj = this.diagramDesigner.items[this.srcObjId];
         dstObj = this.diagramDesigner.items[this.dstObjId];
@@ -1072,6 +1072,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
         var path = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
         if (path) {
             path.remove();
+        }
+    };
+
+    NetLabelConnection.prototype._toggleHighlightClass = function (action) {
+        if (action === 'add') {
+            $(this.skinParts.srcNetLabel).addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+            $(this.skinParts.dstNetLabel).addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
+        } else if (action === 'remove') {
+
+            $(this.skinParts.srcNetLabel).removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+            $(this.skinParts.dstNetLabel).removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
         }
     };
 
