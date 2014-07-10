@@ -116,7 +116,22 @@ define(['plugin/PluginConfig',
             exitCode = config.success ? 0 : 1,
             executor_config = {
                 cmd: 'C:/Python27/python.exe ' + 'generate_name.py ',
-                resultPatterns: ['new_name.json', 'log/**/*']
+                resultArtifacts: [
+                {
+                    name: 'dashboard',
+                    resultPatterns: ['dashboard/**', 'designs/**', 'design-space/**', 'requirements/**',
+                        'test-benches/**', 'results/*/testbench_manifest.json', 'results/results.metaresults.json',
+                        'manifest.project.json', 'index.html', '*.svg']
+                },
+                {
+                    name: 'logs',
+                    resultPatterns: [ 'log/**', '_FAILED.txt']
+                },
+                {
+                    name: 'all',
+                    resultPatterns: []
+                }
+            ]
             },
             filesToAdd = {
                 'generate_name.py': ejs.render(TEMPLATES['generate_name.py.ejs'], {
@@ -162,7 +177,7 @@ define(['plugin/PluginConfig',
                     }
                     self.logger.debug(jobInfo);
                     atSucceedJob = function (jInfo) {
-                        self.blobClient.getMetadata(jInfo.resultHash, function (err, metaData) {
+                        self.blobClient.getMetadata(jInfo.resultHashes['all'], function (err, metaData) {
                             var newNameJsonHash;
                             if (err) {
                                 return callback('Getting results metadata failed: ' + err.toString(), self.result);
@@ -183,13 +198,13 @@ define(['plugin/PluginConfig',
                                             self.core.setAttribute(self.activeNode, 'name', newName[key]);
                                         }
                                     }
-                                    self.result.addArtifact(jInfo.resultHash);
+                                    self.result.addArtifact(jInfo.resultHashes['all']);
                                     self.result.setSuccess(true);
                                     self.save('Updated new name from execution', function (err) {
                                         callback(null, self.result);
                                     });
                                 } else {
-                                    self.result.addArtifact(jInfo.resultHash);
+                                    self.result.addArtifact(jInfo.resultHashes['all']);
                                     self.result.setSuccess(true);
                                     callback(null, self.result);
                                 }
