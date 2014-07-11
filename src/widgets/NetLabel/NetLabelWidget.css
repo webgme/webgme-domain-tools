@@ -4,9 +4,9 @@
  * Author: Dana Zhang
  *
  */
-.diagram-designer .items .c-d-end.src.netLabel {
+.diagram-designer .items .c-d-end.src.highlighted {
   background-color: red; }
-.diagram-designer .items .c-d-end.dst.netLabel {
+.diagram-designer .items .c-d-end.dst.highlighted {
   background-color: blue; }
 .diagram-designer .items div.netlist-container {
   position: absolute;
@@ -14,18 +14,16 @@
   white-space: nowrap; }
   .diagram-designer .items div.netlist-container .netlist {
     position: relative;
-    width: 100px;
+    width: 120px;
     left: -50%;
-    cursor: pointer; }
-    .diagram-designer .items div.netlist-container .netlist .title {
-      width: 100px;
-      text-align: center; }
+    cursor: pointer;
+    text-align: center; }
+    .diagram-designer .items div.netlist-container .netlist .title.highlighted {
+      font-weight: bold; }
     .diagram-designer .items div.netlist-container .netlist .netLabel {
-      border-bottom: black;
-      padding-left: 5px;
-      padding-right: 5px;
       text-overflow: ellipsis;
-      overflow: hidden; }
+      overflow: hidden;
+      background-color: white; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.src-highlighted {
         font-weight: bold;
         color: red; }

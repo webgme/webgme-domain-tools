@@ -18,6 +18,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     var NetLabelConnection,
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
+        DATA_ID = 'data-id',
         COLLAPSE_ON_INDEX = NetLabelWidgetConstants.MAX_LABEL_NUMBER - 1,
         MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
         CONNECTION_DEFAULT_WIDTH = 1,
@@ -44,7 +45,30 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.setConnectionRenderData = function (segPoints) {
         var self = this,
             srcPos = segPoints[0],
-            dstPos = segPoints[segPoints.length - 1];
+            dstPos = segPoints[segPoints.length - 1],
+            _removeExistingConnection, // fn
+            _removeExistingLabels; // fn
+
+        _removeExistingConnection = function () {
+
+            var pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + self.id,
+                textID = TEXT_ID_PREFIX + self.id,
+                connID = self.id;
+
+            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
+            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + connID + '"]').remove();
+            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + textID + '"]').remove();
+            self.diagramDesigner.skinParts.$itemsContainer.find('[' + DATA_ID + '^="' + connID + '"]').remove(); // dragpoints
+            self.skinParts.path = null;
+            self.skinParts.pathShadow = null;
+            self.pathDef = null;
+        };
+
+        _removeExistingLabels = function () {
+            var connID = self.id;
+
+            self.diagramDesigner.skinParts.$itemsContainer.find('[connid^="' + connID + '"]').remove();
+        };
 
         // setting end connectors positions
         self.sourceCoordinates = { "x": srcPos.x,
@@ -57,8 +81,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self._pathPoints = segPoints;
 
         if (this.showAsLabel) {
+            _removeExistingConnection();
             self.setNetRenderData(segPoints);
         } else {
+            _removeExistingLabels();
             self.setLineConnectionRenderData(segPoints);
         }
 
@@ -222,8 +248,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             dstPortLabel = self._netLabelBase.clone(),
             srcText = self._getSrcText(),
-            existingLabel,
-            _setName; // fn
+            existingLabel;
 
 
         // create a label list for the dst object or dst port
@@ -335,6 +360,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     /** CREATE REGULAR DESIGNER-CONNECTION **/
     NetLabelConnection.prototype.setLineConnectionRenderData = function (segPoints) {
+
         var i = 0,
             len,
             pathDef = [],
@@ -368,6 +394,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         this._simplifyTrivially(points);
+
+        this.sourceCoordinates = { "x": -1,
+            "y": -1};
+
+        this.endCoordinates = { "x": -1,
+            "y": -1};
 
         len = points.length;
         validPath = len > 1;
@@ -414,6 +446,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             //check if the prev pathDef is the same as the new
             //this way the redraw does not need to happen
+
             if (this.pathDef !== pathDef) {
                 this.pathDef = pathDef;
 
@@ -432,7 +465,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     this.skinParts.path = this.paper.path(pathDef);
 
                     $(this.skinParts.path.node).attr({"id": this.id,
-                        "class": NetLabelWidgetConstants.NETLIST});
+                        "class": DiagramDesignerWidgetConstants.DESIGNER_CONNECTION_CLASS});
 
                     this.skinParts.path.attr({ "arrow-start": this.designerAttributes.arrowStart,
                         "arrow-end": this.designerAttributes.arrowEnd,
@@ -498,9 +531,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._initialize = function (objDescriptor) {
 
-        this.name = objDescriptor.name;
         /*MODELEDITORCONNECTION CONSTANTS***/
-        this.showAsLabel = objDescriptor.showAsLabel;
         this.diagramDesigner = objDescriptor.designerCanvas;
 
         this.skinParts = {};
@@ -531,7 +562,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         }
 
-        if (this.showAsLabel) {
+        if (objDescriptor.showAsLabel) {
             this._initializeConnectionProps(objDescriptor);
         } else {
             this._initializeLineConnectionProps(objDescriptor);
@@ -542,6 +573,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         this._segmentPointMarkers = [];
         this._connectionEditSegments = [];
+
+        this.name = objDescriptor.name;
+        this.showAsLabel = objDescriptor.showAsLabel;
 
         this._pathPointsBBox = {'x': 0,
             'y': 0,
@@ -580,7 +614,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         this.srcText = objDescriptor.srcText;
         this.dstText = objDescriptor.dstText;
-        this.name = objDescriptor.name;/* || this.id;*/
         this.nameEdit = objDescriptor.nameEdit || false;
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
         this.dstTextEdit = objDescriptor.dstTextEdit || false;
@@ -602,9 +635,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
+
+        this.name = objDescriptor.name;
+        this.showAsLabel = objDescriptor.showAsLabel;
+
         this.reconnectable = objDescriptor.reconnectable === true;
         this.editable = !!objDescriptor.editable;
-        this.name = objDescriptor.name;/* || this.id;*/
+        this.showAsLabel = objDescriptor.showAsLabel;
         this.nameEdit = objDescriptor.nameEdit || false;
 
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
@@ -1002,10 +1039,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.update = function (objDescriptor) {
-        //read props coming from the DataBase or DiagramDesigner
-        this._initializeConnectionProps(objDescriptor);
+        if (objDescriptor.showAsLabel) {
+            this._initializeConnectionProps(objDescriptor);
+        } else {
+            this._initializeLineConnectionProps(objDescriptor);
+        }
     };
-
 
     //ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
     NetLabelConnection.prototype.getConnectionAreas = function (id, isEnd) {

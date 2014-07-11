@@ -36,7 +36,7 @@ define(['./NetLabelWidget.Constants',
             logger.debug('mousedown.item, ItemID: ' + itemId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onItemMouseDown) {
-                self._hideAllLabels();
+                self._clearNetlistSelection();
                 self.onItemMouseDown.call(self, itemId, eventDetails);
             } else {
                 logger.warning('onItemMouseDown(itemId, eventDetails) is undefined, ItemID: ' + itemId + ' eventDetails: ' + JSON.stringify(eventDetails));
@@ -51,7 +51,7 @@ define(['./NetLabelWidget.Constants',
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                self._hideAllLabels();
+                self._clearNetlistSelection();
                 self.onConnectionMouseDown.call(self, connId, eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
@@ -69,9 +69,7 @@ define(['./NetLabelWidget.Constants',
                 self.selectionManager._clearSelection();
                 // todo: this should have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
 //                self.onConnectionMouseDown.call(self, connId, eventDetails);
-
-                self._hideAllLabels();
-                self._showLabels(this);
+                self._onNetlistSelect(this);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -100,7 +98,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onBackgroundMouseDown) {
                 self.onBackgroundMouseDown.call(self, eventDetails);
-                self._hideAllLabels();
+                self._clearNetlistSelection();
             } else {
                 logger.warning('onBackgroundMouseDown(eventDetails) is undefined, eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -126,36 +124,19 @@ define(['./NetLabelWidget.Constants',
             event.stopImmediatePropagation();
         });
 
-        // handle mouse enter on netlists
+        // handle mouse enter on netlist-container title
         this.$el.on('mouseenter.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
-            var objId = $(this).text(),
-                eventDetails = self._processMouseEvent(event, true, true, true, true);
+            logger.debug('Showing all end connectors from object ' + this.id);
 
-            logger.debug('Showing all end connectors from object ' + objId);
-
-            if (self.onConnectionMouseDown) {
-                self._showAllEndConnectors(this);
-
-            } else {
-                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + objId + ' eventDetails: ' + JSON.stringify(eventDetails));
-            }
+            self._showAllEndConnectors(this);
         });
 
-        // handle mouse leave on netlists
+        // handle mouse leave on netlist-container title
         this.$el.on('mouseleave.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
-            var objId = $(this).text(),
-                eventDetails = self._processMouseEvent(event, true, true, true, true);
+            logger.debug('Hiding all end connectors from object ' + this.id);
 
-            logger.debug('Showing all end connectors from object ' + objId);
-
-            if (self.onConnectionMouseDown) {
-                self._hideAllEndConnectors(this);
-
-            } else {
-                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + objId + ' eventDetails: ' + JSON.stringify(eventDetails));
-            }
+            self._hideAllEndConnectors(this);
         });
-
     };
 
     NetLabelWidgetMouse.prototype._processMouseEvent = function (event, triggerUIActivity, preventDefault, stopPropagation, stopImmediatePropagation) {
@@ -216,6 +197,22 @@ define(['./NetLabelWidget.Constants',
     };
 
     /** HELPER FUNCTIONS **/
+
+    NetLabelWidgetMouse.prototype._onNetlistSelect = function (node) {
+        this._clearNetlistSelection();
+        $(node).addClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
+        this._showLabels(node);
+    };
+
+    // todo: there has to a better way to do this
+    NetLabelWidgetMouse.prototype._clearNetlistSelection = function () {
+
+        this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+        this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
+        this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.NETLIST_TITLE).removeClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
+        this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).hide();
+    };
+
     NetLabelWidgetMouse.prototype._showLabels = function (node) {
         var parentNode = node.parentNode,
             children = parentNode.children,
@@ -225,7 +222,6 @@ define(['./NetLabelWidget.Constants',
         for (i = 1; i < children.length; i += 1) {
             $(children[i]).show();
         }
-
     };
 
     NetLabelWidgetMouse.prototype._showAllEndConnectors = function (node) {
@@ -252,12 +248,6 @@ define(['./NetLabelWidget.Constants',
             connObj = self.items[idList[i]];
             connObj.showEndReconnectors(nodeId);
         }
-    };
-
-    // todo: there has to a better way to do this
-    NetLabelWidgetMouse.prototype._hideAllLabels = function () {
-
-        this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).hide()
     };
 
     NetLabelWidgetMouse.prototype._hideAllEndConnectors = function (node) {

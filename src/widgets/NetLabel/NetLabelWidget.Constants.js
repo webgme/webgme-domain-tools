@@ -32,6 +32,7 @@ define([], function () {
         HIGHLIGHT_MODE_CLASS: 'highlight-mode',
         SRCLABEL_HIGHLIGHT_CLASS: 'src-highlighted',
         DSTLABEL_HIGHLIGHT_CLASS: 'dst-highlighted',
+        HIGHLIGHT_CLASS: "highlighted",
         DROP_REGION_CLASS: 'drop-region',
         DROP_REGION_ACCEPT_DROPPABLE_CLASS: 'accept-droppable',
         DROP_REGION_REJECT_DROPPABLE_CLASS: 'reject-droppable',

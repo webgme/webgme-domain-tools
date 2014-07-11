@@ -32,13 +32,13 @@ $collapse-label-color: #A9A9A9;
   .items {
     .c-d-end {
       &.src {
-        &.netLabel {
+        &.highlighted {
           background-color: $diagram-designer-selection-c-d-end-src-background-color;
         }
       }
 
       &.dst {
-        &.netLabel {
+        &.highlighted {
           background-color: $diagram-designer-selection-c-d-end-dst-background-color;
         }
       }
@@ -52,21 +52,25 @@ $collapse-label-color: #A9A9A9;
 
       .netlist {
         position: relative;
-        width: 100px;
+        width: 120px;
         left: -50%;
         cursor: pointer;
+        text-align: center;
 
         .title {
-          width: 100px;
-          text-align: center;
+          &.highlighted {
+            font-weight: bold;
+          }
         }
 
         .netLabel {
-          border-bottom: black;
-          padding-left: 5px;
-          padding-right: 5px;
           text-overflow: ellipsis;
           overflow: hidden;
+          background-color: white;
+
+//          &.highlighted {
+//            background-color: white;
+//          }
 
           &.src-highlighted {
             font-weight: bold;
