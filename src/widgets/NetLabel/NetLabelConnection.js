@@ -1021,13 +1021,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (this.srcObjId !== id) {
 
             srcObj = this.diagramDesigner.items[this.srcObjId];
-            srcObj.$el.css('background-color', '#FFD6D6');
+            srcObj.$el.addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
         }
 
         if (this.dstObjId !== id) {
 
             dstObj = this.diagramDesigner.items[this.dstObjId];
-            dstObj.$el.css('background-color', '#CFFAFA');
+            dstObj.$el.addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
         }
     };
 
@@ -1037,8 +1037,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         srcObj = this.diagramDesigner.items[this.srcObjId];
         dstObj = this.diagramDesigner.items[this.dstObjId];
-        srcObj.$el.css('background-color', 'initial');
-        dstObj.$el.css('background-color', 'initial');
+        srcObj.$el.removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+        dstObj.$el.removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
     };
 
     NetLabelConnection.prototype.update = function (objDescriptor) {

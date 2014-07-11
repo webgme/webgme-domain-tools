@@ -4,6 +4,10 @@
  * Author: Dana Zhang
  *
  */
+.diagram-designer .items .designer-item.src-highlighted {
+  outline: #f77eaf solid; }
+.diagram-designer .items .designer-item.dst-highlighted {
+  outline: #71b7f5 solid; }
 .diagram-designer .items .c-d-end.src.highlighted {
   background-color: red; }
 .diagram-designer .items .c-d-end.dst.highlighted {

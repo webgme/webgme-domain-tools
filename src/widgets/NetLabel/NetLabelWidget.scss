@@ -10,7 +10,8 @@ $diagram-designer-selection-c-d-end-dst-background-color: #0000FF;
 $diagram-designer-selection-c-d-end-src-highlight-color: #FF6666;
 $diagram-designer-selection-c-d-end-dst-highlight-color: #00CCFF;
 $diagram-designer-selection-rubber-band-border-color: #52A8EC;
-$diagram-designer-selection-outline-background-color: rgba(255, 255, 0, 0.05);
+$diagram-designer-srcobj-outline: #F77EAF solid;
+$diagram-designer-dstobj-outline: #71B7F5 solid;
 $diagram-designer-selection-outline-border: rgba(0,0,0,0.5) dashed 1px;
 $diagram-designer-selection-outline-shadow-start: rgba(0, 0, 0, 0.075);
 $diagram-designer-selection-outline-shadow-end: rgba(0, 0, 0, 0.6);
@@ -30,6 +31,17 @@ $collapse-label-color: #A9A9A9;
 .diagram-designer {
 
   .items {
+
+    .designer-item {
+      &.src-highlighted {
+        outline: $diagram-designer-srcobj-outline;
+      }
+
+      &.dst-highlighted {
+        outline: $diagram-designer-dstobj-outline;
+      }
+    }
+
     .c-d-end {
       &.src {
         &.highlighted {
