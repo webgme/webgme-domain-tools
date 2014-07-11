@@ -14,13 +14,18 @@
   white-space: nowrap; }
   .diagram-designer .items div.netlist-container .netlist {
     position: relative;
+    width: 100px;
     left: -50%;
     cursor: pointer; }
+    .diagram-designer .items div.netlist-container .netlist .title {
+      width: 100px;
+      text-align: center; }
     .diagram-designer .items div.netlist-container .netlist .netLabel {
-      cursor: pointer;
       border-bottom: black;
       padding-left: 5px;
-      padding-right: 5px; }
+      padding-right: 5px;
+      text-overflow: ellipsis;
+      overflow: hidden; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.src-highlighted {
         font-weight: bold;
         color: red; }

@@ -113,7 +113,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-    NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><span class="title"></span></div>');
+    NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><div class="title"></div></div>');
     NetLabelConnection.prototype._netLabelBase = $('<div class="netLabel"></div>');
     /** CREATE SRC NET LIST **/
     NetLabelConnection.prototype._createSrcNet = function (srcID, dstID) {
@@ -127,8 +127,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!srcPortLabelList) {
             srcPortLabelList = self._netLabelListBase.clone()[0];
             srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-            $(srcPortLabelList).find('span').text('connections');
-            $(srcPortLabelList).find('span').attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
+            $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
+            $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
         }
 
         srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
@@ -158,7 +158,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        self.skinParts.srcNetTitle = $(srcPortLabelList).find('span')[0];
+        self.skinParts.srcNetTitle = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0];
 
         return srcPortLabelList;
     };
@@ -230,8 +230,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (!dstPortLabelList) {
             dstPortLabelList = self._netLabelListBase.clone()[0];
             dstPortLabelList.setAttribute("obj-id", dstID);
-            $(dstPortLabelList).find('span').text('connections');
-            $(dstPortLabelList).find('span').attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
+            $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
+            $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
         }
 
         // making the dstPortLabel
@@ -261,7 +261,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         }
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
-        self.skinParts.dstNetTitle = $(dstPortLabelList).find('span')[0];
+        self.skinParts.dstNetTitle = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0];
 
         return dstPortLabelList;
 

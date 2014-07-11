@@ -59,7 +59,7 @@ define(['./NetLabelWidget.Constants',
         });
 
         // handle click on netlist title
-        this.$el.on('mousedown.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var connId = this.id,
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
@@ -127,7 +127,7 @@ define(['./NetLabelWidget.Constants',
         });
 
         // handle mouse enter on netlists
-        this.$el.on('mouseenter.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
+        this.$el.on('mouseenter.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var objId = $(this).text(),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 
@@ -142,7 +142,7 @@ define(['./NetLabelWidget.Constants',
         });
 
         // handle mouse leave on netlists
-        this.$el.on('mouseleave.' + EVENT_POSTFIX, 'span.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
+        this.$el.on('mouseleave.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             var objId = $(this).text(),
                 eventDetails = self._processMouseEvent(event, true, true, true, true);
 

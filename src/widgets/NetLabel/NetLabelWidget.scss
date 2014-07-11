@@ -52,23 +52,31 @@ $collapse-label-color: #A9A9A9;
 
       .netlist {
         position: relative;
+        width: 100px;
         left: -50%;
         cursor: pointer;
-              .netLabel {
-                cursor: pointer;
-                border-bottom: black;
-                padding-left: 5px;
-                padding-right: 5px;
 
-                &.src-highlighted {
-                  font-weight: bold;
-                  color: red;
-                }
-                &.dst-highlighted {
-                  font-weight: bold;
-                  color: blue;
-                }
-              }
+        .title {
+          width: 100px;
+          text-align: center;
+        }
+
+        .netLabel {
+          border-bottom: black;
+          padding-left: 5px;
+          padding-right: 5px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+
+          &.src-highlighted {
+            font-weight: bold;
+            color: red;
+          }
+          &.dst-highlighted {
+            font-weight: bold;
+            color: blue;
+          }
+        }
       }
 
     }
