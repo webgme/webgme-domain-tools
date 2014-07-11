@@ -41,8 +41,13 @@ define(['logManager',
                 // if object to be deleted is a connection object
                 if (compID.indexOf("C_") === 0) {
                     itemDeleting = this.designerCanvas.items[compID];
+                    if (itemDeleting.showAsLabel) {
+                        itemDeleting.unHighlight();
+                    } else {
+                        itemDeleting._removePath();
+                        itemDeleting._removePathShadow();
+                    }
                     itemDeleting.hideEndReconnectors();
-                    itemDeleting.unHighlight();
                 }
             } else {
                 this.logger.warning('Can not delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');

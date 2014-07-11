@@ -507,6 +507,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this._hideSrcTexts();
             this._hideDstTexts();
             this.logger.debug("Destroyed");
+
+            this._removePath();
+            this._removePathShadow();
         }
     };
 

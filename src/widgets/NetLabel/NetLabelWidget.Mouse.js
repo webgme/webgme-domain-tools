@@ -205,6 +205,7 @@ define(['./NetLabelWidget.Constants',
     };
 
     // todo: there has to a better way to do this
+    // todo: designer item class might be highlighted as well
     NetLabelWidgetMouse.prototype._clearNetlistSelection = function () {
 
         this.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);

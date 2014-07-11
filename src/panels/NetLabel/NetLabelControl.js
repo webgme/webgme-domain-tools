@@ -26,6 +26,7 @@ define(['js/Panels/ModelEditor/ModelEditorControl',
     _.extend(NetLabelControl.prototype, ModelEditorControl.prototype);
     _.extend(NetLabelControl.prototype, NetLabelControlEventHandlers.prototype);
 
+    // todo: return src/dst texts instead -- in the initprop method these changes are made
     NetLabelControl.prototype.getConnectionDescriptor = function (gmeID) {
 
         var self = this,
