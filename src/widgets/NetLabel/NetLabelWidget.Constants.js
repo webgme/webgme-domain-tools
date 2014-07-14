@@ -33,6 +33,7 @@ define([], function () {
         SRCLABEL_HIGHLIGHT_CLASS: 'src-highlighted',
         DSTLABEL_HIGHLIGHT_CLASS: 'dst-highlighted',
         HIGHLIGHT_CLASS: "highlighted",
+        HOVER_CLASS: "hovered",
         DROP_REGION_CLASS: 'drop-region',
         DROP_REGION_ACCEPT_DROPPABLE_CLASS: 'accept-droppable',
         DROP_REGION_REJECT_DROPPABLE_CLASS: 'reject-droppable',

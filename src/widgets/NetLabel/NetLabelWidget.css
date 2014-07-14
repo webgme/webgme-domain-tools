@@ -24,6 +24,9 @@
     text-align: center; }
     .diagram-designer .items div.netlist-container .netlist .title.highlighted {
       font-weight: bold; }
+    .diagram-designer .items div.netlist-container .netlist .title.hovered {
+      font-size: 11px;
+      font-weight: bold; }
     .diagram-designer .items div.netlist-container .netlist .netLabel {
       text-overflow: ellipsis;
       overflow: hidden;

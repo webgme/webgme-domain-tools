@@ -127,15 +127,13 @@ define(['./NetLabelWidget.Constants',
         // handle mouse enter on netlist-container title
         this.$el.on('mouseenter.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             logger.debug('Showing all end connectors from object ' + this.id);
-
-            self._showAllEndConnectors(this);
+            self._onNetlistHover(this);
         });
 
         // handle mouse leave on netlist-container title
         this.$el.on('mouseleave.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.NETLIST_TITLE,  function (event) {
             logger.debug('Hiding all end connectors from object ' + this.id);
-
-            self._hideAllEndConnectors(this);
+            self._onNetlistUnHover(this);
         });
     };
 
@@ -197,6 +195,16 @@ define(['./NetLabelWidget.Constants',
     };
 
     /** HELPER FUNCTIONS **/
+
+    NetLabelWidgetMouse.prototype._onNetlistHover = function (node) {
+        $(node).addClass(NetLabelWidgetConstants.HOVER_CLASS);
+        this._showAllEndConnectors(node);
+    };
+
+    NetLabelWidgetMouse.prototype._onNetlistUnHover = function (node) {
+        $(node).removeClass(NetLabelWidgetConstants.HOVER_CLASS);
+        this._hideAllEndConnectors(node);
+    };
 
     NetLabelWidgetMouse.prototype._onNetlistSelect = function (node) {
         this._clearNetlistSelection();
