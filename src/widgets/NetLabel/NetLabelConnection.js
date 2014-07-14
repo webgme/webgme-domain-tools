@@ -88,6 +88,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
                 }
             }
+
+            self.unHighlight();
+            self.hideEndReconnectors();
         };
 
         // setting end connectors positions
@@ -100,15 +103,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self._segPoints = segPoints.slice(0);
         self._pathPoints = segPoints;
 
-        if (this.showAsLabel) {
+//        if (self.showAsLabel !== self._showAsLabelPrev || !self._showAsLabelPrev) {
+        if (self.showAsLabel) {
+
             _removeExistingConnection();
             self.setNetRenderData(segPoints);
         } else {
+
             _removeExistingLabels();
             self.setLineConnectionRenderData(segPoints);
         }
+//        }
 
         self._renderEndReconnectors();
+        self._showAsLabelPrev = self.showAsLabel;
     };
 
     NetLabelConnection.prototype.setNetRenderData = function (segPoints) {
@@ -139,22 +147,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this._renderSrcTexts(srcPortLabelList, srcPathDef);
             this._renderDstTexts(dstPortLabelList, dstPathDef);
 
-
-            //in edit mode add edit features
-            if (this._editMode === true) {
-                this._drawEditModePath(points);
-                //show connection end dragpoints
-                this.showEndReconnectors();
-            }
-
-//            this._showConnectionAreaMarker();
-
         } else {
-            this.srcPathDef = null;
-            this.dstPathDef = null;
             this._removePath();
-            this._removePathShadow();
-//            this._hideConnectionAreaMarker();
             this._hideAllTexts();
         }
     };
@@ -999,25 +993,39 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (self.reconnectable) {
 
-            if (self.showAsLabel) {
-                if (self.srcSubCompId && self.srcSubCompId !== id) {
-                    _showSrcEndReconnector();
-
-                } else if (!self.srcSubCompId && self.srcObjId !== id) {
-                    self.highlight(id);
-                }
-
-                if (self.dstSubCompId && self.dstSubCompId !== id) {
-                    _showDstEndReconnector();
-
-                } else if (!self.dstSubCompId && self.dstObjId !== id) {
-                    self.highlight(id);
+            // if id is defined, don't do anything to object with given id
+            if (id) {
+                // if srcObj has given id, then highlight dstObj or show dstSubComp
+                if (self.srcObjId === id || self.srcSubCompId === id) {
+                    if (self.dstSubCompId) {
+                        _showDstEndReconnector();
+                    } else {
+                        self._highlightDst();
+                    }
+                } else if (self.dstObjId === id || self.dstSubCompId === id) {
+                    if (self.srcSubCompId) {
+                        _showSrcEndReconnector();
+                    } else {
+                        self._highlightSrc();
+                    }
                 }
             } else {
-                _showSrcEndReconnector('S');
-                _showDstEndReconnector('D');
-            }
+                if (self.showAsLabel) {
+                    if (self.srcSubCompId) {
+                        _showSrcEndReconnector();
+                    }
 
+                    if (self.dstSubCompId) {
+                        _showDstEndReconnector();
+                    }
+
+                    self.highlight();
+
+                } else {
+                    _showSrcEndReconnector('S');
+                    _showDstEndReconnector('D');
+                }
+            }
             this._toggleHighlightClass('add');
 
         } else {
@@ -1048,20 +1056,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
     NetLabelConnection.prototype.highlight = function (id) {
-        var srcObj,
-            dstObj;
-
-        if (this.srcObjId !== id) {
-
-            srcObj = this.diagramDesigner.items[this.srcObjId];
-            srcObj.$el.addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
-        }
-
-        if (this.dstObjId !== id) {
-
-            dstObj = this.diagramDesigner.items[this.dstObjId];
-            dstObj.$el.addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
-        }
+        this._highlightSrc();
+        this._highlightDst();
     };
 
     NetLabelConnection.prototype.unHighlight = function () {
@@ -1165,6 +1161,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
+    NetLabelConnection.prototype._highlightSrc = function () {
+        var srcObj = this.diagramDesigner.items[this.srcObjId];
+        srcObj.$el.addClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+    };
+
+    NetLabelConnection.prototype._highlightDst = function () {
+        var dstObj = this.diagramDesigner.items[this.dstObjId];
+        dstObj.$el.addClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
+    };
 
     return NetLabelConnection;
 });
