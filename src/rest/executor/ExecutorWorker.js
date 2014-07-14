@@ -15,13 +15,15 @@ define(['logManager',
         'blob/BlobClient',
         'blob/BlobMetadata',
         'fs',
+        'util',
+        'events',
         'path',
         'child_process',
         'minimatch',
         'executor/ExecutorClient',
         'executor/WorkerInfo'
     ],
-    function (logManager, BlobClient, BlobMetadata, fs, path, child_process, minimatch, ExecutorClient, WorkerInfo) {
+    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo) {
 
         // FIXME: test for exe existance
         // FIXME: detect arch and use different exe and args
@@ -96,9 +98,10 @@ define(['logManager',
             fs.mkdirSync(this.workingDirectory);
         }
         this.maxProcesses = parameters.maxProcesses || 1;
-        this.clientRequest = new WorkerInfo.ClientRequest({ clientId: 'todo' });
+        this.clientRequest = new WorkerInfo.ClientRequest({ clientId: null });
         this.clientRequest.availableProcesses = this.maxProcesses;
     };
+    util.inherits(ExecutorWorker, events.EventEmitter);
 
     ExecutorWorker.prototype.startJob = function (jobInfo) {
         var self = this;
@@ -383,7 +386,7 @@ define(['logManager',
                 console.log(err); // TODO
             }
         });
-        // TODO: update gui
+        this.emit('jobUpdate', jobInfo)
     };
 
     ExecutorWorker.prototype.cancelJob = function () {
@@ -404,53 +407,64 @@ define(['logManager',
         var self = this;
         self.checkForUnzipExe();
 
-        var jobs_table = document.getElementById('jobs_table');
-        if (jobs_table) {
-        } else {
-            document.getElementById('jobs').innerHTML = '<table id="jobs_table"><thead><tr><td>Job</td><td>Status</td></tr></thead></table>';
-        }
-
-        var oReq = new XMLHttpRequest();
-        oReq.open('POST', this.executorClient.executorUrl + 'worker', true);
-        oReq.setRequestHeader('Content-Type', 'application/json');
-        oReq.timeout = 25 * 1000;
-        oReq.ontimeout = function (oEvent) {
-            document.getElementById('status').style.color = 'red';
-            document.getElementById('status').textContent = 'Timed out';
-            callback();
-        };
-        oReq.onerror = function (oEvent) {
-            document.getElementById('status').style.color = 'red';
-            document.getElementById('status').textContent = 'Error';
-            callback();
-        };
-        oReq.onload = function (oEvent) {
-            // Uploaded.
-            var response = oEvent.target.response;
-            if (oEvent.target.status > 399) {
-                document.getElementById('status').style.color = 'red';
-                document.getElementById('status').textContent = 'Server returned ' + oEvent.target.status;
-                callback();
+        var _queryWorkerAPI = function() {
+            var jobs_table = document.getElementById('jobs_table');
+            if (jobs_table) {
             } else {
-                document.getElementById('status').style.color = 'green';
-                document.getElementById('status').textContent = 'OK';
-                var response = JSON.parse(oEvent.target.responseText);
-                var jobsToStart = response.jobsToStart;
-                for (var i = 0; i < jobsToStart.length; i++) {
-                    self.executorClient.getInfo(jobsToStart[i], function(err, info) {
-                        if (err) {
-                            // TODO
-                        }
-                        self.jobList[info.hash] = info;
-                        self.startJob(info);
-                    });
-                }
+                //document.getElementById('jobs').innerHTML = '<table id="jobs_table"><thead><tr><td>Job</td><td>Status</td></tr></thead></table>';
 
-                callback(response);
             }
-        };
 
-        oReq.send(JSON.stringify(this.clientRequest));
+            var oReq = new XMLHttpRequest();
+            oReq.open('POST', self.executorClient.executorUrl + 'worker', true);
+            oReq.setRequestHeader('Content-Type', 'application/json');
+            oReq.timeout = 25 * 1000;
+            oReq.ontimeout = function (oEvent) {
+                document.getElementById('status').style.color = 'red';
+                document.getElementById('status').textContent = 'Timed out';
+                callback();
+            };
+            oReq.onerror = function (oEvent) {
+                document.getElementById('status').style.color = 'red';
+                document.getElementById('status').textContent = 'Error';
+                callback();
+            };
+            oReq.onload = function (oEvent) {
+                // Uploaded.
+                var response = oEvent.target.response;
+                if (oEvent.target.status > 399) {
+                    document.getElementById('status').style.color = 'red';
+                    document.getElementById('status').textContent = 'Server returned ' + oEvent.target.status;
+                    callback();
+                } else {
+                    document.getElementById('status').style.color = 'green';
+                    document.getElementById('status').textContent = 'OK';
+                    var response = JSON.parse(oEvent.target.responseText);
+                    var jobsToStart = response.jobsToStart;
+                    for (var i = 0; i < jobsToStart.length; i++) {
+                        self.executorClient.getInfo(jobsToStart[i], function (err, info) {
+                            if (err) {
+                                // TODO
+                            }
+                            self.jobList[info.hash] = info;
+                            self.startJob(info);
+                        });
+                    }
+
+                    callback(response);
+                }
+            };
+
+            oReq.send(JSON.stringify(self.clientRequest));
+        };
+        if (self.clientRequest.clientId) {
+            _queryWorkerAPI();
+        } else {
+            var child = child_process.execFile("hostname", [], {}, function (err, stdout, stderr) {
+                self.clientRequest.clientId = stdout.trim() || "unknown";
+                _queryWorkerAPI();
+            });
+        }
     };
 
     return ExecutorWorker;
