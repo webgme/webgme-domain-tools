@@ -205,7 +205,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _updateText();
 
         } else {
-            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) { // todo: get default name of connection from meta/baseObj
                 existingLabel.textContent = self.name;
             }
             else if (existingLabel.textContent !== dstText) {
@@ -280,8 +280,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabel = self._netLabelBase.clone(),
             srcText = self._getSrcText(),
             existingLabel,
-            _createNetlist,
-            _updateText;
+            _createNetlist, // fn
+            _updateText; // fn
 
 
         _createNetlist = function () {
@@ -325,7 +325,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _updateText();
 
         } else {
-            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) { // todo: get default name of connection from meta/baseObj
                 existingLabel.textContent = self.name;
             }
             else if (existingLabel.textContent !== srcText) {
@@ -582,6 +582,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._initialize = function (objDescriptor) {
 
+        this.defaultName = objDescriptor.defaultName;
         /*MODELEDITORCONNECTION CONSTANTS***/
         this.diagramDesigner = objDescriptor.designerCanvas;
 
