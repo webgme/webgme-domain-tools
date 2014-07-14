@@ -162,7 +162,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcPortLabel = self._netLabelBase.clone(),
             dstText = self._getDstText(),
             existingLabel,
-            _createNetlist; // fn
+            _createNetlist, // fn
+            _updateText; // fn
 
         _createNetlist = function () {
             // create a label list for the src object or src port
@@ -171,6 +172,17 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
                 $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
                 $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
+            }
+        };
+
+        _updateText = function () {
+            var title,
+                nbrOfConns = srcPortLabelList.childElementCount - 1;
+            title = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE);
+            if (nbrOfConns === 1) {
+                title.text(nbrOfConns + " connection");
+            } else {
+                title.text(nbrOfConns + " connections");
             }
         };
 
@@ -190,6 +202,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
             _createNetlist();
             $(srcPortLabelList).append(srcPortLabel);
+            _updateText();
 
         } else {
             if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
@@ -266,16 +279,31 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             dstPortLabel = self._netLabelBase.clone(),
             srcText = self._getSrcText(),
-            existingLabel;
+            existingLabel,
+            _createNetlist,
+            _updateText;
 
 
-        // create a label list for the dst object or dst port
-        if (!dstPortLabelList) {
-            dstPortLabelList = self._netLabelListBase.clone()[0];
-            dstPortLabelList.setAttribute("obj-id", dstID);
-            $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
-            $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
-        }
+        _createNetlist = function () {
+            // create a label list for the dst object or dst port
+            if (!dstPortLabelList) {
+                dstPortLabelList = self._netLabelListBase.clone()[0];
+                dstPortLabelList.setAttribute("obj-id", dstID);
+                $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
+                $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
+            }
+        };
+
+        _updateText = function () {
+            var title,
+                nbrOfConns = dstPortLabelList.childElementCount - 1;
+            title = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE);
+            if (nbrOfConns === 1) {
+                title.text(nbrOfConns + " connection");
+            } else {
+                title.text(nbrOfConns + " connections");
+            }
+        };
 
         // making the dstPortLabel
 
@@ -292,7 +320,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
             } else {
                 dstPortLabel.text(srcText);
             }
+            _createNetlist();
             $(dstPortLabelList).append(dstPortLabel);
+            _updateText();
 
         } else {
             if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
