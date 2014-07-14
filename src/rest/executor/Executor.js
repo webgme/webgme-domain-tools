@@ -25,10 +25,31 @@ define(['logManager',
 
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
-        // TODO: persist this
-    var jobList = new Datastore();
-    jobList = new Datastore({ filename: 'jobList.nedb', autoload: true });
-    jobList.ensureIndex({ fieldName: 'hash', unique: true }, function (err) {});
+    var jobList = new Datastore({ filename: 'jobList.nedb', autoload: true });
+    jobList.ensureIndex({ fieldName: 'hash', unique: true }, function (err) {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+    });
+
+    var workerRefreshInterval = 5 * 1000;
+    // worker = { clientId:, lastSeen: }
+    var workerList = new Datastore({ filename: 'workerList.nedb', autoload: true});
+    var workerTimeout = function() {
+        if (process.uptime() < workerRefreshInterval / 1000 * 5) {
+            return;
+        }
+        workerList.find({ lastSeen: { $lt: (new Date).getTime() / 1000 - workerRefreshInterval / 1000 * 5} }, function(err, docs) {
+            for (var i = 0; i < docs.length; i++) {
+                // reset unfinished jobs assigned to worker to CREATED, so they'll be executed by someone else
+                logger.info('worker "' + docs[i].clientId + '" is gone');
+                workerList.remove({_id: docs[i]._id});
+                jobList.update({ worker: docs[i].clientId, finishTime: null}, { $set: { worker: null, status: 'CREATED' }}, function () { });
+            }
+        });
+    };
+    setInterval(workerTimeout, 10 * 1000);
 
     var ExecutorREST = function(req,res,next){
         //global config is accessible via webGMEGlobal.getConfig()
@@ -184,34 +205,36 @@ define(['logManager',
             return;
         }
 
-        var serverResponse = new WorkerInfo.ServerResponse({ refreshPeriod: 5 * 1000 });
+        var serverResponse = new WorkerInfo.ServerResponse({ refreshPeriod: workerRefreshInterval });
         var clientRequest = new WorkerInfo.ClientRequest(req.body);
 
-        if (clientRequest.availableProcesses) {
-            jobList.find({status: 'CREATED'}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
-                if (err) {
-                    res.send(500);
-                    return; // FIXME need to return 2x
-                }
-                var callback = function (i) {
-                    if (i === docs.length) {
-                        res.send(JSON.stringify(serverResponse));
-                        return;
+        workerList.update({ clientId: clientRequest.clientId }, { $set: { lastSeen: (new Date).getTime() / 1000 }}, { upsert: true }, function() {
+            if (clientRequest.availableProcesses) {
+                jobList.find({status: 'CREATED'}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
+                    if (err) {
+                        res.send(500);
+                        return; // FIXME need to return 2x
                     }
-                    jobList.update({_id: docs[i]._id}, {$set: {status: 'RUNNING'}}, function (err) {
-                        if (err) {
-                            res.send(500);
-                        } else {
-                            serverResponse.jobsToStart.push(docs[i].hash);
-                            callback(i + 1);
+                    var callback = function (i) {
+                        if (i === docs.length) {
+                            res.send(JSON.stringify(serverResponse));
+                            return;
                         }
-                    });
-                };
-                callback(0);
-            });
-        } else {
-            res.send(JSON.stringify(serverResponse));
-        }
+                        jobList.update({_id: docs[i]._id}, {$set: {status: 'RUNNING', worker: clientRequest.clientId}}, function (err) {
+                            if (err) {
+                                res.send(500);
+                            } else {
+                                serverResponse.jobsToStart.push(docs[i].hash);
+                                callback(i + 1);
+                            }
+                        });
+                    };
+                    callback(0);
+                });
+            } else {
+                res.send(JSON.stringify(serverResponse));
+            }
+        });
     };
 
 

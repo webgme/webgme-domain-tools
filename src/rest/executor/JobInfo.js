@@ -7,6 +7,7 @@ define([], function() {
         this.status = parameters.status || 'CREATED'; // TODO: define a constant for this
         this.startTime = parameters.startTime || null;
         this.finishTime = parameters.finishTime || null;
+        this.worker = parameters.worker || null;
     };
 
     JobInfo.finishedStatuses = [ 'SUCCESS', 'ANALYSIS_FAILED' ];
