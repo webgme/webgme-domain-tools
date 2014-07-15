@@ -1093,7 +1093,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
-    NetLabelConnection.prototype.highlight = function (id) {
+    NetLabelConnection.prototype.highlight = function () {
         this._highlightSrc();
         this._highlightDst();
     };

@@ -84,8 +84,10 @@ define(['./NetLabelWidget.Constants',
             logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
 
             if (self.onConnectionMouseDown) {
-                self._clearNetlistSelection();
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                if (!self.items[connId].selected) {
+                    self._clearNetlistSelection();
+                    self.onConnectionMouseDown.call(self, connId, eventDetails);
+                }
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -281,7 +283,9 @@ define(['./NetLabelWidget.Constants',
         // get all the connection objects associated with connid
         for (i = 0; i < idList.length; i += 1) {
             connObj = this.items[idList[i]];
-            connObj.hideEndReconnectors();
+            if (!connObj.selected) {
+                connObj.hideEndReconnectors();
+            }
         }
 
     };
