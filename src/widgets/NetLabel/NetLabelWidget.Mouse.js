@@ -231,6 +231,7 @@ define(['./NetLabelWidget.Constants',
         // show all labels for this NetList
         for (i = 1; i < children.length; i += 1) {
             $(children[i]).show();
+            $(children[i]).addClass(NetLabelWidgetConstants.SHOW_MODE);
         }
     };
 

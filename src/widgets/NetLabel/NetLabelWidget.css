@@ -5,9 +5,11 @@
  *
  */
 .diagram-designer .items .designer-item.src-highlighted {
-  outline: #f77eaf solid; }
+  outline: #f77eaf solid;
+  z-index: 2; }
 .diagram-designer .items .designer-item.dst-highlighted {
-  outline: #71b7f5 solid; }
+  outline: #71b7f5 solid;
+  z-index: 2; }
 .diagram-designer .items .c-d-end.src.highlighted {
   background-color: red; }
 .diagram-designer .items .c-d-end.dst.highlighted {
@@ -28,12 +30,17 @@
       font-size: 11px;
       font-weight: bold; }
     .diagram-designer .items div.netlist-container .netlist .netLabel {
+      margin-left: 5px;
       text-overflow: ellipsis;
       overflow: hidden;
-      background-color: white; }
+      position: relative;
+      z-index: 0; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.src-highlighted {
         font-weight: bold;
         color: red; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.dst-highlighted {
         font-weight: bold;
         color: blue; }
+      .diagram-designer .items div.netlist-container .netlist .netLabel.show-mode {
+        z-index: 1;
+        background-color: white; }

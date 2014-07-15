@@ -35,10 +35,12 @@ $collapse-label-color: #A9A9A9;
     .designer-item {
       &.src-highlighted {
         outline: $diagram-designer-srcobj-outline;
+        z-index: 2;
       }
 
       &.dst-highlighted {
         outline: $diagram-designer-dstobj-outline;
+        z-index: 2;
       }
     }
 
@@ -80,13 +82,11 @@ $collapse-label-color: #A9A9A9;
         }
 
         .netLabel {
+          margin-left: 5px;
           text-overflow: ellipsis;
           overflow: hidden;
-          background-color: white;
-
-//          &.highlighted {
-//            background-color: white;
-//          }
+          position: relative;
+          z-index: 0;
 
           &.src-highlighted {
             font-weight: bold;
@@ -95,6 +95,10 @@ $collapse-label-color: #A9A9A9;
           &.dst-highlighted {
             font-weight: bold;
             color: blue;
+          }
+          &.show-mode {
+            z-index: 1;
+            background-color: white;
           }
         }
       }
