@@ -19,7 +19,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
         DATA_ID = 'data-id',
-        COLLAPSE_ON_INDEX = NetLabelWidgetConstants.MAX_LABEL_NUMBER - 1,
         MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
         CONNECTION_DEFAULT_WIDTH = 1,
         CONNECTION_DEFAULT_COLOR = "#000000",
@@ -32,9 +31,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         CONNECTION_SHADOW_DEFAULT_COLOR = "#B9DCF7",
         CONNECTION_DEFAULT_LINE_TYPE = DiagramDesignerWidgetConstants.LINE_TYPES.NONE,
         SHADOW_MARKER_SIZE_INCREMENT = 3,
-        SHADOW_MARKER_SIZE_INCREMENT_X = 1,
-        SHADOW_MARKER_BLOCK_FIX_OFFSET = 2,
-        JUMP_XING_RADIUS = 3;
+        SHADOW_MARKER_SIZE_INCREMENT_X = 1;
 
     NetLabelConnection = function (objId) {
         Connection.call(this, objId);
@@ -138,7 +135,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstPathDef = [],
             p,
             lastP,
-            points = segPoints,
             validPath = segPoints && segPoints.length > 1,
             srcPortLabelList,
             dstPortLabelList;
@@ -167,6 +163,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
     NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><div class="title"></div></div>');
     NetLabelConnection.prototype._netLabelBase = $('<div class="netLabel"></div>');
+
     /** CREATE SRC NET LIST **/
     NetLabelConnection.prototype._createSrcNet = function (srcID, dstID) {
         var self = this,
@@ -207,7 +204,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // if show as label and connection name is different than default name, set netlabel name to new name
         if (!existingLabel) {
             // if show as label and connection name is different than default name, set netlabel name to new name
-            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) {
                 srcPortLabel.text(self.name);
             } else {
                 srcPortLabel.text(dstText);
@@ -217,7 +214,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _updateText();
 
         } else {
-            if (self.name !== self.defaultName) { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) {
                 existingLabel.textContent = self.name;
             }
             else if (existingLabel.textContent !== dstText) {
@@ -327,7 +324,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         // if src of the current connection hasn't been added, add it to the list of dst object
         if (!existingLabel) {
             // if show as label and connection name is different than default name, set netlabel name to new name
-            if (self.name !== 'Place2Transition') { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) {
                 dstPortLabel.text(self.name);
             } else {
                 dstPortLabel.text(srcText);
@@ -337,7 +334,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _updateText();
 
         } else {
-            if (self.name !== self.defaultName) { // todo: get default name of connection from meta/baseObj
+            if (self.name !== self.defaultName) {
                 existingLabel.textContent = self.name;
             }
             else if (existingLabel.textContent !== srcText) {
@@ -682,8 +679,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.srcTextEdit = objDescriptor.srcTextEdit || false;
         this.dstTextEdit = objDescriptor.dstTextEdit || false;
 
-        //get segnment points
-//        this.segmentPoints = [];
         if (objDescriptor[DiagramDesignerWidgetConstants.LINE_POINTS]) {
             var fixedP;
             var len =  objDescriptor[DiagramDesignerWidgetConstants.LINE_POINTS].length;
@@ -721,8 +716,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.dstObj = objDescriptor.dstObj;
         this.srcParentObj = objDescriptor.srcParentObj;
         this.dstParentObj = objDescriptor.dstParentObj;
-
-//        this.segmentPoints = [];
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
@@ -1140,11 +1133,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype.hideSourceConnectors = function () {
     };
 
-//    NetLabelConnection.prototype.showEndConnectors = function () {
-//    };
-//
-//    NetLabelConnection.prototype.hideEndConnectors = function () {
-//    };
     //END OF --- ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
 
     /** HELPER FUNCTIONS **/
