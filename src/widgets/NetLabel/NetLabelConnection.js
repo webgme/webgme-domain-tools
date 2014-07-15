@@ -70,25 +70,37 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 dstID = self.dstSubCompId || self.dstObjId,
                 pathID,
                 srcNetlist = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
-                dstNetlist = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0];
+                dstNetlist = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
+                nbrOfConns,
+                text;
 
             self.diagramDesigner.skinParts.$itemsContainer.find('[connid^="' + connID + '"]').remove();
             if (srcNetlist) {
-                if (srcNetlist.childNodes.length === 1) {
+                if (srcNetlist.childElementCount === 1) {
                     $(srcNetlist).remove();
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + srcID;
                     self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
+                } else {
+                    nbrOfConns = srcNetlist.childElementCount - 1;
+                    text = nbrOfConns === 1 ? (nbrOfConns + ' connection') : (nbrOfConns + ' connections');
+
+                    $(srcNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
             }
 
             if (dstNetlist) {
-                if (dstNetlist.childNodes.length === 1) {
+                if (dstNetlist.childElementCount === 1) {
                     $(dstNetlist).remove();
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + dstID;
                     self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
+                } else {
+                    nbrOfConns = dstNetlist.childElementCount - 1;
+                    text = nbrOfConns === 1 ? (nbrOfConns + ' connection') : (nbrOfConns + ' connections');
+
+                    $(dstNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
             }
-
+            self.diagramDesigner.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).hide();
             self.unHighlight();
             self.hideEndReconnectors();
         };
@@ -881,6 +893,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                 for (i = 1; i < children.length; i += 1) {
                     $(children[i]).show();
+                    $(children[i]).addClass(NetLabelWidgetConstants.SHOW_MODE);
                 }
             }
 
@@ -890,6 +903,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                 for (i = 1; i < children.length; i += 1) {
                     $(children[i]).show();
+                    $(children[i]).addClass(NetLabelWidgetConstants.SHOW_MODE);
                 }
             }
         };
