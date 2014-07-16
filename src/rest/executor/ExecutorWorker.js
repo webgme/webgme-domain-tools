@@ -105,6 +105,7 @@ define(['logManager',
 
     ExecutorWorker.prototype.startJob = function (jobInfo) {
         var self = this;
+        this.emit('jobUpdate', jobInfo);
 
         // TODO: create job
         // TODO: what if job is already running?
@@ -386,7 +387,7 @@ define(['logManager',
                 console.log(err); // TODO
             }
         });
-        this.emit('jobUpdate', jobInfo)
+        this.emit('jobUpdate', jobInfo);
     };
 
     ExecutorWorker.prototype.cancelJob = function () {
@@ -408,12 +409,6 @@ define(['logManager',
         self.checkForUnzipExe();
 
         var _queryWorkerAPI = function() {
-            var jobs_table = document.getElementById('jobs_table');
-            if (jobs_table) {
-            } else {
-                //document.getElementById('jobs').innerHTML = '<table id="jobs_table"><thead><tr><td>Job</td><td>Status</td></tr></thead></table>';
-
-            }
 
             var oReq = new XMLHttpRequest();
             oReq.open('POST', self.executorClient.executorUrl + 'worker', true);

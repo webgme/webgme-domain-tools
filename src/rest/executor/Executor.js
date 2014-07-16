@@ -45,7 +45,7 @@ define(['logManager',
                 // reset unfinished jobs assigned to worker to CREATED, so they'll be executed by someone else
                 logger.info('worker "' + docs[i].clientId + '" is gone');
                 workerList.remove({_id: docs[i]._id});
-                jobList.update({ worker: docs[i].clientId, finishTime: null}, { $set: { worker: null, status: 'CREATED' }}, function () { });
+                jobList.update({ worker: docs[i].clientId, finishTime: null}, { $set: { worker: null, status: 'CREATED', startTime: null }}, function () { });
             }
         });
     };
