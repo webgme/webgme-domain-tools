@@ -68,11 +68,18 @@
     var worker;
     requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function(ExecutorWorker, JobInfo, ExecutorWorkerController) {
 
-        worker = new ExecutorWorker({ serverPort: 8855, sessionId: undefined });
+        worker = new ExecutorWorker({ server: 'kms56', serverPort: 8855, httpsecure: false, sessionId: undefined });
         
-        worker.queryWorkerAPI(function(response) {
+        worker.queryWorkerAPI(function(err, response) {
             var refreshPeriod = 60 * 1000;
-            var callback = function(response) {
+            var callback = function(err, response) {
+                if (err) {
+                    document.getElementById('status').style.color = 'red';
+                    document.getElementById('status').textContent = err;
+                } else {
+                    document.getElementById('status').style.color = 'green';
+                    document.getElementById('status').textContent = 'OK';
+                }
                 if (response && response.refreshPeriod) {
                     refreshPeriod = response.refreshPeriod;
                 }
@@ -80,7 +87,7 @@
                     worker.queryWorkerAPI(callback);
                 }, refreshPeriod);
             };
-            callback(response);
+            callback(err, response);
         });
     
         var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);

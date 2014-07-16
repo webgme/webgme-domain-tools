@@ -83,9 +83,9 @@ define(['logManager',
     logger = new logger();
 
     var ExecutorWorker = function (parameters) {
-        this.blobClient = new BlobClient({server: 'kms56', serverPort: 8855, httpsecure: false });
+        this.blobClient = new BlobClient({server: parameters.server, serverPort: parameters.serverPort, httpsecure: parameters.httpsecure });
 
-        this.executorClient = new ExecutorClient({server: 'kms56', serverPort: 8855, httpsecure: false });
+        this.executorClient = new ExecutorClient({server: parameters.server, serverPort: parameters.serverPort, httpsecure: parameters.httpsecure });
         this.jobList = {};
 
         this.sourceFilename = 'source.zip';
@@ -415,25 +415,15 @@ define(['logManager',
             oReq.setRequestHeader('Content-Type', 'application/json');
             oReq.timeout = 25 * 1000;
             oReq.ontimeout = function (oEvent) {
-                document.getElementById('status').style.color = 'red';
-                document.getElementById('status').textContent = 'Timed out';
-                callback();
+                callback('Timed out');
             };
             oReq.onerror = function (oEvent) {
-                document.getElementById('status').style.color = 'red';
-                document.getElementById('status').textContent = 'Error';
-                callback();
+                callback('Error');
             };
             oReq.onload = function (oEvent) {
-                // Uploaded.
-                var response = oEvent.target.response;
                 if (oEvent.target.status > 399) {
-                    document.getElementById('status').style.color = 'red';
-                    document.getElementById('status').textContent = 'Server returned ' + oEvent.target.status;
-                    callback();
+                    callback('Server returned ' + oEvent.target.status);
                 } else {
-                    document.getElementById('status').style.color = 'green';
-                    document.getElementById('status').textContent = 'OK';
                     var response = JSON.parse(oEvent.target.responseText);
                     var jobsToStart = response.jobsToStart;
                     for (var i = 0; i < jobsToStart.length; i++) {
@@ -446,9 +436,9 @@ define(['logManager',
                         });
                     }
 
-                    callback(response);
+                    callback(null, response);
                 }
-            };
+            }
 
             oReq.send(JSON.stringify(self.clientRequest));
         };
