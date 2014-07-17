@@ -10,7 +10,8 @@ $diagram-designer-selection-c-d-end-dst-background-color: #0000FF;
 $diagram-designer-selection-c-d-end-src-highlight-color: #FF6666;
 $diagram-designer-selection-c-d-end-dst-highlight-color: #00CCFF;
 $diagram-designer-selection-rubber-band-border-color: #52A8EC;
-$diagram-designer-selection-outline-background-color: rgba(255, 255, 0, 0.05);
+$diagram-designer-srcobj-outline: #F77EAF solid;
+$diagram-designer-dstobj-outline: #71B7F5 solid;
 $diagram-designer-selection-outline-border: rgba(0,0,0,0.5) dashed 1px;
 $diagram-designer-selection-outline-shadow-start: rgba(0, 0, 0, 0.075);
 $diagram-designer-selection-outline-shadow-end: rgba(0, 0, 0, 0.6);
@@ -30,53 +31,78 @@ $collapse-label-color: #A9A9A9;
 .diagram-designer {
 
   .items {
+
+    .designer-item {
+      &.src-highlighted {
+        outline: $diagram-designer-srcobj-outline;
+        z-index: 2;
+      }
+
+      &.dst-highlighted {
+        outline: $diagram-designer-dstobj-outline;
+        z-index: 2;
+      }
+    }
+
     .c-d-end {
       &.src {
-        &.netLabel {
+        &.highlighted {
           background-color: $diagram-designer-selection-c-d-end-src-background-color;
         }
       }
 
       &.dst {
-        &.netLabel {
+        &.highlighted {
           background-color: $diagram-designer-selection-c-d-end-dst-background-color;
         }
       }
     }
-    .connList {
-      width: auto;
-      height: auto;
-      cursor: pointer;
-      padding-top: $connList-top-padding;
-      border: $connList-border-style;
-      text-align: center;
-      line-height: $connList-line-height;
-      .netLabel {
-        cursor: pointer;
-        border-top: $connList-netlabel-border-top;
-        background-color: $connList-netlabel-background-color;
-        padding-left: 5px;
-        padding-right: 5px;
 
-        &.src-highlighted {
-          background-color: $diagram-designer-selection-c-d-end-src-highlight-color;
-        }
-        &.dst-highlighted {
-          background-color: $diagram-designer-selection-c-d-end-dst-highlight-color;
-        }
-      }
-      .show-all-labels {
+    div.netlist-container {
+      position: absolute;
+      font-size: 10px;
+      white-space: nowrap;
+
+
+      .netlist {
+        position: relative;
+        width: 120px;
+        left: -50%;
         cursor: pointer;
-//        border-top: $connList-netlabel-border-top;
-        background-color: $connList-netlabel-background-color;
+        text-align: center;
+
+        .title {
+          &.highlighted {
+            font-weight: bold;
+          }
+          &.hovered {
+            font-size: 11px;
+            font-weight: bold;
+          }
+        }
+
+        .netLabel {
+          margin-left: 5px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          position: relative;
+          z-index: 0;
+
+          &.src-highlighted {
+            font-weight: bold;
+            color: red;
+          }
+          &.dst-highlighted {
+            font-weight: bold;
+            color: blue;
+          }
+          &.show-mode {
+            z-index: 1;
+            background-color: white;
+          }
+        }
       }
-      .collapse-labels {
-        cursor: pointer;
-        color: $collapse-label-color;
-        background-color: $connList-netlabel-background-color;
-        font-size: $collapse-label-font-size;
-        line-height: $collapse-expand-label-line-height;
-      }
+
     }
   }
 

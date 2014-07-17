@@ -13,7 +13,7 @@ define(['logManager',
     'widgets/NetLabel/NetLabelConnection'], function (logManager,
                                          ModelEditorControlDiagramDesignerWidgetEventHandlers,
                                          CONSTANTS,
-                                         GMEConcepts, NetLabelConnection) {
+                                         GMEConcepts) {
 
     "use strict";
 
@@ -24,7 +24,6 @@ define(['logManager',
     };
 
     _.extend(NetLabelControlEventHandlers.prototype, ModelEditorControlDiagramDesignerWidgetEventHandlers.prototype);
-    _.extend(NetLabelControlEventHandlers.prototype, NetLabelConnection.prototype);
 
     NetLabelControlEventHandlers.prototype._onSelectionDelete = function (idList) {
         var objIdList = [],
@@ -42,8 +41,13 @@ define(['logManager',
                 // if object to be deleted is a connection object
                 if (compID.indexOf("C_") === 0) {
                     itemDeleting = this.designerCanvas.items[compID];
+                    if (itemDeleting.showAsLabel) {
+                        itemDeleting.unHighlight();
+                    } else {
+                        itemDeleting._removePath();
+                        itemDeleting._removePathShadow();
+                    }
                     itemDeleting.hideEndReconnectors();
-                    itemDeleting.unHighlight();
                 }
             } else {
                 this.logger.warning('Can not delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');
@@ -54,6 +58,68 @@ define(['logManager',
             this._client.delMoreNodes(objIdList);
         }
     };
+
+
+    NetLabelControlEventHandlers.prototype._attachUserInteractions = function () {
+        var i,
+            self = this;
+
+        this._events = {"mouseenter": { "fn": "onMouseEnter",
+            "stopPropagation": true,
+            "preventDefault": true,
+            "enabledInReadOnlyMode": true},
+            "mouseleave": { "fn": "onMouseLeave",
+                "stopPropagation": true,
+                "preventDefault": true,
+                "enabledInReadOnlyMode": true},
+            "dblclick": { "fn": "onDoubleClick",
+                "stopPropagation": true,
+                "preventDefault": true,
+                "enabledInReadOnlyMode": true}};
+
+        for (i in this._events) {
+            if (this._events.hasOwnProperty(i)) {
+                this.$el.on( i + '.' + EVENT_POSTFIX, null, null, function (event) {
+                    var eventHandlerOpts = self._events[event.type],
+                        handled = false,
+                        enabled = true;
+
+                    if (self.canvas.mode !== self.canvas.OPERATING_MODES.READ_ONLY &&
+                        self.canvas.mode !== self.canvas.OPERATING_MODES.DESIGN) {
+                        return;
+                    }
+
+                    if (eventHandlerOpts) {
+                        if (self.canvas.mode === self.canvas.OPERATING_MODES.READ_ONLY) {
+                            enabled = eventHandlerOpts.enabledInReadOnlyMode;
+                        }
+
+                        if (enabled) {
+                            //call decorators event handler first
+                            handled = self._callDecoratorMethod(eventHandlerOpts.fn, event);
+
+                            if (handled !== true) {
+                                handled = self[eventHandlerOpts.fn].call(self, event);
+                            }
+
+                            //if still not marked as handled
+                            if (handled !== true) {
+                                //finally marked handled if needed
+                                if (eventHandlerOpts.stopPropagation === true) {
+                                    event.stopPropagation();
+                                }
+
+                                if (eventHandlerOpts.preventDefault === true) {
+                                    event.preventDefault();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    };
+
 
     return NetLabelControlEventHandlers;
 });
