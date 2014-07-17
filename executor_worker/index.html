@@ -74,10 +74,12 @@
             var refreshPeriod = 60 * 1000;
             var callback = function(err, response) {
                 if (err) {
-                    document.getElementById('status').style.color = 'red';
+                    document.getElementById('status').style.color = 'white';
+                    document.getElementById('status').style.backgroundColor = 'red';
                     document.getElementById('status').textContent = err;
                 } else {
-                    document.getElementById('status').style.color = 'green';
+                    document.getElementById('status').style.color = 'white';
+                    document.getElementById('status').style.backgroundColor = 'green';
                     document.getElementById('status').textContent = 'OK';
                 }
                 if (response && response.refreshPeriod) {
@@ -92,6 +94,7 @@
     
         var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
         WebGMEApp.value("worker", worker);
+//        WebGMEApp.value("worker", null);
         WebGMEApp.controller('ExecutorWorkerController', ExecutorWorkerController);
         /*WebGMEApp.config(['$routeProvider',
             function ($routeProvider) {
@@ -114,16 +117,21 @@
     </script>
   </head>
   <body>
-    <div id="main">
-    <div id="status">Connecting...</div>
-    <div id="jobs"></div>
+  <div class="container">
+    <div class="row" id="main">
+        <div class="col-md-12" id="status">Connecting...</div>
+        <div class="col-md-12" id="jobs"></div>
     </div>
+
     <!-- div data-ng-view="" -->
-    <div data-ng-controller="ExecutorWorkerController">
-    <ul data-ng-repeat="job in jobs">
-    <li>{{job.hash}} {{job.status}}</li>
-    </ul>
+    <div class="row" data-ng-controller="ExecutorWorkerController">
+        <div class="col-md-12">
+            <ul>
+                <li data-ng-repeat="job in jobs">{{job.hash}} {{job.status}} {{job.name}} {{job.url}} {{job.resultHash}}</li>
+            </ul>
+        </div>
     </div>
     <small>node.js <script>document.write(process.version)</script></small>
+  </div>
   </body>
 </html>
