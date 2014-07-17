@@ -72,6 +72,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 text;
 
             if (srcNetlist) {
+                self.srcLabelDetached = $(srcNetlist).find('[connid^="' + connID + '"]').detach();
                 if (srcNetlist.childElementCount === 1) {
                     $(srcNetlist).remove();
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + srcID;
@@ -82,11 +83,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                     $(srcNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
-
-                self.srcLabelDetached = $(srcNetlist).find('[connid^="' + connID + '"]').detach();
             }
 
             if (dstNetlist) {
+                self.dstLabelDetached = $(dstNetlist).find('[connid^="' + connID + '"]').detach();
                 if (dstNetlist.childElementCount === 1) {
                     $(dstNetlist).remove();
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + dstID;
@@ -97,10 +97,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                     $(dstNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
-                self.dstLabelDetached = $(dstNetlist).find('[connid^="' + connID + '"]').detach();
             }
-
-            self.unHighlight();
         };
 
         // setting end connectors positions
@@ -123,7 +120,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
             self.setLineConnectionRenderData(segPoints);
         }
 
+        self.unHighlight();
+        self.hideEndReconnectors();
         self._renderEndReconnectors();
+        if (self.selected) {
+            self.showEndReconnectors();
+        }
     };
 
     NetLabelConnection.prototype.setNetRenderData = function (segPoints) {
