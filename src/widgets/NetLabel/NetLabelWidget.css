@@ -38,11 +38,13 @@
       .diagram-designer .items div.netlist-container .netlist .netLabel.src-highlighted {
         font-weight: bold;
         font-size: 11px;
-        color: red; }
+        color: red;
+        background-color: white; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.dst-highlighted {
         font-weight: bold;
         font-size: 11px;
-        color: blue; }
+        color: blue;
+        background-color: white; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.show-mode {
         z-index: 1;
         background-color: white; }

@@ -92,11 +92,13 @@ $collapse-label-color: #A9A9A9;
             font-weight: bold;
             font-size: 11px;
             color: red;
+            background-color: white;
           }
           &.dst-highlighted {
             font-weight: bold;
             font-size: 11px;
             color: blue;
+            background-color: white;
           }
           &.show-mode {
             z-index: 1;
