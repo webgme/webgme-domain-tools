@@ -161,7 +161,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         }
     };
 
-    NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><div class="title"></div></div>');
+    NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><div class="title-container"><div class="add-conn">+</div><div class="title"></div></div></div>');
     NetLabelConnection.prototype._netLabelBase = $('<div class="netLabel"></div>');
 
     /** CREATE SRC NET LIST **/
