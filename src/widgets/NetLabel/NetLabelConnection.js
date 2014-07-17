@@ -71,6 +71,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 nbrOfConns,
                 text;
 
+            self.diagramDesigner.skinParts.$itemsContainer.find('[connid^="' + connID + '"]').remove();
             if (srcNetlist) {
                 if (srcNetlist.childElementCount === 1) {
                     $(srcNetlist).remove();
@@ -82,8 +83,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                     $(srcNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
-
-                self.srcLabelDetached = $(srcNetlist).find('[connid^="' + connID + '"]').detach();
             }
 
             if (dstNetlist) {
@@ -97,10 +96,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
                     $(dstNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
                 }
-                self.dstLabelDetached = $(dstNetlist).find('[connid^="' + connID + '"]').detach();
             }
-
+            self.diagramDesigner.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).hide();
             self.unHighlight();
+            self.hideEndReconnectors();
         };
 
         // setting end connectors positions
@@ -113,6 +112,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         self._segPoints = segPoints.slice(0);
         self._pathPoints = segPoints;
 
+//        if (self.showAsLabel !== self._showAsLabelPrev || !self._showAsLabelPrev) {
         if (self.showAsLabel) {
 
             _removeExistingConnection();
@@ -122,8 +122,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _removeExistingLabels();
             self.setLineConnectionRenderData(segPoints);
         }
+//        }
 
         self._renderEndReconnectors();
+        self._showAsLabelPrev = self.showAsLabel;
     };
 
     NetLabelConnection.prototype.setNetRenderData = function (segPoints) {
@@ -170,7 +172,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             dstText = self._getDstText(),
             existingLabel,
             _createNetlist, // fn
-            _createLabel, // fn
             _updateText; // fn
 
         _createNetlist = function () {
@@ -178,23 +179,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             if (!srcPortLabelList) {
                 srcPortLabelList = self._netLabelListBase.clone()[0];
                 srcPortLabelList.setAttribute("obj-id", srcID); // used to highlight actual object
-                $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections'); // todo: this can go in peace
+                $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
                 $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
-            }
-        };
-
-        _createLabel = function () {
-
-            srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
-            srcPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
-            if (!self.selected) {
-                srcPortLabel.css('display', 'none');
-            }
-            // if show as label and connection name is different than default name, set netlabel name to new name
-            if (self.name !== self.defaultName) {
-                srcPortLabel.text(self.name);
-            } else {
-                srcPortLabel.text(dstText);
             }
         };
 
@@ -209,34 +195,36 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         };
 
+        srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
+        srcPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
+        srcPortLabel.css('display', 'none');
 
-        _createNetlist();
-
-        // appending label
-        if (self.srcLabelDetached) {
-            $(srcPortLabelList).append(self.srcLabelDetached[0]);
+        existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
+        // if show as label and connection name is different than default name, set netlabel name to new name
+        if (!existingLabel) {
+            // if show as label and connection name is different than default name, set netlabel name to new name
+            if (self.name !== self.defaultName) {
+                srcPortLabel.text(self.name);
+            } else {
+                srcPortLabel.text(dstText);
+            }
+            _createNetlist();
+            $(srcPortLabelList).append(srcPortLabel);
             _updateText();
 
         } else {
-            existingLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
-            // if dst of the current connection hasn't been added & not collapsed, add it to the list of src object & make it visible
-            // if show as label and connection name is different than default name, set netlabel name to new name
-            if (!existingLabel) {
-                _createLabel();
-                $(srcPortLabelList).append(srcPortLabel);
-                _updateText();
-
-            } else {
-                if (self.name !== self.defaultName) {
-                    existingLabel.textContent = self.name;
-                } else if (existingLabel.textContent !== dstText) {
-                    // handling the name update case
-                    existingLabel.textContent = dstText;
-                }
+            if (self.name !== self.defaultName) {
+                existingLabel.textContent = self.name;
+            }
+            else if (existingLabel.textContent !== dstText) {
+                // handling the name update case
+                existingLabel.textContent = dstText;
             }
         }
 
         self.skinParts.srcNetLabel = $(srcPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        self.skinParts.srcNetTitle = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0];
 
         return srcPortLabelList;
     };
@@ -302,7 +290,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
             srcText = self._getSrcText(),
             existingLabel,
             _createNetlist, // fn
-            _createLabel, // fn
             _updateText; // fn
 
 
@@ -313,21 +300,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 dstPortLabelList.setAttribute("obj-id", dstID);
                 $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
                 $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
-            }
-        };
-
-        _createLabel = function () {
-            // making the dstPortLabel
-            dstPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
-            dstPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
-            if (!self.selected) {
-                dstPortLabel.css('display', 'none');
-            }
-            // if show as label and connection name is different than default name, set netlabel name to new name
-            if (self.name !== self.defaultName) {
-                dstPortLabel.text(self.name);
-            } else {
-                dstPortLabel.text(srcText);
             }
         };
 
@@ -342,34 +314,39 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         };
 
-        _createNetlist();
+        // making the dstPortLabel
 
-        if (self.dstLabelDetached) {
+        dstPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
+        dstPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
+        dstPortLabel.css('display', 'none');
 
-            $(dstPortLabelList).append(self.dstLabelDetached[0]);
-            _updateText();
-        } else {
-            existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
-            // if src of the current connection hasn't been added, add it to the list of dst object
-            if (!existingLabel) {
-                _createLabel();
-                $(dstPortLabelList).append(dstPortLabel);
-                _updateText();
-
+        existingLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        // if src of the current connection hasn't been added, add it to the list of dst object
+        if (!existingLabel) {
+            // if show as label and connection name is different than default name, set netlabel name to new name
+            if (self.name !== self.defaultName) {
+                dstPortLabel.text(self.name);
             } else {
-                if (self.name !== self.defaultName) {
-                    existingLabel.textContent = self.name;
-                }
-                else if (existingLabel.textContent !== srcText) {
-                    // handling the name update case
-                    existingLabel.textContent = srcText;
-                }
+                dstPortLabel.text(srcText);
+            }
+            _createNetlist();
+            $(dstPortLabelList).append(dstPortLabel);
+            _updateText();
+
+        } else {
+            if (self.name !== self.defaultName) {
+                existingLabel.textContent = self.name;
+            }
+            else if (existingLabel.textContent !== srcText) {
+                // handling the name update case
+                existingLabel.textContent = srcText;
             }
         }
-
         self.skinParts.dstNetLabel = $(dstPortLabelList).find('[connid^="' + self.id + '"]')[0];
+        self.skinParts.dstNetTitle = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0];
 
         return dstPortLabelList;
+
     };
 
     NetLabelConnection.prototype._getDstText = function () {
