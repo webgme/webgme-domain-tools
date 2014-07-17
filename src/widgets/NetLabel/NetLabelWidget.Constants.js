@@ -21,6 +21,7 @@ define([], function () {
         DESIGNER_CONNECTION_CLASS: "netlabel-connection",
         NETLIST: "netlist",
         NETLIST_TITLE : "title",
+        ADD_CONNECTION: "add-conn",
         DESIGNER_NETLABEL_CLASS : "netLabel",
         MAX_LABEL_NUMBER: 1,
         MAX_TEXT_WIDTH: 100,

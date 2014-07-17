@@ -7,8 +7,8 @@
 
 
 define(['./NetLabelWidget.Constants',
-        'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
-                                                                                 DiagramDesignerWidgetConstants) {
+    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
+                                                                             DiagramDesignerWidgetConstants) {
 
     "use strict";
 
@@ -70,6 +70,23 @@ define(['./NetLabelWidget.Constants',
                 // todo: this should have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
 //                self.onConnectionMouseDown.call(self, connId, eventDetails);
                 self._onNetlistSelect(this);
+            } else {
+                logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+            }
+        });
+
+        // handle click on add-conn
+        this.$el.on('mousedown.' + EVENT_POSTFIX, 'div.' + NetLabelWidgetConstants.ADD_CONNECTION,  function (event) {
+            var connId = this.id,
+                eventDetails = self._processMouseEvent(event, true, true, true, true);
+
+            logger.debug('mousedown.connection, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
+
+            if (self.onConnectionMouseDown) {
+                self.selectionManager._clearSelection();
+                // todo: this should have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
+//                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                self._onAddConn(this);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -226,7 +243,7 @@ define(['./NetLabelWidget.Constants',
     };
 
     NetLabelWidgetMouse.prototype._showLabels = function (node) {
-        var parentNode = node.parentNode,
+        var parentNode = node.parentNode.parentNode,
             children = parentNode.children,
             i;
 
@@ -239,7 +256,7 @@ define(['./NetLabelWidget.Constants',
 
     NetLabelWidgetMouse.prototype._showAllEndConnectors = function (node) {
         var self = this,
-            children = node.parentNode.childNodes,
+            children = node.parentNode.parentNode.childNodes,
             childrenCount = children.length,
             i,
             id,
@@ -264,7 +281,7 @@ define(['./NetLabelWidget.Constants',
     };
 
     NetLabelWidgetMouse.prototype._hideAllEndConnectors = function (node) {
-        var children = node.parentNode.childNodes,
+        var children = node.parentNode.parentNode.childNodes,
             childrenCount = children.length,
             i,
             id,
@@ -288,6 +305,116 @@ define(['./NetLabelWidget.Constants',
             }
         }
 
+    };
+
+    NetLabelWidgetMouse.prototype._onAddConn = function (node) {
+        var self = this,
+            WIDTH = 120,
+            ITEM_PREFIX = 'I_',
+            inputCtrl,
+            ctrlGroup,
+            cancel,
+            save,
+            endEdit,
+            id = node.parentNode.children[1].id,
+            srcID,
+            sCompID,
+            _getCompID; // fn
+
+        _getCompID = function () {
+            var key,
+                obj,
+                i;
+            for (key in self._itemSubcomponentsMap) {
+                if (self._itemSubcomponentsMap.hasOwnProperty(key)) {
+
+                    obj = self._itemSubcomponentsMap[key];
+                    for (i = 0; i < obj.length; i += 1) {
+                        if (obj[i] === id) {
+                            return key;
+                        }
+                    }
+                }
+            }
+        };
+
+        srcID = id.indexOf(ITEM_PREFIX) === 0 ? id : _getCompID();
+        sCompID = id.indexOf(ITEM_PREFIX) === 0 ? undefined : id;
+
+        endEdit = function () {
+            ctrlGroup.remove();
+        };
+
+        cancel = function () {
+            endEdit();
+        };
+
+        save = function () {
+            var id = inputCtrl.val();
+
+            // end connection drop
+            self.connectionDrawingManager._connectionInDrawProps = {"src": srcID,
+                "sCompId": sCompID,
+                "srcEl": undefined,
+                "type": "create"};
+            self.connectionDrawingManager._connectionEndDrop(id, undefined);
+        };
+
+        // start connection
+        var params = {'srcId': srcID,
+            'srcSubCompId': sCompID};
+        this._onStartConnectionCreate(params);
+
+
+        ctrlGroup = $("<div/>",
+            {"class": "control-group"});
+
+        inputCtrl = $("<input/>", {
+            "type": "text",
+            "class": "new-attr"});
+
+        inputCtrl.outerWidth(WIDTH);
+        inputCtrl.css({"box-sizing": "border-box"});
+
+        ctrlGroup.append(inputCtrl);
+
+        $(node.parentNode.parentNode).append(ctrlGroup);
+
+        //finally put the control in focus
+        inputCtrl.focus();
+
+        //hook up event handlers to 'save' and 'cancel'
+        inputCtrl.keydown(
+            function (event) {
+                switch (event.which) {
+                    case 27: // [esc]
+                        // discard changes on [esc]
+                        inputCtrl.val('');
+                        event.preventDefault();
+                        event.stopPropagation();
+                        cancel();
+                        break;
+                    case 13: // [enter]
+                        // simulate blur to accept new value
+                        event.preventDefault();
+                        event.stopPropagation();
+                        save();
+                        break;
+                    case 46:// DEL
+                        //don't need to handle it specially but need to prevent propagation
+                        event.stopPropagation();
+                        break;
+                }
+            }
+        ).keyup( function (/*event*/) {
+//                if (self._isValidName(inputCtrl.val(), existingNames)) {
+//                    ctrlGroup.removeClass("error");
+//                } else {
+//                    ctrlGroup.addClass("error");
+//                }
+            }).blur(function (/*event*/) {
+                cancel();
+            });
     };
 
     return NetLabelWidgetMouse;
