@@ -364,7 +364,10 @@ define(['./NetLabelWidget.Constants',
         var params = {'srcId': srcID,
             'srcSubCompId': sCompID};
         this._onStartConnectionCreate(params);
-
+        var validEndIDs = this._getValidEndIDs(this._decoratorPackages);
+        // a list of names to use in autocomplete
+        var validEndNames = this._getNamesFromIDs(validEndIDs);
+        // todo: use this list in autocomplete; correct this list -- currently containing everything
 
         ctrlGroup = $("<div/>",
             {"class": "control-group"});

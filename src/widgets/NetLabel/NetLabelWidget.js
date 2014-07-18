@@ -158,9 +158,8 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         }
 
         //add class to items container
-        // todo: return the ids
-        this._getValidEndIDs(decoratorPackages);
         this._connectionDrawStartAddClass();
+        this._decoratorPackages = decoratorPackages;
     };
 
     NetLabelWidget.prototype._getValidEndIDs = function (decoratorPackages) {
@@ -195,16 +194,18 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
             NAME_SEPARATOR = '.',
             i,
             srcID,
+            srcGmeID,
             srcObj,
             srcName,
             sCompID,
             subCompObj,
             subCompName;
 
-        for (i = validEndIDs; i < validEndIDs.length; i += 1) {
+        for (i = 0; i < validEndIDs.length; i += 1) {
             // get src obj name
             srcID = validEndIDs[i].srcID;
-            srcObj = this._client.getNode(srcID);
+            srcGmeID = this._ComponentID2GmeID[srcID];
+            srcObj = this._client.getNode(srcGmeID);
             srcName = srcObj.getAttribute('name');
 
             // get subcomp name if exists
