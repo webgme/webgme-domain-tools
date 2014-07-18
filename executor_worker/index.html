@@ -3,13 +3,26 @@
   <head>
     <title>WebGME executor</title>
     <script>
+    var config = {
+        "server": "localhost",
+        "port": "8855",
+        "protocol": "http"
+    };
     var nodeRequire = require;
+    (function() {
+        var fs = nodeRequire('fs');
+        try {
+            var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
+            config = JSON.parse(configJSON);
+        } catch (e) {
+            if (e.code !== "ENOENT") {
+                throw e;
+            }
+        }
+    })();
     </script>
-    <script src="http://kms56:8855/lib/require/require.min.js">
-    // TODO: if loading require.min.js fails....
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js">
     </script>
-
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 
     <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -31,90 +44,91 @@
     <!-- script src="./lib/angular-file-upload.js" type="text/javascript" -->
 
     <script>
-    requirejs.config({
-        baseUrl: 'http://kms56:8855/',
-        paths: {
-            //WebGME custom modules
-            "logManager": 'common/LogManager',
-            "eventDispatcher": 'common/EventDispatcher',
-            "notificationManager": 'js/NotificationManager',
-            "clientUtil": 'js/util',
-            "loaderCircles": "js/Loader/LoaderCircles",
-            "loaderProgressBar": "js/Loader/LoaderProgressBar",
-            'superagent': 'lib/superagent/superagent',
+        // getScript require.min.js
+        $.ajax({
+            url: config.protocol + "://" + config.server + ":" + config.port + "/lib/require/require.min.js",
+            dataType: "script",
+            success: function () {
+                requirejs([config.protocol + "://" + config.server + ":" + config.port + "/bin/getconfig.js"], function (getconfig) {
+                requirejs.config({
+                    baseUrl: config.protocol + "://" + config.server + ":" + config.port + '/',
+                    paths: {
+                        "logManager": 'common/LogManager',
+                        "eventDispatcher": 'common/EventDispatcher',
+                        "notificationManager": 'js/NotificationManager',
+                        "clientUtil": 'js/util',
+                        "loaderCircles": "js/Loader/LoaderCircles",
+                        "loaderProgressBar": "js/Loader/LoaderProgressBar",
+                        'superagent': 'lib/superagent/superagent',
 
-            "codemirror": 'lib/codemirror/codemirror.amd',
-            "jquery-csszoom": 'lib/jquery/jquery.csszoom',
+                        "codemirror": 'lib/codemirror/codemirror.amd',
+                        "jquery-csszoom": 'lib/jquery/jquery.csszoom',
 
-            "jszip": 'lib/jszip/jszip',
-            "executor": 'extlib/node_modules/webgme-domain-tools/src/rest/executor',
-            "executor_old": 'extlib/node_modules/webgme-domain-tools/src/rest/executor_old'
-            },
-/*        shim: {
-            'fs': {
-                exports: 'fs',
-                init: function () {
-                    return node_require('fs');
-                }
-                }
-            },*/
+                        // "jszip": 'lib/jszip/jszip',
+                        "executor": 'extlib/' + getconfig.paths.executor
+                    },
+                    nodeRequire: nodeRequire
+                });
+                // FIXME ugly hack for node-webkit
+                var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events'];
+                node_modules.forEach(function (module_name) {
+                    requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
+                });
+                var worker;
+                requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function (ExecutorWorker, JobInfo, ExecutorWorkerController) {
 
-        nodeRequire: nodeRequire
-    });
-    // FIXME ugly hack for node-webkit
-    var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events'];
-    node_modules.forEach(function(module_name) {
-        requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
-    });
-    var worker;
-    requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function(ExecutorWorker, JobInfo, ExecutorWorkerController) {
+                    worker = new ExecutorWorker({ server: config.server, serverPort: config.port, httpsecure: config.protocol === 'https', sessionId: undefined });
 
-        worker = new ExecutorWorker({ server: 'kms56', serverPort: 8855, httpsecure: false, sessionId: undefined });
-        
-        worker.queryWorkerAPI(function(err, response) {
-            var refreshPeriod = 60 * 1000;
-            var callback = function(err, response) {
-                if (err) {
-                    document.getElementById('status').style.color = 'white';
-                    document.getElementById('status').style.backgroundColor = 'red';
-                    document.getElementById('status').textContent = err;
-                } else {
-                    document.getElementById('status').style.color = 'white';
-                    document.getElementById('status').style.backgroundColor = 'green';
-                    document.getElementById('status').textContent = 'OK';
-                }
-                if (response && response.refreshPeriod) {
-                    refreshPeriod = response.refreshPeriod;
-                }
-                var timeoutID = window.setTimeout(function() {
-                    worker.queryWorkerAPI(callback);
-                }, refreshPeriod);
-            };
-            callback(err, response);
-        });
-    
-        var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
-        WebGMEApp.value("worker", worker);
-//        WebGMEApp.value("worker", null);
-        WebGMEApp.controller('ExecutorWorkerController', ExecutorWorkerController);
-        /*WebGMEApp.config(['$routeProvider',
-            function ($routeProvider) {
-                $routeProvider.
-                        when('/executor', {
-                            templateUrl: 'app/workspace/views/WorkspaceView.html',
-                            // css: 'app/workspace/styles/Workspace.css',
-                            controller: 'ExecutorWorkerController'
-                        }).
-                        otherwise({
-                            redirectTo: '/executor'
-                        });
-            }]);
-        */
+                    worker.queryWorkerAPI(function (err, response) {
+                        var refreshPeriod = 60 * 1000;
+                        var callback = function (err, response) {
+                            if (err) {
+                                document.getElementById('status').style.color = 'white';
+                                document.getElementById('status').style.backgroundColor = 'red';
+                                document.getElementById('status').textContent = err;
+                            } else {
+                                document.getElementById('status').style.color = 'white';
+                                document.getElementById('status').style.backgroundColor = 'green';
+                                document.getElementById('status').textContent = 'OK';
+                            }
+                            if (response && response.refreshPeriod) {
+                                refreshPeriod = response.refreshPeriod;
+                            }
+                            var timeoutID = window.setTimeout(function () {
+                                worker.queryWorkerAPI(callback);
+                            }, refreshPeriod);
+                        };
+                        callback(err, response);
+                    });
 
-        angular.bootstrap(document, ['WebGMEApp']);
-        
-        // TODO: authentication?
-    });
+                    var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
+                    WebGMEApp.value("worker", worker);
+//                  WebGMEApp.value("worker", null);
+                    WebGMEApp.controller('ExecutorWorkerController', ExecutorWorkerController);
+                    /*WebGMEApp.config(['$routeProvider',
+                     function ($routeProvider) {
+                     $routeProvider.
+                     when('/executor', {
+                     templateUrl: 'app/workspace/views/WorkspaceView.html',
+                     // css: 'app/workspace/styles/Workspace.css',
+                     controller: 'ExecutorWorkerController'
+                     }).
+                     otherwise({
+                     redirectTo: '/executor'
+                     });
+                     }]);
+                     */
+
+                    angular.bootstrap(document, ['WebGMEApp']);
+
+                    // TODO: authentication?
+                });
+            });
+        },
+        error: function(jqxhr, settings, exception) {
+            // FIXME this doesn't fire
+            $("#status").text("Failed to connect");
+        }});
     </script>
   </head>
   <body>
