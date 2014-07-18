@@ -445,7 +445,7 @@ define(['logManager',
             _queryWorkerAPI();
         } else {
             var child = child_process.execFile("hostname", [], {}, function (err, stdout, stderr) {
-                self.clientRequest.clientId = stdout.trim() || "unknown";
+                self.clientRequest.clientId = (stdout.trim() || "unknown") + "_" + process.pid;
                 _queryWorkerAPI();
             });
         }
