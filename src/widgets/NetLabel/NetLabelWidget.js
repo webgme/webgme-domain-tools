@@ -73,5 +73,153 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         return newComponent;
     };
 
+    /**************** ON _TART_CONNECTION_CREATE EVENT HANDLER *******************/
+    NetLabelWidget.prototype._onStartConnectionCreate = function (params) {
+        var srcItemID = params.srcId,
+            srcSubCompID = params.srcSubCompId,
+            availableEndPoints = [],
+            srcItemMetaInfo = this.items[srcItemID]._decoratorInstance ? this.items[srcItemID]._decoratorInstance.getConnectorMetaInfo() : undefined,
+            srcSubCompMetaInfo = srcSubCompID ? this.items[srcItemID]._decoratorInstance.getConnectorMetaInfo(srcSubCompID) : undefined,
+            i,
+            objID,
+            filteredDroppableEnds;
+
+        //clear out selection
+        this.selectionManager.clear();
+
+        //hide all the source connectors on the 'src' item
+        this.items[srcItemID].hideSourceConnectors();
+
+        //iterate through all the known items to build the available connection end list
+        i = this.itemIds.length;
+        while (i--) {
+            availableEndPoints.push({'dstItemID': this.itemIds[i],
+                'dstSubCompID': undefined});
+        }
+
+        //iterate through all the known items' subcomponents to build the available connection end list
+        for (objID in this._itemSubcomponentsMap) {
+            if (this._itemSubcomponentsMap.hasOwnProperty(objID)) {
+                i = this._itemSubcomponentsMap[objID].length;
+                while (i--) {
+                    availableEndPoints.push({'dstItemID': objID,
+                        'dstSubCompID': this._itemSubcomponentsMap[objID][i]});
+                }
+            }
+        }
+
+        //if connecting to connections are enabled
+        if (this._connectToConnection === true) {
+            //iterate through all the known connections to build the available connection end list
+            i = this.connectionIds.length;
+            while (i--) {
+                availableEndPoints.push({'dstItemID': this.connectionIds[i],
+                    'dstSubCompID': undefined});
+            }
+        }
+
+        //all available items and their subcomponent is a valid connection-destination by default
+        params.availableConnectionEnds = availableEndPoints;
+
+        //call optional filtering
+        filteredDroppableEnds = this.onFilterNewConnectionDroppableEnds(params) || [];
+        this.logger.debug('_onStartConnectionCreate filteredDroppableEnds: ' + JSON.stringify(filteredDroppableEnds));
+
+        //iterate through all the filteredDroppableEnds and
+        //ask the decorators to display the connectors for the given item/subcomponent
+        var processedIndices = [];
+        var decoratorPackages = [];
+        while (filteredDroppableEnds.length > 0) {
+            i = filteredDroppableEnds.length;
+            objID = filteredDroppableEnds[0].dstItemID;
+            var decoratorUpdatePackage = [];
+            processedIndices = [];
+            while (i--) {
+                if (objID === filteredDroppableEnds[i].dstItemID) {
+                    processedIndices.push(i);
+                    decoratorUpdatePackage.push(filteredDroppableEnds[i].dstSubCompID);
+                }
+            }
+            decoratorPackages.push([objID, srcItemMetaInfo, srcSubCompMetaInfo, decoratorUpdatePackage]);
+            processedIndices.sort(function(a,b){return a-b});
+            i = processedIndices.length;
+            while(i--) {
+                filteredDroppableEnds.splice(processedIndices[i], 1);
+            }
+        }
+
+        this.logger.debug('_onStartConnectionCreate decorator update package: ' + JSON.stringify(decoratorPackages));
+        i = decoratorPackages.length;
+        while (i--) {
+            objID = decoratorPackages[i][0];
+            this.items[objID].showEndConnectors({'srcItemMetaInfo': decoratorPackages[i][1],
+                'srcSubCompMetaInfo': decoratorPackages[i][2],
+                'connectors': decoratorPackages[i][3]} );
+        }
+
+        //add class to items container
+        // todo: return the ids
+        this._getValidEndIDs(decoratorPackages);
+        this._connectionDrawStartAddClass();
+    };
+
+    NetLabelWidget.prototype._getValidEndIDs = function (decoratorPackages) {
+        var i,
+            j,
+            connectors,
+            srcID,
+            sCompID,
+            validEndIDList = [];
+
+        for (i = 0; i < decoratorPackages.length; i += 1) {
+            srcID  = decoratorPackages[i][0];
+            connectors = decoratorPackages[i][3];
+            if (!connectors[0]) {
+                validEndIDList.push({'srcID': srcID,
+                                   'sCompID': undefined});
+            }
+            for (j = 0; j < connectors.length; j += 1) {
+                if (connectors[j]) {
+                    sCompID = connectors[j];
+                    validEndIDList.push({'srcID': srcID,
+                                       'sCompID': sCompID});
+                }
+            }
+        }
+
+        return validEndIDList;
+    };
+
+    NetLabelWidget.prototype._getNamesFromIDs = function (validEndIDs) {
+        var retNames = [],
+            NAME_SEPARATOR = '.',
+            i,
+            srcID,
+            srcObj,
+            srcName,
+            sCompID,
+            subCompObj,
+            subCompName;
+
+        for (i = validEndIDs; i < validEndIDs.length; i += 1) {
+            // get src obj name
+            srcID = validEndIDs[i].srcID;
+            srcObj = this._client.getNode(srcID);
+            srcName = srcObj.getAttribute('name');
+
+            // get subcomp name if exists
+            sCompID = validEndIDs[i].sCompID;
+            if (sCompID) {
+                subCompObj = this._client.getNode(sCompID);
+                subCompName = srcName + NAME_SEPARATOR + subCompObj.getAttribute('name');
+                retNames.push(subCompName);
+            } else {
+                retNames.push(srcName);
+            }
+        }
+
+        return retNames;
+    };
+
     return NetLabelWidget;
 });
