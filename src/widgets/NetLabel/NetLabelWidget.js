@@ -162,64 +162,94 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         this._decoratorPackages = decoratorPackages;
     };
 
-    NetLabelWidget.prototype._getValidEndIDs = function (decoratorPackages) {
-        var i,
-            j,
-            connectors,
-            srcID,
-            sCompID,
-            validEndIDList = [];
+    NetLabelWidget.prototype._getValidEndObjects = function (decoratorPackages) {
+        var self = this,
+            ids,
+            validObjects,
+            i,
+            uniquePackage,
+            _getValidEndIDs,
+            _getNamesFromIDs;
 
         for (i = 0; i < decoratorPackages.length; i += 1) {
-            srcID  = decoratorPackages[i][0];
-            connectors = decoratorPackages[i][3];
-            if (!connectors[0]) {
-                validEndIDList.push({'srcID': srcID,
-                                   'sCompID': undefined});
-            }
-            for (j = 0; j < connectors.length; j += 1) {
-                if (connectors[j]) {
-                    sCompID = connectors[j];
-                    validEndIDList.push({'srcID': srcID,
-                                       'sCompID': sCompID});
+            uniquePackage = _.uniq(decoratorPackages[i][3]);
+            decoratorPackages[i][3] = uniquePackage;
+        }
+
+        _getValidEndIDs = function () {
+            var i,
+                j,
+                connectors,
+                endConnector,
+                id,
+                sCompID,
+                validEndIDList = [];
+
+            for (i = 0; i < decoratorPackages.length; i += 1) {
+                id  = decoratorPackages[i][0];
+                connectors = decoratorPackages[i][3];
+                endConnector = self.items[id]._decoratorInstance.$endConnectors[0];
+                if (!connectors[0] && endConnector) {
+                    validEndIDList.push({'ID': id,
+                        'sCompID': undefined});
+                }
+                for (j = 0; j < connectors.length; j += 1) {
+                    if (connectors[j]) {
+                        sCompID = connectors[j];
+                        validEndIDList.push({'ID': id,
+                            'sCompID': sCompID});
+                    }
                 }
             }
-        }
 
-        return validEndIDList;
-    };
+            return validEndIDList;
+        };
 
-    NetLabelWidget.prototype._getNamesFromIDs = function (validEndIDs) {
-        var retNames = [],
-            NAME_SEPARATOR = '.',
-            i,
-            srcID,
-            srcGmeID,
-            srcObj,
-            srcName,
-            sCompID,
-            subCompObj,
-            subCompName;
+        _getNamesFromIDs = function (validEndIDs) {
+            var retObjects = [],
+                NAME_SEPARATOR = '.',
+                i,
+                id,
+                GmeID,
+                obj,
+                name,
+                sCompID,
+                subCompObj,
+                subCompName;
 
-        for (i = 0; i < validEndIDs.length; i += 1) {
-            // get src obj name
-            srcID = validEndIDs[i].srcID;
-            srcGmeID = this._ComponentID2GmeID[srcID];
-            srcObj = this._client.getNode(srcGmeID);
-            srcName = srcObj.getAttribute('name');
+            for (i = 0; i < validEndIDs.length; i += 1) {
+                // get src obj name
+                id = validEndIDs[i].ID;
+                GmeID = self._ComponentID2GmeID[id];
+                obj = self._client.getNode(GmeID);
+                name = obj.getAttribute('name');
 
-            // get subcomp name if exists
-            sCompID = validEndIDs[i].sCompID;
-            if (sCompID) {
-                subCompObj = this._client.getNode(sCompID);
-                subCompName = srcName + NAME_SEPARATOR + subCompObj.getAttribute('name');
-                retNames.push(subCompName);
-            } else {
-                retNames.push(srcName);
+                // get subcomp name if exists
+                sCompID = validEndIDs[i].sCompID;
+                if (sCompID) {
+                    subCompObj = self._client.getNode(sCompID);
+                    subCompName = name + NAME_SEPARATOR + subCompObj.getAttribute('name');
+                    retObjects.push({
+                       'id': i,
+                       'name': subCompName,
+                       'obj': validEndIDs[i]
+                    });
+                } else {
+                    retObjects.push({
+                        'id': i,
+                        'name': name,
+                        'obj': validEndIDs[i]
+                    });
+                }
             }
-        }
 
-        return retNames;
+            return retObjects;
+        };
+
+        ids = _getValidEndIDs();
+        validObjects = _getNamesFromIDs(ids);
+
+        return validObjects;
     };
 
     return NetLabelWidget;
