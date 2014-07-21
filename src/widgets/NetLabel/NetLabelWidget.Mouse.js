@@ -313,13 +313,42 @@ define(['./NetLabelWidget.Constants',
             ITEM_PREFIX = 'I_',
             inputCtrl,
             ctrlGroup,
-            cancel,
-            save,
-            endEdit,
             id = node.parentNode.children[1].id,
             srcID,
             sCompID,
-            _getCompID; // fn
+            params,
+            validEndIDs,
+            validEndNames,
+            cancel,
+            save,
+            endEdit,
+            _getCompID, // fn
+            _isValidName; // fn
+
+        cancel = function () {
+            var itemId,
+                i;
+            for (i = 0; i < self.itemIds.length; i += 1) {
+                itemId = self.itemIds[i];
+                self.items[itemId].hideEndConnectors();
+            }
+            endEdit();
+        };
+
+        save = function () {
+            var id = inputCtrl.val();
+
+            // end connection drop
+            self.connectionDrawingManager._connectionInDrawProps = {"src": srcID,
+                "sCompId": sCompID,
+                "srcEl": undefined,
+                "type": "create"};
+            self.connectionDrawingManager._connectionEndDrop(id, undefined);
+        };
+
+        endEdit = function () {
+            ctrlGroup.remove();
+        };
 
         _getCompID = function () {
             var key,
@@ -338,46 +367,41 @@ define(['./NetLabelWidget.Constants',
             }
         };
 
+        _isValidName = function (name, collection) {
+            var result = true;
+
+            if (name === '' ||
+                typeof name !== 'string' ||
+                collection.indexOf(name) === -1) {
+                result = false;
+            }
+
+            return result;
+        };
+
         srcID = id.indexOf(ITEM_PREFIX) === 0 ? id : _getCompID();
         sCompID = id.indexOf(ITEM_PREFIX) === 0 ? undefined : id;
 
-        endEdit = function () {
-            ctrlGroup.remove();
-        };
-
-        cancel = function () {
-            endEdit();
-        };
-
-        save = function () {
-            var id = inputCtrl.val();
-
-            // end connection drop
-            self.connectionDrawingManager._connectionInDrawProps = {"src": srcID,
-                "sCompId": sCompID,
-                "srcEl": undefined,
-                "type": "create"};
-            self.connectionDrawingManager._connectionEndDrop(id, undefined);
-        };
-
         // start connection
-        var params = {'srcId': srcID,
+        params = {'srcId': srcID,
             'srcSubCompId': sCompID};
-        this._onStartConnectionCreate(params);
-        var validEndIDs = this._getValidEndIDs(this._decoratorPackages);
+        self._onStartConnectionCreate(params);
+        validEndIDs = self._getValidEndIDs(self._decoratorPackages);
         // a list of names to use in autocomplete
-        var validEndNames = this._getNamesFromIDs(validEndIDs);
-        // todo: use this list in autocomplete; correct this list -- currently containing everything
+        validEndNames = self._getNamesFromIDs(validEndIDs);
 
         ctrlGroup = $("<div/>",
             {"class": "control-group"});
 
         inputCtrl = $("<input/>", {
             "type": "text",
-            "class": "new-attr"});
+            "class": "new-conn"});
 
         inputCtrl.outerWidth(WIDTH);
         inputCtrl.css({"box-sizing": "border-box"});
+
+        // enable autocomplete
+        inputCtrl.typeahead({source: validEndNames});
 
         ctrlGroup.append(inputCtrl);
 
@@ -410,11 +434,11 @@ define(['./NetLabelWidget.Constants',
                 }
             }
         ).keyup( function (/*event*/) {
-//                if (self._isValidName(inputCtrl.val(), existingNames)) {
-//                    ctrlGroup.removeClass("error");
-//                } else {
-//                    ctrlGroup.addClass("error");
-//                }
+                if (_isValidName(inputCtrl.val(), validEndNames)) {
+                    ctrlGroup.removeClass("error");
+                } else {
+                    ctrlGroup.addClass("error");
+                }
             }).blur(function (/*event*/) {
                 cancel();
             });
