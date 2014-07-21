@@ -45,6 +45,7 @@ define(['logManager',
                 // reset unfinished jobs assigned to worker to CREATED, so they'll be executed by someone else
                 logger.info('worker "' + docs[i].clientId + '" is gone');
                 workerList.remove({_id: docs[i]._id});
+                // FIXME: race after assigning finishTime between this and uploading to blob
                 jobList.update({ worker: docs[i].clientId, finishTime: null}, { $set: { worker: null, status: 'CREATED', startTime: null }}, function () { });
             }
         });
@@ -191,10 +192,36 @@ define(['logManager',
 
     };
 
+    var ExecutorRESTWorkerGET = function(req, res, next) {
+        var response = {};
+        workerList.find({ }, function (err, workers) {
+            var jobQuery = function (i) {
+                if (i == workers.length) {
+                    res.send(JSON.stringify(response));
+                    return;
+                }
+                var worker = workers[i];
+                jobList.find({status: 'RUNNING', worker: worker.clientId}, function (err, jobs) {
+                    // FIXME: index jobList on status?
+                    for (var j = 0; j < jobs.length; j++) {
+                        delete jobs[j]._id;
+                    }
+                    response[worker.clientId] = jobs;
+
+                    jobQuery(i + 1);
+                });
+            }
+            jobQuery(0);
+        });
+    }
+
     var ExecutorRESTWorkerAPI = function(req, res, next) {
-        if (req.method !== 'POST') {
+        if (req.method !== 'POST' && req.method !== 'GET') {
             res.send(405);
             return;
+        }
+        if (req.method === 'GET') {
+            return ExecutorRESTWorkerGET(req, res, next);
         }
 
         var url = require('url').parse(req.url);
@@ -215,15 +242,16 @@ define(['logManager',
                         res.send(500);
                         return; // FIXME need to return 2x
                     }
+
                     var callback = function (i) {
                         if (i === docs.length) {
                             res.send(JSON.stringify(serverResponse));
                             return;
                         }
-                        jobList.update({_id: docs[i]._id}, {$set: {status: 'RUNNING', worker: clientRequest.clientId}}, function (err) {
+                        jobList.update({_id: docs[i]._id, status: 'CREATED'}, {$set: {status: 'RUNNING', worker: clientRequest.clientId}}, function (err, numReplaced) {
                             if (err) {
                                 res.send(500);
-                            } else {
+                            } else if (numReplaced) {
                                 serverResponse.jobsToStart.push(docs[i].hash);
                                 callback(i + 1);
                             }
