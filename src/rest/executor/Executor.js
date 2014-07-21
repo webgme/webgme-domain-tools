@@ -41,7 +41,7 @@ define(['logManager',
             return;
         }
         workerList.find({ lastSeen: { $lt: (new Date).getTime() / 1000 - workerRefreshInterval / 1000 * 5} }, function(err, docs) {
-            for (var i = 0; i < docs.length; i++) {
+            for (var i = 0; i < docs.length; i += 1) {
                 // reset unfinished jobs assigned to worker to CREATED, so they'll be executed by someone else
                 logger.info('worker "' + docs[i].clientId + '" is gone');
                 workerList.remove({_id: docs[i]._id});
@@ -78,7 +78,7 @@ define(['logManager',
                     return;
                 }
                 var jobList = {};
-                for (var i = 0; i < docs.length; i++) {
+                for (var i = 0; i < docs.length; i += 1) {
                     jobList[docs[i].hash] = docs[i];
                     delete docs[i]._id;
                 }
@@ -196,14 +196,14 @@ define(['logManager',
         var response = {};
         workerList.find({ }, function (err, workers) {
             var jobQuery = function (i) {
-                if (i == workers.length) {
+                if (i === workers.length) {
                     res.send(JSON.stringify(response));
                     return;
                 }
                 var worker = workers[i];
                 jobList.find({status: 'RUNNING', worker: worker.clientId}, function (err, jobs) {
                     // FIXME: index jobList on status?
-                    for (var j = 0; j < jobs.length; j++) {
+                    for (var j = 0; j < jobs.length; j += 1) {
                         delete jobs[j]._id;
                     }
                     response[worker.clientId] = jobs;
