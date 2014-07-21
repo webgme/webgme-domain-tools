@@ -317,13 +317,13 @@ define(['./NetLabelWidget.Constants',
             srcID,
             sCompID,
             params,
-            validEndIDs,
-            validEndNames,
+            validEndObjects,
             cancel,
             save,
             endEdit,
             _getCompID, // fn
-            _isValidName; // fn
+            _isValidName, // fn
+            _extractor; // fn
 
         cancel = function () {
             var itemId,
@@ -335,15 +335,16 @@ define(['./NetLabelWidget.Constants',
             endEdit();
         };
 
-        save = function () {
-            var id = inputCtrl.val();
+        save = function (endObj) {
+            var endId = endObj.obj.ID,
+                sCompId = endObj.obj.sCompID;
 
             // end connection drop
             self.connectionDrawingManager._connectionInDrawProps = {"src": srcID,
                 "sCompId": sCompID,
                 "srcEl": undefined,
                 "type": "create"};
-            self.connectionDrawingManager._connectionEndDrop(id, undefined);
+            self.connectionDrawingManager._connectionEndDrop(endId, sCompId);
         };
 
         endEdit = function () {
@@ -368,12 +369,21 @@ define(['./NetLabelWidget.Constants',
         };
 
         _isValidName = function (name, collection) {
-            var result = true;
+            var result = false,
+                i,
+                obj;
 
             if (name === '' ||
-                typeof name !== 'string' ||
-                collection.indexOf(name) === -1) {
+                typeof name !== 'string') {
                 result = false;
+            } else {
+                for (i = 0; i < collection.length; i += 1) {
+                    obj = collection[i];
+                    if (obj.name === name) {
+                        result = true;
+                        break;
+                    }
+                }
             }
 
             return result;
@@ -386,9 +396,8 @@ define(['./NetLabelWidget.Constants',
         params = {'srcId': srcID,
             'srcSubCompId': sCompID};
         self._onStartConnectionCreate(params);
-        validEndIDs = self._getValidEndIDs(self._decoratorPackages);
         // a list of names to use in autocomplete
-        validEndNames = self._getNamesFromIDs(validEndIDs);
+        validEndObjects = self._getValidEndObjects(self._decoratorPackages);
 
         ctrlGroup = $("<div/>",
             {"class": "control-group"});
@@ -401,7 +410,51 @@ define(['./NetLabelWidget.Constants',
         inputCtrl.css({"box-sizing": "border-box"});
 
         // enable autocomplete
-        inputCtrl.typeahead({source: validEndNames});
+//        inputCtrl.typeahead({source: validEndNames});
+
+        _extractor = function (query) {
+            var result = /([^,]+)$/.exec(query);
+            if(result && result[1])
+                return result[1].trim();
+            return '';
+        };
+
+        inputCtrl.typeahead({
+            source: function(query, process) {
+                var results = _.map(validEndObjects, function(obj) {
+                    return obj.id + "";
+                });
+                process(results);
+            },
+
+            matcher: function(id) {
+                var endObj = _.find(validEndObjects, function(o) {
+                    return o.id == id;
+                });
+
+                var query = _extractor(this.query);
+                if (!query) return false;
+
+                return ~endObj.name.toLowerCase().indexOf(query.toLowerCase());
+            },
+
+            highlighter: function(id) {
+                var endObj = _.find(validEndObjects, function(o) {
+                    return o.id == id;
+                });
+                return endObj.name;
+            },
+
+            updater: function(id) {
+                var endObj = _.find(validEndObjects, function(o) {
+                    return o.id == id;
+                });
+                cancel();
+                save(endObj);
+                return endObj.name;
+            }
+        });
+
 
         ctrlGroup.append(inputCtrl);
 
@@ -421,12 +474,6 @@ define(['./NetLabelWidget.Constants',
                         event.stopPropagation();
                         cancel();
                         break;
-                    case 13: // [enter]
-                        // simulate blur to accept new value
-                        event.preventDefault();
-                        event.stopPropagation();
-                        save();
-                        break;
                     case 46:// DEL
                         //don't need to handle it specially but need to prevent propagation
                         event.stopPropagation();
@@ -434,7 +481,7 @@ define(['./NetLabelWidget.Constants',
                 }
             }
         ).keyup( function (/*event*/) {
-                if (_isValidName(inputCtrl.val(), validEndNames)) {
+                if (_isValidName(inputCtrl.val(), validEndObjects)) {
                     ctrlGroup.removeClass("error");
                 } else {
                     ctrlGroup.addClass("error");

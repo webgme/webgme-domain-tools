@@ -315,6 +315,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 dstPortLabelList.setAttribute("obj-id", dstID);
                 $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).text('connections');
                 $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE).attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
+                if (self.diagramDesigner.items[dstID] && self.diagramDesigner.items[dstID]._decoratorInstance.$sourceConnectors[0]);
+                else {
+                    $(dstPortLabelList).find('.' + NetLabelWidgetConstants.ADD_CONNECTION).remove();
+                }
             }
         };
 
