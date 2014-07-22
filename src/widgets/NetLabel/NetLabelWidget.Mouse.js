@@ -309,7 +309,6 @@ define(['./NetLabelWidget.Constants',
 
     NetLabelWidgetMouse.prototype._onAddConn = function (node) {
         var self = this,
-            WIDTH = 120,
             ITEM_PREFIX = 'I_',
             inputCtrl,
             ctrlGroup,
@@ -318,24 +317,22 @@ define(['./NetLabelWidget.Constants',
             sCompID,
             params,
             validEndObjects,
-            cancel,
-            save,
-            endEdit,
-            _getCompID, // fn
-            _isValidName, // fn
-            _extractor; // fn
+            _cancel,
+            _save,
+            _endEdit,
+            _getCompID; // fn
 
-        cancel = function () {
+        _cancel = function () {
             var itemId,
                 i;
             for (i = 0; i < self.itemIds.length; i += 1) {
                 itemId = self.itemIds[i];
                 self.items[itemId].hideEndConnectors();
             }
-            endEdit();
+            _endEdit();
         };
 
-        save = function (endObj) {
+        _save = function (endObj) {
             var endId = endObj.obj.ID,
                 sCompId = endObj.obj.sCompID;
 
@@ -347,7 +344,7 @@ define(['./NetLabelWidget.Constants',
             self.connectionDrawingManager._connectionEndDrop(endId, sCompId);
         };
 
-        endEdit = function () {
+        _endEdit = function () {
             ctrlGroup.remove();
         };
 
@@ -368,27 +365,6 @@ define(['./NetLabelWidget.Constants',
             }
         };
 
-        _isValidName = function (name, collection) {
-            var result = false,
-                i,
-                obj;
-
-            if (name === '' ||
-                typeof name !== 'string') {
-                result = false;
-            } else {
-                for (i = 0; i < collection.length; i += 1) {
-                    obj = collection[i];
-                    if (obj.name === name) {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        };
-
         srcID = id.indexOf(ITEM_PREFIX) === 0 ? id : _getCompID();
         sCompID = id.indexOf(ITEM_PREFIX) === 0 ? undefined : id;
 
@@ -406,18 +382,10 @@ define(['./NetLabelWidget.Constants',
             "type": "text",
             "class": "new-conn"});
 
-        inputCtrl.outerWidth(WIDTH);
+        inputCtrl.outerWidth(NetLabelWidgetConstants.MAX_TEXT_WIDTH);
         inputCtrl.css({"box-sizing": "border-box"});
 
         // enable autocomplete
-//        inputCtrl.typeahead({source: validEndNames});
-
-        _extractor = function (query) {
-            var result = /([^,]+)$/.exec(query);
-            if(result && result[1])
-                return result[1].trim();
-            return '';
-        };
 
         inputCtrl.typeahead({
             source: function(query, process) {
@@ -432,10 +400,7 @@ define(['./NetLabelWidget.Constants',
                     return o.id == id;
                 });
 
-                var query = _extractor(this.query);
-                if (!query) return false;
-
-                return ~endObj.name.toLowerCase().indexOf(query.toLowerCase());
+                return ~endObj.name.toLowerCase().indexOf(this.query.toLowerCase());
             },
 
             highlighter: function(id) {
@@ -449,12 +414,11 @@ define(['./NetLabelWidget.Constants',
                 var endObj = _.find(validEndObjects, function(o) {
                     return o.id == id;
                 });
-                cancel();
-                save(endObj);
+                setTimeout(function () { _endEdit(); }, 250);
+                _save(endObj);
                 return endObj.name;
             }
         });
-
 
         ctrlGroup.append(inputCtrl);
 
@@ -472,7 +436,7 @@ define(['./NetLabelWidget.Constants',
                         inputCtrl.val('');
                         event.preventDefault();
                         event.stopPropagation();
-                        cancel();
+                        _cancel();
                         break;
                     case 46:// DEL
                         //don't need to handle it specially but need to prevent propagation
@@ -480,15 +444,10 @@ define(['./NetLabelWidget.Constants',
                         break;
                 }
             }
-        ).keyup( function (/*event*/) {
-                if (_isValidName(inputCtrl.val(), validEndObjects)) {
-                    ctrlGroup.removeClass("error");
-                } else {
-                    ctrlGroup.addClass("error");
-                }
-            }).blur(function (/*event*/) {
-                cancel();
-            });
+        ).blur(function (/*event*/) {
+            // a hack to avoid mouse select bug
+            setTimeout(function () { _cancel(); }, 250);
+        });
     };
 
     return NetLabelWidgetMouse;

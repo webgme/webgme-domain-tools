@@ -78,7 +78,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + srcID;
                     self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
                 } else {
-                    nbrOfConns = srcNetlist.childElementCount - 1;
+                    nbrOfConns = $(srcNetlist).find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).length;
                     text = nbrOfConns === 1 ? (nbrOfConns + ' connection') : (nbrOfConns + ' connections');
 
                     $(srcNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
@@ -92,7 +92,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + dstID;
                     self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
                 } else {
-                    nbrOfConns = dstNetlist.childElementCount - 1;
+                    nbrOfConns = $(dstNetlist).find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).length;
                     text = nbrOfConns === 1 ? (nbrOfConns + ' connection') : (nbrOfConns + ' connections');
 
                     $(dstNetlist).find('.' + NetLabelWidgetConstants.NETLIST_TITLE)[0].textContent = text;
@@ -202,7 +202,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         _updateText = function () {
             var title,
-                nbrOfConns = srcPortLabelList.childElementCount - 1;
+                nbrOfConns = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).length;
             title = $(srcPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE);
             if (nbrOfConns === 1) {
                 title.text(nbrOfConns + " connection");
@@ -339,7 +339,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         _updateText = function () {
             var title,
-                nbrOfConns = dstPortLabelList.childElementCount - 1;
+                nbrOfConns = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.DESIGNER_NETLABEL_CLASS).length;
             title = $(dstPortLabelList).find('.' + NetLabelWidgetConstants.NETLIST_TITLE);
             if (nbrOfConns === 1) {
                 title.text(nbrOfConns + " connection");
@@ -1142,10 +1142,52 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.update = function (objDescriptor) {
+        var shadowArrowStart,
+            shadowArrowEnd;
+
         if (objDescriptor.showAsLabel) {
             this._initializeConnectionProps(objDescriptor);
         } else {
             this._initializeLineConnectionProps(objDescriptor);
+            //update path itself
+            if (this.skinParts.path) {
+                this.skinParts.path.attr({ "arrow-start": this.designerAttributes.arrowStart,
+                    "arrow-end": this.designerAttributes.arrowEnd,
+                    "stroke": this.designerAttributes.color,
+                    "stroke-width": this.designerAttributes.width,
+                    "stroke-dasharray": this.designerAttributes.pattern});
+            }
+
+            if (this.skinParts.pathShadow) {
+                this._updatePathShadow(this._pathPoints);
+                this.skinParts.pathShadow.attr({ "stroke-width": this.designerAttributes.shadowWidth });
+            }
+
+            if (this.skinParts.pathShadowArrowStart) {
+                shadowArrowStart = this.designerAttributes.arrowStart.replace("inheritance", "block");
+
+                this.skinParts.pathShadowArrowStart.attr({ "stroke-width": this.designerAttributes.shadowEndArrowWidth,
+                    "arrow-start": shadowArrowStart});
+            }
+
+            if (this.skinParts.pathShadowArrowEnd) {
+                shadowArrowEnd = this.designerAttributes.arrowEnd.replace("inheritance", "block");
+
+                this.skinParts.pathShadowArrowEnd.attr({ "stroke-width": this.designerAttributes.shadowEndArrowWidth,
+                    "arrow-end": shadowArrowEnd});
+            }
+
+            if (this.skinParts.name) {
+                this.skinParts.name.css({'color': this.designerAttributes.color});
+            }
+
+            if (this.skinParts.srcText) {
+                this.skinParts.srcText.css({'color': this.designerAttributes.color});
+            }
+
+            if (this.skinParts.dstText) {
+                this.skinParts.dstText.css({'color': this.designerAttributes.color});
+            }
         }
     };
 
