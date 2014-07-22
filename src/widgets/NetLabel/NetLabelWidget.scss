@@ -66,15 +66,15 @@ $collapse-label-color: #A9A9A9;
 
       .netlist {
         position: relative;
-        width: 120px;
+        width: 100px;
         left: -50%;
         cursor: pointer;
         text-align: center;
 
         .title-container {
-          margin-left: 20px;
           .add-conn {
             float: left;
+            padding-left: 15px;
           }
 
           .title {
@@ -89,7 +89,7 @@ $collapse-label-color: #A9A9A9;
         }
 
         .netLabel {
-          margin-left: 5px;
+          margin-left: 20px;
           text-overflow: ellipsis;
           overflow: hidden;
           position: relative;
