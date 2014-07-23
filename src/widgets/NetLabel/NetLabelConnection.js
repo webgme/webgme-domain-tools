@@ -18,20 +18,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     var NetLabelConnection,
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
-        DATA_ID = 'data-id',
-        MIN_WIDTH_NOT_TO_NEED_SHADOW = 5,
-        CONNECTION_DEFAULT_WIDTH = 1,
-        CONNECTION_DEFAULT_COLOR = "#000000",
-        CONNECTION_DEFAULT_PATTERN = DiagramDesignerWidgetConstants.LINE_PATTERNS.SOLID,
-        CONNECTION_NO_END = DiagramDesignerWidgetConstants.LINE_ARROWS.NONE,
-        CONNECTION_DEFAULT_END = CONNECTION_NO_END,
-        CONNECTION_SHADOW_DEFAULT_OPACITY = 0,
-        CONNECTION_SHADOW_DEFAULT_WIDTH = 5,
-        CONNECTION_SHADOW_DEFAULT_OPACITY_WHEN_SELECTED = 1,
-        CONNECTION_SHADOW_DEFAULT_COLOR = "#B9DCF7",
-        CONNECTION_DEFAULT_LINE_TYPE = DiagramDesignerWidgetConstants.LINE_TYPES.NONE,
-        SHADOW_MARKER_SIZE_INCREMENT = 3,
-        SHADOW_MARKER_SIZE_INCREMENT_X = 1;
+        DATA_ID = 'data-id';
 
     NetLabelConnection = function (objId) {
         Connection.call(this, objId);
@@ -49,10 +36,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
         _removeExistingConnection = function () {
 
             var pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + self.id,
+                pathArrowID = DiagramDesignerWidgetConstants.PATH_SHADOW_ARROW_END_ID_PREFIX + self.id,
                 textID = TEXT_ID_PREFIX + self.id,
                 connID = self.id;
 
             self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
+            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathArrowID + '"]').remove();
             self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + connID + '"]').remove();
             self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + textID + '"]').remove();
             self.diagramDesigner.skinParts.$itemsContainer.find('[' + DATA_ID + '^="' + connID + '"]').remove(); // dragpoints
@@ -100,36 +89,34 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
         };
 
+        // setting end connectors positions
+        self.sourceCoordinates = { "x": srcPos.x,
+            "y": srcPos.y};
+
+        self.endCoordinates = { "x": dstPos.x,
+            "y": dstPos.y};
+
+        self._segPoints = segPoints.slice(0);
+        self._pathPoints = segPoints;
 
         if (self.showAsLabel) {
-            // setting end connectors positions
-            self.sourceCoordinates = { "x": srcPos.x,
-                "y": srcPos.y};
 
-            self.endCoordinates = { "x": dstPos.x,
-                "y": dstPos.y};
-
-            self._segPoints = segPoints.slice(0);
-            self._pathPoints = segPoints;
-//            _removeExistingConnection();
-//
-            if (this._prevShowLabel === false) {
-                this.pathDef = null;
-
-                Connection.prototype.destroy.call(this);
-            }
+            _removeExistingConnection();
+//            if (this._prevShowLabel === false) {
+//                this.pathDef = null;
+//                Connection.prototype.destroy.call(this);
+//            }
             self.setNetRenderData(segPoints);
-
-            self.unHighlight();
-            self.hideEndReconnectors();
-            self._renderEndReconnectors();
-            if (self.selected) {
-                self.showEndReconnectors();
-            }
         } else {
-
             _removeExistingLabels();
-            Connection.prototype.setConnectionRenderData.call(self, segPoints);
+            Connection.prototype.setConnectionRenderData.call(this, segPoints);
+        }
+
+        self.unHighlight();
+        self.hideEndReconnectors();
+        self._renderEndReconnectors();
+        if (self.selected) {
+            self.showEndReconnectors();
         }
     };
 
@@ -162,12 +149,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         } else {
             this._removePath();
-            this._hideAllTexts();
         }
     };
 
     NetLabelConnection.prototype._netLabelListBase = $('<div class="netlist"><div class="title-container"><div class="add-conn">+</div><div class="title"></div></div></div>');
     NetLabelConnection.prototype._netLabelBase = $('<div class="netLabel"></div>');
+    NetLabelConnection.prototype._netlistContainer = $('<div class="netlist-container"></div>');
 
     /** CREATE SRC NET LIST **/
     NetLabelConnection.prototype._createSrcNet = function (srcID, dstID) {
@@ -220,7 +207,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         _createNetlist();
 
         // appending label
-        if (self.srcLabelDetached) {
+        if (self.srcLabelDetached && self.srcLabelDetached[0]) {
             $(srcPortLabelList).append(self.srcLabelDetached[0]);
             _updateText();
 
@@ -259,8 +246,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return srcText;
     };
 
-    NetLabelConnection.prototype._netlistContainer = $('<div class="netlist-container"></div>');
-
     NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList, pathDef) {
         var objID = srcPortLabelList.attributes['obj-id'].value,
             id = TEXT_ID_PREFIX + objID,
@@ -268,26 +253,19 @@ define(['js/Widgets/DiagramDesigner/Connection',
             pathCenter = {},
             newPathDef;
 
-        this._hideSrcTexts();
-
         pathCenter.x = (pathDef.x1 + pathDef.x2) / 2;
         pathCenter.y = (pathDef.y1 + pathDef.y2) / 2;
 
+        this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
 
-        this.skinParts.textContainer1 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
-
-        if (!this.skinParts.textContainer1) {
-
+        if (!this.skinParts.textContainer1[0]) {
             this.skinParts.textContainer1 = this._netlistContainer.clone();
-            this.skinParts.textContainer1.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                'left': pathCenter.x});
-            this.skinParts.textContainer1.attr(NetLabelWidgetConstants.NETLIST_ID, id);
-            this.skinParts.textContainer1.append(srcPortLabelList);
-            $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
-        } else {
-            $(this.skinParts.textContainer1).css({ 'top': pathCenter.y - TEXT_OFFSET,
-                'left': pathCenter.x});
         }
+        this.skinParts.textContainer1.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            'left': pathCenter.x});
+        this.skinParts.textContainer1.attr(NetLabelWidgetConstants.NETLIST_ID, id);
+        this.skinParts.textContainer1.append(srcPortLabelList);
+        $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
 
         // remove previous lines drawn for this component/sub-component
         this._removeExistingPath(pathID);
@@ -355,7 +333,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         _createNetlist();
 
-        if (self.dstLabelDetached) {
+        if (self.dstLabelDetached && self.dstLabelDetached[0]) {
 
             $(dstPortLabelList).append(self.dstLabelDetached[0]);
             _updateText();
@@ -401,25 +379,19 @@ define(['js/Widgets/DiagramDesigner/Connection',
             pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + objID,
             newPathDef;
 
-        this._hideDstTexts();
-
         pathCenter.x = (pathDef.x1 + pathDef.x2) / 2;
         pathCenter.y = (pathDef.y1 + pathDef.y2) / 2;
 
 
-        this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]')[0];
-        if (!this.skinParts.textContainer2) {
-
+        this.skinParts.textContainer2 = this.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + id + '"]');
+        if (!this.skinParts.textContainer2[0]) {
             this.skinParts.textContainer2 = this._netlistContainer.clone();
-            this.skinParts.textContainer2.css({ 'top': pathCenter.y - TEXT_OFFSET,
-                'left': pathCenter.x});
-            this.skinParts.textContainer2.attr(NetLabelWidgetConstants.NETLIST_ID, id);
-            this.skinParts.textContainer2.append(dstPortLabelList);
-            $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
-        } else {
-            $(this.skinParts.textContainer2).css({ 'top': pathCenter.y - TEXT_OFFSET,
-                'left': pathCenter.x});
         }
+        this.skinParts.textContainer2.css({ 'top': pathCenter.y - TEXT_OFFSET,
+            'left': pathCenter.x});
+        this.skinParts.textContainer2.attr(NetLabelWidgetConstants.NETLIST_ID, id);
+        this.skinParts.textContainer2.append(dstPortLabelList);
+        $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
 
         newPathDef = this._getPathDefFromPointObject(pathDef);
         this._removeExistingPath(pathID);
@@ -455,41 +427,23 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
             this.diagramDesigner.skinParts.$itemsContainer.find('.' + NetLabelWidgetConstants.NETLIST).remove();
             this._hideTexts();
-            this._hideSrcTexts();
-            this._hideDstTexts();
             this.logger.debug("Destroyed");
-//
-//            this._removePath();
-//            this._removePathShadow();
-        }
-    };
 
-    NetLabelConnection.prototype._hideAllTexts = function () {
-        this._hideTexts();
-        this._hideSrcTexts();
-        this._hideDstTexts();
-    };
-
-    NetLabelConnection.prototype._hideSrcTexts = function () {
-        if (this.skinParts.textContainer1) {
-            this.skinParts.textContainer1.remove();
-        }
-    };
-
-    NetLabelConnection.prototype._hideDstTexts = function () {
-
-        if (this.skinParts.textContainer2) {
-            this.skinParts.textContainer2.remove();
+            this._removePath();
+            this._removePathShadow();
         }
     };
 
     NetLabelConnection.prototype._initialize = function (objDescriptor) {
-        this.showAsLabel = objDescriptor.showAsLabel;
 
+        this.defaultName = objDescriptor.defaultName;
+        /*MODELEDITORCONNECTION CONSTANTS***/
         this.diagramDesigner = objDescriptor.designerCanvas;
 
         this.skinParts = {};
         this.paper = this.diagramDesigner.skinParts.SVGPaper;
+
+        this.reconnectable = false;
 
         this.selected = false;
         this.selectedInMultiSelection = false;
@@ -499,8 +453,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this._editMode = false;
         this._readOnly = false;
 
+        //get segnment points
         this.segmentPoints = [];
-        this.reconnectable = false;
 
         this._segmentPointMarkers = [];
         this._connectionEditSegments = [];
@@ -512,16 +466,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
             'w': 0,
             'h': 0};
 
-        this._initializeConnectionProps(objDescriptor);
+        if (objDescriptor.showAsLabel) {
+            this._initializeConnectionProps(objDescriptor);
+        } else {
+            Connection.prototype._initializeConnectionProps.call(this, objDescriptor);
+        }
     };
 
     NetLabelConnection.prototype._initializeConnectionProps = function (objDescriptor) {
-        if (objDescriptor.showAsLabel) {
 
-            // connection attributes
+        this.showAsLabel = objDescriptor.showAsLabel;
+
+        if (this.showAsLabel) {
+
             this.name = objDescriptor.name;
-            this.defaultName = objDescriptor.defaultName;
-            this.showAsLabel = objDescriptor.showAsLabel;
 
             this.reconnectable = objDescriptor.reconnectable === true;
             this.editable = !!objDescriptor.editable;
@@ -530,7 +488,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             this.srcTextEdit = objDescriptor.srcTextEdit || false;
             this.dstTextEdit = objDescriptor.dstTextEdit || false;
 
-            // getting relevant src & dst IDs & objects (used to update src/dst port names)
+            // getting relevant src & dst IDs
             this.srcObjId = objDescriptor.srcObjId; // designer item ID (etc 'I_')
             this.srcSubCompId = objDescriptor.srcSubCompId; // port ID, undefined if port nonexistent
             this.dstObjId = objDescriptor.dstObjId;
@@ -546,7 +504,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var bBox;
+        var bBox,
+            strokeWidthAdjust,
+            dx,
+            dy,
+            shadowAdjust = 0,
+            endMarkerBBox,
+            bBoxPath,
+            bPoints,
+            len;
 
         if (this.showAsLabel) {
             bBox = { "x": 0,
@@ -555,11 +521,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 "y2": 0,
                 "width": 0,
                 "height": 0 };
-
+            return bBox;
         } else {
             bBox = Connection.prototype.getBoundingBox.call(this);
         }
-
         return bBox;
     };
 
@@ -598,9 +563,6 @@ define(['js/Widgets/DiagramDesigner/Connection',
 
         if (this.showAsLabel) {
             _showLabels();
-
-            this.showEndReconnectors();
-
             //in edit mode and when not participating in a multiple selection,
             //show endpoint connectors
             if (this.selectedInMultiSelection === true) {
@@ -613,8 +575,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
                 }
             }
         } else {
-            Connection.prototype.onSelect.call(this, multiSelection);
+            Connection.prototype.onSelect.call(this);
         }
+
+        this.showEndReconnectors();
+
     };
 
     NetLabelConnection.prototype.onDeselect = function () {
@@ -643,14 +608,20 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selected = false;
         this.selectedInMultiSelection = false;
 
-        if (this.showAsLabel) {
+        if (!this.showAsLabel) {
 
-            this.unHighlight();
-            this.hideEndReconnectors();
-            this._setEditMode(false);
-        } else {
+//            this._unHighlightPath();
             Connection.prototype.onDeselect.call(this);
         }
+//        if (this.showAsLabel) {
+//            // todo: this would have worked but SelectionManager "if (idList.length > 1)" length > 1 check?
+////            _hideLabels();
+//        } else {
+//            this._unHighlightPath();
+//        }
+        this.unHighlight();
+        this.hideEndReconnectors();
+        this._setEditMode(false);
     };
 
     /**
@@ -658,176 +629,140 @@ define(['js/Widgets/DiagramDesigner/Connection',
      * @param id - if undefined, one connection is selected; otherwise, a netlist is hovered over to show all other-end connectors
      */
     NetLabelConnection.prototype.showEndReconnectors = function (id) {
-        if (this.showAsLabel) {
+        var self = this,
+            scale = Math.max(1, this.designerAttributes.width / 10),
+            _showSrcEndReconnector, // fn
+            _showDstEndReconnector; // fn
 
-            var self = this,
-                scale = Math.max(1, this.designerAttributes.width / 10),
-                _showSrcEndReconnector, // fn
-                _showDstEndReconnector; // fn
+        _showSrcEndReconnector = function (text) {
 
-            _showSrcEndReconnector = function (text) {
+            self.skinParts.srcDragPoint.css({"position": "absolute",
+                "top": self.sourceCoordinates.y,
+                "left": self.sourceCoordinates.x});
 
-                self.skinParts.srcDragPoint.css({"position": "absolute",
-                    "top": self.sourceCoordinates.y,
-                    "left": self.sourceCoordinates.x});
+            self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.srcDragPoint);
+            //resize connectors to connection width
+            self.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            if (text) {
 
-                self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.srcDragPoint);
-                //resize connectors to connection width
-                self.skinParts.srcDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
-                if (text) {
-
-                    self.skinParts.srcDragPoint.text(text);
-                    self.skinParts.srcDragPoint.css('background-color', 'white');
-                } else {
-                    $(self.skinParts.srcDragPoint).addClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
-                }
-            };
-
-            _showDstEndReconnector = function (text) {
-
-                self.skinParts.dstDragPoint.css({"position": "absolute",
-                    "top": self.endCoordinates.y,
-                    "left": self.endCoordinates.x});
-
-                self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.dstDragPoint);
-                //resize connectors to connection width
-                self.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
-                if (text) {
-
-                    self.skinParts.dstDragPoint.text(text);
-                    self.skinParts.dstDragPoint.css('background-color', 'white');
-                } else {
-                    $(self.skinParts.dstDragPoint).addClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
-                }
-            };
-
-            if (self.reconnectable) {
-
-                // if id is defined, don't do anything to object with given id
-                if (id) {
-                    // if srcObj has given id, then highlight dstObj or show dstSubComp
-                    if (self.srcObjId === id || self.srcSubCompId === id) {
-                        if (self.dstSubCompId) {
-                            _showDstEndReconnector();
-                        } else {
-                            self._highlightDst();
-                        }
-                    } else if (self.dstObjId === id || self.dstSubCompId === id) {
-                        if (self.srcSubCompId) {
-                            _showSrcEndReconnector();
-                        } else {
-                            self._highlightSrc();
-                        }
-                    }
-                } else {
-                    if (self.showAsLabel) {
-                        if (self.srcSubCompId) {
-                            _showSrcEndReconnector();
-                        }
-
-                        if (self.dstSubCompId) {
-                            _showDstEndReconnector();
-                        }
-
-                        self.highlight();
-
-                    } else {
-                        _showSrcEndReconnector('S');
-                        _showDstEndReconnector('D');
-                    }
-                }
-                this._toggleHighlightClass('add');
-
+                self.skinParts.srcDragPoint.text(text);
+                self.skinParts.srcDragPoint.css('background-color', 'white');
             } else {
-                this.hideEndReconnectors();
+                $(self.skinParts.srcDragPoint).addClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
             }
+        };
+
+        _showDstEndReconnector = function (text) {
+
+            self.skinParts.dstDragPoint.css({"position": "absolute",
+                "top": self.endCoordinates.y,
+                "left": self.endCoordinates.x});
+
+            self.diagramDesigner.skinParts.$itemsContainer.append(self.skinParts.dstDragPoint);
+            //resize connectors to connection width
+            self.skinParts.dstDragPoint.css('transform', "scale(" + scale + "," + scale + ")");
+            if (text) {
+
+                self.skinParts.dstDragPoint.text(text);
+                self.skinParts.dstDragPoint.css('background-color', 'white');
+            } else {
+                $(self.skinParts.dstDragPoint).addClass(NetLabelWidgetConstants.HIGHLIGHT_CLASS);
+            }
+        };
+
+        if (self.reconnectable) {
+
+            // if id is defined, don't do anything to object with given id
+            if (id) {
+                // if srcObj has given id, then highlight dstObj or show dstSubComp
+                if (self.srcObjId === id || self.srcSubCompId === id) {
+                    if (self.dstSubCompId) {
+                        _showDstEndReconnector();
+                    } else {
+                        self._highlightDst();
+                    }
+                } else if (self.dstObjId === id || self.dstSubCompId === id) {
+                    if (self.srcSubCompId) {
+                        _showSrcEndReconnector();
+                    } else {
+                        self._highlightSrc();
+                    }
+                }
+            } else {
+                if (self.showAsLabel) {
+                    if (self.srcSubCompId) {
+                        _showSrcEndReconnector();
+                    }
+
+                    if (self.dstSubCompId) {
+                        _showDstEndReconnector();
+                    }
+
+                    self.highlight();
+
+                } else {
+                    _showSrcEndReconnector('S');
+                    _showDstEndReconnector('D');
+                }
+            }
+            this._toggleHighlightClass('add');
+
         } else {
-            Connection.prototype.showEndReconnectors.call(this);
+            this.hideEndReconnectors();
         }
     };
 
     NetLabelConnection.prototype.hideEndReconnectors = function () {
-        var self = this;
+        if (this.skinParts.srcDragPoint) {
+            this.skinParts.srcDragPoint.empty();
+            this.skinParts.srcDragPoint.remove();
+            this.skinParts.srcDragPoint = null;
+        }
+
+        if (this.skinParts.dstDragPoint) {
+            this.skinParts.dstDragPoint.empty();
+            this.skinParts.dstDragPoint.remove();
+            this.skinParts.dstDragPoint = null;
+        }
+
+        this._renderEndReconnectors();
         if (this.showAsLabel) {
 
-            if (this.skinParts.srcDragPoint) {
-                this.skinParts.srcDragPoint.empty();
-                this.skinParts.srcDragPoint.remove();
-                this.skinParts.srcDragPoint = null;
-            }
-
-            if (this.skinParts.dstDragPoint) {
-                this.skinParts.dstDragPoint.empty();
-                this.skinParts.dstDragPoint.remove();
-                this.skinParts.dstDragPoint = null;
-            }
-
-            this._renderEndReconnectors();
-            if (this.showAsLabel) {
-
-                this.unHighlight();
-            }
-            this._toggleHighlightClass('remove');
-        } else {
-            Connection.prototype.hideEndReconnectors.call(self);
+            this.unHighlight();
         }
+        this._toggleHighlightClass('remove');
     };
 
     /******************** HIGHLIGHT / UNHIGHLIGHT MODE *********************/
     NetLabelConnection.prototype.highlight = function () {
-        if (this.showAsLabel) {
-
-            this._highlightSrc();
-            this._highlightDst();
-        } else {
-            Connection.prototype.highlight.call(this);
-        }
+        this._highlightSrc();
+        this._highlightDst();
     };
 
     NetLabelConnection.prototype.unHighlight = function () {
-        if (this.showAsLabel) {
+        var srcObj,
+            dstObj;
 
-            var srcObj,
-                dstObj;
-
-            srcObj = this.diagramDesigner.items[this.srcObjId];
-            dstObj = this.diagramDesigner.items[this.dstObjId];
-            if (srcObj) {
-                srcObj.$el.removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
-            }
-            if (dstObj) {
-                dstObj.$el.removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
-            }
-        } else {
-            Connection.prototype.unHighlight.call(this);
+        srcObj = this.diagramDesigner.items[this.srcObjId];
+        dstObj = this.diagramDesigner.items[this.dstObjId];
+        if (srcObj) {
+            srcObj.$el.removeClass(NetLabelWidgetConstants.SRCLABEL_HIGHLIGHT_CLASS);
+        }
+        if (dstObj) {
+            dstObj.$el.removeClass(NetLabelWidgetConstants.DSTLABEL_HIGHLIGHT_CLASS);
         }
     };
 
     NetLabelConnection.prototype.update = function (objDescriptor) {
         this._prevShowLabel = this.showAsLabel;
         this.showAsLabel = objDescriptor.showAsLabel;
-        if (objDescriptor.showAsLabel) {
+
+        if (this.showAsLabel) {
             this._initializeConnectionProps(objDescriptor);
         } else {
-            this.showAsLabel = objDescriptor.showAsLabel;
             Connection.prototype.update.call(this, objDescriptor);
         }
     };
-
-    //ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
-    NetLabelConnection.prototype.getConnectionAreas = function (id, isEnd) {
-        var result = [];
-
-        return result;
-    };
-
-    NetLabelConnection.prototype.showSourceConnectors = function (params) {
-    };
-
-    NetLabelConnection.prototype.hideSourceConnectors = function () {
-    };
-
-    //END OF --- ONLY IF CONNECTION CAN BE DRAWN BETWEEN CONNECTIONS
 
     /** HELPER FUNCTIONS **/
     NetLabelConnection.prototype._getPathDef = function (p, lastP) {
