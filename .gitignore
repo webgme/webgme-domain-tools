@@ -1,5 +1,6 @@
-# server logs
+# logs
 server.log
+npm-debug.log
 
 # WebStorm
 .idea
@@ -22,3 +23,6 @@ executor-temp
 
 # ignore all .zip files
 *.zip
+
+# ignore database files
+*.nedb
