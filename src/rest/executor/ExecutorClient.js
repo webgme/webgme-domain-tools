@@ -8,7 +8,7 @@
  */
 
 
-define([], function () {
+define(['superagent'], function (superagent) {
 
     var ExecutorClient = function (parameters) {
         this.isNodeJS = (typeof window === 'undefined') && (typeof process === "object");
@@ -71,7 +71,7 @@ define([], function () {
     };
 
     ExecutorClient.prototype.updateJob = function (jobInfo, callback) {
-        this.sendHttpRequestWithData('POST', this.executorUrl + 'update/' + jobInfo.hash, JSON.stringify(jobInfo), function (err, response) {
+        this.sendHttpRequestWithData('POST', this.executorUrl + 'update/' + jobInfo.hash, jobInfo, function (err, response) {
             if (err) {
                 callback(err);
                 return;
@@ -121,39 +121,17 @@ define([], function () {
     };
 
     ExecutorClient.prototype.sendHttpRequestWithData = function (method, url, data, callback) {
-
-        if (this.isNodeJS) {
-            var options = {
-                hostname: this.server,
-                port: this.serverPort,
-                path: require('url').parse(url).path,
-                method: method
-            };
-
-            this._sendHttpRequestWithContent(options, null, callback);
-
-        } else {
-            var oReq = new XMLHttpRequest();
-            oReq.open(method, url, true);
-            if (data) {
-                oReq.setRequestHeader('Content-Type', 'application/json');
-            }
-            oReq.onload = function (oEvent) {
-                // Uploaded.
-                var response = oEvent.target.response;
-                if (oEvent.target.status > 399) {
-                    callback(oEvent.target.status, response);
-                } else {
-                    callback(null, response);
-                }
-            };
-
-            if (data) {
-                oReq.send(data);
-            } else {
-                oReq.send();
-            }
+        var req = new superagent.Request(method, url);
+        if (data) {
+            req.send(data);
         }
+        req.end(function (err, res) {
+            if (res.statusCode > 399) {
+                callback(res.statusCode, res.text);
+            } else {
+                callback(null, res.text);
+            }
+        });
     };
 
     ExecutorClient.prototype._ensureAuthenticated = function (options, callback) {
@@ -167,50 +145,6 @@ define([], function () {
 //            }
 //        }
         callback(null, options);
-    };
-
-
-    ExecutorClient.prototype._sendHttpRequestWithContent = function (options, data, callback) {
-        var self = this;
-        self._ensureAuthenticated(options, function (err, updatedOptions) {
-            if (err) {
-                callback(err);
-            } else {
-                self.__sendHttpRequestWithContent(updatedOptions, data, callback);
-            }
-        });
-    };
-
-    ExecutorClient.prototype.__sendHttpRequestWithContent = function (options, data, callback) {
-        // TODO: use the http or https
-        var req = this.http.request(options, function (res) {
-            //    console.log('STATUS: ' + res.statusCode);
-            //    console.log('HEADERS: ' + JSON.stringify(res.headers));
-            //    res.setEncoding('utf8');
-            var d = '';
-            res.on('data', function (chunk) {
-                d += chunk;
-            });
-
-            res.on('end', function () {
-                if (res.statusCode === 200) {
-                    callback(null, d);
-                } else {
-                    callback(res.statusCode, d);
-                }
-            });
-        });
-
-        req.on('error', function (e) {
-            callback(e);
-        });
-
-        if (data) {
-            // write data to request body
-            req.write(data);
-        }
-
-        req.end();
     };
 
     return ExecutorClient;

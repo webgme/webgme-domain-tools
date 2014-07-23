@@ -7,7 +7,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "webgme": "=0.6.5",
+		"webgme": "https://github.com/webgme/webgme/tarball/master",
         "requirejs": "=2.1.11",
         "unzip": "=0.1.8",
         "minimatch": "=0.3.0",

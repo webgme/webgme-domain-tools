@@ -21,9 +21,10 @@ define(['logManager',
         'child_process',
         'minimatch',
         'executor/ExecutorClient',
-        'executor/WorkerInfo'
+        'executor/WorkerInfo',
+        'superagent'
     ],
-    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo) {
+    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, superagent) {
 
         // FIXME: test for exe existance
         // FIXME: detect arch and use different exe and args
@@ -268,7 +269,7 @@ define(['logManager',
         archiveFile = function (filename, filePath, callback) {
             // FIXME: get the blob client to stream
             //var stream = fs.createReadStream(results[i]);
-            fs.readFile(filePath,  function (err, data) {
+            fs.readFile(filePath, function (err, data) {
                 jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
                     var j;
                     if (err) {
@@ -410,43 +411,41 @@ define(['logManager',
 
         var _queryWorkerAPI = function() {
 
-            var oReq = new XMLHttpRequest();
-            oReq.open('POST', self.executorClient.executorUrl + 'worker', true);
-            oReq.setRequestHeader('Content-Type', 'application/json');
-            oReq.timeout = 25 * 1000;
-            oReq.ontimeout = function (oEvent) {
-                callback('Timed out');
-            };
-            oReq.onerror = function (oEvent) {
-                callback('Error');
-            };
-            oReq.onload = function (oEvent) {
-                if (oEvent.target.status > 399) {
-                    callback('Server returned ' + oEvent.target.status);
-                } else {
-                    var response = JSON.parse(oEvent.target.responseText);
-                    var jobsToStart = response.jobsToStart;
-                    for (var i = 0; i < jobsToStart.length; i++) {
-                        self.executorClient.getInfo(jobsToStart[i], function (err, info) {
-                            if (err) {
-                                // TODO
-                            }
-                            self.jobList[info.hash] = info;
-                            self.startJob(info);
-                        });
+            superagent.post(self.executorClient.executorUrl + 'worker')
+                //.set('Content-Type', 'application/json')
+                //oReq.timeout = 25 * 1000;
+                .send(self.clientRequest)
+                .end(function (err, res) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    if (res.status > 399) {
+                        callback('Server returned ' + res.status);
+                    } else {
+                        var response = JSON.parse(res.text);
+                        console.log(res.text)
+                        var jobsToStart = response.jobsToStart;
+                        for (var i = 0; i < jobsToStart.length; i++) {
+                            self.executorClient.getInfo(jobsToStart[i], function (err, info) {
+                                if (err) {
+                                    // TODO
+                                }
+                                self.jobList[info.hash] = info;
+                                self.startJob(info);
+                            });
+                        }
+
+                        callback(null, response);
                     }
 
-                    callback(null, response);
-                }
-            }
-
-            oReq.send(JSON.stringify(self.clientRequest));
+                });
         };
         if (self.clientRequest.clientId) {
             _queryWorkerAPI();
         } else {
             var child = child_process.execFile("hostname", [], {}, function (err, stdout, stderr) {
-                self.clientRequest.clientId = stdout.trim() || "unknown";
+                self.clientRequest.clientId = (stdout.trim() || "unknown") + "_" + process.pid;
                 _queryWorkerAPI();
             });
         }
