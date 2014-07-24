@@ -7,8 +7,10 @@
 
 
 define(['./NetLabelWidget.Constants',
-    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
-                                                                             DiagramDesignerWidgetConstants) {
+    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
+    'typeahead'], function (NetLabelWidgetConstants,
+                            DiagramDesignerWidgetConstants,
+                            typeahead) {
 
     "use strict";
 
