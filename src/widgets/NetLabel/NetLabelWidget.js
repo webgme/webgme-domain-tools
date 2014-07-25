@@ -231,13 +231,13 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
                     subCompName = name + NAME_SEPARATOR + subCompObj.getAttribute('name');
                     retObjects.push({
                        'id': i,
-                       'name': subCompName,
+                       'value': subCompName,
                        'obj': validEndIDs[i]
                     });
                 } else {
                     retObjects.push({
                         'id': i,
-                        'name': name,
+                        'value': name,
                         'obj': validEndIDs[i]
                     });
                 }

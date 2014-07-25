@@ -8,9 +8,11 @@
 
 define(['./NetLabelWidget.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
-    'typeahead'], function (NetLabelWidgetConstants,
+    'typeahead',
+    'bloodhound'], function (NetLabelWidgetConstants,
                             DiagramDesignerWidgetConstants,
-                            typeahead) {
+                            typeahead,
+                            bloodhound) {
 
     "use strict";
 
@@ -346,6 +348,12 @@ define(['./NetLabelWidget.Constants',
             self.connectionDrawingManager._connectionEndDrop(endId, sCompId);
         };
 
+        // todo: style this
+        var _focus = function (endObj) {
+            var id = endObj.obj.ID;
+            self.items[id].$el.effect('highlight');
+        };
+
         _endEdit = function () {
             ctrlGroup.remove();
         };
@@ -382,44 +390,122 @@ define(['./NetLabelWidget.Constants',
 
         inputCtrl = $("<input/>", {
             "type": "text",
-            "class": "new-conn"});
+            "class": "new-conn",
+            "placeholder": "states",
+            "data-source": '["Deluxe Bicycle", "Super Deluxe Trampoline", "Super Duper Scooter"]'});
 
         inputCtrl.outerWidth(NetLabelWidgetConstants.MAX_TEXT_WIDTH);
         inputCtrl.css({"box-sizing": "border-box"});
 
         // enable autocomplete
 
-        inputCtrl.typeahead({
-            source: function(query, process) {
-                var results = _.map(validEndObjects, function(obj) {
-                    return obj.id + "";
-                });
-                process(results);
+//        inputCtrl.typeahead({
+//            source: function(query, process) {
+//                var results = _.map(validEndObjects, function(obj) {
+//                    return obj.id + "";
+//                });
+//                process(results);
+//            },
+//
+//            matcher: function(id) {
+//                var endObj = _.find(validEndObjects, function(o) {
+//                    return o.id == id;
+//                });
+//
+//                return ~endObj.name.toLowerCase().indexOf(this.query.toLowerCase());
+//            },
+//
+//            highlighter: function(id) {
+//                var endObj = _.find(validEndObjects, function(o) {
+//                    return o.id == id;
+//                });
+//                return endObj.name;
+//            },
+//
+//            updater: function(id) {
+//                var endObj = _.find(validEndObjects, function(o) {
+//                    return o.id == id;
+//                });
+//                setTimeout(function () { _endEdit(); }, 250);
+//                _save(endObj);
+//                return endObj.name;
+//            }
+//        });
+//        var states_array = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+//            'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
+//            'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+//            'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+//            'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+//            'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+//            'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+//            'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+//            'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+//        ];
+//        var states = new Bloodhound({
+//            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+//            queryTokenizer: Bloodhound.tokenizers.whitespace,
+//            // `states` is an array of state names defined in "The Basics"
+//            local: _.map(states_array, function(state) { return { value: state }; })
+//        });
+//
+//// kicks off the loading/processing of `local` and `prefetch`
+//        states.initialize();
+//
+//        inputCtrl.typeahead({
+//                hint: true,
+//                highlight: true,
+//                minLength: 1
+//            },
+//            {
+//                name: 'states',
+//                displayKey: 'value',
+//                // `ttAdapter` wraps the suggestion engine in an adapter that
+//                // is compatible with the typeahead jQuery plugin
+//                source: states.ttAdapter()
+//            });
+
+        var projects = [
+            {
+                id: "jquery",
+                name: "jQuery",
+                desc: "the write less, do more, JavaScript library",
+                icon: {a: 'a', b: 'b'}
             },
-
-            matcher: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-
-                return ~endObj.name.toLowerCase().indexOf(this.query.toLowerCase());
+            {
+                id: "jquery",
+                name: "jQuery UI",
+                desc: "the official user interface library for jQuery",
+                icon: {a: 'a', b: 'b'}
             },
-
-            highlighter: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-                return endObj.name;
-            },
-
-            updater: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-                setTimeout(function () { _endEdit(); }, 250);
-                _save(endObj);
-                return endObj.name;
+            {
+                id: "sizzlejs",
+                name: "Sizzle JS",
+                desc: "a pure-JavaScript CSS selector engine",
+                icon: {a: 'a', b: 'b'}
             }
+        ];
+
+        inputCtrl.autocomplete({
+            minLength: 0,
+            source: validEndObjects,
+            focus: function( event, ui ) {
+                inputCtrl.val( ui.item.value );
+                _focus(ui.item);
+                return false;
+            },
+            select: function( event, ui ) {
+                inputCtrl.val( ui.item.value );
+                _save(ui.item);
+                return false;
+            }
+        });
+
+//// Actual code for testing
+        inputCtrl.bind('typeahead:cursorchanged', function(){
+            console.log("In cursorChange event!");
+        });
+        inputCtrl.bind('typeahead:autocompleted', function(){
+            console.log("In autocompleted event ...");
         });
 
         ctrlGroup.append(inputCtrl);
