@@ -11,7 +11,8 @@
         "requirejs": "=2.1.11",
         "unzip": "=0.1.8",
         "minimatch": "=0.3.0",
-        "nedb": "=0.10.5"
+        "nedb": "=0.10.5",
+        "superagent": "=0.18.2"
     },
     "devDependencies": {
         "mocha": ">=1.17.1",
