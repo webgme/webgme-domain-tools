@@ -34,20 +34,21 @@ define(['js/Widgets/DiagramDesigner/Connection',
             _removeExistingLabels; // fn
 
         _removeExistingConnection = function () {
-
-            var pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + self.id,
-                pathArrowID = DiagramDesignerWidgetConstants.PATH_SHADOW_ARROW_END_ID_PREFIX + self.id,
-                textID = TEXT_ID_PREFIX + self.id,
-                connID = self.id;
-
-            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
-            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathArrowID + '"]').remove();
-            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + connID + '"]').remove();
-            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + textID + '"]').remove();
-            self.diagramDesigner.skinParts.$itemsContainer.find('[' + DATA_ID + '^="' + connID + '"]').remove(); // dragpoints
-            self.skinParts.path = null;
-            self.skinParts.pathShadow = null;
+            Connection.prototype.destroy.call(self);
             self.pathDef = null;
+//            var pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + self.id,
+//                pathArrowID = DiagramDesignerWidgetConstants.PATH_SHADOW_ARROW_END_ID_PREFIX + self.id,
+//                textID = TEXT_ID_PREFIX + self.id,
+//                connID = self.id;
+//
+//            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathID + '"]').remove();
+//            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + pathArrowID + '"]').remove();
+//            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + connID + '"]').remove();
+//            self.diagramDesigner.skinParts.$itemsContainer.find('[id^="' + textID + '"]').remove();
+//            self.diagramDesigner.skinParts.$itemsContainer.find('[' + DATA_ID + '^="' + connID + '"]').remove(); // dragpoints
+//            self.skinParts.path = null;
+//            self.skinParts.pathShadow = null;
+//            self.pathDef = null;
         };
 
         _removeExistingLabels = function () {
@@ -265,7 +266,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             'left': pathCenter.x});
         this.skinParts.textContainer1.attr(NetLabelWidgetConstants.NETLIST_ID, id);
         this.skinParts.textContainer1.append(srcPortLabelList);
-        $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer1);
+        this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.textContainer1);
 
         // remove previous lines drawn for this component/sub-component
         this._removeExistingPath(pathID);
@@ -391,7 +392,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
             'left': pathCenter.x});
         this.skinParts.textContainer2.attr(NetLabelWidgetConstants.NETLIST_ID, id);
         this.skinParts.textContainer2.append(dstPortLabelList);
-        $(this.diagramDesigner.skinParts.$itemsContainer.children()[0]).after(this.skinParts.textContainer2);
+        this.diagramDesigner.skinParts.$itemsContainer.append(this.skinParts.textContainer2);
 
         newPathDef = this._getPathDefFromPointObject(pathDef);
         this._removeExistingPath(pathID);
