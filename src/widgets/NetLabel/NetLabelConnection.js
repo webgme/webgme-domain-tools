@@ -422,6 +422,10 @@ define(['js/Widgets/DiagramDesigner/Connection',
     NetLabelConnection.prototype._initialize = function (objDescriptor) {
 
         this.defaultName = objDescriptor.defaultName;
+
+        this.srcObjId = objDescriptor.srcObjId;
+        this.dstObjId = objDescriptor.dstObjId;
+
         /*MODELEDITORCONNECTION CONSTANTS***/
         this.diagramDesigner = objDescriptor.designerCanvas;
 
