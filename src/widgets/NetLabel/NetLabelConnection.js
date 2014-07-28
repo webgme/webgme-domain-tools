@@ -18,7 +18,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
     var NetLabelConnection,
         TEXT_OFFSET = 15,
         TEXT_ID_PREFIX = "t_",
-        DATA_ID = 'data-id';
+        CONNECTION_NO_END = DiagramDesignerWidgetConstants.LINE_ARROWS.NONE;
 
     NetLabelConnection = function (objId) {
         Connection.call(this, objId);
@@ -129,8 +129,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
             lastP = segPoints[segPoints.length - 2]; // dst-end
             dstPathDef = this._getPathDef(p, lastP);
 
-            this._renderSrcTexts(srcPortLabelList, srcPathDef);
-            this._renderDstTexts(dstPortLabelList, dstPathDef);
+            this._renderSrcNet(srcPortLabelList, srcPathDef);
+            this._renderDstNet(dstPortLabelList, dstPathDef);
 
         } else {
             this._removePath();
@@ -144,10 +144,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
     /** CREATE SRC NET LIST **/
     NetLabelConnection.prototype._createSrcNet = function (srcID, dstID) {
         var self = this,
+            START_ARROW = '&rarr;',
             srcPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + srcID + '"]')[0],
             srcPortLabel = self._netLabelBase.clone(),
             dstText = self._getDstText(),
             existingLabel,
+            newText,
             _createNetlist, // fn
             _createLabel, // fn
             _updateText; // fn
@@ -163,6 +165,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         };
 
         _createLabel = function () {
+            var text;
 
             srcPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, dstID);
             srcPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
@@ -171,10 +174,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
             // if show as label and connection name is different than default name, set netlabel name to new name
             if (self.name !== self.defaultName) {
-                srcPortLabel.text(self.name);
+                text = self.name;
             } else {
-                srcPortLabel.text(dstText);
+                text = dstText;
             }
+            if ((self.designerAttributes.arrowEnd && self.designerAttributes.arrowEnd !== CONNECTION_NO_END) ||
+                (self.designerAttributes.arrowStart && self.designerAttributes.arrowStart !== CONNECTION_NO_END)) {
+                text += '  ' + START_ARROW;
+            }
+            srcPortLabel.html(text).text();
         };
 
         _updateText = function () {
@@ -212,6 +220,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     // handling the name update case
                     existingLabel.textContent = dstText;
                 }
+
+                if ((self.designerAttributes.arrowEnd && self.designerAttributes.arrowEnd !== 'none') ||
+                    (self.designerAttributes.arrowStart && self.designerAttributes.arrowStart !== 'none')) {
+                    if (existingLabel.textContent.indexOf(START_ARROW) === -1) {
+                        newText = existingLabel.textContent + '  ' + START_ARROW;
+                        $(existingLabel).html(newText).text();
+                    }
+                } else {
+                    existingLabel.textContent.replace(START_ARROW, '').trim();
+                }
             }
         }
 
@@ -231,7 +249,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return srcText;
     };
 
-    NetLabelConnection.prototype._renderSrcTexts = function (srcPortLabelList, pathDef) {
+    NetLabelConnection.prototype._renderSrcNet = function (srcPortLabelList, pathDef) {
         var objID = srcPortLabelList.attributes['obj-id'].value,
             id = TEXT_ID_PREFIX + objID,
             pathID = DiagramDesignerWidgetConstants.PATH_SHADOW_ID_PREFIX + objID,
@@ -267,10 +285,12 @@ define(['js/Widgets/DiagramDesigner/Connection',
     /** CREATE DST NET LIST **/
     NetLabelConnection.prototype._createDstNet = function (srcID, dstID) {
         var self = this,
+            END_ARROW = '&rarr;',
             dstPortLabelList = self.diagramDesigner.skinParts.$itemsContainer.find('[obj-id^="' + dstID + '"]')[0],
             dstPortLabel = self._netLabelBase.clone(),
             srcText = self._getSrcText(),
             existingLabel,
+            newText,
             _createNetlist, // fn
             _createLabel, // fn
             _updateText; // fn
@@ -291,6 +311,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         };
 
         _createLabel = function () {
+            var text;
             // making the dstPortLabel
             dstPortLabel.attr(NetLabelWidgetConstants.NETLIST_ID, srcID);
             dstPortLabel.attr(NetLabelWidgetConstants.CONNECTION_ID, self.id);
@@ -299,10 +320,15 @@ define(['js/Widgets/DiagramDesigner/Connection',
             }
             // if show as label and connection name is different than default name, set netlabel name to new name
             if (self.name !== self.defaultName) {
-                dstPortLabel.text(self.name);
+                text = self.name;
             } else {
-                dstPortLabel.text(srcText);
+                text = srcText;
             }
+            if ((self.designerAttributes.arrowEnd && self.designerAttributes.arrowEnd !== 'none') ||
+                (self.designerAttributes.arrowStart && self.designerAttributes.arrowStart !== 'none')) {
+                text = END_ARROW + '  ' + text;
+            }
+            dstPortLabel.html(text).text();
         };
 
         _updateText = function () {
@@ -338,6 +364,16 @@ define(['js/Widgets/DiagramDesigner/Connection',
                     // handling the name update case
                     existingLabel.textContent = srcText;
                 }
+
+                if ((self.designerAttributes.arrowEnd && self.designerAttributes.arrowEnd !== 'none') ||
+                    (self.designerAttributes.arrowStart && self.designerAttributes.arrowStart !== 'none')) {
+                    if (existingLabel.textContent.indexOf(END_ARROW) === -1) {
+                        newText = END_ARROW + '  ' + existingLabel.textContent;
+                        $(existingLabel).html(newText).text();
+                    }
+                } else {
+                    existingLabel.textContent.replace(END_ARROW, '').trim();
+                }
             }
         }
 
@@ -357,7 +393,7 @@ define(['js/Widgets/DiagramDesigner/Connection',
         return dstText;
     };
 
-    NetLabelConnection.prototype._renderDstTexts = function (dstPortLabelList, pathDef) {
+    NetLabelConnection.prototype._renderDstNet = function (dstPortLabelList, pathDef) {
         var pathCenter = {},
             objID = dstPortLabelList.attributes['obj-id'].value,
             id = TEXT_ID_PREFIX + objID,
@@ -438,6 +474,9 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.selectedInMultiSelection = false;
 
         this.designerAttributes = {};
+
+        this.designerAttributes.arrowStart = objDescriptor[DiagramDesignerWidgetConstants.LINE_START_ARROW] || CONNECTION_NO_END;
+        this.designerAttributes.arrowEnd = objDescriptor[DiagramDesignerWidgetConstants.LINE_END_ARROW] || CONNECTION_NO_END;
 
         this._editMode = false;
         this._readOnly = false;
@@ -698,6 +737,8 @@ define(['js/Widgets/DiagramDesigner/Connection',
         this.showAsLabel = objDescriptor.showAsLabel;
         this.srcObjId = objDescriptor.srcObjId;
         this.dstObjId = objDescriptor.dstObjId;
+        this.designerAttributes.arrowStart = objDescriptor[DiagramDesignerWidgetConstants.LINE_START_ARROW] || CONNECTION_NO_END;
+        this.designerAttributes.arrowEnd = objDescriptor[DiagramDesignerWidgetConstants.LINE_END_ARROW] || CONNECTION_NO_END;
 
         if (this.showAsLabel) {
             this._initializeConnectionProps(objDescriptor);
