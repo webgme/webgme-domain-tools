@@ -280,13 +280,14 @@ define(['./NetLabelWidget.Constants',
         // get all the connection objects associated with connid
         for (i = 0; i < idList.length; i += 1) {
             connObj = self.items[idList[i]];
-            connObj.showEndReconnectors(nodeId);
+            connObj._showEndOfSrc(nodeId);
         }
     };
 
     NetLabelWidgetMouse.prototype._hideAllEndConnectors = function (node) {
         var children = node.parentNode.parentNode.childNodes,
             childrenCount = children.length,
+            nodeId = node.id,
             i,
             id,
             idList = [],
@@ -305,10 +306,9 @@ define(['./NetLabelWidget.Constants',
         for (i = 0; i < idList.length; i += 1) {
             connObj = this.items[idList[i]];
             if (!connObj.selected) {
-                connObj.hideEndReconnectors();
+                connObj._hideEndOfSrc(nodeId);
             }
         }
-
     };
 
     NetLabelWidgetMouse.prototype._onAddConn = function (node) {
