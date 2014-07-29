@@ -351,6 +351,7 @@ define(['./NetLabelWidget.Constants',
                 "type": "create"};
             self.connectionDrawingManager._connectionEndDrop(endId, sCompId);
             _endEdit();
+            self.logger.info("New connection created.");
         };
 
         _focus = function (endObj) {

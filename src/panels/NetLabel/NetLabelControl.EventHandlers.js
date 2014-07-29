@@ -50,12 +50,13 @@ define(['logManager',
                     itemDeleting.hideEndReconnectors();
                 }
             } else {
-                this.logger.warning('Can not delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');
+                this.logger.warning('Cannot delete item with ID: ' + objID + '. Possibly it is the ROOT or FCO');
             }
         }
 
         if (objIdList.length > 0) {
             this._client.delMoreNodes(objIdList);
+            this.logger.info('Deleted connections: ' + objIdList);
         }
     };
 

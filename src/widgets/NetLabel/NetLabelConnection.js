@@ -90,17 +90,13 @@ define(['js/Widgets/DiagramDesigner/Connection',
         if (self.showAsLabel) {
 
             _removeExistingConnection();
-//            if (this._prevShowLabel === false) {
-//                this.pathDef = null;
-//                Connection.prototype.destroy.call(this);
-//            }
+
             self.setNetRenderData(segPoints);
         } else {
             _removeExistingLabels();
             Connection.prototype.setConnectionRenderData.call(this, segPoints);
         }
 
-//        self.unHighlight();
         self.hideEndReconnectors();
         self._renderEndReconnectors();
         if (self.selected) {
