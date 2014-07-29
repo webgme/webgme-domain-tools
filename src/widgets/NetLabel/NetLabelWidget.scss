@@ -27,12 +27,18 @@ $connList-line-height: 15px;
 $collapse-label-font-size: 7px;
 $collapse-expand-label-line-height: 11px;
 $collapse-label-color: #A9A9A9;
+$autocomplete-focus-outline: #E2E2E2 solid;
 
 .diagram-designer {
 
   .items {
 
     .designer-item {
+
+      &.autocomplete-focus {
+        outline: gray solid;
+      }
+
       &.src-highlighted {
         outline: $diagram-designer-srcobj-outline;
         z-index: 2;
@@ -42,6 +48,13 @@ $collapse-label-color: #A9A9A9;
         outline: $diagram-designer-dstobj-outline;
         z-index: 2;
       }
+
+      .connector {
+        &.autocomplete-focus {
+          outline: gray solid;
+        }
+      }
+
     }
 
     .c-d-end {
