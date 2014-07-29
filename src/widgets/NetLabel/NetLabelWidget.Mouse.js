@@ -7,12 +7,8 @@
 
 
 define(['./NetLabelWidget.Constants',
-    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
-    'typeahead',
-    'bloodhound'], function (NetLabelWidgetConstants,
-                            DiagramDesignerWidgetConstants,
-                            typeahead,
-                            bloodhound) {
+    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
+                                                                             DiagramDesignerWidgetConstants) {
 
     "use strict";
 
