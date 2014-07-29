@@ -7,6 +7,7 @@
 
 
 define(['js/Widgets/ModelEditor/ModelEditorWidget',
+        'js/Widgets/DiagramDesigner/DiagramDesignerWidget',
         'js/Widgets/DiagramDesigner/ConnectionRouteManagerBasic',
         'js/Widgets/DiagramDesigner/ConnectionRouteManager2',
         'js/Widgets/DiagramDesigner/ConnectionRouteManager3',
@@ -14,6 +15,7 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         './NetLabelConnection',
         './NetLabelWidget.Mouse',
         'css!./NetLabelWidget'], function (ModelEditorWidget,
+                                           DiagramDesignerWidget,
                                            ConnectionRouteManagerBasic,
                                            ConnectionRouteManager2,
                                            ConnectionRouteManager3,
@@ -250,6 +252,23 @@ define(['js/Widgets/ModelEditor/ModelEditorWidget',
         validObjects = _getNamesFromIDs(ids);
 
         return validObjects;
+    };
+
+    NetLabelWidget.prototype._onSelectionChanged = function (selectedIds) {
+        var _selectedElements = this.selectionManager._selectedElements,
+            selectedId,
+            selectedItem;
+
+        DiagramDesignerWidget.prototype._onSelectionChanged.call(this, selectedIds);
+
+        // remove selection outline if a netlabel connection is the only item selected
+        if (_selectedElements.length === 1) {
+            selectedId = _selectedElements[0];
+            selectedItem = this.items[selectedId];
+            if (selectedItem.showAsLabel) {
+                this.$el.find('.selection-outline').remove();
+            }
+        }
     };
 
     return NetLabelWidget;

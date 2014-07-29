@@ -532,19 +532,11 @@ define(['js/Widgets/DiagramDesigner/Connection',
     };
 
     NetLabelConnection.prototype.getBoundingBox = function () {
-        var bBox,
-            strokeWidthAdjust,
-            dx,
-            dy,
-            shadowAdjust = 0,
-            endMarkerBBox,
-            bBoxPath,
-            bPoints,
-            len;
+        var bBox;
 
         if (this.showAsLabel) {
-            bBox = { "x": 0,
-                "y": 0,
+            bBox = { "x": NaN,
+                "y": NaN,
                 "x2": 0,
                 "y2": 0,
                 "width": 0,

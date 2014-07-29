@@ -56,7 +56,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self._clearNetlistSelection();
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                self._setSelection([connId], eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
