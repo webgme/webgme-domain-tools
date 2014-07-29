@@ -33,6 +33,7 @@ define([], function () {
         HIGHLIGHT_MODE_CLASS: 'highlight-mode',
         SRCLABEL_HIGHLIGHT_CLASS: 'src-highlighted',
         DSTLABEL_HIGHLIGHT_CLASS: 'dst-highlighted',
+        AUTOCOMPLETE_FOCUS_CLASS: "autocomplete-focus",
         HIGHLIGHT_CLASS: "highlighted",
         HOVER_CLASS: "hovered",
         SHOW_MODE: "show-mode",

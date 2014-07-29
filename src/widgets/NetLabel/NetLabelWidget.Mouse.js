@@ -7,10 +7,8 @@
 
 
 define(['./NetLabelWidget.Constants',
-    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
-    'typeahead'], function (NetLabelWidgetConstants,
-                            DiagramDesignerWidgetConstants,
-                            typeahead) {
+    'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants'], function (NetLabelWidgetConstants,
+                                                                             DiagramDesignerWidgetConstants) {
 
     "use strict";
 
@@ -54,7 +52,7 @@ define(['./NetLabelWidget.Constants',
 
             if (self.onConnectionMouseDown) {
                 self._clearNetlistSelection();
-                self.onConnectionMouseDown.call(self, connId, eventDetails);
+                self._setSelection([connId], eventDetails);
             } else {
                 logger.warning('onConnectionMouseDown(connId, eventDetails) is undefined, connId: ' + connId + ' eventDetails: ' + JSON.stringify(eventDetails));
             }
@@ -278,13 +276,14 @@ define(['./NetLabelWidget.Constants',
         // get all the connection objects associated with connid
         for (i = 0; i < idList.length; i += 1) {
             connObj = self.items[idList[i]];
-            connObj.showEndReconnectors(nodeId);
+            connObj._showEndOfSrc(nodeId);
         }
     };
 
     NetLabelWidgetMouse.prototype._hideAllEndConnectors = function (node) {
         var children = node.parentNode.parentNode.childNodes,
             childrenCount = children.length,
+            nodeId = node.id,
             i,
             id,
             idList = [],
@@ -303,10 +302,9 @@ define(['./NetLabelWidget.Constants',
         for (i = 0; i < idList.length; i += 1) {
             connObj = this.items[idList[i]];
             if (!connObj.selected) {
-                connObj.hideEndReconnectors();
+                connObj._hideEndOfSrc(nodeId);
             }
         }
-
     };
 
     NetLabelWidgetMouse.prototype._onAddConn = function (node) {
@@ -321,6 +319,8 @@ define(['./NetLabelWidget.Constants',
             validEndObjects,
             _cancel,
             _save,
+            _focus,
+            _removeFocus,
             _endEdit,
             _getCompID; // fn
 
@@ -332,6 +332,12 @@ define(['./NetLabelWidget.Constants',
                 self.items[itemId].hideEndConnectors();
             }
             _endEdit();
+            self.$el.find('.' + NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS).removeClass(NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS);
+
+        };
+
+        _removeFocus = function () {
+            self.$el.find('.' + NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS).removeClass(NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS);
         };
 
         _save = function (endObj) {
@@ -344,9 +350,29 @@ define(['./NetLabelWidget.Constants',
                 "srcEl": undefined,
                 "type": "create"};
             self.connectionDrawingManager._connectionEndDrop(endId, sCompId);
+            _endEdit();
+        };
+
+        _focus = function (endObj) {
+            var id = endObj.obj.ID,
+                sCompId = endObj.obj.sCompID,
+                $endConnectors = self.items[id]._decoratorInstance.$endConnectors,
+                i;
+
+            _removeFocus();
+            self.items[id].$el.addClass(NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS);
+            if (sCompId) {
+                for (i = 0; i < $endConnectors.length; i += 1 ) {
+                    if ($endConnectors[i].getAttribute(DiagramDesignerWidgetConstants.DATA_SUBCOMPONENT_ID) === sCompId) {
+                        $($endConnectors[i]).addClass(NetLabelWidgetConstants.AUTOCOMPLETE_FOCUS_CLASS);
+                        return;
+                    }
+                }
+            }
         };
 
         _endEdit = function () {
+            _removeFocus();
             ctrlGroup.remove();
         };
 
@@ -367,14 +393,14 @@ define(['./NetLabelWidget.Constants',
             }
         };
 
+        // start connection on 'add-icon' click
         srcID = id.indexOf(ITEM_PREFIX) === 0 ? id : _getCompID();
         sCompID = id.indexOf(ITEM_PREFIX) === 0 ? undefined : id;
-
-        // start connection
         params = {'srcId': srcID,
             'srcSubCompId': sCompID};
         self._onStartConnectionCreate(params);
-        // a list of names to use in autocomplete
+
+        // get a list of names to use in autocomplete
         validEndObjects = self._getValidEndObjects(self._decoratorPackages);
 
         ctrlGroup = $("<div/>",
@@ -388,37 +414,18 @@ define(['./NetLabelWidget.Constants',
         inputCtrl.css({"box-sizing": "border-box"});
 
         // enable autocomplete
-
-        inputCtrl.typeahead({
-            source: function(query, process) {
-                var results = _.map(validEndObjects, function(obj) {
-                    return obj.id + "";
-                });
-                process(results);
+        inputCtrl.autocomplete({
+            minLength: 1,
+            source: validEndObjects,
+            focus: function( event, ui ) {
+                inputCtrl.val( ui.item.value );
+                _focus(ui.item);
+                return false;
             },
-
-            matcher: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-
-                return ~endObj.name.toLowerCase().indexOf(this.query.toLowerCase());
-            },
-
-            highlighter: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-                return endObj.name;
-            },
-
-            updater: function(id) {
-                var endObj = _.find(validEndObjects, function(o) {
-                    return o.id == id;
-                });
-                setTimeout(function () { _endEdit(); }, 250);
-                _save(endObj);
-                return endObj.name;
+            select: function( event, ui ) {
+                inputCtrl.val( ui.item.value );
+                _save(ui.item);
+                return false;
             }
         });
 
@@ -448,7 +455,11 @@ define(['./NetLabelWidget.Constants',
             }
         ).blur(function (/*event*/) {
             // a hack to avoid mouse select bug
-            setTimeout(function () { _cancel(); }, 250);
+            setTimeout(function () { _cancel(); }, 50);
+        });
+
+        $('.ui-autocomplete').mouseleave(function() {
+            _removeFocus();
         });
     };
 
