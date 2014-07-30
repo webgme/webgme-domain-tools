@@ -5,7 +5,7 @@
  *
  */
 .diagram-designer .items .designer-item.autocomplete-focus {
-  outline: #e2e2e2 solid; }
+  outline: gray solid; }
 .diagram-designer .items .designer-item.src-highlighted {
   outline: #f77eaf solid;
   z-index: 2; }
@@ -13,7 +13,7 @@
   outline: #71b7f5 solid;
   z-index: 2; }
 .diagram-designer .items .designer-item .connector.autocomplete-focus {
-  outline: #e2e2e2 solid; }
+  outline: gray solid; }
 .diagram-designer .items .c-d-end.src.highlighted {
   background-color: red; }
 .diagram-designer .items .c-d-end.dst.highlighted {
