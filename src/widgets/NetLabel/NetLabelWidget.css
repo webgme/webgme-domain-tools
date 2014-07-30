@@ -5,7 +5,7 @@
  *
  */
 .diagram-designer .items .designer-item.autocomplete-focus {
-  outline: gray solid; }
+  outline: #e2e2e2 solid; }
 .diagram-designer .items .designer-item.src-highlighted {
   outline: #f77eaf solid;
   z-index: 2; }
@@ -13,7 +13,7 @@
   outline: #71b7f5 solid;
   z-index: 2; }
 .diagram-designer .items .designer-item .connector.autocomplete-focus {
-  outline: gray solid; }
+  outline: #e2e2e2 solid; }
 .diagram-designer .items .c-d-end.src.highlighted {
   background-color: red; }
 .diagram-designer .items .c-d-end.dst.highlighted {
@@ -45,12 +45,12 @@
         font-weight: bold;
         font-size: 11px;
         color: red;
-        background-color: white; }
+        background-color: #eeeeee; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.dst-highlighted {
         font-weight: bold;
         font-size: 11px;
         color: blue;
-        background-color: white; }
+        background-color: #eeeeee; }
       .diagram-designer .items div.netlist-container .netlist .netLabel.show-mode {
         z-index: 1;
-        background-color: white; }
+        background-color: #eeeeee; }

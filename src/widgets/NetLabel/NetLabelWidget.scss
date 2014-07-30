@@ -7,27 +7,15 @@
 
 $diagram-designer-selection-c-d-end-src-background-color: #FF0000;
 $diagram-designer-selection-c-d-end-dst-background-color: #0000FF;
-$diagram-designer-selection-c-d-end-src-highlight-color: #FF6666;
-$diagram-designer-selection-c-d-end-dst-highlight-color: #00CCFF;
-$diagram-designer-selection-rubber-band-border-color: #52A8EC;
 $diagram-designer-srcobj-outline: #F77EAF solid;
 $diagram-designer-dstobj-outline: #71B7F5 solid;
-$diagram-designer-selection-outline-border: rgba(0,0,0,0.5) dashed 1px;
-$diagram-designer-selection-outline-shadow-start: rgba(0, 0, 0, 0.075);
-$diagram-designer-selection-outline-shadow-end: rgba(0, 0, 0, 0.6);
-$diagram-designer-selection-outline-s-btn-background-color: #FFFFFF;
-$diagram-designer-selection-outline-s-btn-shadow-start: rgba(0, 0, 0, 0.075);
-$diagram-designer-selection-outline-s-btn-shadow-end: rgba(0, 0, 0, 0.6);
-$connList-netlabel-border-style: 1px solid #C0C0C0;
-$connList-netlabel-border-top: 1px dashed #999999;
-$connList-border-style: 1px groove #4D4D4D;
-$connList-netlabel-background-color: #f3f3f3;
-$connList-top-padding: 5px;
-$connList-line-height: 15px;
-$collapse-label-font-size: 7px;
-$collapse-expand-label-line-height: 11px;
-$collapse-label-color: #A9A9A9;
+$connList-netlabel-background-color: #eee;
 $autocomplete-focus-outline: #E2E2E2 solid;
+$designer-item-z-index-onhighlight: 2;
+$onselect-font-weight: bold;
+$onselect-font-size: 11px;
+$src-onselect-font-color: red;
+$dst-onselect-font-color: blue;
 
 .diagram-designer {
 
@@ -36,25 +24,24 @@ $autocomplete-focus-outline: #E2E2E2 solid;
     .designer-item {
 
       &.autocomplete-focus {
-        outline: gray solid;
+        outline: $autocomplete-focus-outline;
       }
 
       &.src-highlighted {
         outline: $diagram-designer-srcobj-outline;
-        z-index: 2;
+        z-index: $designer-item-z-index-onhighlight;
       }
 
       &.dst-highlighted {
         outline: $diagram-designer-dstobj-outline;
-        z-index: 2;
+        z-index: $designer-item-z-index-onhighlight;
       }
 
       .connector {
         &.autocomplete-focus {
-          outline: gray solid;
+          outline: $autocomplete-focus-outline;
         }
       }
-
     }
 
     .c-d-end {
@@ -76,7 +63,6 @@ $autocomplete-focus-outline: #E2E2E2 solid;
       font-size: 10px;
       white-space: nowrap;
 
-
       .netlist {
         position: relative;
         width: 100px;
@@ -92,11 +78,11 @@ $autocomplete-focus-outline: #E2E2E2 solid;
 
           .title {
             &.highlighted {
-              font-weight: bold;
+              font-weight: $onselect-font-weight;
             }
             &.hovered {
-              font-size: 11px;
-              font-weight: bold;
+              font-size: $onselect-font-size;
+              font-weight: $onselect-font-weight;
             }
           }
         }
@@ -108,25 +94,23 @@ $autocomplete-focus-outline: #E2E2E2 solid;
           z-index: 0;
 
           &.src-highlighted {
-            font-weight: bold;
-            font-size: 11px;
-            color: red;
-            background-color: white;
+            font-weight: $onselect-font-weight;
+            font-size: $onselect-font-size;
+            color: $src-onselect-font-color;
+            background-color: $connList-netlabel-background-color;
           }
           &.dst-highlighted {
-            font-weight: bold;
-            font-size: 11px;
-            color: blue;
-            background-color: white;
+            font-weight: $onselect-font-weight;
+            font-size: $onselect-font-size;
+            color: $dst-onselect-font-color;
+            background-color: $connList-netlabel-background-color;
           }
           &.show-mode {
             z-index: 1;
-            background-color: white;
+            background-color: $connList-netlabel-background-color;
           }
         }
       }
-
     }
   }
-
 }
