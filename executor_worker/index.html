@@ -47,6 +47,7 @@
         // getScript require.min.js
         $.ajax({
             url: config.protocol + "://" + config.server + ":" + config.port + "/lib/require/require.min.js",
+            cache: true,
             dataType: "script",
             success: function () {
                 requirejs([config.protocol + "://" + config.server + ":" + config.port + "/bin/getconfig.js"], function (getconfig) {
@@ -59,10 +60,12 @@
                         "clientUtil": 'js/util',
                         "loaderCircles": "js/Loader/LoaderCircles",
                         "loaderProgressBar": "js/Loader/LoaderProgressBar",
-                        'superagent': 'lib/superagent/superagent',
+                        "superagent": "lib/superagent/superagent",
 
                         "codemirror": 'lib/codemirror/codemirror.amd',
                         "jquery-csszoom": 'lib/jquery/jquery.csszoom',
+
+                        "blob": "middleware/blob",
 
                         // "jszip": 'lib/jszip/jszip',
                         "executor": 'extlib/' + getconfig.paths.executor
