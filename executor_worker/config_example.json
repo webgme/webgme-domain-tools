@@ -1,5 +1,3 @@
-{
-    "server": "localhost",
-    "port": "8855",
-    "protocol": "http"
-}
+[
+"http://localhost:8888"
+]

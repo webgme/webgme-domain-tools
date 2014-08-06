@@ -25,11 +25,17 @@ define(['logManager',
         'superagent'
     ],
     function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, superagent) {
-
-        // FIXME: test for exe existance
-        // FIXME: detect arch and use different exe and args
-        var UNZIP_EXE = "c:\\Program Files\\7-Zip\\7z.exe";
-        var UNZIP_ARGS = ["x", "-y"];
+        var UNZIP_EXE;
+        var UNZIP_ARGS;
+        if (process.platform === "win32") {
+            UNZIP_EXE = "c:\\Program Files\\7-Zip\\7z.exe";
+            UNZIP_ARGS = ["x", "-y"];
+        } else if (process.platform === "linux") {
+            UNZIP_EXE = "/usr/bin/unzip";
+            UNZIP_ARGS = ["-o"];
+        } else {
+            UNZIP_EXE = "unknown";
+        }
 
         var walk = function(dir, done) {
         var results = [];
@@ -98,9 +104,8 @@ define(['logManager',
         if (!fs.existsSync(this.workingDirectory)) {
             fs.mkdirSync(this.workingDirectory);
         }
-        this.maxProcesses = parameters.maxProcesses || 1;
+        this.availableProcessesContainer = parameters.availableProcessesContainer || { availableProcesses: 1 };
         this.clientRequest = new WorkerInfo.ClientRequest({ clientId: null });
-        this.clientRequest.availableProcesses = this.maxProcesses;
     };
     util.inherits(ExecutorWorker, events.EventEmitter);
 
@@ -383,6 +388,7 @@ define(['logManager',
     };
 
     ExecutorWorker.prototype.sendJobUpdate = function(jobInfo) {
+        this.availableProcessesContainer.availableProcesses += 1; // TODO: be sure not to do this twice for one job
         this.executorClient.updateJob(jobInfo, function (err) {
             if (err) {
                 console.log(err); // TODO
@@ -411,6 +417,7 @@ define(['logManager',
 
         var _queryWorkerAPI = function() {
 
+            this.clientRequest.availableProcesses = this.availableProcessesContainer.availableProcesses;
             superagent.post(self.executorClient.executorUrl + 'worker')
                 //.set('Content-Type', 'application/json')
                 //oReq.timeout = 25 * 1000;
@@ -424,7 +431,7 @@ define(['logManager',
                         callback('Server returned ' + res.status);
                     } else {
                         var response = JSON.parse(res.text);
-                        console.log(res.text)
+                        //console.log(res.text)
                         var jobsToStart = response.jobsToStart;
                         for (var i = 0; i < jobsToStart.length; i++) {
                             self.executorClient.getInfo(jobsToStart[i], function (err, info) {
@@ -432,6 +439,7 @@ define(['logManager',
                                     // TODO
                                 }
                                 self.jobList[info.hash] = info;
+                                self.availableProcessesContainer.availableProcesses -= 1;
                                 self.startJob(info);
                             });
                         }
@@ -442,11 +450,11 @@ define(['logManager',
                 });
         };
         if (self.clientRequest.clientId) {
-            _queryWorkerAPI();
+            _queryWorkerAPI.call(self);
         } else {
             var child = child_process.execFile("hostname", [], {}, function (err, stdout, stderr) {
                 self.clientRequest.clientId = (stdout.trim() || "unknown") + "_" + process.pid;
-                _queryWorkerAPI();
+                _queryWorkerAPI.call(self);
             });
         }
     };

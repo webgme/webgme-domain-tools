@@ -2,25 +2,6 @@
 <html>
   <head>
     <title>WebGME executor</title>
-    <script>
-    var config = {
-        "server": "localhost",
-        "port": "8855",
-        "protocol": "http"
-    };
-    var nodeRequire = require;
-    (function() {
-        var fs = nodeRequire('fs');
-        try {
-            var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
-            config = JSON.parse(configJSON);
-        } catch (e) {
-            if (e.code !== "ENOENT") {
-                throw e;
-            }
-        }
-    })();
-    </script>
     <script src="http://code.jquery.com/jquery-1.11.1.min.js">
     </script>
 
@@ -45,111 +26,159 @@
 
     <script>
         // getScript require.min.js
-        $.ajax({
-            url: config.protocol + "://" + config.server + ":" + config.port + "/lib/require/require.min.js",
-            cache: true,
-            dataType: "script",
-            success: function () {
-                requirejs([config.protocol + "://" + config.server + ":" + config.port + "/bin/getconfig.js"], function (getconfig) {
-                requirejs.config({
-                    baseUrl: config.protocol + "://" + config.server + ":" + config.port + '/',
-                    paths: {
-                        "logManager": 'common/LogManager',
-                        "eventDispatcher": 'common/EventDispatcher',
-                        "notificationManager": 'js/NotificationManager',
-                        "clientUtil": 'js/util',
-                        "loaderCircles": "js/Loader/LoaderCircles",
-                        "loaderProgressBar": "js/Loader/LoaderProgressBar",
-                        "superagent": "lib/superagent/superagent",
+        //$(document).ready(function () {config.forEach(
+        function addWebGMEConnection(webGMEUrl) {
+            var url = nodeRequire('url');
+            var dataControllerName = "ExecutorWorkerController_" + url.parse(webGMEUrl).hostname;
+            var workerView = $('\
+            <div>\
+            <div class="row">\
+                    <div class="hostname"></div>\
+                    <div class="col-md-12 status">Connecting...</div>\
+            </div>\
+            <div class="row controller">\
+                <div class="col-md-12">\
+                    <ul>\
+                        <li data-ng-repeat="job in jobs">{{job.hash}} {{job.status}} {{job.name}} {{job.url}} {{job.resultHash}}</li>\
+                    </ul>\
+                </div>\
+            </div>\
+            </div>').appendTo($("#main"));
+            workerView.find(".hostname").text(url.parse(webGMEUrl).hostname);
+            workerView.find(".controller").attr("data-ng-controller", dataControllerName);
+            var statusDiv = workerView.find(".status");
 
-                        "codemirror": 'lib/codemirror/codemirror.amd',
-                        "jquery-csszoom": 'lib/jquery/jquery.csszoom',
+            $.ajax({
+                url: webGMEUrl + "/lib/require/require.min.js",
+                cache: true,
+                dataType: "script",
+                success: function () {
+                    var requirejs = window.requirejs;
+                    delete window.requirejs; // don't share requirejs state across WebGMEs, they may require different versions
+                    requirejs([webGMEUrl + "/bin/getconfig.js"], function (getconfig) {
+                    requirejs.config({
+                        baseUrl: webGMEUrl + '/',
+                        paths: {
+                            "logManager": 'common/LogManager',
+                            "eventDispatcher": 'common/EventDispatcher',
+                            "notificationManager": 'js/NotificationManager',
+                            "clientUtil": 'js/util',
+                            "loaderCircles": "js/Loader/LoaderCircles",
+                            "loaderProgressBar": "js/Loader/LoaderProgressBar",
+                            "superagent": "lib/superagent/superagent",
 
-                        "blob": "middleware/blob",
+                            "codemirror": 'lib/codemirror/codemirror.amd',
+                            "jquery-csszoom": 'lib/jquery/jquery.csszoom',
 
-                        // "jszip": 'lib/jszip/jszip',
-                        "executor": 'extlib/' + getconfig.paths.executor
-                    },
-                    nodeRequire: nodeRequire
-                });
-                // FIXME ugly hack for node-webkit
-                var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events'];
-                node_modules.forEach(function (module_name) {
-                    requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
-                });
-                var worker;
-                requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function (ExecutorWorker, JobInfo, ExecutorWorkerController) {
+                            "blob": "middleware/blob",
 
-                    worker = new ExecutorWorker({ server: config.server, serverPort: config.port, httpsecure: config.protocol === 'https', sessionId: undefined });
-
-                    worker.queryWorkerAPI(function (err, response) {
-                        var refreshPeriod = 60 * 1000;
-                        var callback = function (err, response) {
-                            if (err) {
-                                document.getElementById('status').style.color = 'white';
-                                document.getElementById('status').style.backgroundColor = 'red';
-                                document.getElementById('status').textContent = err;
-                            } else {
-                                document.getElementById('status').style.color = 'white';
-                                document.getElementById('status').style.backgroundColor = 'green';
-                                document.getElementById('status').textContent = 'OK';
-                            }
-                            if (response && response.refreshPeriod) {
-                                refreshPeriod = response.refreshPeriod;
-                            }
-                            var timeoutID = window.setTimeout(function () {
-                                worker.queryWorkerAPI(callback);
-                            }, refreshPeriod);
-                        };
-                        callback(err, response);
+                            // "jszip": 'lib/jszip/jszip',
+                            "executor": 'extlib/' + getconfig.paths.executor
+                        },
+                        nodeRequire: nodeRequire
                     });
+                    // FIXME ugly hack for node-webkit
+                    var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events'];
+                    node_modules.forEach(function (module_name) {
+                        requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
+                    });
+                    var worker;
+                    requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function (ExecutorWorker, JobInfo, ExecutorWorkerController) {
 
-                    var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
-                    WebGMEApp.value("worker", worker);
-//                  WebGMEApp.value("worker", null);
-                    WebGMEApp.controller('ExecutorWorkerController', ExecutorWorkerController);
-                    /*WebGMEApp.config(['$routeProvider',
-                     function ($routeProvider) {
-                     $routeProvider.
-                     when('/executor', {
-                     templateUrl: 'app/workspace/views/WorkspaceView.html',
-                     // css: 'app/workspace/styles/Workspace.css',
-                     controller: 'ExecutorWorkerController'
-                     }).
-                     otherwise({
-                     redirectTo: '/executor'
-                     });
-                     }]);
-                     */
+                        var webGMEPort = url.parse(webGMEUrl).port || (url.parse(webGMEUrl).protocol === 'https:' ? 443 : 80);
+                        worker = new ExecutorWorker({ server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort,
+                            httpsecure: url.parse(webGMEUrl).protocol === 'https:', sessionId: undefined,
+                            availableProcessesContainer: availableProcessesContainer});
 
-                    angular.bootstrap(document, ['WebGMEApp']);
+                        worker.queryWorkerAPI(function (err, response) {
+                            var refreshPeriod = 60 * 1000;
+                            var callback = function (err, response) {
+                                if (err) {
+                                    statusDiv.css('color', 'white');
+                                    statusDiv.css('backgroundColor', 'red');
+                                    statusDiv.text(err);
+                                } else {
+                                    statusDiv.css('color', 'white');
+                                    statusDiv.css('backgroundColor', 'green');
+                                    statusDiv.text('OK');
+                                }
+                                if (response && response.refreshPeriod) {
+                                    refreshPeriod = response.refreshPeriod;
+                                }
+                                var timeoutID = window.setTimeout(function () {
+                                    worker.queryWorkerAPI(callback);
+                                }, refreshPeriod);
+                            };
+                            callback(err, response);
+                        });
 
-                    // TODO: authentication?
+                        var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
+                        WebGMEApp.value("worker", worker);
+    //                  WebGMEApp.value("worker", null);
+                        WebGMEApp.controller(dataControllerName, ExecutorWorkerController);
+                        /*WebGMEApp.config(['$routeProvider',
+                         function ($routeProvider) {
+                         $routeProvider.
+                         when('/executor', {
+                         templateUrl: 'app/workspace/views/WorkspaceView.html',
+                         // css: 'app/workspace/styles/Workspace.css',
+                         controller: 'ExecutorWorkerController'
+                         }).
+                         otherwise({
+                         redirectTo: '/executor'
+                         });
+                         }]);
+                         */
+
+                        angular.bootstrap(workerView, ['WebGMEApp']);
+
+                        // TODO: authentication?
+                    });
                 });
-            });
-        },
-        error: function(jqxhr, settings, exception) {
-            // FIXME this doesn't fire
-            $("#status").text("Failed to connect");
-        }});
+            },
+            error: function(jqxhr, settings, exception) {
+                // FIXME this doesn't fire
+                statusDiv.text("Failed to connect");
+            }});
+        };
+
+        var webGMEUrls = Object.create(null);
+        var availableProcessesContainer = { availableProcesses: 1 }; // shared among all ExecutorWorkers
+        var nodeRequire = require;
+        (function() {
+            var fs = nodeRequire('fs');
+
+            function readConfig() {
+                var config = [ "http://localhost:8888" ];
+                try {
+                    var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
+                    config = JSON.parse(configJSON);
+                    if (Array.isArray(config)) {
+                    } else if (typeof(config) === "string") {
+                        config = [ config ];
+                    } else {
+                        config = [ config.protocol + "://" + config.server + ":" + config.port ];
+                    }
+                } catch (e) {
+                    if (e.code !== "ENOENT") {
+                        throw e;
+                    }
+                }
+                config.forEach(function (webGMEUrl) {
+                    if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
+                    } else {
+                        webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl);
+                    }
+                    // TODO: handle removing URL
+                });
+            }
+            $(document).ready(readConfig);
+            fs.watch("config.json", function() { setTimeout(readConfig, 200); }); // setTimeout: likely handle O_TRUNC of config.json (though `move config.json.tmp config.json` is preferred)
+        })();
     </script>
   </head>
   <body>
-  <div class="container">
-    <div class="row" id="main">
-        <div class="col-md-12" id="status">Connecting...</div>
-        <div class="col-md-12" id="jobs"></div>
-    </div>
-
-    <!-- div data-ng-view="" -->
-    <div class="row" data-ng-controller="ExecutorWorkerController">
-        <div class="col-md-12">
-            <ul>
-                <li data-ng-repeat="job in jobs">{{job.hash}} {{job.status}} {{job.name}} {{job.url}} {{job.resultHash}}</li>
-            </ul>
-        </div>
-    </div>
-    <small>node.js <script>document.write(process.version)</script></small>
+  <div class="container" id="main">
   </div>
   </body>
 </html>
