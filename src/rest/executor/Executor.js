@@ -52,6 +52,28 @@ define(['logManager',
     };
     setInterval(workerTimeout, 10 * 1000);
 
+    var labelJobs = {};
+    var labelJobsFilename = 'labelJobs.json'; // TODO put somewhere that makes sense
+    function updateLabelJobs() {
+        var fs = require('fs');
+        fs.readFile(labelJobsFilename, {encoding: 'utf-8'}, function (err, data) {
+            logger.info("Reading " + labelJobsFilename);
+            labelJobs = JSON.parse(data);
+        });
+    }
+    function watchLabelJobs() {
+        var fs = require('fs');
+        fs.exists(labelJobsFilename, function (exists) {
+            if (exists) {
+                updateLabelJobs();
+                fs.watch(labelJobsFilename, { persistent: false }, function() { setTimeout(updateLabelJobs, 200); });
+            } else {
+                setTimeout(watchLabelJobs, 10 * 1000);
+            }
+        });
+    };
+    watchLabelJobs();
+
     var ExecutorREST = function(req,res,next){
         //global config is accessible via webGMEGlobal.getConfig()
         var config = webGMEGlobal.getConfig();
@@ -133,7 +155,10 @@ define(['logManager',
         }
         var hash = url[2];
 
-        var jobInfo = new JobInfo({hash:hash});
+        var info = req.body;
+        info.hash = hash;
+        info.createTime = new Date().toISOString();
+        var jobInfo = new JobInfo(info);
         // TODO: check if hash ok
         jobList.update({ hash: hash }, jobInfo, { upsert: true }, function(err) {
             if (err) {
@@ -201,7 +226,7 @@ define(['logManager',
                     return;
                 }
                 var worker = workers[i];
-                jobList.find({status: 'RUNNING', worker: worker.clientId}, function (err, jobs) {
+                jobList.find({status: 'RUNNING', worker: worker.clientId}).sort({createTime: 1}).exec(function (err, jobs) {
                     // FIXME: index jobList on status?
                     for (var j = 0; j < jobs.length; j += 1) {
                         delete jobs[j]._id;
@@ -233,11 +258,12 @@ define(['logManager',
         }
 
         var serverResponse = new WorkerInfo.ServerResponse({ refreshPeriod: workerRefreshInterval });
+        serverResponse.labelJobs = labelJobs;
         var clientRequest = new WorkerInfo.ClientRequest(req.body);
 
         workerList.update({ clientId: clientRequest.clientId }, { $set: { lastSeen: (new Date).getTime() / 1000 }}, { upsert: true }, function() {
             if (clientRequest.availableProcesses) {
-                jobList.find({status: 'CREATED'}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
+                jobList.find({status: 'CREATED', $not: { labels: {$nin: clientRequest.labels} }}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
                     if (err) {
                         res.send(500);
                         return; // FIXME need to return 2x
@@ -251,10 +277,11 @@ define(['logManager',
                         jobList.update({_id: docs[i]._id, status: 'CREATED'}, {$set: {status: 'RUNNING', worker: clientRequest.clientId}}, function (err, numReplaced) {
                             if (err) {
                                 res.send(500);
+                                return;
                             } else if (numReplaced) {
                                 serverResponse.jobsToStart.push(docs[i].hash);
-                                callback(i + 1);
                             }
+                            callback(i + 1);
                         });
                     };
                     callback(0);

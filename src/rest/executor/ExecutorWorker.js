@@ -22,9 +22,10 @@ define(['logManager',
         'minimatch',
         'executor/ExecutorClient',
         'executor/WorkerInfo',
+        'executor/JobInfo',
         'superagent'
     ],
-    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, superagent) {
+    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, JobInfo, superagent) {
         var UNZIP_EXE;
         var UNZIP_ARGS;
         if (process.platform === "win32") {
@@ -86,6 +87,7 @@ define(['logManager',
     var logger = // logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
         function() { };
     logger.prototype.error = function(x) { console.log(x); };
+    logger.prototype.info = logger.prototype.error;
     logger.prototype.debug = logger.prototype.error;
     logger = new logger();
 
@@ -106,12 +108,12 @@ define(['logManager',
         }
         this.availableProcessesContainer = parameters.availableProcessesContainer || { availableProcesses: 1 };
         this.clientRequest = new WorkerInfo.ClientRequest({ clientId: null });
+        this.labelJobs = {};
     };
     util.inherits(ExecutorWorker, events.EventEmitter);
 
-    ExecutorWorker.prototype.startJob = function (jobInfo) {
+    ExecutorWorker.prototype.startJob = function (jobInfo, errorCallback, successCallback) {
         var self = this;
-        this.emit('jobUpdate', jobInfo);
 
         // TODO: create job
         // TODO: what if job is already running?
@@ -119,24 +121,22 @@ define(['logManager',
         // get metadata for hash
         self.blobClient.getMetadata(jobInfo.hash, function (err, metadata) {
             if (err) {
-                logger.error(err);
                 jobInfo.status = 'FAILED_TO_GET_SOURCE_METADATA';
-                self.sendJobUpdate(jobInfo);
+                errorCallback(err);
                 return;
             }
 
             if (metadata.contentType !== BlobMetadata.CONTENT_TYPES.COMPLEX) {
                 jobInfo.status = 'FAILED_SOURCE_IS_NOT_COMPLEX';
-                self.sendJobUpdate(jobInfo);
+                errorCallback(jobInfo.status);
                 return;
             }
 
             // download artifacts
             self.blobClient.getObject(jobInfo.hash, function (err, content) {
                 if (err) {
-                    logger.error('Failed obtaining job source content, err: ' + err.toString());
                     jobInfo.status = 'FAILED_SOURCE_COULD_NOT_BE_OBTAINED';
-                    self.sendJobUpdate(jobInfo);
+                    errorCallback('Failed obtaining job source content, err: ' + err.toString());
                     return;
                 }
 
@@ -152,9 +152,8 @@ define(['logManager',
                 content = new Buffer(new Uint8Array(content));
                 fs.writeFile(zipPath, content, function (err) {
                     if (err) {
-                        logger.error('Failed creating source zip-file, err: ' + err.toString());
                         jobInfo.status = 'FAILED_CREATING_SOURCE_ZIP';
-                        self.sendJobUpdate(jobInfo);
+                        errorCallback('Failed creating source zip-file, err: ' + err.toString());
                         return;
                     }
 
@@ -165,9 +164,8 @@ define(['logManager',
                     var child = child_process.execFile(UNZIP_EXE, args, {cwd: jobDir},
                         function (err, stdout, stderr) {
                         if (err) {
-                            logger.error(err);
                             jobInfo.status = 'FAILED_UNZIP';
-                            self.sendJobUpdate(jobInfo);
+                            errorCallback(err);
                             return;
                         }
 
@@ -181,9 +179,8 @@ define(['logManager',
                         // get cmd file dynamically from the this.executorConfigFilename file
                         fs.readFile(path.join(jobDir, self.executorConfigFilename), 'utf8', function (err, data) {
                             if (err) {
-                                logger.error('Could not read ' + self.executorConfigFilename + ' err:' + err);
                                 jobInfo.status = 'FAILED_EXECUTOR_CONFIG';
-                                self.sendJobUpdate(jobInfo);
+                                errorCallback('Could not read ' + self.executorConfigFilename + ' err:' + err);
                                 return;
                             }
 
@@ -197,20 +194,20 @@ define(['logManager',
 
                                     jobInfo.finishTime = new Date().toISOString();
 
-                                    logger.debug('stdout: ' + stdout);
+                                    logger.debug(jobInfo.hash + ' stdout: ' + stdout);
 
                                     if (stderr) {
-                                        logger.error('stderr: ' + stderr);
+                                        logger.error(jobInfo.hash + ' stderr: ' + stderr);
                                     }
 
                                     if (error !== null) {
-                                        logger.error('exec error: ' + error);
-                                        jobInfo.status = 'FAILED';
+                                        logger.error(jobInfo.hash + ' exec error: ' + error);
+                                        jobInfo.status = 'ANALYSIS_FAILED';
                                     }
 
                                     // TODO: save stderr and stdout to files.
 
-                                    self.saveJobResults(jobInfo, jobDir, executorConfig);
+                                    successCallback(jobInfo, jobDir, executorConfig); // normally self.saveJobResults(jobInfo, jobDir, executorConfig);
                                 });
                         });
                     });
@@ -312,7 +309,7 @@ define(['logManager',
                             pendingStatus = err;
                         }
                         counter -= 1;
-                        if (counter <= 0) {
+                        if (counter == 0) {
                             if (pendingStatus) {
                                 jobInfo.status = pendingStatus;
                             } else {
@@ -388,7 +385,9 @@ define(['logManager',
     };
 
     ExecutorWorker.prototype.sendJobUpdate = function(jobInfo) {
-        this.availableProcessesContainer.availableProcesses += 1; // TODO: be sure not to do this twice for one job
+        if (JobInfo.isFinishedStatus(jobInfo.status)) {
+            this.availableProcessesContainer.availableProcesses += 1;
+        }
         this.executorClient.updateJob(jobInfo, function (err) {
             if (err) {
                 console.log(err); // TODO
@@ -437,11 +436,48 @@ define(['logManager',
                             self.executorClient.getInfo(jobsToStart[i], function (err, info) {
                                 if (err) {
                                     // TODO
+                                    this.availableProcessesContainer.availableProcesses += 1;
+                                    return;
                                 }
                                 self.jobList[info.hash] = info;
                                 self.availableProcessesContainer.availableProcesses -= 1;
-                                self.startJob(info);
+                                self.emit('jobUpdate', info);
+                                self.startJob(info, function (err) {
+                                    logger.error("Job " + info.hash + " failed to run: " + err + ". Status: " + info.status);
+                                    self.sendJobUpdate(info);
+                                }, function(jobInfo, jobDir, executorConfig) {
+                                    self.saveJobResults(jobInfo, jobDir, executorConfig);
+                                });
                             });
+                        }
+                        for (var label in response.labelJobs) {
+                            if (self.availableProcessesContainer.availableProcesses) {
+                                if (response.labelJobs.hasOwnProperty(label) && !self.labelJobs.hasOwnProperty(label)) {
+                                    self.labelJobs[label] = response.labelJobs[label];
+                                    self.availableProcessesContainer.availableProcesses -= 1;
+                                    (function (label) {
+                                        self.executorClient.getInfo(self.labelJobs[label], function (err, info) {
+                                            if (err) {
+                                                this.availableProcessesContainer.availableProcesses += 1;
+                                                logger.error("Label job " + label + "(" + self.labelJobs[label] + ") failed to get blob: " + err);
+                                                return;
+                                            }
+                                            self.startJob(info, function (err) {
+                                                this.availableProcessesContainer.availableProcesses += 1;
+                                                logger.error("Label job " + label + "(" + info.hash + ") failed to run: " + err + ". Status: " + info.status);
+                                            }, function(jobInfo, jobDir, executorConfig) {
+                                                this.availableProcessesContainer.availableProcesses += 1;
+                                                if (jobInfo.status !== 'ANALYSIS_FAILED') {
+                                                    self.clientRequest.labels.push(label);
+                                                    logger.info("Label job " + label + " succeeded. Labels are " + JSON.stringify(self.clientRequest.labels));
+                                                } else {
+                                                    logger.error("Label job " + label + "(" + info.hash + ") run failed: " + err + ". Status: " + info.status);
+                                                }
+                                            });
+                                        });
+                                    })(label);
+                                }
+                            }
                         }
 
                         callback(null, response);

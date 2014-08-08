@@ -59,8 +59,11 @@ define(['superagent'], function (superagent) {
         }
     };
 
-    ExecutorClient.prototype.createJob = function (hash, callback) {
-        this.sendHttpRequest('POST', this.getCreateURL(hash), function (err, response) {
+    ExecutorClient.prototype.createJob = function (jobInfo, callback) {
+        if (typeof jobInfo === 'string') {
+            jobInfo = { hash: jobInfo }; // old API
+        }
+        this.sendHttpRequestWithData('POST', this.getCreateURL(jobInfo.hash), jobInfo, function (err, response) {
             if (err) {
                 callback(err);
                 return;
@@ -126,8 +129,8 @@ define(['superagent'], function (superagent) {
             req.send(data);
         }
         req.end(function (err, res) {
-            if (res.statusCode > 399) {
-                callback(res.statusCode, res.text);
+            if (res.status > 399) {
+                callback(res.status, res.text);
             } else {
                 callback(null, res.text);
             }
