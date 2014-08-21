@@ -21,3 +21,19 @@ Implementation TODO:
 Recover from transient errors
 Handle disconnecting/reconnecting of workers more gracefully
 Expose REST API for workers
+
+Labels
+Jobs with labels specified require an executor_worker that has all of the jobs' labels. executor_workers get labels automatically, by running jobs that determine if a tool is on that machine.
+HOWTO: add label job
+1. Create the job itself:
+  Write a cmd.exe script "run_execution.cmd" that exits with code 0 if the tool exists, is licensed, etc
+  echo { "cmd": "run_execution.cmd", "resultArtifacts": [ ] } > executor_config.json
+  "C:\Program Files\7-Zip\7z.exe" a META_14.08.zip run_execution.cmd executor_config.json
+2. Add an entry to labelJobs.json
+  Method 1: manual:
+    curl --header "Content-Type:application/octet-stream" --data-binary @META_14.08.zip http://localhost:8855/rest/blob/createFile/META_14.08.zip
+    add entry "META_14.09": "b350eb95d1cdf7424af72253902081107403f76b" to labelJobs.json
+  Method 2: addLabelJob.js script:
+    put all label job .zip files into a directory
+    node addLabelJob.js http://localhost:8855/ *zip > labelJobs.json
+    move /y labelJobs.json ..\labelJobs.json

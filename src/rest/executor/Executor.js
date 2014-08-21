@@ -52,7 +52,7 @@ define(['logManager',
     };
     setInterval(workerTimeout, 10 * 1000);
 
-    var labelJobs = {};
+    var labelJobs = {}; // map from label to blob hash
     var labelJobsFilename = 'labelJobs.json'; // TODO put somewhere that makes sense
     function updateLabelJobs() {
         var fs = require('fs');

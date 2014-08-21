@@ -126,12 +126,6 @@ define(['logManager',
                 return;
             }
 
-            if (metadata.contentType !== BlobMetadata.CONTENT_TYPES.COMPLEX) {
-                jobInfo.status = 'FAILED_SOURCE_IS_NOT_COMPLEX';
-                errorCallback(jobInfo.status);
-                return;
-            }
-
             // download artifacts
             self.blobClient.getObject(jobInfo.hash, function (err, content) {
                 if (err) {
@@ -165,6 +159,7 @@ define(['logManager',
                         function (err, stdout, stderr) {
                         if (err) {
                             jobInfo.status = 'FAILED_UNZIP';
+                            console.error(stderr);
                             errorCallback(err);
                             return;
                         }
@@ -260,7 +255,7 @@ define(['logManager',
                 };
             counter = filesToArchive.length;
             if (filesToArchive.length === 0) {
-                logger.info('There was no files to archive..');
+                logger.info('There were no files to archive..');
                 counterCallback(null);
             }
             for (i = 0; i < filesToArchive.length; i += 1) {
@@ -309,7 +304,7 @@ define(['logManager',
                             pendingStatus = err;
                         }
                         counter -= 1;
-                        if (counter == 0) {
+                        if (counter <= 0) {
                             if (pendingStatus) {
                                 jobInfo.status = pendingStatus;
                             } else {
@@ -456,24 +451,18 @@ define(['logManager',
                                     self.labelJobs[label] = response.labelJobs[label];
                                     self.availableProcessesContainer.availableProcesses -= 1;
                                     (function (label) {
-                                        self.executorClient.getInfo(self.labelJobs[label], function (err, info) {
-                                            if (err) {
-                                                this.availableProcessesContainer.availableProcesses += 1;
-                                                logger.error("Label job " + label + "(" + self.labelJobs[label] + ") failed to get blob: " + err);
-                                                return;
+                                        var info = { hash: response.labelJobs[label] };
+                                        self.startJob(info, function (err) {
+                                            this.availableProcessesContainer.availableProcesses += 1;
+                                            logger.error("Label job " + label + "(" + info.hash + ") failed to run: " + err + ". Status: " + info.status);
+                                        }, function(jobInfo, jobDir, executorConfig) {
+                                            this.availableProcessesContainer.availableProcesses += 1;
+                                            if (jobInfo.status !== 'ANALYSIS_FAILED') {
+                                                self.clientRequest.labels.push(label);
+                                                logger.info("Label job " + label + " succeeded. Labels are " + JSON.stringify(self.clientRequest.labels));
+                                            } else {
+                                                logger.error("Label job " + label + "(" + info.hash + ") run failed: " + err + ". Status: " + info.status);
                                             }
-                                            self.startJob(info, function (err) {
-                                                this.availableProcessesContainer.availableProcesses += 1;
-                                                logger.error("Label job " + label + "(" + info.hash + ") failed to run: " + err + ". Status: " + info.status);
-                                            }, function(jobInfo, jobDir, executorConfig) {
-                                                this.availableProcessesContainer.availableProcesses += 1;
-                                                if (jobInfo.status !== 'ANALYSIS_FAILED') {
-                                                    self.clientRequest.labels.push(label);
-                                                    logger.info("Label job " + label + " succeeded. Labels are " + JSON.stringify(self.clientRequest.labels));
-                                                } else {
-                                                    logger.error("Label job " + label + "(" + info.hash + ") run failed: " + err + ". Status: " + info.status);
-                                                }
-                                            });
                                         });
                                     })(label);
                                 }
