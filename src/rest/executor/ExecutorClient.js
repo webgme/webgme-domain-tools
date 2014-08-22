@@ -119,6 +119,18 @@ define(['superagent'], function (superagent) {
         });
     };
 
+    ExecutorClient.prototype.getWorkersInfo = function (callback) {
+
+        this.sendHttpRequest('GET', this.executorUrl + 'worker', function (err, response) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            callback(null, JSON.parse(response));
+        });
+    };
+
     ExecutorClient.prototype.sendHttpRequest = function (method, url, callback) {
         return this.sendHttpRequestWithData(method, url, null, callback);
     };
