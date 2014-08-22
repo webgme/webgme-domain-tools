@@ -197,7 +197,7 @@ define(['logManager',
 
                                     if (error !== null) {
                                         logger.error(jobInfo.hash + ' exec error: ' + error);
-                                        jobInfo.status = 'ANALYSIS_FAILED';
+                                        jobInfo.status = 'FAILED_TO_EXECUTE';
                                     }
 
                                     // TODO: save stderr and stdout to files.
@@ -457,7 +457,7 @@ define(['logManager',
                                             logger.error("Label job " + label + "(" + info.hash + ") failed to run: " + err + ". Status: " + info.status);
                                         }, function(jobInfo, jobDir, executorConfig) {
                                             this.availableProcessesContainer.availableProcesses += 1;
-                                            if (jobInfo.status !== 'ANALYSIS_FAILED') {
+                                            if (jobInfo.status !== 'FAILED_TO_EXECUTE') {
                                                 self.clientRequest.labels.push(label);
                                                 logger.info("Label job " + label + " succeeded. Labels are " + JSON.stringify(self.clientRequest.labels));
                                             } else {
