@@ -231,7 +231,9 @@ define(['logManager',
                     for (var j = 0; j < jobs.length; j += 1) {
                         delete jobs[j]._id;
                     }
-                    response[worker.clientId] = jobs;
+                    delete worker._id;
+                    response[worker.clientId] = worker;
+                    response[worker.clientId].jobs = jobs;
 
                     jobQuery(i + 1);
                 });
@@ -261,7 +263,7 @@ define(['logManager',
         serverResponse.labelJobs = labelJobs;
         var clientRequest = new WorkerInfo.ClientRequest(req.body);
 
-        workerList.update({ clientId: clientRequest.clientId }, { $set: { lastSeen: (new Date).getTime() / 1000 }}, { upsert: true }, function() {
+        workerList.update({ clientId: clientRequest.clientId }, { $set: { lastSeen: (new Date).getTime() / 1000, labels: clientRequest.labels }}, { upsert: true }, function() {
             if (clientRequest.availableProcesses) {
                 jobList.find({status: 'CREATED', $not: { labels: {$nin: clientRequest.labels} }}).limit(clientRequest.availableProcesses).exec(function (err, docs) {
                     if (err) {
