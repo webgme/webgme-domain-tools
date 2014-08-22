@@ -8,7 +8,7 @@ var filearg = process.argv[3];
 
 var requirejs = require('requirejs');
 requirejs.config({
-    baseUrl: '..',
+    baseUrl: __dirname + '/..',
     paths: {
         //WebGME custom modules
         "logManager": '../webgme/common/LogManager',
