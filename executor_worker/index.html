@@ -8,8 +8,10 @@
     <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
+    <link href="styles/worker.css" rel="stylesheet">
 
-    <!-- script src="./lib/moment.min.js" type="text/javascript" -->
+
+      <!-- script src="./lib/moment.min.js" type="text/javascript" -->
     <!-- script src="./lib/angular-file-upload-shim.min.js" type="text/javascript" -->
 
     <script src="https://code.angularjs.org/1.2.18/angular.js" type="text/javascript"></script>
@@ -31,20 +33,27 @@
             var url = nodeRequire('url');
             var dataControllerName = "ExecutorWorkerController_" + url.parse(webGMEUrl).hostname;
             var workerView = $('\
-            <div>\
-            <div class="row">\
-                    <div class="hostname"></div>\
-                    <div class="col-md-12 status">Connecting...</div>\
-            </div>\
-            <div class="row controller">\
-                <div class="col-md-12">\
-                    <ul>\
-                        <li data-ng-repeat="job in jobs">{{job.hash}} {{job.status}} {{job.name}} {{job.url}} {{job.resultHash}}</li>\
-                    </ul>\
+            <div class="container">\
+                <div class="row">\
+                        <h1 class="hostname"><span></span> <small></small></h1>\
+                        <div class="col-md-12 status">Connecting...</div>\
                 </div>\
-            </div>\
+                <div class="row controller">\
+                    <div class="col-md-12">\
+                        <ul>\
+                            <li data-ng-repeat="job in jobs">\
+                             <span class="hash">{{job.hash}}</span>\
+                             <i class="badge" data-ng-class="{\'alert-success\': job.status === \'SUCCESS\', \'alert-danger\': job.status.indexOf(\'FAILED\') === 0, \'alert-info\': job.status === \'CREATED\'}">{{job.status}}</i>\
+                             <span>{{job.name}}</span>\
+                             <span>{{job.url}}</span>\
+                             <span>{{job.resultHash}}</span>\
+                             </li>\
+                        </ul>\
+                    </div>\
+                </div>\
             </div>').appendTo($("#main"));
-            workerView.find(".hostname").text(url.parse(webGMEUrl).hostname);
+            workerView.find(".hostname span").text(url.parse(webGMEUrl).hostname);
+            workerView.find(".hostname small").text(webGMEUrl);
             workerView.find(".controller").attr("data-ng-controller", dataControllerName);
             var statusDiv = workerView.find(".status");
 
@@ -114,7 +123,7 @@
 
                         var WebGMEApp = angular.module('WebGMEApp', ['ngRoute']);
                         WebGMEApp.value("worker", worker);
-    //                  WebGMEApp.value("worker", null);
+//                      WebGMEApp.value("worker", null);
                         WebGMEApp.controller(dataControllerName, ExecutorWorkerController);
                         /*WebGMEApp.config(['$routeProvider',
                          function ($routeProvider) {
@@ -178,7 +187,7 @@
     </script>
   </head>
   <body>
-  <div class="container" id="main">
-  </div>
+    <div class="container" id="main">
+    </div>
   </body>
 </html>
