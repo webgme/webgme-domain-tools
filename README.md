@@ -28,6 +28,6 @@ If the package.json changes then:
 
 ## Executing plugin ##
 
-`node node_modules\webgme\bin\run_plugin.js --help` gives detailed description about the available command line flags.
+`node node_modules\webgme\src\bin\run_plugin.js --help` gives detailed description about the available command line flags.
 
-Example: `node node_modules\webgme\bin\run_plugin.js -c config.json -p Test -n ChildrenConfig`
+Example: `node node_modules\webgme\src\bin\run_plugin.js -c config.json -p Test -n ChildrenConfig`
