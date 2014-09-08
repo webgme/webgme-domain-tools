@@ -22,7 +22,7 @@ define([], function() {
         'PortComposition': '/1822302751/472382791',
         'Property': '/1822302751/1417572566',
         'SimulationParameter': '/1822302751/1963127367',
-        'SimulationParameterCompostiion': '/1822302751/238092457'
+        'SimulationParameterComposition': '/1822302751/238092457'
     };
 
 });
