@@ -141,6 +141,10 @@ define(['superagent'], function (superagent) {
             req.send(data);
         }
         req.end(function (err, res) {
+            if (err) {
+                callback(err);
+                return;
+            }
             if (res.status > 399) {
                 callback(res.status, res.text);
             } else {
