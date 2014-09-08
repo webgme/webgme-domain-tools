@@ -115,7 +115,7 @@ define(['plugin/PluginConfig',
                 self.logger.info("HERE:" + metaElementName);
                 self.createMessage(metaElementNode , metaElementName);
 
-                self.LanguageDocumentation.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode);
+                self.LanguageDocumentation.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode, true);
                 self.LanguageDocumentation.LanguageElementList.push(metaElementName);
             }
         }
@@ -126,17 +126,18 @@ define(['plugin/PluginConfig',
             path,
             elementDoc = {
                 "Name": null,
-                "DisplayedName": null,
-                "Role": null,
-                "Type": null,
+                //"DisplayedName": null,
+                //"Role": null,
+                //"Type": null,
                 "GUID": null,
                 "ID": null,
-                "Description": null,
-                "Namespace": null,
+                //"Description": null,
+                //"Namespace": null,
                 "IsAbstract": null,
-                "IsImmediate": null,
-                "Visualization": null,
+                //"IsImmediate": null,
+                //"Visualization": null,
                 "Attributes": [],
+                "RegistryNames": [],
                 "BaseClasses": [],
                 "DerivedClasses": [],
                 "ParentContainerClasses": [],
@@ -149,8 +150,6 @@ define(['plugin/PluginConfig',
                 "DestinationClasses": []
             },
 
-            children = [],
-            parents = [],
             baseTypes = [];
 
         if (metaNode != null) {
@@ -160,33 +159,17 @@ define(['plugin/PluginConfig',
             elementDoc.ID = self.core.getPath(metaNode);
             elementDoc.GUID = self.core.getGuid(metaNode);
             elementDoc.IsAbstract = self.core.getRegistry(metaNode, 'isAbstract');
-            elementDoc.Attributes = self.core.getAttributeNames(metaNode);
-            elementDoc.Attributes.sort();
-            parents.push(self.core.getParent(metaNode));
-            baseTypes.push(self.core.getBase(metaNode));
+
+            if (getDetails) {
+                elementDoc.Attributes = self.core.getAttributeNames(metaNode);
+                elementDoc.Attributes.sort();
+                elementDoc.RegistryNames = self.core.getRegistryNames(metaNode);
+                elementDoc.RegistryNames.sort();
+
+                elementDoc.ParentContainerClasses.push(self.makeNewElementDoc(self.core.getParent(metaNode), false));
+                elementDoc.BaseClasses.push(self.makeNewElementDoc(self.core.getBase(metaNode), false));
+            }
         }
-
-        ///
-        metaType.name = self.core.getAttribute(self.META[name], 'name');
-        metaType.ID = self.core.getPath(self.META[name]);
-        metaType.GUID = self.core.getGuid(self.META[name]);
-        metaType.Hash = self.core.getHash(self.META[name]);
-
-        metaType.isAbstract = self.core.getRegistry(self.META[name], 'isAbstract');
-
-        var baseNode = self.core.getBase(self.META[name]);
-        if (baseNode) {
-            metaType.base = self.core.getAttribute(self.core.getBase(self.META[name]), 'name');
-        }
-
-        metaType.attributeNames = self.core.getAttributeNames(self.META[name]);
-        metaType.attributeNames.sort();
-        metaType.registryNames = self.core.getRegistryNames(self.META[name]);
-        metaType.registryNames.sort();
-        ///
-
-
-
 
         return elementDoc;
     };
