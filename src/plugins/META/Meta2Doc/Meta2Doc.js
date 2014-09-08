@@ -18,7 +18,18 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
-        this.LanguageElements = {};
+        this.LanguageDocumentation = {
+            "LanguageElements": {},
+            "LanguageElementList": [],
+            "LanguageInfo": {
+                "Name": null,
+                "Version": null,
+                "ChangeTime": null,
+                "Author": null,
+                "Comment": null,
+                "Details": {}
+            }
+        };
     };
 
     // Prototypal inheritance from PluginBase.
@@ -70,11 +81,25 @@ define(['plugin/PluginConfig',
 
         self.getMetaRelationships();
 
-        self.result.setSuccess(true);
-        self.save('added obj', function (err) {
-            callback(null, self.result);
-        });
+        var addFileCallbackFunction = function (err, hash) {
 
+            var artifactSaveCallbackFunction = function (err, artifactHash) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    return callback(err, self.result);
+                } else {
+                    self.result.setSuccess(true);
+                    self.result.addArtifact(artifactHash);
+                    self.save('added obj', function (err) {
+                        callback(null, self.result);
+                    });
+                }
+            };
+
+            documentationArtifact.save(artifactSaveCallbackFunction);
+        };
+
+        documentationArtifact.addFile('LanguageElements.json', JSON.stringify(self.LanguageDocumentation), addFileCallbackFunction);
     };
 
     Meta2Doc.prototype.getMetaRelationships = function () {
@@ -90,20 +115,22 @@ define(['plugin/PluginConfig',
                 self.logger.info("HERE:" + metaElementName);
                 self.createMessage(metaElementNode , metaElementName);
 
-                self.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode);
+                self.LanguageDocumentation.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode);
+                self.LanguageDocumentation.LanguageElementList.push(metaElementName);
             }
         }
-
     };
 
-    Meta2Doc.prototype.makeNewElementDoc = function (metaNode) {
+    Meta2Doc.prototype.makeNewElementDoc = function (metaNode, getDetails) {
         var self = this,
+            path,
             elementDoc = {
                 "Name": null,
                 "DisplayedName": null,
                 "Role": null,
                 "Type": null,
                 "GUID": null,
+                "ID": null,
                 "Description": null,
                 "Namespace": null,
                 "IsAbstract": null,
@@ -120,7 +147,46 @@ define(['plugin/PluginConfig',
                 "IncomingConnectionClasses": [],
                 "SourceClasses": [],
                 "DestinationClasses": []
-            };
+            },
+
+            children = [],
+            parents = [],
+            baseTypes = [];
+
+        if (metaNode != null) {
+            path = self.core.getPath(metaNode);
+
+            elementDoc.Name = self.core.getAttribute(metaNode, 'name');
+            elementDoc.ID = self.core.getPath(metaNode);
+            elementDoc.GUID = self.core.getGuid(metaNode);
+            elementDoc.IsAbstract = self.core.getRegistry(metaNode, 'isAbstract');
+            elementDoc.Attributes = self.core.getAttributeNames(metaNode);
+            elementDoc.Attributes.sort();
+            parents.push(self.core.getParent(metaNode));
+            baseTypes.push(self.core.getBase(metaNode));
+        }
+
+        ///
+        metaType.name = self.core.getAttribute(self.META[name], 'name');
+        metaType.ID = self.core.getPath(self.META[name]);
+        metaType.GUID = self.core.getGuid(self.META[name]);
+        metaType.Hash = self.core.getHash(self.META[name]);
+
+        metaType.isAbstract = self.core.getRegistry(self.META[name], 'isAbstract');
+
+        var baseNode = self.core.getBase(self.META[name]);
+        if (baseNode) {
+            metaType.base = self.core.getAttribute(self.core.getBase(self.META[name]), 'name');
+        }
+
+        metaType.attributeNames = self.core.getAttributeNames(self.META[name]);
+        metaType.attributeNames.sort();
+        metaType.registryNames = self.core.getRegistryNames(self.META[name]);
+        metaType.registryNames.sort();
+        ///
+
+
+
 
         return elementDoc;
     };
