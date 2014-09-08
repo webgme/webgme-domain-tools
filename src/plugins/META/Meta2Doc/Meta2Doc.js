@@ -18,7 +18,7 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
-        this.metaName2node = {};
+        this.LanguageElements = {};
     };
 
     // Prototypal inheritance from PluginBase.
@@ -66,6 +66,10 @@ define(['plugin/PluginConfig',
 
         self.logger.info("Running Meta2Doc");
 
+        var documentationArtifact = self.blobClient.createArtifact('FMU');
+
+        self.getMetaRelationships();
+
         self.result.setSuccess(true);
         self.save('added obj', function (err) {
             callback(null, self.result);
@@ -81,10 +85,61 @@ define(['plugin/PluginConfig',
 
         for (metaElementName in self.META) {
             if (self.META.hasOwnProperty(metaElementName)) {
+                metaElementNode = self.META[metaElementName];
+
                 self.logger.info("HERE:" + metaElementName);
+                self.createMessage(metaElementNode , metaElementName);
+
+                self.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode);
             }
         }
 
+    };
+
+    Meta2Doc.prototype.makeNewElementDoc = function (metaNode) {
+        var self = this,
+            elementDoc = {
+                "Name": null,
+                "DisplayedName": null,
+                "Role": null,
+                "Type": null,
+                "GUID": null,
+                "Description": null,
+                "Namespace": null,
+                "IsAbstract": null,
+                "IsImmediate": null,
+                "Visualization": null,
+                "Attributes": [],
+                "BaseClasses": [],
+                "DerivedClasses": [],
+                "ParentContainerClasses": [],
+                "ChildClasses": [],
+                "ReferredClasses": [],
+                "ReferringClasses": [],
+                "OutgoingConnectionClasses": [],
+                "IncomingConnectionClasses": [],
+                "SourceClasses": [],
+                "DestinationClasses": []
+            };
+
+        return elementDoc;
+    };
+
+    Meta2Doc.prototype.makeNewAttributeDoc = function (metaNode) {
+        var self = this,
+            attributeDoc = {
+                "Name": null,
+                "Type": null,
+                "DefaultValue": null,
+                "EnumOptions": null,
+                "GUID": null,
+                "Description": null,
+                "Namespace": null,
+                "IsImmediate": null,
+                "Help": null
+            };
+
+        return attributeDoc;
     };
 
     return Meta2Doc;
