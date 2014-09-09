@@ -18,6 +18,9 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
+        this.id2MetaNode = {};
+        this.id2ElementDoc = {};
+
         this.LanguageDocumentation = {
             "LanguageElements": {},
             "LanguageElementList": [],
@@ -111,8 +114,13 @@ define(['plugin/PluginConfig',
         for (metaElementName in self.META) {
             if (self.META.hasOwnProperty(metaElementName)) {
                 metaElementNode = self.META[metaElementName];
+                self.id2MetaNode[self.core.getPath(metaElementNode)] = metaElementNode;
+            }
+        }
 
-                self.logger.info("HERE:" + metaElementName);
+        for (metaElementName in self.META) {
+            if (self.META.hasOwnProperty(metaElementName)) {
+                metaElementNode = self.META[metaElementName];
                 self.createMessage(metaElementNode , metaElementName);
 
                 self.LanguageDocumentation.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode, true);
@@ -123,7 +131,7 @@ define(['plugin/PluginConfig',
 
     Meta2Doc.prototype.makeNewElementDoc = function (metaNode, getDetails) {
         var self = this,
-            path,
+            iterator,
             elementDoc = {
                 "Name": null,
                 //"DisplayedName": null,
@@ -134,31 +142,44 @@ define(['plugin/PluginConfig',
                 //"Description": null,
                 //"Namespace": null,
                 "IsAbstract": null,
+                "Meta": null,
                 //"IsImmediate": null,
                 //"Visualization": null,
-                "Attributes": [],
-                "RegistryNames": [],
+//                "Attributes": [],
+//                "RegistryNames": [],
                 "BaseClasses": [],
-                "DerivedClasses": [],
-                "ParentContainerClasses": [],
-                "ChildClasses": [],
-                "ReferredClasses": [],
-                "ReferringClasses": [],
-                "OutgoingConnectionClasses": [],
-                "IncomingConnectionClasses": [],
+//                "DerivedClasses": [],
+//                "ParentContainerClasses": [],
+//                "ChildClasses": [],
+//                "ReferredClasses": [],
+//                "ReferringClasses": [],
+//                "OutgoingConnectionClasses": [],
+//                "IncomingConnectionClasses": [],
                 "SourceClasses": [],
                 "DestinationClasses": []
-            },
-
-            baseTypes = [];
+            };
 
         if (metaNode != null) {
-            path = self.core.getPath(metaNode);
-
             elementDoc.Name = self.core.getAttribute(metaNode, 'name');
             elementDoc.ID = self.core.getPath(metaNode);
             elementDoc.GUID = self.core.getGuid(metaNode);
             elementDoc.IsAbstract = self.core.getRegistry(metaNode, 'isAbstract');
+
+            elementDoc.Meta = self.getMeta(metaNode);
+
+            // SourceClasses
+            if (elementDoc.Meta.pointers.hasOwnProperty('src')) {
+                for (iterator=0;iterator<elementDoc.Meta.pointers['src'].length;iterator++) {
+                    elementDoc.SourceClasses.push(self.core.getAttribute(self.id2MetaNode[elementDoc.Meta.pointers['src'][iterator]], 'name'));
+                }
+            }
+
+            // DestinationClasses
+            if (elementDoc.Meta.pointers.hasOwnProperty('dst')) {
+                for (iterator=0;iterator<elementDoc.Meta.pointers['dst'].length;iterator++) {
+                    elementDoc.DestinationClasses.push(self.core.getAttribute(self.id2MetaNode[elementDoc.Meta.pointers['dst'][iterator]], 'name'));
+                }
+            }
 
             if (getDetails) {
                 elementDoc.Attributes = self.core.getAttributeNames(metaNode);
@@ -166,7 +187,7 @@ define(['plugin/PluginConfig',
                 elementDoc.RegistryNames = self.core.getRegistryNames(metaNode);
                 elementDoc.RegistryNames.sort();
 
-                elementDoc.ParentContainerClasses.push(self.makeNewElementDoc(self.core.getParent(metaNode), false));
+                //elementDoc.ParentContainerClasses.push(self.makeNewElementDoc(self.core.getParent(metaNode), false));
                 elementDoc.BaseClasses.push(self.makeNewElementDoc(self.core.getBase(metaNode), false));
             }
         }
@@ -189,6 +210,37 @@ define(['plugin/PluginConfig',
             };
 
         return attributeDoc;
+    };
+
+    Meta2Doc.prototype.getMeta = function (nodeObj){
+        var self = this,
+            meta = {children:{},attributes:{},pointers:{}},
+            node = nodeObj || null;
+
+        if(node){
+            var metaNode = self.core.getChild(node,"_meta");
+            var childrenNode = self.core.getChild(metaNode,"children");
+
+            //children
+            meta.children = self.core.getMemberPaths(childrenNode,"items");
+
+            //attributes - they are simple json objects from our point of view
+            var atrNames = self.core.getAttributeNames(metaNode);
+            for(var i=0;i<atrNames.length;i++){
+                meta.attributes[atrNames[i]] = JSON.parse(JSON.stringify(self.core.getAttribute(metaNode,atrNames[i])));
+            }
+
+            //pointers and pointer lists
+            var pointerNames = self.core.getPointerNames(metaNode) || [];
+            for(var i=0;i<pointerNames.length;i++){
+                var pointerNode = self.core.getChild(metaNode,"_p_"+pointerNames[i]);
+                meta.pointers[pointerNames[i]] = self.core.getMemberPaths(pointerNode,"items");
+            }
+
+            return meta;
+        } else {
+            return null;
+        }
     };
 
     return Meta2Doc;
