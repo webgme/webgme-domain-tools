@@ -117,12 +117,7 @@ define(['plugin/PluginConfig',
                 id = self.core.getPath(metaElementNode);
 
                 // Sep10Experiment
-                self.id2MetaElement[id] = {
-                    "name": metaElementName,
-                    "node": metaElementNode,
-                    "meta": self.getMeta(metaElementNode),
-                    "eDoc": self.makeNewElementDoc(metaElementNode, true)
-                };
+                metaElement = self.makeGetMetaElement(id, metaElementName, metaElementNode);
             }
         }
 
@@ -137,21 +132,49 @@ define(['plugin/PluginConfig',
         }
     };
 
+    Meta2Doc.prototype.makeGetMetaElement = function (id, name, node) {
+        var self = this;
+
+        if (self.id2MetaElement.hasOwnProperty(id)) {
+            return self.id2MetaElement[id];
+        } else {
+            self.id2MetaElement[id] = {
+                "name": name,
+                "node": node,
+                "meta": self.getMeta(node),
+                "eDoc": self.makeNewElementDoc(node, true)
+            };
+
+            return self.id2MetaElement[id];
+        }
+    };
+
     Meta2Doc.prototype.engorgeExistingElementDoc = function (metaElementObject) {
         var self = this,
-            iterator;
+            iterator,
+            tempElementDoc,
+            simpleMetaElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
 
         // BaseClasses
         var baseClass = self.core.getBase(metaElementObject.node);
         if (baseClass != null) {
-            var baseClassDoc = self.makeNewElementDoc(baseClass, false);
+            var baseClassDoc = self.makeNewElementDoc(baseClass, false),
+                baseClassId = self.core.getPath(baseClass),
+                baseClassMetaElementObject;
             baseClassDoc.IsImmediate = true;
             metaElementObject.eDoc.BaseClasses.push(baseClassDoc);
+
+            // DerivedClasses (of the BaseClass)
+            if (self.id2MetaElement.hasOwnProperty(baseClassId)) {
+                baseClassMetaElementObject = self.id2MetaElement[baseClassId];
+                tempElementDoc = simpleMetaElementDoc;
+                tempElementDoc.IsImmediate = true;
+                baseClassMetaElementObject.eDoc.DerivedClasses.push(tempElementDoc);
+            }
+
         }
 
         for (var pointerName in metaElementObject.meta.pointers) {
-            var tempElementDoc;
-
             // SourceClasses
             if (pointerName === 'src' && metaElementObject.meta.pointers.hasOwnProperty('src')) {
                 var srcNodeId,
@@ -167,7 +190,7 @@ define(['plugin/PluginConfig',
                     metaElementObject.eDoc.SourceClasses.push(tempElementDoc);
 
                     // OutgoingConnectionClasses (of the SourceClass)
-                    tempElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
+                    tempElementDoc = simpleMetaElementDoc;
                     tempElementDoc.IsImmediate = true;
                     srcMetaElementObject.eDoc.OutgoingConnectionClasses.push(tempElementDoc);
                 }
@@ -183,7 +206,7 @@ define(['plugin/PluginConfig',
                     metaElementObject.eDoc.DestinationClasses.push(tempElementDoc);
 
                     // IncomingConnectionClasses (of the DestinationClass)
-                    tempElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
+                    tempElementDoc = simpleMetaElementDoc;
                     tempElementDoc.IsImmediate = true;
                     dstMetaElementObject.eDoc.IncomingConnectionClasses.push(tempElementDoc);
                 }
@@ -199,7 +222,7 @@ define(['plugin/PluginConfig',
                     metaElementObject.eDoc.ReferredClasses.push(tempElementDoc);
 
                     // IncomingConnectionClasses (of the DestinationClass)
-                    tempElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
+                    tempElementDoc = simpleMetaElementDoc;
                     tempElementDoc.Note = pointerName;
                     referredMetaElementObject.eDoc.ReferringClasses.push(tempElementDoc);
                 }
