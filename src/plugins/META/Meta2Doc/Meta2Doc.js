@@ -18,8 +18,7 @@ define(['plugin/PluginConfig',
         // Call base class' constructor.
         PluginBase.call(this);
 
-        this.id2MetaNode = {};
-        this.id2ElementDoc = {};
+        this.id2MetaElement = {}; // {"node": the node, "meta": self.getMeta, "eDoc": self.makeNewElementDoc}
 
         this.LanguageDocumentation = {
             "LanguageElements": {},
@@ -109,54 +108,93 @@ define(['plugin/PluginConfig',
         var self = this,
             metaElementName,
             metaElementNode,
-            baseClasses;
+            id,
+            metaElement;
 
         for (metaElementName in self.META) {
             if (self.META.hasOwnProperty(metaElementName)) {
                 metaElementNode = self.META[metaElementName];
-                self.id2MetaNode[self.core.getPath(metaElementNode)] = metaElementNode;
+                id = self.core.getPath(metaElementNode);
+
+                // Sep10Experiment
+                self.id2MetaElement[id] = {
+                    "name": metaElementName,
+                    "node": metaElementNode,
+                    "meta": self.getMeta(metaElementNode),
+                    "eDoc": self.makeNewElementDoc(metaElementNode, true)
+                };
             }
         }
 
-        for (metaElementName in self.META) {
-            if (self.META.hasOwnProperty(metaElementName)) {
-                metaElementNode = self.META[metaElementName];
-                self.createMessage(metaElementNode , metaElementName);
+        for (id in self.id2MetaElement) {
+            if (self.id2MetaElement.hasOwnProperty(id)) {
+                metaElement = self.id2MetaElement[id];
 
-                self.LanguageDocumentation.LanguageElements[metaElementName] = self.makeNewElementDoc(metaElementNode, true);
-                self.LanguageDocumentation.LanguageElementList.push(metaElementName);
+                self.engorgeExistingElementDoc(metaElement);
+
+                self.LanguageDocumentation.LanguageElements[metaElement.name] = metaElement.eDoc;
             }
         }
     };
 
-    Meta2Doc.prototype.makeNewElementDoc = function (metaNode, getDetails) {
+    Meta2Doc.prototype.engorgeExistingElementDoc = function (metaElementObject) {
         var self = this,
-            iterator,
+            iterator;
+
+        // BaseClasses
+        var baseClass = self.core.getBase(metaElementObject.node);
+        if (baseClass != null) {
+            var baseClassDoc = self.makeNewElementDoc(baseClass, false);
+            baseClassDoc.IsImmediate = true;
+            metaElementObject.eDoc.BaseClasses.push(baseClassDoc);
+        }
+
+        // SourceClasses
+        if (metaElementObject.meta.pointers.hasOwnProperty('src')) {
+            var srcNodeId,
+                srcMetaElementObject;
+
+            metaElementObject.eDoc.Type = 'Connection';
+
+            for (iterator=0;iterator<metaElementObject.meta.pointers['src'].length;iterator++) {
+                srcNodeId = metaElementObject.meta.pointers['src'][iterator];
+                srcMetaElementObject = self.id2MetaElement[srcNodeId];
+                metaElementObject.eDoc.SourceClasses.push(self.makeNewElementDoc(srcMetaElementObject.node, false));
+
+                // OutgoingConnectionClasses (of the SourceClass)
+                srcMetaElementObject.eDoc.OutgoingConnectionClasses.push(self.makeNewElementDoc(metaElementObject.node, false));
+            }
+        }
+
+        // DestinationClasses
+        if (metaElementObject.meta.pointers.hasOwnProperty('dst')) {
+            var dstNodeId,
+                dstMetaElementObject;
+
+            for (iterator=0;iterator<metaElementObject.meta.pointers['dst'].length;iterator++) {
+                dstNodeId = metaElementObject.meta.pointers['dst'][iterator];
+                dstMetaElementObject = self.id2MetaElement[dstNodeId];
+                metaElementObject.eDoc.DestinationClasses.push(self.makeNewElementDoc(dstMetaElementObject.node, false));
+
+                // IncomingConnectionClasses (of the DestinationClass)
+                dstMetaElementObject.eDoc.IncomingConnectionClasses.push(self.makeNewElementDoc(metaElementObject.node, false));
+            }
+        }
+    };
+
+    Meta2Doc.prototype.makeNewElementDoc = function (metaNode, withDetails) {
+        var self = this,
             elementDoc = {
                 "Name": null,
-                //"DisplayedName": null,
-                //"Role": null,
-                //"Type": null,
+                "Type": 'FCO',
                 "GUID": null,
                 "ID": null,
-                //"Description": null,
-                //"Namespace": null,
+                "Description": null,
+                "Namespace": null,
                 "IsAbstract": null,
-                "Meta": null,
-                //"IsImmediate": null,
-                //"Visualization": null,
-//                "Attributes": [],
-//                "RegistryNames": [],
-                "BaseClasses": [],
-//                "DerivedClasses": [],
-//                "ParentContainerClasses": [],
-//                "ChildClasses": [],
-//                "ReferredClasses": [],
-//                "ReferringClasses": [],
-//                "OutgoingConnectionClasses": [],
-//                "IncomingConnectionClasses": [],
-                "SourceClasses": [],
-                "DestinationClasses": []
+                "IsImmediate": null,
+                "Attributes": []
+                //"Visualization": null
             };
 
         if (metaNode != null) {
@@ -164,32 +202,19 @@ define(['plugin/PluginConfig',
             elementDoc.ID = self.core.getPath(metaNode);
             elementDoc.GUID = self.core.getGuid(metaNode);
             elementDoc.IsAbstract = self.core.getRegistry(metaNode, 'isAbstract');
+        }
 
-            elementDoc.Meta = self.getMeta(metaNode);
-
-            // SourceClasses
-            if (elementDoc.Meta.pointers.hasOwnProperty('src')) {
-                for (iterator=0;iterator<elementDoc.Meta.pointers['src'].length;iterator++) {
-                    elementDoc.SourceClasses.push(self.core.getAttribute(self.id2MetaNode[elementDoc.Meta.pointers['src'][iterator]], 'name'));
-                }
-            }
-
-            // DestinationClasses
-            if (elementDoc.Meta.pointers.hasOwnProperty('dst')) {
-                for (iterator=0;iterator<elementDoc.Meta.pointers['dst'].length;iterator++) {
-                    elementDoc.DestinationClasses.push(self.core.getAttribute(self.id2MetaNode[elementDoc.Meta.pointers['dst'][iterator]], 'name'));
-                }
-            }
-
-            if (getDetails) {
-                elementDoc.Attributes = self.core.getAttributeNames(metaNode);
-                elementDoc.Attributes.sort();
-                elementDoc.RegistryNames = self.core.getRegistryNames(metaNode);
-                elementDoc.RegistryNames.sort();
-
-                //elementDoc.ParentContainerClasses.push(self.makeNewElementDoc(self.core.getParent(metaNode), false));
-                elementDoc.BaseClasses.push(self.makeNewElementDoc(self.core.getBase(metaNode), false));
-            }
+        if (withDetails) {
+            elementDoc["BaseClasses"] = [];
+            elementDoc["DerivedClasses"] = [];
+            elementDoc["ParentContainerClasses"] = [];
+            elementDoc["ChildClasses"] = [];
+            elementDoc["ReferredClasses"] = [];
+            elementDoc["ReferringClasses"] = [];
+            elementDoc["OutgoingConnectionClasses"] = [];
+            elementDoc["IncomingConnectionClasses"] = [];
+            elementDoc["SourceClasses"] = [];
+            elementDoc["DestinationClasses"] = [];
         }
 
         return elementDoc;
