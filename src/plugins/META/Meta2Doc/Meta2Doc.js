@@ -117,7 +117,12 @@ define(['plugin/PluginConfig',
                 id = self.core.getPath(metaElementNode);
 
                 // Sep10Experiment
-                metaElement = self.makeGetMetaElement(id, metaElementName, metaElementNode);
+                self.id2MetaElement[id] = {
+                    "name": metaElementName,
+                    "node": metaElementNode,
+                    "meta": self.getMeta(metaElementNode),
+                    "eDoc": self.makeNewElementDoc(metaElementNode, true)
+                };
             }
         }
 
@@ -132,28 +137,15 @@ define(['plugin/PluginConfig',
         }
     };
 
-    Meta2Doc.prototype.makeGetMetaElement = function (id, name, node) {
-        var self = this;
-
-        if (self.id2MetaElement.hasOwnProperty(id)) {
-            return self.id2MetaElement[id];
-        } else {
-            self.id2MetaElement[id] = {
-                "name": name,
-                "node": node,
-                "meta": self.getMeta(node),
-                "eDoc": self.makeNewElementDoc(node, true)
-            };
-
-            return self.id2MetaElement[id];
-        }
-    };
-
     Meta2Doc.prototype.engorgeExistingElementDoc = function (metaElementObject) {
         var self = this,
             iterator,
+            childNodeId,
+            childMetaElementObject,
             tempElementDoc,
             simpleMetaElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
+
+        simpleMetaElementDoc.IsImmediate = true;
 
         // BaseClasses
         var baseClass = self.core.getBase(metaElementObject.node);
@@ -167,10 +159,20 @@ define(['plugin/PluginConfig',
             // DerivedClasses (of the BaseClass)
             if (self.id2MetaElement.hasOwnProperty(baseClassId)) {
                 baseClassMetaElementObject = self.id2MetaElement[baseClassId];
-                tempElementDoc = simpleMetaElementDoc;
-                tempElementDoc.IsImmediate = true;
-                baseClassMetaElementObject.eDoc.DerivedClasses.push(tempElementDoc);
+                baseClassMetaElementObject.eDoc.DerivedClasses.push(simpleMetaElementDoc);
             }
+        }
+
+        // ChildClasses
+        for (iterator=0;iterator<metaElementObject.meta.children.length;iterator++) {
+            childNodeId = metaElementObject.meta.children[iterator];
+            childMetaElementObject = self.id2MetaElement[childNodeId];
+            tempElementDoc = self.makeNewElementDoc(childMetaElementObject.node, false);
+            tempElementDoc.IsImmediate = true;
+            metaElementObject.eDoc.ChildClasses.push(tempElementDoc);
+
+            // ParentContainerClasses (of the Child)
+            childMetaElementObject.eDoc.ParentContainerClasses.push(simpleMetaElementDoc);
 
         }
 
@@ -190,11 +192,9 @@ define(['plugin/PluginConfig',
                     metaElementObject.eDoc.SourceClasses.push(tempElementDoc);
 
                     // OutgoingConnectionClasses (of the SourceClass)
-                    tempElementDoc = simpleMetaElementDoc;
-                    tempElementDoc.IsImmediate = true;
-                    srcMetaElementObject.eDoc.OutgoingConnectionClasses.push(tempElementDoc);
+                    srcMetaElementObject.eDoc.OutgoingConnectionClasses.push(simpleMetaElementDoc);
                 }
-            } else if (pointerName === 'dst' && metaElementObject.meta.pointers.hasOwnProperty('dst')) {
+            } else if (pointerName === 'dst' && metaElementObject.meta.pointers.hasOwnProperty('dst')) {  // DestinationClasses
                 var dstNodeId,
                     dstMetaElementObject;
 
@@ -206,9 +206,7 @@ define(['plugin/PluginConfig',
                     metaElementObject.eDoc.DestinationClasses.push(tempElementDoc);
 
                     // IncomingConnectionClasses (of the DestinationClass)
-                    tempElementDoc = simpleMetaElementDoc;
-                    tempElementDoc.IsImmediate = true;
-                    dstMetaElementObject.eDoc.IncomingConnectionClasses.push(tempElementDoc);
+                    dstMetaElementObject.eDoc.IncomingConnectionClasses.push(simpleMetaElementDoc);
                 }
             } else {
                 var referredNodeId,
@@ -314,6 +312,23 @@ define(['plugin/PluginConfig',
             return meta;
         } else {
             return null;
+        }
+    };
+
+    Meta2Doc.prototype.makeGetMetaElement = function (id, name, node) {
+        var self = this;
+
+        if (self.id2MetaElement.hasOwnProperty(id)) {
+            return self.id2MetaElement[id];
+        } else {
+            self.id2MetaElement[id] = {
+                "name": name,
+                "node": node,
+                "meta": self.getMeta(node),
+                "eDoc": self.makeNewElementDoc(node, true)
+            };
+
+            return self.id2MetaElement[id];
         }
     };
 
