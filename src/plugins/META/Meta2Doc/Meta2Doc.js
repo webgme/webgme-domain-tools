@@ -108,6 +108,8 @@ define(['plugin/PluginConfig',
         var self = this,
             metaElementName,
             metaElementNode,
+            baseNode,
+            baseClassIds,
             id,
             metaElement;
 
@@ -116,12 +118,22 @@ define(['plugin/PluginConfig',
                 metaElementNode = self.META[metaElementName];
                 id = self.core.getPath(metaElementNode);
 
+                baseNode = self.core.getBase(metaElementNode);
+                baseClassIds = [];
+
+                while (baseNode) {
+                    baseClassIds.push(self.core.getPath(baseNode));
+                    baseNode = self.core.getBase(baseNode);
+                }
+
                 // Sep10Experiment
                 self.id2MetaElement[id] = {
                     "name": metaElementName,
                     "node": metaElementNode,
                     "meta": self.getMeta(metaElementNode),
-                    "eDoc": self.makeNewElementDoc(metaElementNode, true)
+                    "eDoc": self.makeNewElementDoc(metaElementNode, true),
+                    "eDocLite": self.makeNewElementDoc(metaElementNode, false),
+                    "BaseClassIds": baseClassIds
                 };
             }
         }
@@ -130,99 +142,143 @@ define(['plugin/PluginConfig',
             if (self.id2MetaElement.hasOwnProperty(id)) {
                 metaElement = self.id2MetaElement[id];
 
-                self.engorgeExistingElementDoc(metaElement);
+                self.getRelationships(metaElement);
+            }
+        }
+
+        for (id in self.id2MetaElement) {
+            if (self.id2MetaElement.hasOwnProperty(id)) {
+                metaElement = self.id2MetaElement[id];
+
+                self.addInheritedRelationships(metaElement);
 
                 self.LanguageDocumentation.LanguageElements[metaElement.name] = metaElement.eDoc;
             }
         }
     };
 
-    Meta2Doc.prototype.engorgeExistingElementDoc = function (metaElementObject) {
+    Meta2Doc.prototype.getRelationships = function (metaElementObject) {
         var self = this,
-            iterator,
-            childNodeId,
-            childMetaElementObject,
-            tempElementDoc,
-            simpleMetaElementDoc = self.makeNewElementDoc(metaElementObject.node, false);
+            elementDocToFill = metaElementObject.eDoc,
+            eDocLiteToReciprocate = metaElementObject.eDocLite,
+            metaToExplore = metaElementObject.meta,
+            i,
+            relatedNodeId,
+            relatedNodeElementDoc,
+            relatedNodeElementDocLite;
 
-        simpleMetaElementDoc.IsImmediate = true;
+        while (metaToExplore !== null) {
+            // MetaChildren
+            for (i=0;i<metaToExplore.children.length;i++) {
+                relatedNodeId = metaToExplore.children[i];
+                if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+                    relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+                    elementDocToFill.ChildClasses.push(relatedNodeElementDocLite);
 
-        // BaseClasses
-        var baseClass = self.core.getBase(metaElementObject.node);
-        if (baseClass != null) {
-            var baseClassDoc = self.makeNewElementDoc(baseClass, false),
-                baseClassId = self.core.getPath(baseClass),
-                baseClassMetaElementObject;
-            baseClassDoc.IsImmediate = true;
-            metaElementObject.eDoc.BaseClasses.push(baseClassDoc);
-
-            // DerivedClasses (of the BaseClass)
-            if (self.id2MetaElement.hasOwnProperty(baseClassId)) {
-                baseClassMetaElementObject = self.id2MetaElement[baseClassId];
-                baseClassMetaElementObject.eDoc.DerivedClasses.push(simpleMetaElementDoc);
+                    // Add 'this' as a Parent of the Child
+                    relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+                    relatedNodeElementDoc.ParentContainerClasses.push(eDocLiteToReciprocate);
+                }
             }
-        }
 
-        // ChildClasses
-        for (iterator=0;iterator<metaElementObject.meta.children.length;iterator++) {
-            childNodeId = metaElementObject.meta.children[iterator];
-            childMetaElementObject = self.id2MetaElement[childNodeId];
-            tempElementDoc = self.makeNewElementDoc(childMetaElementObject.node, false);
-            tempElementDoc.IsImmediate = true;
-            metaElementObject.eDoc.ChildClasses.push(tempElementDoc);
+            // Pointers
+            for (var pointerName in metaToExplore.pointers) {
+                if (pointerName === 'src' && metaToExplore.pointers.hasOwnProperty(pointerName)) {
+                    for (i=0;i<metaToExplore.pointers[pointerName].length;i++) {
+                        relatedNodeId = metaToExplore.pointers[pointerName][i];
+                        if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+                            // Add the Source eDocLite to this
+                            relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+                            elementDocToFill.SourceClasses.push(relatedNodeElementDocLite);
 
-            // ParentContainerClasses (of the Child)
-            childMetaElementObject.eDoc.ParentContainerClasses.push(simpleMetaElementDoc);
+                            // Add 'this' as an OutgoingConn of the Source
+                            relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+                            relatedNodeElementDoc.OutgoingConnectionClasses.push(eDocLiteToReciprocate);
+                        }
+                    }
+                } else if (pointerName === 'dst' && metaToExplore.pointers.hasOwnProperty(pointerName)) {
+                    for (i=0;i<metaToExplore.pointers[pointerName].length;i++) {
+                        relatedNodeId = metaToExplore.pointers[pointerName][i];
+                        if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+                            // Add the Destination eDocLite to this
+                            relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+                            elementDocToFill.DestinationClasses.push(relatedNodeElementDocLite);
 
-        }
+                            // Add 'this' as an IncomingConn of the Dst
+                            relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+                            relatedNodeElementDoc.IncomingConnectionClasses.push(eDocLiteToReciprocate);
+                        }
+                    }
+                } else {
+                    for (i=0;i<metaToExplore.pointers[pointerName].length;i++) {
+                        relatedNodeId = metaToExplore.pointers[pointerName][i];
+                        if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+                            // Add the Referred type
+                            relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+                            elementDocToFill.ReferredClasses.push(relatedNodeElementDocLite);
 
-        for (var pointerName in metaElementObject.meta.pointers) {
-            // SourceClasses
-            if (pointerName === 'src' && metaElementObject.meta.pointers.hasOwnProperty('src')) {
-                var srcNodeId,
-                    srcMetaElementObject;
-
-                metaElementObject.eDoc.Type = 'Connection';
-
-                for (iterator=0;iterator<metaElementObject.meta.pointers['src'].length;iterator++) {
-                    srcNodeId = metaElementObject.meta.pointers['src'][iterator];
-                    srcMetaElementObject = self.id2MetaElement[srcNodeId];
-                    tempElementDoc = self.makeNewElementDoc(srcMetaElementObject.node, false);
-                    tempElementDoc.IsImmediate = true;
-                    metaElementObject.eDoc.SourceClasses.push(tempElementDoc);
-
-                    // OutgoingConnectionClasses (of the SourceClass)
-                    srcMetaElementObject.eDoc.OutgoingConnectionClasses.push(simpleMetaElementDoc);
+                            // Add 'this' as a 'Referring' of the Referred
+                            relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+                            relatedNodeElementDoc.ReferringClasses.push(eDocLiteToReciprocate);
+                        }
+                    }
                 }
-            } else if (pointerName === 'dst' && metaElementObject.meta.pointers.hasOwnProperty('dst')) {  // DestinationClasses
-                var dstNodeId,
-                    dstMetaElementObject;
+            }
 
-                for (iterator=0;iterator<metaElementObject.meta.pointers['dst'].length;iterator++) {
-                    dstNodeId = metaElementObject.meta.pointers['dst'][iterator];
-                    dstMetaElementObject = self.id2MetaElement[dstNodeId];
-                    tempElementDoc = self.makeNewElementDoc(dstMetaElementObject.node, false);
-                    tempElementDoc.IsImmediate = true;
-                    metaElementObject.eDoc.DestinationClasses.push(tempElementDoc);
+            metaToExplore = null;
 
-                    // IncomingConnectionClasses (of the DestinationClass)
-                    dstMetaElementObject.eDoc.IncomingConnectionClasses.push(simpleMetaElementDoc);
-                }
-            } else {
-                var referredNodeId,
-                    referredMetaElementObject;
+//            // Base and Derived Types
+//            relatedNodeId = metaElementObject.BaseClassIds.pop();
+//            if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+//                // Add the BaseClass
+//                relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+//                elementDocToFill.BaseClasses.push(relatedNodeElementDocLite);
+//
+//                // Add 'this' to the BaseClass as a DerivedClass
+//                relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+//                relatedNodeElementDoc.DerivedClasses.push(eDocLiteToReciprocate);
+//
+//                // update metaToExplore
+//                metaToExplore = self.id2MetaElement[relatedNodeId].meta;
+//            } else {
+//                metaToExplore = null;
+//            }
+        }
+    };
 
-                for (iterator=0;iterator<metaElementObject.meta.pointers[pointerName].length;iterator++) {
-                    referredNodeId = metaElementObject.meta.pointers[pointerName][iterator];
-                    referredMetaElementObject = self.id2MetaElement[referredNodeId];
-                    tempElementDoc = self.makeNewElementDoc(referredMetaElementObject.node, false);
-                    tempElementDoc.Note = pointerName;
-                    metaElementObject.eDoc.ReferredClasses.push(tempElementDoc);
+    Meta2Doc.prototype.addInheritedRelationships = function (metaElementObject) {
+        var self = this,
+            listNames = [
+                "BaseClasses",
+                "DerivedClasses",
+                "ParentContainerClasses",
+                "ChildClasses",
+                "ReferredClasses",
+                "ReferringClasses",
+                "OutgoingConnectionClasses",
+                "IncomingConnectionClasses",
+                "SourceClasses",
+                "DestinationClasses"
+            ],
+            baseClassIds = metaElementObject.BaseClassIds,
+            baseClassElementDoc,
+            thisList,
+            listToMerge;
 
-                    // IncomingConnectionClasses (of the DestinationClass)
-                    tempElementDoc = simpleMetaElementDoc;
-                    tempElementDoc.Note = pointerName;
-                    referredMetaElementObject.eDoc.ReferringClasses.push(tempElementDoc);
+        // Iterate over BaseClasses (if it has 0, we would be wasting time doing anything else)
+        for (var idIndex=0;idIndex<baseClassIds.length;idIndex++) {
+            baseClassElementDoc = self.id2MetaElement[baseClassIds[idIndex]].eDoc;
+
+            // Iterate over listNames
+            for (var listNameIndex=0;listNameIndex<listNames.length;listNameIndex++) {
+                thisList = metaElementObject.eDoc[listNames[listNameIndex]];
+                listToMerge = baseClassElementDoc[listNames[listNameIndex]];
+
+                // Iterate over items in the BaseClass's list
+                for (var i=0;i<listToMerge.length;i++) {
+                    if (thisList.indexOf(listToMerge[i]) === -1) {
+                        thisList.push(listToMerge[i]);
+                    }
                 }
             }
         }
@@ -230,6 +286,7 @@ define(['plugin/PluginConfig',
 
     Meta2Doc.prototype.makeNewElementDoc = function (metaNode, withDetails) {
         var self = this,
+            baseNode,
             elementDoc = {
                 "Name": null,
                 "Type": 'FCO',
