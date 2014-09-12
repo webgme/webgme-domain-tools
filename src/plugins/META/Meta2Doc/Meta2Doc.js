@@ -153,6 +153,7 @@ define(['plugin/PluginConfig',
                 self.addInheritedRelationships(metaElement);
 
                 self.LanguageDocumentation.LanguageElements[metaElement.name] = metaElement.eDoc;
+                self.LanguageDocumentation.LanguageElementList.push(metaElement.name);
             }
         }
     };
