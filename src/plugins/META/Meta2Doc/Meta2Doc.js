@@ -79,7 +79,7 @@ define(['plugin/PluginConfig',
 
         self.logger.info("Running Meta2Doc");
 
-        var documentationArtifact = self.blobClient.createArtifact('FMU');
+        var documentationArtifact = self.blobClient.createArtifact('LanguageDoc');
 
         self.getMetaRelationships();
 
