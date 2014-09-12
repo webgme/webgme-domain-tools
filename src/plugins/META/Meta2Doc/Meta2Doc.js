@@ -174,6 +174,15 @@ define(['plugin/PluginConfig',
 
         for (attrName in metaToExplore.attributes) {
             var attrObj = {};
+
+            if (attrName === "name") {
+                continue;
+            }
+
+            if (attrName === "INFO") {
+                elementDocToFill.Description = self.core.getAttribute(metaElementObject.node, attrName);
+            }
+
             attrObj["Name"] = attrName;
             attrObj["Type"] = metaToExplore.attributes[attrName]["type"];
             attrObj["DefaultValue"] = self.core.getAttribute(metaElementObject.node, attrName);
