@@ -156,6 +156,8 @@ define(['plugin/PluginConfig',
                 self.LanguageDocumentation.LanguageElementList.push(metaElement.name);
             }
         }
+
+        self.LanguageDocumentation.LanguageElementList.sort();
     };
 
     Meta2Doc.prototype.getRelationships = function (metaElementObject) {
