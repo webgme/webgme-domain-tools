@@ -126,7 +126,6 @@ define(['plugin/PluginConfig',
                     baseNode = self.core.getBase(baseNode);
                 }
 
-                // Sep10Experiment
                 self.id2MetaElement[id] = {
                     "name": metaElementName,
                     "node": metaElementNode,
@@ -163,6 +162,7 @@ define(['plugin/PluginConfig',
     Meta2Doc.prototype.getRelationships = function (metaElementObject) {
         var self = this,
             elementDocToFill = metaElementObject.eDoc,
+            attrName,
             eDocLiteToReciprocate = metaElementObject.eDocLite,
             metaToExplore = metaElementObject.meta,
             i,
@@ -170,6 +170,26 @@ define(['plugin/PluginConfig',
             relatedNodeElementDoc,
             relatedNodeElementDocLite,
             baseClassIds = metaElementObject.BaseClassIds.slice(0);
+
+
+        for (attrName in metaToExplore.attributes) {
+            var attrObj = {};
+            attrObj["Name"] = attrName;
+            attrObj["Type"] = metaToExplore.attributes[attrName]["type"];
+            attrObj["DefaultValue"] = self.core.getAttribute(metaElementObject.node, attrName);
+
+//            if (!attrObj.DefaultValue) {
+//                if (metaToExplore.attributes[attrName].hasOwnProperty("default")) {
+//                    attrObj["DefaultValue"] = metaToExplore.attributes[attrName]["default"];
+//                }
+//            }
+
+            if (metaToExplore.attributes[attrName].hasOwnProperty("enum")) {
+                attrObj["EnumOptions"] = metaToExplore.attributes[attrName]["enum"];
+            }
+
+            elementDocToFill.Attributes.push(attrObj);
+        }
 
         while (metaToExplore !== null) {
             // MetaChildren
@@ -274,8 +294,6 @@ define(['plugin/PluginConfig',
     Meta2Doc.prototype.addInheritedRelationships = function (metaElementObject) {
         var self = this,
             listNames = [
-                //"BaseClasses",
-                //"DerivedClasses",
                 "ParentContainerClasses",
                 "ChildClasses",
                 "ReferredClasses",
@@ -290,7 +308,6 @@ define(['plugin/PluginConfig',
             thisList,
             listToMerge,
             i,
-            j,
             relatedClassId,
             relatedClassDerivedTypes;
 
@@ -301,12 +318,7 @@ define(['plugin/PluginConfig',
                 baseClassElementDoc = self.id2MetaElement[baseClassIds[idIndex]].eDoc;
                 listToMerge = baseClassElementDoc[listNames[listNameIndex]];
 
-                // Iterate over items in the BaseClass's list
-                for (i=0;i<listToMerge.length;i++) {
-                    if (thisList.indexOf(listToMerge[i]) === -1) {
-                        thisList.push(listToMerge[i]);
-                    }
-                }
+                self.mergeListsWithoutDuplicates(thisList, listToMerge);
             }
 
             // Add DerivedClasses of the Related Classes
@@ -314,11 +326,7 @@ define(['plugin/PluginConfig',
                 relatedClassId = thisList[i].ID;
                 relatedClassDerivedTypes = self.id2MetaElement[relatedClassId].eDoc.DerivedClasses;
 
-                for (j=0;j<relatedClassDerivedTypes.length;j++) {
-                    if (thisList.indexOf(relatedClassDerivedTypes[j]) === -1) {
-                        thisList.push(relatedClassDerivedTypes[j]);
-                    }
-                }
+                self.mergeListsWithoutDuplicates(thisList, relatedClassDerivedTypes);
             }
         }
     };
