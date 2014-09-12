@@ -166,7 +166,8 @@ define(['plugin/PluginConfig',
             i,
             relatedNodeId,
             relatedNodeElementDoc,
-            relatedNodeElementDocLite;
+            relatedNodeElementDocLite,
+            baseClassIds = metaElementObject.BaseClassIds.slice(0);
 
         while (metaToExplore !== null) {
             // MetaChildren
@@ -174,11 +175,15 @@ define(['plugin/PluginConfig',
                 relatedNodeId = metaToExplore.children[i];
                 if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
                     relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
-                    elementDocToFill.ChildClasses.push(relatedNodeElementDocLite);
+                    if (elementDocToFill.ChildClasses.indexOf(relatedNodeElementDocLite) === -1) {
+                        elementDocToFill.ChildClasses.push(relatedNodeElementDocLite);
+                    }
 
                     // Add 'this' as a Parent of the Child
                     relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
-                    relatedNodeElementDoc.ParentContainerClasses.push(eDocLiteToReciprocate);
+                    if (relatedNodeElementDoc.ParentContainerClasses.indexOf(eDocLiteToReciprocate) === -1) {
+                        relatedNodeElementDoc.ParentContainerClasses.push(eDocLiteToReciprocate);
+                    }
                 }
             }
 
@@ -190,11 +195,15 @@ define(['plugin/PluginConfig',
                         if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
                             // Add the Source eDocLite to this
                             relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
-                            elementDocToFill.SourceClasses.push(relatedNodeElementDocLite);
+                            if (elementDocToFill.SourceClasses.indexOf(relatedNodeElementDocLite) === -1) {
+                                elementDocToFill.SourceClasses.push(relatedNodeElementDocLite);
+                            }
 
                             // Add 'this' as an OutgoingConn of the Source
                             relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
-                            relatedNodeElementDoc.OutgoingConnectionClasses.push(eDocLiteToReciprocate);
+                            if (relatedNodeElementDoc.OutgoingConnectionClasses.indexOf(eDocLiteToReciprocate) === -1) {
+                                relatedNodeElementDoc.OutgoingConnectionClasses.push(eDocLiteToReciprocate);
+                            }
                         }
                     }
                 } else if (pointerName === 'dst' && metaToExplore.pointers.hasOwnProperty(pointerName)) {
@@ -203,11 +212,15 @@ define(['plugin/PluginConfig',
                         if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
                             // Add the Destination eDocLite to this
                             relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
-                            elementDocToFill.DestinationClasses.push(relatedNodeElementDocLite);
+                            if (elementDocToFill.DestinationClasses.indexOf(relatedNodeElementDocLite) === -1) {
+                                elementDocToFill.DestinationClasses.push(relatedNodeElementDocLite);
+                            }
 
                             // Add 'this' as an IncomingConn of the Dst
                             relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
-                            relatedNodeElementDoc.IncomingConnectionClasses.push(eDocLiteToReciprocate);
+                            if (relatedNodeElementDoc.IncomingConnectionClasses.indexOf(eDocLiteToReciprocate) === -1) {
+                                relatedNodeElementDoc.IncomingConnectionClasses.push(eDocLiteToReciprocate);
+                            }
                         }
                     }
                 } else {
@@ -216,11 +229,16 @@ define(['plugin/PluginConfig',
                         if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
                             // Add the Referred type
                             relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
-                            elementDocToFill.ReferredClasses.push(relatedNodeElementDocLite);
+                            if (elementDocToFill.ReferredClasses.indexOf(relatedNodeElementDocLite) === -1) {
+                                elementDocToFill.ReferredClasses.push(relatedNodeElementDocLite);
+                            }
+
 
                             // Add 'this' as a 'Referring' of the Referred
                             relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
-                            relatedNodeElementDoc.ReferringClasses.push(eDocLiteToReciprocate);
+                            if (relatedNodeElementDoc.ReferringClasses.indexOf(eDocLiteToReciprocate) === -1) {
+                                relatedNodeElementDoc.ReferringClasses.push(eDocLiteToReciprocate);
+                            }
                         }
                     }
                 }
@@ -228,30 +246,34 @@ define(['plugin/PluginConfig',
 
             metaToExplore = null;
 
-//            // Base and Derived Types
-//            relatedNodeId = metaElementObject.BaseClassIds.pop();
-//            if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
-//                // Add the BaseClass
-//                relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
-//                elementDocToFill.BaseClasses.push(relatedNodeElementDocLite);
-//
-//                // Add 'this' to the BaseClass as a DerivedClass
-//                relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
-//                relatedNodeElementDoc.DerivedClasses.push(eDocLiteToReciprocate);
-//
-//                // update metaToExplore
-//                metaToExplore = self.id2MetaElement[relatedNodeId].meta;
-//            } else {
-//                metaToExplore = null;
-//            }
+            // Base and Derived Types
+            relatedNodeId = baseClassIds.pop();
+            if (self.id2MetaElement.hasOwnProperty(relatedNodeId)) {
+                // Add the BaseClass
+                relatedNodeElementDocLite = self.id2MetaElement[relatedNodeId].eDocLite;
+                if (elementDocToFill.BaseClasses.indexOf(relatedNodeElementDocLite) === -1) {
+                    elementDocToFill.BaseClasses.push(relatedNodeElementDocLite);
+                }
+
+                // Add 'this' to the BaseClass as a DerivedClass
+                relatedNodeElementDoc = self.id2MetaElement[relatedNodeId].eDoc;
+                if (relatedNodeElementDoc.DerivedClasses.indexOf(eDocLiteToReciprocate) === -1) {
+                    relatedNodeElementDoc.DerivedClasses.push(eDocLiteToReciprocate);
+                }
+
+                // update metaToExplore
+                metaToExplore = self.id2MetaElement[relatedNodeId].meta;
+            } else {
+                metaToExplore = null;
+            }
         }
     };
 
     Meta2Doc.prototype.addInheritedRelationships = function (metaElementObject) {
         var self = this,
             listNames = [
-                "BaseClasses",
-                "DerivedClasses",
+                //"BaseClasses",
+                //"DerivedClasses",
                 "ParentContainerClasses",
                 "ChildClasses",
                 "ReferredClasses",
@@ -264,23 +286,51 @@ define(['plugin/PluginConfig',
             baseClassIds = metaElementObject.BaseClassIds,
             baseClassElementDoc,
             thisList,
-            listToMerge;
+            listToMerge,
+            i,
+            j,
+            relatedClassId,
+            relatedClassDerivedTypes;
 
-        // Iterate over BaseClasses (if it has 0, we would be wasting time doing anything else)
-        for (var idIndex=0;idIndex<baseClassIds.length;idIndex++) {
-            baseClassElementDoc = self.id2MetaElement[baseClassIds[idIndex]].eDoc;
+        for (var listNameIndex=0;listNameIndex<listNames.length;listNameIndex++) {
+            thisList = metaElementObject.eDoc[listNames[listNameIndex]];
 
-            // Iterate over listNames
-            for (var listNameIndex=0;listNameIndex<listNames.length;listNameIndex++) {
-                thisList = metaElementObject.eDoc[listNames[listNameIndex]];
+            for (var idIndex=0;idIndex<baseClassIds.length;idIndex++) {
+                baseClassElementDoc = self.id2MetaElement[baseClassIds[idIndex]].eDoc;
                 listToMerge = baseClassElementDoc[listNames[listNameIndex]];
 
                 // Iterate over items in the BaseClass's list
-                for (var i=0;i<listToMerge.length;i++) {
+                for (i=0;i<listToMerge.length;i++) {
                     if (thisList.indexOf(listToMerge[i]) === -1) {
                         thisList.push(listToMerge[i]);
                     }
                 }
+            }
+
+            // Add DerivedClasses of the Related Classes
+            for (i=0;i<thisList.length;i++) {
+                relatedClassId = thisList[i].ID;
+                relatedClassDerivedTypes = self.id2MetaElement[relatedClassId].eDoc.DerivedClasses;
+
+                for (j=0;j<relatedClassDerivedTypes.length;j++) {
+                    if (thisList.indexOf(relatedClassDerivedTypes[j]) === -1) {
+                        thisList.push(relatedClassDerivedTypes[j]);
+                    }
+                }
+            }
+        }
+    };
+
+    Meta2Doc.prototype.mergeListsWithoutDuplicates = function (masterList, listToAdd) {
+        var self = this,
+            secondListIndex,
+            listItemToAdd;
+
+        for (secondListIndex=0;secondListIndex<listToAdd.length;secondListIndex++) {
+            listItemToAdd = listToAdd[secondListIndex];
+
+            if (masterList.indexOf(listItemToAdd) === -1) {
+                masterList.push(listItemToAdd);
             }
         }
     };
