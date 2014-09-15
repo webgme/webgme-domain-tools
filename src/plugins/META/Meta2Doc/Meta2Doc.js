@@ -365,7 +365,6 @@ define(['plugin/PluginConfig',
                 "Description": null,
                 "Namespace": null,
                 "IsAbstract": null,
-                "IsImmediate": null,
                 "Note": null,
                 "Attributes": []
                 //"Visualization": null
@@ -392,23 +391,6 @@ define(['plugin/PluginConfig',
         }
 
         return elementDoc;
-    };
-
-    Meta2Doc.prototype.makeNewAttributeDoc = function (metaNode) {
-        var self = this,
-            attributeDoc = {
-                "Name": null,
-                "Type": null,
-                "DefaultValue": null,
-                "EnumOptions": null,
-                "GUID": null,
-                "Description": null,
-                "Namespace": null,
-                "IsImmediate": null,
-                "Help": null
-            };
-
-        return attributeDoc;
     };
 
     Meta2Doc.prototype.getMeta = function (nodeObj){
