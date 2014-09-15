@@ -4,7 +4,7 @@
 
 define(['bin/getconfig',
         'plugin/PluginConfig',
-    'plugin/PluginBase'],
+        'plugin/PluginBase'],
     function (CONFIG, PluginConfig, PluginBase) {
     'use strict';
 
@@ -23,6 +23,8 @@ define(['bin/getconfig',
         PluginBase.call(this);
 
         this.id2MetaElement = {}; // {"node": the node, "meta": self.getMeta, "eDoc": self.makeNewElementDoc}
+
+        this.languageDocString;
 
         this.LanguageDocumentation = {
             "LanguageElements": {},
@@ -105,7 +107,9 @@ define(['bin/getconfig',
             documentationArtifact.save(artifactSaveCallbackFunction);
         };
 
-        documentationArtifact.addFile('LanguageElements.json', JSON.stringify(self.LanguageDocumentation), addFileCallbackFunction);
+        self.languageDocString = "var LANGUAGEDOC = " + JSON.stringify(self.LanguageDocumentation) + ";";
+
+        documentationArtifact.addFile('LanguageDocumentation.js', self.languageDocString, addFileCallbackFunction);
     };
 
     Meta2Doc.prototype.getMetaRelationships = function () {
