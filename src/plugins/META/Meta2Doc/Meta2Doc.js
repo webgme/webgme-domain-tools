@@ -195,13 +195,14 @@ define(['bin/getconfig',
             attrObj["Type"] = metaToExplore.attributes[attrName]["type"];
             attrObj["DefaultValue"] = self.core.getAttribute(metaElementObject.node, attrName);
 
-//            if (!attrObj.DefaultValue) {
-//                if (metaToExplore.attributes[attrName].hasOwnProperty("default")) {
-//                    attrObj["DefaultValue"] = metaToExplore.attributes[attrName]["default"];
-//                }
-//            }
+            if (!attrObj.DefaultValue) {
+                if (metaToExplore.attributes[attrName].hasOwnProperty("default")) {
+                    attrObj["DefaultValue"] = metaToExplore.attributes[attrName]["default"];
+                }
+            }
 
             if (metaToExplore.attributes[attrName].hasOwnProperty("enum")) {
+                attrObj.Type += " - Enum";
                 attrObj["EnumOptions"] = metaToExplore.attributes[attrName]["enum"];
             }
 
