@@ -110,7 +110,7 @@ def run_explicit_euler(fmi_me_object):
         i += 1
         time_at_step_i = time_at_step_i + t_increment
         
-        logger.debug("Solving system for at t={0}".format(time_at_step_i))
+        logger.debug("Solving system for t={0}".format(time_at_step_i))
         
         for i in range(len(fmi_me_object.priority_map)):
            
