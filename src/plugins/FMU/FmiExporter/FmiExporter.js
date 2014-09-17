@@ -94,7 +94,22 @@ define(['plugin/PluginConfig',
                 'description': "Run FMI Model Exchange Simulation",
                 'value': true,
                 'valueType': 'boolean',
-                'readOnly': false            }
+                'readOnly': false
+            },
+            {
+                "name": "resultHandling",
+                "displayName": "Result Handling",
+                "description": 'What action to take after the simulation has completed.',
+                "value": 'results',
+                "valueType": "string",
+                "valueItems": [
+                    "all",
+                    "table",
+                    "plots",
+                    "results"
+                ],
+                "readOnly": false
+            },
         ];
     };
 
@@ -106,7 +121,24 @@ define(['plugin/PluginConfig',
             modelExchangeName,
             executor_config = {
                 cmd: 'run_jmodelica_model_exchange.cmd',
-                results: null
+                resultArtifacts: [
+                    {
+                        name: 'all',
+                        resultPatterns: []
+                    },
+                    {
+                        name: 'table',
+                        resultPatterns: ['Results/results.csv']
+                    },
+                    {
+                        name: 'plots',
+                        resultPatterns: ['Results/*.svg']
+                    },
+                    {
+                        name: 'results',
+                        resultPatterns: ['Results/**', 'jmodelica_model_exchange_py.log']
+                    }
+                ]
             };
 
         if (!selectedNode) {
@@ -125,16 +157,16 @@ define(['plugin/PluginConfig',
             return;
         }
 
-        if (config.allFiles) {
-            executor_config.results = { files: [], dirs: [] };
-        } else {
-            executor_config.results = {
-                files: [
-                    "jmodelica_model_exchange_py.log"
-                ],
-                dirs: ["Results"]
-            };
-        }
+//        if (config.allFiles) {
+//            executor_config.resultArtifacts = { files: [], dirs: [] };
+//        } else {
+//            executor_config.resultArtifacts = {
+//                files: [
+//                    "jmodelica_model_exchange_py.log"
+//                ],
+//                dirs: ["Results"]
+//            };
+//        }
 
         var allNodesAreLoadedCallbackFunction = function (err) {
             if (err) {
@@ -157,7 +189,8 @@ define(['plugin/PluginConfig',
             self.filesToSave['executor_config.json'] = JSON.stringify(executor_config, null, 4);
             self.filesToSave['fmi_wrapper.py'] = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
             self.filesToSave['jmodelica_model_exchange.py'] = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-            self.filesToSave['run_jmodelica_model_exchange.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+            self.filesToSave['run_execution.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+            //self.filesToSave['run_jmodelica_model_exchange.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
             self.filesToSave['ReadMe.txt'] = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
 
             var addFilesCallback = function (err, fileHashes) {
@@ -242,6 +275,60 @@ define(['plugin/PluginConfig',
     };
 
     FmiExporter.prototype.runSimulation = function (modelExchangeNode, executionPackageHash, callback) {
+        var self = this,
+            executorClient = new ExecutorClient(),
+            createJobCallback = function (err, createdJobInfo) {
+                if (err) {
+                    self.result.setSuccess(false);
+                    return callback('Creating job failed: ' + err.toString(), self.result);
+                }
+                self.logger.debug(createdJobInfo);
+
+                var onJobSuccess = function (completedJobInfo) {
+                        var updateModelCallback = function (err) {
+                            if (err) {
+                                return callback(err, completedJobInfo.resultHash);
+                            }
+
+                            callback(null, completedJobInfo.resultHash);
+                        };
+
+                        self.core.setAttribute(modelExchangeNode, "results", completedJobInfo.resultHash);
+
+                        self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
+                    },
+                    intervalId = setInterval(function () {
+                        // Get the job-info at intervals and check for a non-CREATED status.
+
+                        var getInfoCallback = function (err, jobInfo) {
+                            if (err) {
+                                return callback(err, null);
+                            }
+
+                            self.logger.info(JSON.stringify(jobInfo, null, 4));
+                            if (jobInfo.status === 'CREATED') {
+                                // The job is still running...
+                                return;
+                            }
+
+                            clearInterval(intervalId);
+                            if (jobInfo.status === 'SUCCESS') {
+                                //callback(null, jobInfo.resultHash);
+                                onJobSuccess(jobInfo);
+                            } else {
+                                callback('Job execution failed', null);
+                            }
+                        };
+
+                        executorClient.getInfo(executionPackageHash, getInfoCallback);
+                    }, 400);
+            };
+
+        executorClient.createJob(executionPackageHash, createJobCallback)
+    };
+
+
+    FmiExporter.prototype.runSimulation_ = function (modelExchangeNode, executionPackageHash, callback) {
         var self = this,
             executorClient = new ExecutorClient(),
             createJobCallback = function (err, createdJobInfo) {
