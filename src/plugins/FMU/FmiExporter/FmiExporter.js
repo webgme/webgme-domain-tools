@@ -443,68 +443,70 @@ define(['plugin/PluginConfig',
             isOutput;
 
         for (thisNodePath in self.path2node) {
-            thisNode = self.path2node[thisNodePath];
-            thisNodeName = self.core.getAttribute(thisNode, 'name');
+            if (self.path2node.hasOwnProperty(thisNodePath)) {
+                thisNode = self.path2node[thisNodePath];
+                thisNodeName = self.core.getAttribute(thisNode, 'name');
 
-            // DEBUG
-            isFmu = self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU);
-            isParam = self.isMetaTypeOf(thisNode, FmuMetaTypes.Parameter);
-            isInput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Input);
-            isOutput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Output);
-            //
+                // DEBUG
+                isFmu = self.isMetaTypeOf(thisNode, FmuMetaTypes.FMU);
+                isParam = self.isMetaTypeOf(thisNode, FmuMetaTypes.Parameter);
+                isInput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Input);
+                isOutput = self.isMetaTypeOf(thisNode, FmuMetaTypes.Output);
+                //
 
-            if (self.isMetaTypeOf(thisNode, FmuMetaTypes.PortComposition)) {
+                if (self.isMetaTypeOf(thisNode, FmuMetaTypes.PortComposition)) {
 
-                connSrcPath = self.core.getPointerPath(thisNode, 'src');
-                connDstPath = self.core.getPointerPath(thisNode, 'dst');
+                    connSrcPath = self.core.getPointerPath(thisNode, 'src');
+                    connDstPath = self.core.getPointerPath(thisNode, 'dst');
 
-                if (connSrcPath && connDstPath) {
-                    if (self.connectionMap.hasOwnProperty(connSrcPath)) {
-                        self.connectionMap[connSrcPath].push(connDstPath);   // append to existing list of destinations
+                    if (connSrcPath && connDstPath) {
+                        if (self.connectionMap.hasOwnProperty(connSrcPath)) {
+                            self.connectionMap[connSrcPath].push(connDstPath);   // append to existing list of destinations
 
+                        } else {
+                            self.connectionMap[connSrcPath] = [connDstPath];
+                        }
                     } else {
-                        self.connectionMap[connSrcPath] = [connDstPath];
+                        var portCompositionPath = self.core.getPath(thisNode);
+                        self.logger.warning('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
                     }
-                } else {
-                    var portCompositionPath = self.core.getPath(thisNode);
-                    self.logger.warning('PortComposition (' + portCompositionPath + ') is missing a SrcPointer or DstPointer.');
-                }
 
-            } else if (isFmu) {
-                if (!self.pathToFmuInfo.hasOwnProperty(thisNodePath)) {
-                    self.getFmuInfo(thisNodePath, thisNode, thisNodeName);
-                }
+                } else if (isFmu) {
+                    if (!self.pathToFmuInfo.hasOwnProperty(thisNodePath)) {
+                        self.getFmuInfo(thisNodePath, thisNode, thisNodeName);
+                    }
 
-            } else if (isParam) {
-                parentFmuPath = self.getParentPath(thisNodePath);
+                } else if (isParam) {
+                    parentFmuPath = self.getParentPath(thisNodePath);
 
-                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    self.getFmuInfo(parentFmuPath);
-                }
+                    if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                        self.getFmuInfo(parentFmuPath);
+                    }
 
-                self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+                    self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
 
-            } else if (isInput) {
-                parentFmuPath = self.getParentPath(thisNodePath);
+                } else if (isInput) {
+                    parentFmuPath = self.getParentPath(thisNodePath);
 
-                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    self.getFmuInfo(parentFmuPath);
-                }
+                    if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                        self.getFmuInfo(parentFmuPath);
+                    }
 
-                self.pathToFmuInfo[parentFmuPath].Inputs[thisNodePath] = thisNodeName;
+                    self.pathToFmuInfo[parentFmuPath].Inputs[thisNodePath] = thisNodeName;
 
-            } else if (isOutput) {
-                parentFmuPath = self.getParentPath(thisNodePath);
+                } else if (isOutput) {
+                    parentFmuPath = self.getParentPath(thisNodePath);
 
-                if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
-                    self.getFmuInfo(parentFmuPath);
-                }
+                    if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
+                        self.getFmuInfo(parentFmuPath);
+                    }
 
-                self.pathToFmuInfo[parentFmuPath].Outputs[thisNodePath] = thisNodeName;
+                    self.pathToFmuInfo[parentFmuPath].Outputs[thisNodePath] = thisNodeName;
 
-            } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.SimulationParameter)) {
-                if (self.simulationInfo.hasOwnProperty(thisNodeName)) {
-                    self.simulationInfo[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+                } else if (self.isMetaTypeOf(thisNode, FmuMetaTypes.SimulationParameter)) {
+                    if (self.simulationInfo.hasOwnProperty(thisNodeName)) {
+                        self.simulationInfo[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+                    }
                 }
             }
         }
