@@ -89,7 +89,7 @@ define(['plugin/PluginConfig',
                 'readOnly': false
             },
             {
-                'name': 'runSimulation',
+                'name': 'createAndExecuteJob',
                 'displayName': "Run FMI Simulation",
                 'description': "Run FMI Model Exchange Simulation",
                 'value': true,
@@ -153,21 +153,20 @@ define(['plugin/PluginConfig',
                         return callback(err, self.result);
                     }
 
-                    if (config.runSimulation) {
-                        var runSimulationCallback = function (err, simulationResultHash) {
+                    if (config.createAndExecuteJob) {
+                        var runSimulationCallback = function (err) {
                             if (err) {
                                 self.result.setSuccess(false);
                                 return callback(err, self.result);
                             }
 
-                            self.result.addArtifact(simulationResultHash);
                             self.result.setSuccess(true);
-                            self.save("Simulation package generated.", function (err) {
+                            self.save("Execution was successful!", function (err) {
                                 callback(null, self.result);
                             });
                         };
 
-                        self.runSimulation(modelExchangeNode, executionArtifactHash, runSimulationCallback);
+                        self.createAndExecuteJob(modelExchangeNode, executionArtifactHash, runSimulationCallback);
                     } else {
                         self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
                         self.result.addArtifact(executionArtifactHash);
@@ -267,7 +266,7 @@ define(['plugin/PluginConfig',
         executionArtifact.addFiles(self.filesToSave, addFilesCallback);
     };
 
-    FmiExporter.prototype.runSimulation = function (modelExchangeNode, executionPackageHash, callback) {
+    FmiExporter.prototype.createAndExecuteJob = function (modelExchangeNode, executionPackageHash, callback) {
         var self = this,
             executorClient = new ExecutorClient(),
             createJobCallback = function (err, createdJobInfo) {
@@ -278,17 +277,15 @@ define(['plugin/PluginConfig',
                 self.logger.debug(createdJobInfo);
 
                 var onJobSuccess = function (completedJobInfo) {
-                        var updateModelCallback = function (err) {
-                            if (err) {
-                                return callback(err, completedJobInfo.resultHash);
+
+                        for (var key in completedJobInfo.resultHashes) {
+                            if (completedJobInfo.resultHashes.hasOwnProperty(key)) {
+                                self.result.addArtifact(completedJobInfo.resultHashes[key]);
                             }
+                        }
 
-                            callback(null, completedJobInfo.resultHash);
-                        };
+                        callback(null, completedJobInfo.resultHashes);
 
-                        self.core.setAttribute(modelExchangeNode, "results", completedJobInfo.resultHash);
-
-                        self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
                     },
                     intervalId = setInterval(function () {
                         // Get the job-info at intervals and check for a non-CREATED status.
@@ -299,14 +296,13 @@ define(['plugin/PluginConfig',
                             }
 
                             self.logger.info(JSON.stringify(jobInfo, null, 4));
-                            if (jobInfo.status === 'CREATED') {
+                            if (jobInfo.status === 'CREATED' || jobInfo.status === 'RUNNING') {
                                 // The job is still running...
                                 return;
                             }
 
                             clearInterval(intervalId);
                             if (jobInfo.status === 'SUCCESS') {
-                                //callback(null, jobInfo.resultHash);
                                 onJobSuccess(jobInfo);
                             } else {
                                 callback('Job execution failed', null);
@@ -317,7 +313,7 @@ define(['plugin/PluginConfig',
                     }, 400);
             };
 
-        executorClient.createJob(executionPackageHash, createJobCallback)
+        executorClient.createJob(executionPackageHash, createJobCallback);
     };
 
     FmiExporter.prototype.runSimulation_ = function (modelExchangeNode, executionPackageHash, callback) {
