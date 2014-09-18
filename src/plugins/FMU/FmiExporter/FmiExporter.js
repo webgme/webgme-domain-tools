@@ -118,9 +118,82 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             config = self.getCurrentConfig(),
             modelExchangeNode,
-            modelExchangeName,
+            modelExchangeName;
+
+        if (!selectedNode) {
+            callback('selectedNode is not defined', self.result);
+            return;
+        }
+
+        this.updateMETA(FmuMetaTypes);
+
+        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
+            modelExchangeNode = selectedNode;
+            modelExchangeName = self.core.getAttribute(modelExchangeNode, 'name');
+            self.nodeCount +=1;
+        } else {
+            callback('SelectedNode is not a ModelExchange!', self.result);
+            return;
+        }
+
+        var allNodesAreLoadedCallbackFunction = function (err) {
+            if (err) {
+                var msg = 'Something went wrong getting loading child nodes';
+                self.logger.error(msg);
+                return callback(msg, self.result);
+            }
+
+            self.buildModelExchangeConfig();
+            self.runTarjansAlgorithm();
+
+            var artifactIsReadyCallbackFunction = function (err, executionArtifact) {
+                var artifactSaveCallback = function (err, executionArtifactHash) {
+                    if (err) {
+                        self.result.setSuccess(false);
+                        return callback(err, self.result);
+                    }
+
+                    if (config.runSimulation) {
+                        var runSimulationCallback = function (err, simulationResultHash) {
+                            if (err) {
+                                self.result.setSuccess(false);
+                                return callback(err, self.result);
+                            }
+
+                            self.result.addArtifact(simulationResultHash);
+                            self.result.setSuccess(true);
+                            self.save("Simulation package generated.", function (err) {
+                                callback(null, self.result);
+                            });
+                        };
+
+                        self.runSimulation(modelExchangeNode, executionArtifactHash, runSimulationCallback);
+                    } else {
+                        self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
+                        self.result.addArtifact(executionArtifactHash);
+                        self.save("Simulation package generated.", function (err) {
+                            if (err) {
+                                self.result.setSuccess(false);
+                                callback(err, self.result);
+                            }
+                            self.result.setSuccess(true);
+                            callback(null, self.result);
+                        });
+                    }
+                };
+
+                executionArtifact.save(artifactSaveCallback);
+            };
+            self.generateExecutionArtifact(modelExchangeName, artifactIsReadyCallbackFunction);
+        };
+        self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
+    };
+
+    FmiExporter.prototype.generateExecutionArtifact = function (modelExchangeName, callback) {
+        var self = this,
+            executionArtifact = self.blobClient.createArtifact(modelExchangeName),
             executor_config = {
-                cmd: 'run_jmodelica_model_exchange.cmd',
+                cmd: 'run_execution.cmd',
                 resultArtifacts: [
                     {
                         name: 'all',
@@ -141,137 +214,57 @@ define(['plugin/PluginConfig',
                 ]
             };
 
-        if (!selectedNode) {
-            callback('selectedNode is not defined', self.result);
-            return;
-        }
+        self.modelExchangeConfig['Connections'] = self.connectionMap;
+        self.modelExchangeConfig['PriorityMap'] = self.priorityMap;
+        self.modelExchangeConfig['FMUs'] = self.pathToFmuInfo;
+        self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
 
-        this.updateMETA(FmuMetaTypes);
+        self.filesToSave['model_exchange_config.json'] = JSON.stringify(self.modelExchangeConfig, null, 4);
+        self.filesToSave['executor_config.json'] = JSON.stringify(executor_config, null, 4);
+        self.filesToSave['fmi_wrapper.py'] = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
+        self.filesToSave['jmodelica_model_exchange.py'] = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
+        self.filesToSave['run_execution.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
+        self.filesToSave['ReadMe.txt'] = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
 
-        if (self.isMetaTypeOf(selectedNode, FmuMetaTypes.ModelExchange)) {
-            modelExchangeNode = selectedNode;
-            modelExchangeName = self.core.getAttribute(modelExchangeNode, 'name');
-            self.nodeCount +=1;
-        } else {
-            callback('SelectedNode is not a ModelExchange!', self.result);
-            return;
-        }
-
-//        if (config.allFiles) {
-//            executor_config.resultArtifacts = { files: [], dirs: [] };
-//        } else {
-//            executor_config.resultArtifacts = {
-//                files: [
-//                    "jmodelica_model_exchange_py.log"
-//                ],
-//                dirs: ["Results"]
-//            };
-//        }
-
-        var allNodesAreLoadedCallbackFunction = function (err) {
+        var addFilesCallback = function (err, fileHashes) {
             if (err) {
-                var msg = 'Something went wrong getting loading child nodes';
-                self.logger.error(msg);
-                return callback(msg, self.result);
+                self.result.setSuccess(false);
+                return callback(err, self.result);
             }
 
-            self.buildModelExchangeConfig();
-            self.runTarjansAlgorithm();
+            var i,
+                fmuPathWithinArtifact,
+                fmuHash,
+                fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
+                addHashesError,
+                addHashesCounter = fmuPackageHashMapKeys.length;
 
-            var executionArtifact = self.blobClient.createArtifact(modelExchangeName);
-
-            self.modelExchangeConfig['Connections'] = self.connectionMap;
-            self.modelExchangeConfig['PriorityMap'] = self.priorityMap;
-            self.modelExchangeConfig['FMUs'] = self.pathToFmuInfo;
-            self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
-
-            self.filesToSave['model_exchange_config.json'] = JSON.stringify(self.modelExchangeConfig, null, 4);
-            self.filesToSave['executor_config.json'] = JSON.stringify(executor_config, null, 4);
-            self.filesToSave['fmi_wrapper.py'] = ejs.render(TEMPLATES['fmi_wrapper.py.ejs']);
-            self.filesToSave['jmodelica_model_exchange.py'] = ejs.render(TEMPLATES['jmodelica_model_exchange.py.ejs']);
-            self.filesToSave['run_execution.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-            //self.filesToSave['run_jmodelica_model_exchange.cmd'] = ejs.render(TEMPLATES['run_jmodelica_model_exchange.cmd.ejs']);
-            self.filesToSave['ReadMe.txt'] = ejs.render(TEMPLATES['ReadMe.txt.ejs']);
-
-            var addFilesCallback = function (err, fileHashes) {
-                if (err) {
-                    self.result.setSuccess(false);
-                    return callback(err, self.result);
+            var addHashCounterCallback = function (addHashCallbackError, addedHash) {
+                if (addHashCallbackError) {
+                    addHashesError += addHashCallbackError;
                 }
 
-                var i,
-                    fmuPathWithinArtifact,
-                    fmuHash,
-                    fmuPackageHashMapKeys = Object.keys(self.fmuPackageHashMap),
-                    addHashesError,
-                    addHashesCounter = fmuPackageHashMapKeys.length;
+                fileHashes.push(addedHash);
+                addHashesCounter -= 1;
 
-                var addHashCounterCallback = function (addHashCallbackError, addedHash) {
-                    if (addHashCallbackError) {
-                        addHashesError += addHashCallbackError;
+                if (addHashesCounter === 0) {
+                    if (addHashesError) {
+                        self.result.setSuccess(false);
+                        callback(addHashesError, self.result);
+                    } else {
+                        callback(addHashesError, executionArtifact);
                     }
-
-                    fileHashes.push(addedHash);
-                    addHashesCounter -= 1;
-
-                    if (addHashesCounter === 0) {
-
-                        if (addHashesError) {
-                            self.result.setSuccess(false);
-                            callback(addHashesError, self.result);
-                            return;
-                        }
-
-                        var artifactSaveCallback = function (err, executionArtifactHash) {
-                            if (err) {
-                                self.result.setSuccess(false);
-                                return callback(err, self.result);
-                            }
-
-                            if (config.runSimulation) {
-                                var runSimulationCallback = function (err, simulationResultHash) {
-                                    if (err) {
-                                        self.result.setSuccess(false);
-                                        return callback(err, self.result);
-                                    }
-
-                                    self.result.addArtifact(simulationResultHash);
-                                    self.result.setSuccess(true);
-                                    self.save("Simulation package generated.", function (err) {
-                                        callback(null, self.result);
-                                    });
-                                };
-
-                                self.runSimulation(modelExchangeNode, executionArtifactHash, runSimulationCallback);
-                            } else {
-                                self.logger.info('Execution Artifact Hash: ' + executionArtifactHash);
-                                self.result.addArtifact(executionArtifactHash);
-                                self.save("Simulation package generated.", function (err) {
-                                    if (err) {
-                                        self.result.setSuccess(false);
-                                        callback(err, self.result);
-                                    }
-                                    self.result.setSuccess(true);
-                                    callback(null, self.result);
-                                });
-                            }
-                        };
-
-                        executionArtifact.save(artifactSaveCallback);
-                    }
-                };
-
-                for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
-                    fmuPathWithinArtifact = fmuPackageHashMapKeys[i];
-                    fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
-                    executionArtifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
                 }
             };
 
-            executionArtifact.addFiles(self.filesToSave, addFilesCallback);
+            for (i = 0; i < fmuPackageHashMapKeys.length; i += 1) {
+                fmuPathWithinArtifact = fmuPackageHashMapKeys[i];
+                fmuHash = self.fmuPackageHashMap[fmuPathWithinArtifact];
+                executionArtifact.addObjectHash(fmuPathWithinArtifact, fmuHash, addHashCounterCallback);
+            }
         };
 
-        self.loadAllNodesRecursive(modelExchangeNode, null, allNodesAreLoadedCallbackFunction);
+        executionArtifact.addFiles(self.filesToSave, addFilesCallback);
     };
 
     FmiExporter.prototype.runSimulation = function (modelExchangeNode, executionPackageHash, callback) {
@@ -326,7 +319,6 @@ define(['plugin/PluginConfig',
 
         executorClient.createJob(executionPackageHash, createJobCallback)
     };
-
 
     FmiExporter.prototype.runSimulation_ = function (modelExchangeNode, executionPackageHash, callback) {
         var self = this,
