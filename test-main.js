@@ -2,6 +2,8 @@
  * Copyright (C) 2014 Vanderbilt University, All rights reserved.
  *
  * Author: Zsolt Lattmann
+ *
+ * This is the main entry point in the browser for the Karma test
  */
 
 // TODO: implement a tool that generates this file since it has dynamic content
@@ -23,7 +25,7 @@ requirejs.config({
 
     paths: {
         // plugin base classes
-        "plugin": "node_modules/webgme/plugin",
+        "plugin": "./node_modules/webgme/src/plugin",
 
         // plugins
         // TODO: populate plugin list dynamically based on config.json
@@ -36,17 +38,29 @@ requirejs.config({
         "plugin/ChildrenSaveArtifacts": "./src/plugins/Examples",
         "plugin/DuplicateActiveNode": "./src/plugins/Examples",
         "plugin/UsingTemplates": "./src/plugins/Examples",
+        "plugin/ActiveNode": "./src/plugins/Examples",
+        "plugin/ConfigurationArtifact": "./src/plugins/Examples",
         "plugin/DSMLAPIGenerator": "./src/plugins/META",
         "plugin/GetPrintAllObjects": "./src/plugins/FMU",
+        "plugin/FmiExporter": "./src/plugins/FMU",
+        "plugin/FmuImporter": "./src/plugins/FMU",
         "plugin/ImportFMUs": "./src/plugins/FMU",
         "plugin/PetriNetExporter": "./src/plugins/PetriNet",
         "plugin/CoreExamples": "./src/plugins/TestCore",
 
+        "executor": "./src/rest/executor",
+
+        "superagent": "./node_modules/webgme/src/client/lib/superagent/superagent",
+        "jszip": "./node_modules/webgme/src/client/lib/jszip/jszip",
+
         // external libraries used by plugins
-        "ejs": "./lib/ejs/ejs.min",
+        "ejs": "./support/ejs/ejs.min",
+        "xmljsonconverter": "./lib/xmljsonconverter",
+        "sax": "./support/sax/sax",
 
         // modules used by test cases
-        "mocks": "./src/mocks"
+        "mocks": "./test/mocks",
+        "models": "./test/models"
     },
 
     shim: {
