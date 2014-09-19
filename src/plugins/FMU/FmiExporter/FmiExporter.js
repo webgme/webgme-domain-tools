@@ -92,20 +92,6 @@ define(['plugin/PluginConfig',
                 'value': true,
                 'valueType': 'boolean',
                 'readOnly': false
-            },
-            {
-                "name": "resultHandling",
-                "displayName": "Result Handling",
-                "description": 'What should be returned after the simulation has completed.',
-                "value": 'results',
-                "valueType": "string",
-                "valueItems": [
-                    "all",
-                    "table",
-                    "plots",
-                    "results"
-                ],
-                "readOnly": false
             }
         ];
     };
@@ -151,21 +137,28 @@ define(['plugin/PluginConfig',
                     }
 
                     if (config.createAndExecuteJob) {
-                        var runSimulationCallback = function (err) {
+                        var runSimulationCallback = function (err, simulationResultHashes) {
                             if (err) {
                                 self.result.setSuccess(false);
                                 return callback(err, self.result);
                             }
 
-                            self.save("Execution was successful!", function (err) {
-                                if (err) {
-                                    self.result.setSuccess(false);
-                                    callback(err, self.result);
-                                }
+                            var updateSaveModelCallback = function (err) {
+                                self.save("Execution was successful!", function (err) {
+                                    if (err) {
+                                        self.result.setSuccess(false);
+                                        callback(err, self.result);
+                                    }
 
-                                self.result.setSuccess(true);
-                                callback(null, self.result);
-                            });
+                                    self.result.setSuccess(true);
+                                    callback(null, self.result);
+                                });                            };
+
+                            if (simulationResultHashes.hasOwnProperty('results')) {
+                                self.updateModelResultAssets(simulationResultHashes.results, updateSaveModelCallback);
+                            } else {
+                                updateSaveModelCallback(null);
+                            }
                         };
 
                         self.createAndExecuteJob(modelExchangeNode, executionArtifactHash, runSimulationCallback);
