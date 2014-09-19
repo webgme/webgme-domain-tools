@@ -36,7 +36,12 @@ define(['plugin/PluginConfig',
             'StopTime': 1,
             'StepSize': 0.001
         };
-        this.modelExchangeConfig = {};
+        this.modelExchangeConfig = {
+            'Connections': null,
+            'PriorityMap': null,
+            'FMUs': null,
+            'SimulationInfo': null
+        };
         this.filesToSave = {};
     };
 
@@ -81,14 +86,6 @@ define(['plugin/PluginConfig',
     FmiExporter.prototype.getConfigStructure = function () {
         return [
             {
-                'name': 'allFiles',
-                'displayName': 'Return all result files',
-                'description': 'Should the execution return all files?',
-                'value': false,
-                'valueType': 'boolean',
-                'readOnly': false
-            },
-            {
                 'name': 'createAndExecuteJob',
                 'displayName': "Run FMI Simulation",
                 'description': "Run FMI Model Exchange Simulation",
@@ -99,7 +96,7 @@ define(['plugin/PluginConfig',
             {
                 "name": "resultHandling",
                 "displayName": "Result Handling",
-                "description": 'What action to take after the simulation has completed.',
+                "description": 'What should be returned after the simulation has completed.',
                 "value": 'results',
                 "valueType": "string",
                 "valueItems": [
@@ -109,7 +106,7 @@ define(['plugin/PluginConfig',
                     "results"
                 ],
                 "readOnly": false
-            },
+            }
         ];
     };
 
@@ -160,8 +157,13 @@ define(['plugin/PluginConfig',
                                 return callback(err, self.result);
                             }
 
-                            self.result.setSuccess(true);
                             self.save("Execution was successful!", function (err) {
+                                if (err) {
+                                    self.result.setSuccess(false);
+                                    callback(err, self.result);
+                                }
+
+                                self.result.setSuccess(true);
                                 callback(null, self.result);
                             });
                         };
@@ -213,10 +215,10 @@ define(['plugin/PluginConfig',
                 ]
             };
 
-        self.modelExchangeConfig['Connections'] = self.connectionMap;
-        self.modelExchangeConfig['PriorityMap'] = self.priorityMap;
-        self.modelExchangeConfig['FMUs'] = self.pathToFmuInfo;
-        self.modelExchangeConfig['SimulationInfo'] = self.simulationInfo;
+        self.modelExchangeConfig.Connections = self.connectionMap;
+        self.modelExchangeConfig.PriorityMap = self.priorityMap;
+        self.modelExchangeConfig.FMUs = self.pathToFmuInfo;
+        self.modelExchangeConfig.SimulationInfo = self.simulationInfo;
 
         self.filesToSave['model_exchange_config.json'] = JSON.stringify(self.modelExchangeConfig, null, 4);
         self.filesToSave['executor_config.json'] = JSON.stringify(executor_config, null, 4);
@@ -316,59 +318,6 @@ define(['plugin/PluginConfig',
         executorClient.createJob(executionPackageHash, createJobCallback);
     };
 
-    FmiExporter.prototype.runSimulation_ = function (modelExchangeNode, executionPackageHash, callback) {
-        var self = this,
-            executorClient = new ExecutorClient(),
-            createJobCallback = function (err, createdJobInfo) {
-                if (err) {
-                    self.result.setSuccess(false);
-                    return callback('Creating job failed: ' + err.toString(), self.result);
-                }
-                self.logger.debug(createdJobInfo);
-
-                var onJobSuccess = function (completedJobInfo) {
-                        var updateModelCallback = function (err) {
-                            if (err) {
-                                return callback(err, completedJobInfo.resultHash);
-                            }
-
-                            callback(null, completedJobInfo.resultHash);
-                        };
-
-                        self.core.setAttribute(modelExchangeNode, "results", completedJobInfo.resultHash);
-
-                        self.updateModelResultAssets(completedJobInfo.resultHash, updateModelCallback);
-                    },
-                    intervalId = setInterval(function () {
-                        // Get the job-info at intervals and check for a non-CREATED status.
-
-                        var getInfoCallback = function (err, jobInfo) {
-                            if (err) {
-                                return callback(err, null);
-                            }
-
-                            self.logger.info(JSON.stringify(jobInfo, null, 4));
-                            if (jobInfo.status === 'CREATED') {
-                                // The job is still running...
-                                return;
-                            }
-
-                            clearInterval(intervalId);
-                            if (jobInfo.status === 'SUCCESS') {
-                                //callback(null, jobInfo.resultHash);
-                                onJobSuccess(jobInfo);
-                            } else {
-                                callback('Job execution failed', null);
-                            }
-                        };
-
-                        executorClient.getInfo(executionPackageHash, getInfoCallback);
-                    }, 400);
-            };
-
-        executorClient.createJob(executionPackageHash, createJobCallback)
-    };
-
     FmiExporter.prototype.updateModelResultAssets = function (resultFileHash, callback) {
         var self = this;
 
@@ -381,7 +330,6 @@ define(['plugin/PluginConfig',
                 plotMapFileHash = metadataContent["Results/plot_map.json"].content,
                 plotMapString,
                 plotMap,
-                objectPath,
                 plotFileName,
                 plotSoftLink,
                 nodeObject;
@@ -403,17 +351,16 @@ define(['plugin/PluginConfig',
                 plotMapString = ab2str_arraymanipulation(content);
                 plotMap = JSON.parse(plotMapString);
 
-                for (objectPath in plotMap) {
-                    if (plotMap.hasOwnProperty(objectPath) === false) {
+                for (var objectPath in plotMap) {
+                    if (plotMap.hasOwnProperty(objectPath)) {
+                        plotFileName = plotMap[objectPath];
+                        plotSoftLink = metadataContent["Results/" + plotFileName].content;
+                        nodeObject = self.path2node[objectPath];
+                        self.core.setAttribute(nodeObject, "svg", plotSoftLink);
+                        self.logger.debug("Set svg for " + self.core.getAttribute(nodeObject, "name"));
+                    } else {
                         self.logger.error("Could not set svg for " + objectPath);
-                        continue;
                     }
-
-                    plotFileName = plotMap[objectPath];
-                    plotSoftLink = metadataContent["Results/" + plotFileName].content;
-                    nodeObject = self.path2node[objectPath];
-                    self.core.setAttribute(nodeObject, "svg", plotSoftLink);
-                    self.logger.debug("Set svg for " + self.core.getAttribute(nodeObject, "name"));
                 }
 
                 callback(null);
@@ -522,17 +469,19 @@ define(['plugin/PluginConfig',
                 'NodePath': fmuNodePath,
                 'Parameters': {},
                 'Inputs': {},
-                'Outputs': {}
+                'Outputs': {},
+                'File': '',
+                'Asset': ''
             };
 
         self.pathToTarjansVertex[fmuNodePath] = new Tarjan.Vertex(fmuNodePath);
 
         if (fmuInstanceAssetHash === fmuBaseAssetHash) {
-            fmuInfo['File'] = 'FMUs/' + fmuBaseName + '.fmu';
-            fmuInfo['Asset'] = self.core.getAttribute(fmuBaseNode, 'resource');
+            fmuInfo.File = 'FMUs/' + fmuBaseName + '.fmu';
+            fmuInfo.Asset = self.core.getAttribute(fmuBaseNode, 'resource');
         } else {
-            fmuInfo['File'] = 'FMUs/' + fmuNodeName + '.fmu';
-            fmuInfo['Asset'] = self.core.getAttribute(fmuNode, 'resource');
+            fmuInfo.File = 'FMUs/' + fmuNodeName + '.fmu';
+            fmuInfo.Asset = self.core.getAttribute(fmuNode, 'resource');
         }
 
         self.fmuPackageHashMap[fmuInfo.File] = fmuInfo.Asset;
@@ -541,16 +490,14 @@ define(['plugin/PluginConfig',
 
     FmiExporter.prototype.getParentPath = function (childPath) {
         var splitPath = childPath.split('/'),
-            slicedPath = splitPath.slice(0, -1),
-            parentPath = slicedPath.join('/');
+            slicedPath = splitPath.slice(0, -1);
 
-        return parentPath;
+        return slicedPath.join('/');
     };
 
     FmiExporter.prototype.loadAllNodesRecursive = function (parentNode, errors, callback) {
         var self = this,
-            loadChildrenCallbackFunction,
-            parentName = self.core.getAttribute(parentNode, 'name');
+            loadChildrenCallbackFunction;
 
         loadChildrenCallbackFunction = function (err, children) {
             if (err) {
@@ -568,7 +515,7 @@ define(['plugin/PluginConfig',
 
             for (var i = 0; i < childNodes.length; i += 1) {
                 self.path2node[self.core.getPath(childNodes[i])] = childNodes[i];
-                self.loadAllNodesRecursive(childNodes[i], errors, callback)
+                self.loadAllNodesRecursive(childNodes[i], errors, callback);
             }
         };
 
@@ -579,35 +526,34 @@ define(['plugin/PluginConfig',
         var self = this,
             tarjansVertex,
             tarjansVertices = [],
-            fmuPath,
             fmuInfo,
             fmuTargetPath,
-            outputPath,
             connectedInputs,
             ithConnectedInput,
             i;
 
 
-        for (fmuPath in self.pathToTarjansVertex) {
-            fmuInfo = self.pathToFmuInfo[fmuPath];
-            tarjansVertex = self.pathToTarjansVertex[fmuPath];
+        for (var fmuPath in self.pathToTarjansVertex) {
+            if (self.pathToTarjansVertex.hasOwnProperty(fmuPath)) {
+                fmuInfo = self.pathToFmuInfo[fmuPath];
+                tarjansVertex = self.pathToTarjansVertex[fmuPath];
 
-            for (outputPath in fmuInfo.Outputs) {
-                if (!self.connectionMap.hasOwnProperty(outputPath)) {
-                    continue;
+                for (var outputPath in fmuInfo.Outputs) {
+                    if (fmuInfo.Outputs.hasOwnProperty(outputPath) &&
+                        self.connectionMap.hasOwnProperty(outputPath)) {
+                        connectedInputs = self.connectionMap[outputPath];
+
+                        for (i = 0; i < connectedInputs.length; i += 1) {
+                            ithConnectedInput = connectedInputs[i];
+
+                            fmuTargetPath = self.getParentPath(ithConnectedInput);
+                            tarjansVertex.connectTo(self.pathToTarjansVertex[fmuTargetPath]);
+                        }
+                    }
                 }
-                connectedInputs = self.connectionMap[outputPath];
-                
-                for (i = 0; i < connectedInputs.length; i += 1) {
-                    ithConnectedInput = connectedInputs[i];
 
-                    fmuTargetPath = self.getParentPath(ithConnectedInput);
-                    tarjansVertex.connectTo(self.pathToTarjansVertex[fmuTargetPath]);
-                }
-
+                tarjansVertices.push(tarjansVertex);
             }
-            
-            tarjansVertices.push(tarjansVertex);
         }
 
         var tarjansGraph = new Tarjan.Graph(tarjansVertices),
