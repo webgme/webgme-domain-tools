@@ -22,10 +22,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'node_modules/webgme/plugin/**/*.js', included: false},
+      {pattern: 'node_modules/webgme/src/client/lib/**/*.js', included: false},
+      {pattern: 'node_modules/webgme/src/plugin/**/*.js', included: false},
       {pattern: 'lib/**/*.js', included: false},
+      {pattern: 'support/**/*.js', included: false},
       {pattern: 'util/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
+      {pattern: 'test/mocks/*.js', included: false},
+      {pattern: 'test/models/**/*.js', included: false},
       {pattern: 'test/**/*Spec.js', included: false},
 
       'test-main.js'
