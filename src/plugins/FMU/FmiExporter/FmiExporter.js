@@ -86,6 +86,14 @@ define(['plugin/PluginConfig',
     FmiExporter.prototype.getConfigStructure = function () {
         return [
             {
+                'name': 'allowLoops',
+                'displayName': "Allow Loops",
+                'description': "Run simulation even if loops are found in the system",
+                'value': false,
+                'valueType': 'boolean',
+                'readOnly': false
+            },
+            {
                 'name': 'createAndExecuteJob',
                 'displayName': "Run FMI Simulation",
                 'description': "Run FMI Model Exchange Simulation",
@@ -101,7 +109,8 @@ define(['plugin/PluginConfig',
             selectedNode = self.activeNode,
             config = self.getCurrentConfig(),
             modelExchangeNode,
-            modelExchangeName;
+            modelExchangeName,
+            fmusInLoop;
 
         if (!selectedNode) {
             callback('selectedNode is not defined', self.result);
@@ -115,6 +124,7 @@ define(['plugin/PluginConfig',
             modelExchangeName = self.core.getAttribute(modelExchangeNode, 'name');
             self.nodeCount +=1;
         } else {
+            self.createMessage(selectedNode, 'SelectedNode is not a ModelExchange!');
             callback('SelectedNode is not a ModelExchange!', self.result);
             return;
         }
@@ -127,7 +137,15 @@ define(['plugin/PluginConfig',
             }
 
             self.buildModelExchangeConfig();
-            self.runTarjansAlgorithm();
+            fmusInLoop = self.runTarjansAlgorithm();
+
+            if (!config.allowLoops) {
+                if (fmusInLoop.length > 0) {
+                    self.createMessage(modelExchangeNode, modelExchangeName + ' contains a loop.');
+                    self.result.setSuccess(false);
+                    return callback(err, self.result);
+                }
+            }
 
             var artifactIsReadyCallbackFunction = function (err, executionArtifact) {
                 var artifactSaveCallback = function (err, executionArtifactHash) {
@@ -523,7 +541,9 @@ define(['plugin/PluginConfig',
             fmuTargetPath,
             connectedInputs,
             ithConnectedInput,
-            i;
+            i,
+            loopsDetected = false,
+            fmusInLoop = [];
 
 
         for (var fmuPath in self.pathToTarjansVertex) {
@@ -556,19 +576,20 @@ define(['plugin/PluginConfig',
         for (i = 0; i < tarjansScc.length; i += 1) {
             self.priorityMap[i+1] = [];
 
-            for (var j=0;j<tarjansScc[i].length;j++) {
-                self.priorityMap[i+1].push(tarjansScc[i][j].name);
+            if (tarjansScc[i].length > 1) {
+                loopsDetected = true;
             }
 
-//            if (tarjansScc[i].length === 1) {
-//                self.priorityMap[tarjansScc.length - i] = tarjansScc[i][0].name;
-//
-//            } else {
-//                self.logger.error("Tarjan's algorithm detected a loop with fmu " + tarjansScc[i][0].name);
-//                self.result.setSuccess(false);
-//                return;
-//            }
+            for (var j=0;j<tarjansScc[i].length;j++) {
+                self.priorityMap[i+1].push(tarjansScc[i][j].name);
+
+                if (loopsDetected) {
+                    fmusInLoop.push(self.path2node[tarjansScc[i][j].name]);
+                }
+            }
         }
+
+        return fmusInLoop;
     };
 
     return FmiExporter;
