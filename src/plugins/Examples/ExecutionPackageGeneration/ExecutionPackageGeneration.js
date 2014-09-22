@@ -169,15 +169,11 @@ define(['plugin/PluginConfig',
                                 return callback('Getting results metadata failed: ' + err.toString(), self.result);
                             }
                             newNameJsonHash = metaData.content['new_name.json'].content;
-                            self.blobClient.getObject(newNameJsonHash, function (err, content) {
-                                var results,
-                                    newName,
-                                    key;
+                            self.blobClient.getObject(newNameJsonHash, function (err, newName) {
+                                var key;
                                 if (err) {
                                     return callback('Getting content failed: ' + err.toString(), self.result);
                                 }
-                                results = String.fromCharCode.apply(null, new Uint8Array(content));
-                                newName = JSON.parse(results);
                                 if (config.update) {
                                     for (key in newName) {
                                         if (newName.hasOwnProperty(key)) {
