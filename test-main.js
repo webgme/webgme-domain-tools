@@ -49,6 +49,7 @@ requirejs.config({
         "plugin/CoreExamples": "./src/plugins/TestCore",
 
         "executor": "./src/rest/executor",
+        "blob": "./node_modules/webgme/src/middleware/blob",
 
         "superagent": "./node_modules/webgme/src/client/lib/superagent/superagent",
         "jszip": "./node_modules/webgme/src/client/lib/jszip/jszip",

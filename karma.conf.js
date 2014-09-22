@@ -17,20 +17,23 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'requirejs', 'chai'],
+    frameworks: ['mocha', 'requirejs', 'chai', 'express-http-server'],
 
 
     // list of files / patterns to load in the browser
     files: [
       {pattern: 'node_modules/webgme/src/client/lib/**/*.js', included: false},
       {pattern: 'node_modules/webgme/src/plugin/**/*.js', included: false},
+      {pattern: 'node_modules/webgme/src/middleware/blob/*.js', included: false},
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'support/**/*.js', included: false},
       {pattern: 'util/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/mocks/*.js', included: false},
       {pattern: 'test/models/**/*.js', included: false},
+
       {pattern: 'test/**/*Spec.js', included: false},
+      {pattern: 'node_modules/webgme/src/middleware/blob/*Spec.js', included: false},
 
       'test-main.js'
     ],
@@ -79,6 +82,37 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: false,
+
+      proxies: {
+          '/rest': 'http://localhost:8965/rest'
+      },
+
+      expressHttpServer: {
+          port: 8965,
+          appVisitor: function (app, log) {
+              function ensureAuthenticated(req, res, next) {
+                  req.session = {udmId: 'karma_test_user'};
+                  next();
+              };
+              var webgme = require('webgme');
+              var config = require('./config.json');
+              global.webGMEGlobal.setConfig(config);
+
+              var requirejs = global.webGMEGlobal.requirejs;
+
+              requirejs(['blob/BlobFSBackend', 'blob/BlobServer'], function(BlobFSBackend, BlobServer) {
+                  var blobBackend = new BlobFSBackend();
+                  BlobServer.createExpressBlob(app, blobBackend, ensureAuthenticated, log);
+              });
+              app.use(function(req, res, next) {
+                  // TODO: possible race between client and above requirejs call
+                  next();
+              });
+              app.get('/rest/blob/istesting', function (req, res) {
+                  res.end('done', 200);
+              });
+          }
+      }
   });
 };
