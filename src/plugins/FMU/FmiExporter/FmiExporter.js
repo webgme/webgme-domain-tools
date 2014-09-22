@@ -554,14 +554,20 @@ define(['plugin/PluginConfig',
             tarjansScc = tarjansAlgorithm.run();
 
         for (i = 0; i < tarjansScc.length; i += 1) {
-            if (tarjansScc[i].length === 1) {
-                self.priorityMap[tarjansScc.length - i] = tarjansScc[i][0].name;
+            self.priorityMap[i+1] = [];
 
-            } else {
-                self.logger.error("Tarjan's algorithm detected a loop with fmu " + tarjansScc[i][0].name);
-                self.result.setSuccess(false);
-                return;
+            for (var j=0;j<tarjansScc[i].length;j++) {
+                self.priorityMap[i+1].push(tarjansScc[i][j].name);
             }
+
+//            if (tarjansScc[i].length === 1) {
+//                self.priorityMap[tarjansScc.length - i] = tarjansScc[i][0].name;
+//
+//            } else {
+//                self.logger.error("Tarjan's algorithm detected a loop with fmu " + tarjansScc[i][0].name);
+//                self.result.setSuccess(false);
+//                return;
+//            }
         }
     };
 

@@ -113,85 +113,139 @@ def run_explicit_euler(fmi_me_object):
         logger.debug("Solving system for t={0}".format(time_at_step_i))
         
         for i in range(len(fmi_me_object.priority_map)):
+
+            priority_level = str(i + 1)
+            priority_level_list = fmi_me_object.priority_map[priority_level]
+        
+            for fmu_path in priority_level_list:
            
-            fmu_path = fmi_me_object.priority_map[str(i + 1)]
-            fmu = fmi_me_object.fmu_map[fmu_path]
-            
-            logger.debug("Solving {0}".format(fmu.name))
+                fmu = fmi_me_object.fmu_map[fmu_path]
+                
+                logger.debug("Solving {0}".format(fmu.name))
 
-            # Get existing event indicators
-            event_indicators = fmu.pyfmi_fmu.get_event_indicators()
 
-            # Get existing states and compute derivatives of the FMU
-            x_bar = fmu.pyfmi_fmu.continuous_states
-            x_dot = fmu.pyfmi_fmu.get_derivatives()
 
-            # Set time of the FMU
-            fmu.pyfmi_fmu.time = time_at_step_i
+                # Get existing event indicators
+                event_indicators = fmu.pyfmi_fmu.get_event_indicators()
 
-            # Compute new states and set them
-            x_bar = x_bar + t_increment*x_dot
-            fmu.pyfmi_fmu.continuous_states = x_bar
 
-            ########### Check for Events ###############
-            
-            # Get new event indicators
-            event_indicators_new = fmu.pyfmi_fmu.get_event_indicators()
 
-            # Inform FMUs of the step and check for a step event (returns True/False)
-            step_event = fmu.pyfmi_fmu.completed_integrator_step()
+                # Get existing states and compute derivatives of the FMU
+                x_bar = fmu.pyfmi_fmu.continuous_states
+                x_dot = fmu.pyfmi_fmu.get_derivatives()
 
-            # Check for time and state events (time events are 'predictable', state events are not necessarily so)
-            time_event  = abs(time_at_step_i-t_next) <= 1.e-10  # this one checks for the end (?)
-            state_event = True if True in ((event_indicators_new>0.0) != (event_indicators>0.0)) else False
 
-            # Handle any events
-            if step_event or time_event or state_event:
 
-                event_info = fmu.pyfmi_fmu.get_event_info()
-                event_info.iterationConverged = False
 
-                # Event iteration
-                while event_info.iterationConverged == False:
-                    fmu.pyfmi_fmu.event_update(intermediateResult=True) #Stops after each event iteration
+                # Set time of the FMU
+                fmu.pyfmi_fmu.time = time_at_step_i
+
+
+
+
+
+                # Compute new states and set them
+                x_bar = x_bar + t_increment*x_dot
+                fmu.pyfmi_fmu.continuous_states = x_bar
+
+
+                ########### Check for Events ###############
+                
+                # Get new event indicators
+                event_indicators_new = fmu.pyfmi_fmu.get_event_indicators()
+
+
+
+
+                # Inform FMUs of the step and check for a step event (returns True/False)
+                step_event = fmu.pyfmi_fmu.completed_integrator_step()
+
+
+
+                # Check for time and state events (time events are 'predictable', state events are not necessarily so)
+                time_event  = abs(time_at_step_i-t_next) <= 1.e-10  # this one checks for the end (?)
+                state_event = True if True in ((event_indicators_new>0.0) != (event_indicators>0.0)) else False
+
+
+
+                # Handle any events
+                if step_event or time_event or state_event:
+
+
+
+
                     event_info = fmu.pyfmi_fmu.get_event_info()
+                    event_info.iterationConverged = False
 
-                    #Retrieve solutions (if needed)
-                    if event_info.iterationConverged == False:
-                        # fmu.get_real, get_integer, get_boolean,
-                        # get_string(valueref)
-                        pass
 
-                # Check if the event affected the state values and if so sets them
-                if event_info.stateValuesChanged:
-                    x_bar = fmu.pyfmi_fmu.continuous_states
+                    # Event iteration
+                    while event_info.iterationConverged == False:
 
-                # Get new nominal values.
-                if event_info.stateValueReferencesChanged:
-                    atol = 0.01*rtol*fmu.pyfmi_fmu.nominal_continuous_states
 
-                # Check for new time event
-                if event_info.upcomingTimeEvent:
-                    t_next = min(event_info.nextEventTime, sim_end_time)
-                else:
-                    t_next = sim_end_time
 
-            ##########################
+                        fmu.pyfmi_fmu.event_update(intermediateResult=True) #Stops after each event iteration
+                        event_info = fmu.pyfmi_fmu.get_event_info()
 
-            fmu_result = fmu.pyfmi_fmu.get_real(fmu.time_varying_refs)
-            result_array = results_data[fmu.name]
-            result_array.append(fmu_result)
 
-            # Propagate output values
-            for output_path, output_object in fmu.output_map.iteritems():
-                output_value = fmu.pyfmi_fmu.get_real(output_object.value_ref)
-            
-                if output_path in fmi_me_object.conn_map:
-                    for target_input_path in fmi_me_object.conn_map[output_path]:
-                        target_fmu_path = get_parent_fmu_path(target_input_path)
-                        target_fmu = fmi_me_object.fmu_map[target_fmu_path]
-                        input_value_ref = target_fmu.input_map[target_input_path].value_ref
-                        target_fmu.pyfmi_fmu.set_real(input_value_ref, output_value)
+
+
+                        #Retrieve solutions (if needed)
+                        if event_info.iterationConverged == False:
+                            # fmu.get_real, get_integer, get_boolean,
+                            # get_string(valueref)
+                            pass
+
+
+
+                    # Check if the event affected the state values and if so sets them
+                    if event_info.stateValuesChanged:
+                        x_bar = fmu.pyfmi_fmu.continuous_states
+
+
+
+
+
+
+                    # Get new nominal values.
+                    if event_info.stateValueReferencesChanged:
+                        atol = 0.01*rtol*fmu.pyfmi_fmu.nominal_continuous_states
+
+
+                    # Check for new time event
+                    if event_info.upcomingTimeEvent:
+                        t_next = min(event_info.nextEventTime, sim_end_time)
+                    else:
+                        t_next = sim_end_time
+
+
+
+
+                ##########################
+
+
+
+
+
+
+
+
+
+
+
+                fmu_result = fmu.pyfmi_fmu.get_real(fmu.time_varying_refs)
+                result_array = results_data[fmu.name]
+                result_array.append(fmu_result)
+
+                # Propagate output values
+                for output_path, output_object in fmu.output_map.iteritems():
+                    output_value = fmu.pyfmi_fmu.get_real(output_object.value_ref)
+                
+                    if output_path in fmi_me_object.conn_map:
+                        for target_input_path in fmi_me_object.conn_map[output_path]:
+                            target_fmu_path = get_parent_fmu_path(target_input_path)
+                            target_fmu = fmi_me_object.fmu_map[target_fmu_path]
+                            input_value_ref = target_fmu.input_map[target_input_path].value_ref
+                            target_fmu.pyfmi_fmu.set_real(input_value_ref, output_value)
 
         time_for_result.append(time_at_step_i)
     
