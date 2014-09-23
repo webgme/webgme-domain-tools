@@ -208,7 +208,7 @@ define(['plugin/PluginConfig',
                 cmd: 'run_execution.cmd',
                 resultArtifacts: [
                     {
-                        name: 'all',
+                        name: 'execution_package',
                         resultPatterns: []
                     },
                     {
@@ -331,6 +331,8 @@ define(['plugin/PluginConfig',
 
     FmiExporter.prototype.updateModelResultAssets = function (resultFileHash, callback) {
         var self = this;
+
+        self.core.setAttribute(self.activeNode, "results", resultFileHash);
 
         var blobGetMetadataCallback = function (err, metadata) {
             if (err) {
