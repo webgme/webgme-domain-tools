@@ -4,7 +4,7 @@ define([], function() {
         this.resultHashes = parameters.resultHashes || [];
         this.resultSuperSet = parameters.resultSuperSet || null;
         this.userId = parameters.userId || [];
-        this.status = parameters.status || 'CREATED'; // TODO: define a constant for this
+        this.status = parameters.status || null;
         this.createTime = parameters.createTime || null;
         this.startTime = parameters.startTime || null;
         this.finishTime = parameters.finishTime || null;

@@ -158,6 +158,7 @@ define(['logManager',
         var info = req.body;
         info.hash = hash;
         info.createTime = new Date().toISOString();
+        info.status = info.status || 'CREATED'; // TODO: define a constant for this
         var jobInfo = new JobInfo(info);
         // TODO: check if hash ok
         jobList.update({ hash: hash }, jobInfo, { upsert: true }, function(err) {
@@ -196,8 +197,9 @@ define(['logManager',
             } else if (docs.length) {
                 var jobInfo = new JobInfo(docs[0]);
                 var jobInfoUpdate = new JobInfo(req.body);
+                jobInfoUpdate.hash = hash;
                 for (var i in jobInfoUpdate) {
-                    if (jobInfoUpdate.hasOwnProperty(i)) {
+                    if (jobInfoUpdate[i] !== null && (!(jobInfoUpdate[i] instanceof Array) || jobInfoUpdate[i].length !== 0)) {
                         jobInfo[i] = jobInfoUpdate[i];
                     }
                 }
