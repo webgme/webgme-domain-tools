@@ -3,4 +3,8 @@ echo off
 pushd %~dp0
 call C:\JModelica.org-1.12\setenv.bat
 "C:\Python27\python.exe" .\\jmodelica_model_exchange.py .\\model_exchange_config.json
-popd
+if %ERRORLEVEL% == 0 (
+    popd
+) else (
+    echo jmodelica_model_exchange.py had a non-zero exit code > FAILED.txt
+)

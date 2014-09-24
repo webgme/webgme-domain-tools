@@ -33,6 +33,12 @@ except:
 # Set up the Option parser
 from optparse import OptionParser
 
+if os.name == 'nt':
+    import win32api
+    def _exit(code):
+        win32api.TerminateProcess(win32api.GetCurrentProcess(), code)
+    sys.exit = _exit
+
 parser = OptionParser()
 parser.add_option("-c",
                   "--config",

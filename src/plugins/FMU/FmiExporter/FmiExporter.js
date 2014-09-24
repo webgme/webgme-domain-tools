@@ -162,10 +162,16 @@ define(['plugin/PluginConfig',
                             }
 
                             var updateSaveModelCallback = function (err) {
+                                if (err) {
+                                    self.result.setSuccess(false);
+                                    self.createMessage(self.activeNode, err);
+                                    return callback(err, self.result);
+                                }
+
                                 self.save("Execution was successful!", function (err) {
                                     if (err) {
                                         self.result.setSuccess(false);
-                                        callback(err, self.result);
+                                        return callback(err, self.result);
                                     }
 
                                     self.result.setSuccess(true);
@@ -221,7 +227,7 @@ define(['plugin/PluginConfig',
                     },
                     {
                         name: 'results',
-                        resultPatterns: ['Results/**', 'jmodelica_model_exchange_py.log']
+                        resultPatterns: ['Results/**', 'FAILED.txt', 'jmodelica_model_exchange_py.log']
                     }
                 ]
             };
@@ -339,8 +345,15 @@ define(['plugin/PluginConfig',
                 return callback(err);
             }
 
+            // TODO: Check if the simulation was successful
             var metadataContent = metadata.content,
-                plotMapFileHash = metadataContent["Results/plot_map.json"].content,
+                failedTxt = metadataContent["FAILED.txt"];
+
+            if (failedTxt) {
+                return callback("ModelExchange simulation failed; see results/jmodelica_model_exchange_py.log");
+            }
+
+            var plotMapFileHash = metadataContent["Results/plot_map.json"].content,
                 plotMapString,
                 plotMap,
                 plotFileName,
