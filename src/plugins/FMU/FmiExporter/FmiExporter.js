@@ -408,6 +408,8 @@ define(['plugin/PluginConfig',
             connDstPath,
             isFmu,
             isParam,
+            paramValue,
+            paramDefault,
             isInput,
             isOutput;
 
@@ -446,13 +448,27 @@ define(['plugin/PluginConfig',
                     }
 
                 } else if (isParam) {
+                    paramValue = null;
+                    paramDefault = null;
+
                     parentFmuPath = self.getParentPath(thisNodePath);
 
                     if (!self.pathToFmuInfo.hasOwnProperty(parentFmuPath)) {
                         self.getFmuInfo(parentFmuPath);
                     }
 
-                    self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = self.core.getAttribute(thisNode, 'value');
+                    paramValue = self.core.getAttribute(thisNode, 'value');
+
+                    if (paramValue === "") {
+                        paramDefault = self.core.getAttribute(thisNode, 'defaultValue');
+                        if (paramDefault === "") {
+                            continue; // Don't want an empty string as a value for this parameter
+                        } else {
+                            self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = paramDefault;
+                        }
+                    } else {
+                        self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = paramValue;
+                    }
 
                 } else if (isInput) {
                     parentFmuPath = self.getParentPath(thisNodePath);
