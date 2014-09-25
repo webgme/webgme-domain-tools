@@ -2,17 +2,18 @@
 
 ### REST API ###
 
-`GET /rest/external/executor/?status=CREATED`
-`GET /rest/external/executor/info/[job sha1]`  
-`POST /rest/external/executor/create/[job sha1]`  
-`POST /rest/external/executor/update/[job sha1]`  
-See also ExecutorClient.js. See JobInfo.js for the list of fields.
+- `GET /rest/external/executor/?status=CREATED`
+- `GET /rest/external/executor/info/[job sha1]` 
+- `POST /rest/external/executor/create/[job sha1]`
+- `POST /rest/external/executor/update/[job sha1]`
 
-`GET /rest/external/executor/worker/`  
+See also `ExecutorClient.js`. See `JobInfo.js` for the list of fields.
+
+- `GET /rest/external/executor/worker/`  
 
 ### Usage of Executor Client ###
 
-See `executor-worker/README.txt` and `executor-worker/README.md`
+See [`executor_worker/README.txt`](../../../executor_worker/README.txt) and [`executor_worker/README.md`](../../../executor_worker/README.md)
 
 ### Labels ###
 
@@ -20,4 +21,4 @@ See `executor-worker/README.txt`
 
 ### Job storage ###
 
-Jobs are stored in the WebGME blob.
+Jobs are stored in the WebGME blob. Job and executor slave information stored in the jobs.nedb file.
