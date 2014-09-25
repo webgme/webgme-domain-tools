@@ -21,4 +21,4 @@ See `executor-worker/README.txt`
 
 ### Job storage ###
 
-Jobs are stored in the WebGME blob. Job and executor slave information stored in the jobList.nedb file.
+Jobs are stored in the WebGME blob. Job information is stored in the jobList.nedb file.
