@@ -17,7 +17,7 @@ See [`executor_worker/README.txt`](../../../executor_worker/README.txt) and [`ex
 
 ### Labels ###
 
-See `executor-worker/README.txt`
+See [`executor_worker/README.txt`](../../../executor_worker/README.txt)
 
 ### Job storage ###
 
