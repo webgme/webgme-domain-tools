@@ -410,6 +410,7 @@ define(['plugin/PluginConfig',
             isParam,
             paramValue,
             paramDefault,
+            msgString,
             isInput,
             isOutput;
 
@@ -462,6 +463,8 @@ define(['plugin/PluginConfig',
                     if (paramValue === "") {
                         paramDefault = self.core.getAttribute(thisNode, 'defaultValue');
                         if (paramDefault === "") {
+                            msgString = "Parameter " + thisNodeName + " has no value or defaultValue; it will be ignored.";
+                            self.createMessage(thisNode, msgString);
                             continue; // Don't want an empty string as a value for this parameter
                         } else {
                             self.pathToFmuInfo[parentFmuPath].Parameters[thisNodeName] = paramDefault;
