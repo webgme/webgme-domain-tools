@@ -167,8 +167,6 @@ define(['logManager',
                         // delete downloaded file
                         fs.unlinkSync(zipPath);
 
-                        var exec = child_process.exec;
-
                         jobInfo.startTime = new Date().toISOString();
 
                         // get cmd file dynamically from the this.executorConfigFilename file
@@ -184,8 +182,11 @@ define(['logManager',
 
                             logger.debug('working directory: ' + jobDir + ' executing: ' + cmd);
 
-                            var child = exec(cmd, {cwd: jobDir},
-                                function (error, stdout, stderr) {
+                            var child = child_process.spawn(cmd, [], {cwd: jobDir, stdio: ['ignore', 'pipe', 'pipe']});
+                            var outlog = fs.createWriteStream(path.join(jobDir, 'job_stdout.txt'));
+                            child.stdout.pipe(outlog);
+                            child.stderr.pipe(fs.createWriteStream(path.join(jobDir, 'job_stderr.txt'))); // TODO: maybe put in the same file as stdout
+                            child.on('close', function (code, stdout, stderr) {
 
                                     jobInfo.finishTime = new Date().toISOString();
 
@@ -195,8 +196,8 @@ define(['logManager',
                                         logger.error(jobInfo.hash + ' stderr: ' + stderr);
                                     }
 
-                                    if (error !== null) {
-                                        logger.error(jobInfo.hash + ' exec error: ' + error);
+                                    if (code !== 0) {
+                                        logger.error(jobInfo.hash + ' exec error: ' + code);
                                         jobInfo.status = 'FAILED_TO_EXECUTE';
                                     }
 
