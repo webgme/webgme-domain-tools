@@ -17,7 +17,8 @@
         "./src/plugins/PetriNet",
         "./src/plugins/LogicGates",
         "./src/plugins/TestCore",
-        "./src/plugins/PortHamiltonianSystem"
+        "./src/plugins/PortHamiltonianSystem",
+        "./src/plugins/Layout"
     ],
 
     "rextrast": {
