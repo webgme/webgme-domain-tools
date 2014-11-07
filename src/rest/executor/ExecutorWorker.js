@@ -185,6 +185,7 @@ define(['logManager',
                             var child = child_process.spawn(cmd, [], {cwd: jobDir, stdio: ['ignore', 'pipe', 'pipe']});
                             var outlog = fs.createWriteStream(path.join(jobDir, 'job_stdout.txt'));
                             child.stdout.pipe(outlog);
+                            child.stdout.pipe(fs.createWriteStream(path.join(self.workingDirectory, jobInfo.hash.substr(0, 6) + '_stdout.txt')));
                             child.stderr.pipe(fs.createWriteStream(path.join(jobDir, 'job_stderr.txt'))); // TODO: maybe put in the same file as stdout
                             child.on('close', function (code, stdout, stderr) {
 
