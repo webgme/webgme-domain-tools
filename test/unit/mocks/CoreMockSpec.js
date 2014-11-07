@@ -15,7 +15,7 @@ if (typeof window === 'undefined') {
 
 
 //exports.testSomething = function(test){
-//    var CoreMock = requirejs('../../src/mocks/CoreMock');
+//    var CoreMock = requirejs('../../test/mocks/CoreMock');
 //    var core = new CoreMock();
 //
 //    var n = core.createNode({parent: core.getRootNode()});
