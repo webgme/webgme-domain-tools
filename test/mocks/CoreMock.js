@@ -26,12 +26,22 @@ define(['./NodeMock'], function (NodeMock) {
         return node;
     };
 
+    CoreMock.prototype.copyNode = function (node, parentNode) {
+        var newNode = node.clone(this, parentNode, this._nodes);
+
+        return newNode;
+    }
+
     CoreMock.prototype.addChild = function (node, child) {
         node.children.push(this.getPath(child));
     };
 
     CoreMock.prototype.getPath = function (node) {
         return node.path;
+    };
+
+    CoreMock.prototype.getName = function (node) {
+        return node.attributes.name;
     };
 
     CoreMock.prototype.getRelid = function (node) {
@@ -56,6 +66,7 @@ define(['./NodeMock'], function (NodeMock) {
     CoreMock.prototype.getAttributeNames = function (node) {
         return Object.keys(node.attributes);
     };
+    CoreMock.prototype.getOwnAttributeNames = CoreMock.prototype.getAttributeNames;
 
     CoreMock.prototype.setRegistry = function (node, name, value) {
         node.registry[name] = value;
@@ -65,9 +76,17 @@ define(['./NodeMock'], function (NodeMock) {
         return node.registry[name];
     };
 
+    CoreMock.prototype.getRegistryNames = function getRegistryNames(node) {
+        return Object.keys(node.registry);
+    }
+
+    CoreMock.prototype.getOwnRegistryNames = CoreMock.prototype.getRegistryNames;
+
     CoreMock.prototype.getPointerNames = function (node) {
         return Object.keys(node.pointers);
     };
+
+    CoreMock.prototype.getOwnPointerNames = CoreMock.prototype.getPointerNames;
 
     CoreMock.prototype.setPointer = function (node, name, target) {
         node.pointers[name] = target.path;
@@ -92,6 +111,10 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.getParent = function (node) {
         return this._nodes[node.parent];
+    };
+
+    CoreMock.prototype.getChildrenPaths = function (node) {
+        return Object.keys(node.children);
     };
 
     CoreMock.prototype.getGuid = function (node) {
@@ -120,6 +143,7 @@ define(['./NodeMock'], function (NodeMock) {
             };
         setTimeout(timeOutFunction, Math.random() * self._timeOut);
     };
+
 
     CoreMock.prototype.loadChildren = function (node, callback) {
         var self = this,

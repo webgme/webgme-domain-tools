@@ -46,6 +46,10 @@ define([], function () {
 
         if (options.base) {
             this.pointers.base = core.getPath(options.base);
+            if (this.pointers.base) {
+            } else {
+                throw new Error(options.base + " not found");
+            }
         }
 
         this.collection = {};
@@ -57,6 +61,37 @@ define([], function () {
         if (options.parent) {
             core.addChild(options.parent, this);
         }
+    };
+
+    NodeMock.prototype.clone = function (core, parent, nodes) {
+        var orig = this;
+        var Temp = function () {
+            NodeMock._nodes.push(this);
+
+            this.ID = NodeMock._nodes.length;
+            this.guid = generateGUID();
+            this.parent = core.getPath(parent);
+            this.path = this.parent + '/' + this.ID;
+            nodes[this.path] = this;
+
+            this.children = [];
+            for (var i = 0; i < orig.children.length; i++) {
+                var child = nodes[orig.children[i]].clone(core, this, nodes);
+                this.children.push(child.path);
+            }
+
+            var copy = JSON.parse(JSON.stringify(orig));
+            for (var key in copy) {
+                if (orig.hasOwnProperty(key) && !this.hasOwnProperty(key)) {
+                    this[key] = copy[key];
+                }
+            }
+        };
+        Temp.prototype = NodeMock.prototype;
+
+        var that = new Temp;
+        // FIXME: fix pointers
+        return that;
     };
 
     NodeMock._nodes = [];
