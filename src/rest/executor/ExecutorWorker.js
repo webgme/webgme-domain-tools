@@ -307,7 +307,9 @@ define(['logManager',
                         }
                         counter -= 1;
                         if (counter <= 0) {
-                            if (pendingStatus) {
+                            if (JobInfo.isFailedFinishedStatus(jobInfo.status)) {
+                                // Keep the previous error status
+                            } else if (pendingStatus) {
                                 jobInfo.status = pendingStatus;
                             } else {
                                 jobInfo.status = 'SUCCESS';
