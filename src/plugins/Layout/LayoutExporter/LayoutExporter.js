@@ -2,7 +2,8 @@
  * Created by zhangpn on 11/3/2014.
  */
 define(['plugin/PluginConfig',
-        'plugin/PluginBase'], function (PluginConfig, PluginBase) {
+        'plugin/PluginBase',
+        'js/Widgets/DiagramDesigner/DiagramDesignerWidget.DecoratorBase',], function (PluginConfig, PluginBase, Decorator) {
 
     'use strict';
 
@@ -143,7 +144,8 @@ define(['plugin/PluginConfig',
             error = "",
             afterLoadingSrc,
             afterLoadingDst,
-            pushConnection;
+            pushConnection,
+            afterLoadingChildren;
 
         afterLoadingSrc = function (err, node) {
             var isPort = core.getRegistry(node, ISPORT),
@@ -210,6 +212,36 @@ define(['plugin/PluginConfig',
             }
         };
 
+        afterLoadingChildren = function (err, children) {
+            var port,
+                i;
+
+            if (err) {
+                error += err;
+                callback(error);
+                return;
+            }
+
+            // todo: fix relative position of ports
+            if (children.length > 0) {
+                component.ports = [];
+                for (i = 0; i < children.length; i += 1) {
+                    port = {
+                        name: core.getAttribute(children[i], NAME),
+                        id: core.getPath(children[i]),
+                        relative_position: {
+                            x: 0,
+                            y: 0
+                        }
+                    };
+                    component.ports.push(port);
+                }
+            }
+
+            self.components.push(component);
+            callback(null);
+        };
+
         // check if node is a connection
         // todo: find a better way to get connections...
         if (ptrArray.indexOf(SRCPTR) > -1 && ptrArray.indexOf(DSTPTR) > - 1) {
@@ -234,8 +266,8 @@ define(['plugin/PluginConfig',
             component.id = core.getPath(node);
             component.position = node.data.reg.position;
 
-            // todo: get size of component, ports if any
-            self.components.push(component);
+            // get ports of component if any
+            core.loadChildren(node, afterLoadingChildren);
         }
     };
 
