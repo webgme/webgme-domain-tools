@@ -64,41 +64,23 @@ define(['plugin/PluginConfig',
                 callback(err, self.result);
                 return;
             }
-            self.logger.warning('Visited all children!');
+
+            // a dirty way to get component size, port relative position, connection pathpoints
+            if (window.document) {
+
+                self.getData(window.document);
+            }
+
             self.saveResults(output, callback);
+
+            console.info("Plugin completed");
 
         };
 
         self.getChildrenFromNode(selectedNode, afterAllVisited);
 
-        console.info("Plugin completed");
     };
 
-    LayoutExporterPlugin.prototype.saveResults = function (obj, callback) {
-        var self = this,
-            core = self.core,
-            artifact = self.blobClient.createArtifact('LayoutExporterOutput'),
-            file = {};
-
-        file[core.getAttribute(self.activeNode, NAME) + ".json"] = JSON.stringify(obj, null, 4);
-
-        artifact.addFiles(file, function (err, hashes) {
-            if (err) {
-                callback(err, self.result);
-                return;
-            }
-            self.logger.warning(hashes.toString());
-            artifact.save(function (err, hash) {
-                if (err) {
-                    callback(err, self.result);
-                    return;
-                }
-                self.result.addArtifact(hash);
-                self.result.setSuccess(true);
-                callback(null, self.result);
-            });
-        });
-    };
 
     LayoutExporterPlugin.prototype.getChildrenFromNode = function (node, callback) {
         var self = this,
@@ -271,6 +253,82 @@ define(['plugin/PluginConfig',
         }
     };
 
+    LayoutExporterPlugin.prototype.saveResults = function (obj, callback) {
+        var self = this,
+            core = self.core,
+            artifact = self.blobClient.createArtifact('LayoutExporterOutput'),
+            file = {};
+
+        file[core.getAttribute(self.activeNode, NAME) + ".json"] = JSON.stringify(obj, null, 4);
+
+        artifact.addFiles(file, function (err, hashes) {
+            if (err) {
+                callback(err, self.result);
+                return;
+            }
+            self.logger.warning(hashes.toString());
+            artifact.save(function (err, hash) {
+                if (err) {
+                    callback(err, self.result);
+                    return;
+                }
+                self.result.addArtifact(hash);
+                self.result.setSuccess(true);
+                callback(null, self.result);
+            });
+        });
+    };
+
+    LayoutExporterPlugin.prototype.getData = function (doc) {
+        var self = this,
+            items = $(doc).find('.items'),
+            conns = items.children()[0],
+            comps = items.find('.designer-item'),
+            i,
+            j,
+            matchFound;
+
+        // find components in designer-items and get size for each component
+        for (i = 0; i < comps.length; i += 1) {
+            for (j = 0; j < self.components.length; j += 1) {
+
+                // if x pos and y pos of designer item is +/- 6px of component x pos and y pos,
+                // then get size of decorator and store it in our layout object
+                matchFound = match(comps[i].style.left, comps[i].style.top, self.components[j].position.x, self.components[j].position.y);
+                if (matchFound) {
+                    self.components[j].size = {};
+                    self.components[j].size.width = parseInt($(comps[i]).find('.svg-container')[0].children[0].getAttribute('width'));
+                    self.components[j].size.height = parseInt($(comps[i]).find('.svg-container')[0].children[0].getAttribute('height'));
+
+                    // get ports relative position info
+                    if (self.components[j].ports) {
+                        
+                    }
+                    break;
+                }
+            }
+        }
+
+        // find connection info
+
+    };
+
+    var match = function (x, y, targetX, targetY) {
+        var _meetTarget,
+            xMeet,
+            yMeet;
+
+        _meetTarget = function (val, target) {
+            var RANGE_OFFSET = 6;
+
+            return parseInt(val) <= target + RANGE_OFFSET && parseInt(val) >= target - RANGE_OFFSET;
+        };
+
+        xMeet = _meetTarget(x, targetX);
+        yMeet = _meetTarget(y, targetY);
+
+        return xMeet && yMeet;
+    };
 
     return LayoutExporterPlugin;
 });
