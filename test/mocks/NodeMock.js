@@ -77,7 +77,6 @@ define([], function () {
             this.children = [];
             for (var i = 0; i < orig.children.length; i++) {
                 var child = nodes[orig.children[i]].clone(core, this, nodes);
-                this.children.push(child.path);
             }
 
             var copy = JSON.parse(JSON.stringify(orig));
@@ -91,6 +90,7 @@ define([], function () {
 
         var that = new Temp;
         // FIXME: fix pointers
+        parent.children.push(that.path);
         return that;
     };
 
