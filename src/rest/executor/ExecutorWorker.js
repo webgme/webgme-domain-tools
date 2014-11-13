@@ -266,27 +266,24 @@ define(['logManager',
         };
 
         archiveFile = function (filename, filePath, callback) {
-            // FIXME: get the blob client to stream
-            //var stream = fs.createReadStream(results[i]);
-            fs.readFile(filePath, function (err, data) {
-                jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
-                    var j;
-                    if (err) {
-                        logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
-                        callback('FAILED_TO_ARCHIVE_FILE');
-                    } else {
-                        // Add the file-hash to the results artifacts containing the filename.
-                        //console.log('Filename added : ' + filename);
-                        for (j = 0; j < resultsArtifacts.length; j += 1) {
-                            if (resultsArtifacts[j].files[filename] === true) {
-                                resultsArtifacts[j].files[filename] = hash;
-                                //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[j].name
-                                //    + '" with hash: ' + hash);
-                            }
+            var data = new File(filePath, filename);
+            jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
+                var j;
+                if (err) {
+                    logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
+                    callback('FAILED_TO_ARCHIVE_FILE');
+                } else {
+                    // Add the file-hash to the results artifacts containing the filename.
+                    //console.log('Filename added : ' + filename);
+                    for (j = 0; j < resultsArtifacts.length; j += 1) {
+                        if (resultsArtifacts[j].files[filename] === true) {
+                            resultsArtifacts[j].files[filename] = hash;
+                            //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[j].name
+                            //    + '" with hash: ' + hash);
                         }
-                        callback(null);
                     }
-                });
+                    callback(null);
+                }
             });
         };
 
