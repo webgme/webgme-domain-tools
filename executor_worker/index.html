@@ -87,7 +87,7 @@
                         nodeRequire: nodeRequire
                     });
                     // FIXME ugly hack for node-webkit
-                    var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events'];
+                    var node_modules = ['fs', 'stream', 'path', 'child_process', 'minimatch', 'crypto', 'util', 'mime', 'http', 'https', 'events', 'rimraf'];
                     node_modules.forEach(function (module_name) {
                         requirejs.s.contexts._.defined[module_name] = nodeRequire(module_name);
                     });

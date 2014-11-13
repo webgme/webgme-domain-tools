@@ -23,9 +23,10 @@ define(['logManager',
         'executor/ExecutorClient',
         'executor/WorkerInfo',
         'executor/JobInfo',
-        'superagent'
+        'superagent',
+        'rimraf'
     ],
-    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, JobInfo, superagent) {
+    function (logManager, BlobClient, BlobMetadata, fs, util, events, path, child_process, minimatch, ExecutorClient, WorkerInfo, JobInfo, superagent, rimraf) {
         var UNZIP_EXE;
         var UNZIP_ARGS;
         if (process.platform === "win32") {
@@ -62,27 +63,6 @@ define(['logManager',
         });
     };
 
-    var deleteFolderRecursive = function(path) {
-        if( fs.existsSync(path) ) {
-            fs.readdirSync(path).forEach(function(file,index){
-                var curPath = path + "/" + file;
-                if(fs.lstatSync(curPath).isDirectory()) { // recurse
-                    deleteFolderRecursive(curPath);
-                } else { // delete file
-                    try {
-                        fs.unlinkSync(curPath);
-                    } catch (err) {
-                        logger.error('Could not delete executor-temp file, err:' + err);
-                    }
-                }
-            });
-            try {
-                fs.rmdirSync(path);
-            } catch (err) {
-                logger.error('Could not delete executor-temp directory, err:' + err);
-            }
-        }
-    };
     //here you can define global variables for your middleware
     var logger = // logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
         function() { };
@@ -318,12 +298,15 @@ define(['logManager',
                     if (counter === 0) {
                         counterCallback(null);
                     }
-                    // FIXME: This is synchronous
-                    deleteFolderRecursive(directory);
-                    jobInfo.resultSuperSetHash = resultHash;
-                    for (i = 0; i < resultsArtifacts.length; i += 1) {
-                        addObjectHashesAndSaveArtifact(resultsArtifacts[i], counterCallback);
-                    }
+                    rimraf(directory, function (err) {
+                        if (err) {
+                            logger.error('Could not delete executor-temp file, err: ' + err);
+                        }
+                        jobInfo.resultSuperSetHash = resultHash;
+                        for (i = 0; i < resultsArtifacts.length; i += 1) {
+                            addObjectHashesAndSaveArtifact(resultsArtifacts[i], counterCallback);
+                        }
+                    });
                 }
             });
         };
