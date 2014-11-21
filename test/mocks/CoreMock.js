@@ -102,6 +102,15 @@ define(['./NodeMock'], function (NodeMock) {
         return node.pointers.hasOwnProperty(name);
     };
 
+    CoreMock.prototype.addMember = function (node, name, member) {
+        node.pointers[name] = node.pointers[name] || [];
+        node.pointers[name].push(member.path);
+    };
+
+    CoreMock.prototype.getMemberPaths = function (node, name) {
+        return node.pointers[name] || [];
+    };
+
     CoreMock.prototype.getBase = function (node) {
         if (node.pointers.base === null) {
             return null;
