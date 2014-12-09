@@ -75,6 +75,9 @@ define(['logManager',
         this.blobClient = new BlobClient({server: parameters.server, serverPort: parameters.serverPort, httpsecure: parameters.httpsecure });
 
         this.executorClient = new ExecutorClient({server: parameters.server, serverPort: parameters.serverPort, httpsecure: parameters.httpsecure });
+        if (parameters.executorNonce) {
+            this.executorClient.executorNonce = parameters.executorNonce;
+        }
         this.jobList = {};
 
         this.sourceFilename = 'source.zip';
@@ -396,9 +399,14 @@ define(['logManager',
         var _queryWorkerAPI = function() {
 
             this.clientRequest.availableProcesses = this.availableProcessesContainer.availableProcesses;
-            superagent.post(self.executorClient.executorUrl + 'worker')
+            var req = superagent.post(self.executorClient.executorUrl + 'worker');
+            if (this.executorClient.executorNonce) {
+                req.set('x-executor-nonce', this.executorClient.executorNonce);
+            }
+            req
                 //.set('Content-Type', 'application/json')
                 //oReq.timeout = 25 * 1000;
+
                 .send(self.clientRequest)
                 .end(function (err, res) {
                     if (err) {

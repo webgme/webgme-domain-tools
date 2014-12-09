@@ -29,7 +29,7 @@
     <script>
         // getScript require.min.js
         //$(document).ready(function () {config.forEach(
-        function addWebGMEConnection(webGMEUrl) {
+        function addWebGMEConnection(webGMEUrl, parameters) {
             var url = nodeRequire('url');
             var dataControllerName = "ExecutorWorkerController_" + url.parse(webGMEUrl).hostname;
             var workerView = $('\
@@ -97,7 +97,8 @@
                         var webGMEPort = url.parse(webGMEUrl).port || (url.parse(webGMEUrl).protocol === 'https:' ? 443 : 80);
                         worker = new ExecutorWorker({ server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort,
                             httpsecure: url.parse(webGMEUrl).protocol === 'https:', sessionId: undefined,
-                            availableProcessesContainer: availableProcessesContainer});
+                            availableProcessesContainer: availableProcessesContainer,
+                            executorNonce: parameters.executorNonce});
 
                         worker.queryWorkerAPI(function (err, response) {
                             var refreshPeriod = 60 * 1000;
@@ -163,20 +164,23 @@
                     var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
                     config = JSON.parse(configJSON);
                     if (Array.isArray(config)) {
+                        config = {};
+                        config.forEach(function (webGMEUrl) {
+                            config[webGMEUrl] = {};
+                        });
                     } else if (typeof(config) === "string") {
-                        config = [ config ];
+                        config = { config: {} };
                     } else {
-                        config = [ config.protocol + "://" + config.server + ":" + config.port ];
                     }
                 } catch (e) {
                     if (e.code !== "ENOENT") {
                         throw e;
                     }
                 }
-                config.forEach(function (webGMEUrl) {
+                Object.getOwnPropertyNames(config).forEach(function (webGMEUrl) {
                     if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
                     } else {
-                        webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl);
+                        webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, config[webGMEUrl]);
                     }
                     // TODO: handle removing URL
                 });

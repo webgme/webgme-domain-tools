@@ -17,6 +17,11 @@ Edit config.json
 With WebGME started, run nw.exe
 
 
+Authorization:
+To ensure only authorized workers are adding and running jobs, configure the pre-shared secret between the WebGME server and the workers.
+1. Add "executorNonce": "reallylongsecret" to config.json
+2. Change executor_worker\config.json like: { "http://localhost:8888": { "executorNonce": "reallylongsecret" } }
+
 Implementation TODO:
 Recover from transient errors
 Handle disconnecting/reconnecting of workers more gracefully

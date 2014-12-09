@@ -14,6 +14,7 @@
 define(['logManager',
     'fs',
     'path',
+    'buffer-equal-constant-time',
     'unzip',
     'child_process',
     'minimatch',
@@ -21,7 +22,7 @@ define(['logManager',
     'executor/JobInfo',
     'executor/WorkerInfo'
     ],
-    function (logManager, fs, path, unzip, child_process, minimatch, Datastore, JobInfo, WorkerInfo) {
+    function (logManager, fs, path, bufferEqual, unzip, child_process, minimatch, Datastore, JobInfo, WorkerInfo) {
 
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
@@ -79,6 +80,16 @@ define(['logManager',
         var config = webGMEGlobal.getConfig();
         // logger.debug('Executor request');
 
+        var authenticate = function() {
+            if (config.executorNonce) {
+                if (!req.headers['x-executor-nonce'] || bufferEqual(new Buffer(req.headers['x-executor-nonce']), new Buffer(config.executorNonce)) !== true) {
+                    res.send(403);
+                    return false;
+                }
+            }
+            return true;
+        }
+
         var url = require('url').parse(req.url);
         var pathParts = url.pathname.split("/");
 
@@ -120,19 +131,19 @@ define(['logManager',
 
             switch (pathParts[1]) {
                 case "create":
-                    ExecutorRESTCreate(req, res, next);
+                    authenticate() && ExecutorRESTCreate(req, res, next);
                     break;
                 case "worker":
-                    ExecutorRESTWorkerAPI(req, res, next);
+                    (req.method !== 'POST' || authenticate()) && ExecutorRESTWorkerAPI(req, res, next);
                     break;
                 case "cancel":
-                    ExecutorRESTCancel(req, res, next);
+                    authenticate() && ExecutorRESTCancel(req, res, next);
                     break;
                 case "info":
                     ExecutorRESTInfo(req, res, next);
                     break;
                 case "update":
-                    ExecutorRESTUpdate(req, res, next);
+                    authenticate() && ExecutorRESTUpdate(req, res, next);
                     break;
                 default:
                     res.send(404);

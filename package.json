@@ -1,46 +1,47 @@
 {
-    "name": "webgme-domain-tools",
-    "version": "0.1.0",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/webgme/webgme-domain-tools"
-    },
-    "license": "MIT",
-    "dependencies": {
+  "name": "webgme-domain-tools",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webgme/webgme-domain-tools"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "buffer-equal-constant-time": "^1.0.1",
         "webgme": "https://github.com/webgme/webgme/tarball/master",
         "requirejs": "=2.1.11",
         "unzip": "=0.1.8",
         "minimatch": "=0.3.0",
         "nedb": "=0.10.5",
         "superagent": "=0.18.2"
-    },
-    "devDependencies": {
-        "mocha": ">=1.17.1",
-        "chai": ">=1.9.0",
-        "jslint": ">=0.3.0",
-        "istanbul": ">=0.2.6",
-        "jsdoc": ">=3.3.0-alpha1",
-        "karma": "~0.12",
-        "karma-mocha": "~0.1",
-        "karma-chai": "~0.1",
-        "karma-chrome-launcher": "~0.1",
-        "karma-firefox-launcher": "~0.1",
-        "karma-express-http-server": "~0.0.1",
-        "karma-requirejs": "~0.2",
-        "karma-coverage": "~0.2",
-        "commander": ">=2.1.0"
-    },
-    "engines": {
-        "node": ">=0.10.0"
-    },
+  },
+  "devDependencies": {
+    "mocha": ">=1.17.1",
+    "chai": ">=1.9.0",
+    "jslint": ">=0.3.0",
+    "istanbul": ">=0.2.6",
+    "jsdoc": ">=3.3.0-alpha1",
+    "karma": "~0.12",
+    "karma-mocha": "~0.1",
+    "karma-chai": "~0.1",
+    "karma-chrome-launcher": "~0.1",
+    "karma-firefox-launcher": "~0.1",
+    "karma-express-http-server": "~0.0.1",
+    "karma-requirejs": "~0.2",
+    "karma-coverage": "~0.2",
+    "commander": ">=2.1.0"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
     "config": {
     },
-    "scripts": {
-        "start": "node app.js",
+  "scripts": {
+    "start": "node app.js",
         "test": "./node_modules/.bin/istanbul --hook-run-in-context test ./node_modules/.bin/_mocha -- -R spec --recursive ./test/unit",
-        "test_karma": "node ./node_modules/karma/bin/karma start karma.conf.js --single-run --browsers Firefox",
+    "test_karma": "node ./node_modules/karma/bin/karma start karma.conf.js --single-run --browsers Firefox",
         "test_win": "node_modules\\.bin\\istanbul.cmd --hook-run-in-context test node_modules\\mocha\\bin\\_mocha -- -R spec --recursive .\\test\\unit",
         "jsdoc": "node_modules/.bin/jsdoc src -r",
-        "plugin": "node node_modules/webgme/bin/run_plugin.js -c config.json"
-    }
+    "plugin": "node node_modules/webgme/bin/run_plugin.js -c config.json"
+}
 }

@@ -137,6 +137,9 @@ define(['superagent'], function (superagent) {
 
     ExecutorClient.prototype.sendHttpRequestWithData = function (method, url, data, callback) {
         var req = new superagent.Request(method, url);
+        if (this.executorNonce) {
+            req.set('x-executor-nonce', this.executorNonce);
+        }
         if (data) {
             req.send(data);
         }
