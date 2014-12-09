@@ -26,3 +26,8 @@ executor-temp
 
 # ignore database files
 *.nedb
+mongodatabase/local.0
+mongodatabase/local.ns
+mongodatabase/mongod.lock
+mongodatabase/multi.0
+mongodatabase/multi.ns
