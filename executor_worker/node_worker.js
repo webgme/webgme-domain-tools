@@ -68,20 +68,23 @@ var availableProcessesContainer = { availableProcesses: 1 }; // shared among all
             var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
             config = JSON.parse(configJSON);
             if (Array.isArray(config)) {
+                config = {};
+                config.forEach(function (webGMEUrl) {
+                    config[webGMEUrl] = {};
+                });
             } else if (typeof(config) === "string") {
-                config = [ config ];
+                config = { config: {} };
             } else {
-                config = [ config.protocol + "://" + config.server + ":" + config.port ];
             }
         } catch (e) {
             if (e.code !== "ENOENT") {
                 throw e;
             }
         }
-        config.forEach(function (webGMEUrl) {
+        Object.getOwnPropertyNames(config).forEach(function (webGMEUrl) {
             if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
             } else {
-                webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl);
+                webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, config[webGMEUrl]);
             }
             // TODO: handle removing URL
         });
