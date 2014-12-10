@@ -11,19 +11,24 @@
  *
  */
 
-define(['logManager',
+if (typeof module !== 'undefined') {
+    exports.domainToolsNodeRequire = require;
+    exports.CLIENTS_MUST_USE_REQUIRE_JS = true;
+} else
+define(['module',
+    'logManager',
     'fs',
     'path',
-    'buffer-equal-constant-time',
-    'unzip',
     'child_process',
-    'minimatch',
-    'nedb',
     'executor/JobInfo',
     'executor/WorkerInfo'
     ],
-    function (logManager, fs, path, bufferEqual, unzip, child_process, minimatch, Datastore, JobInfo, WorkerInfo) {
-
+    function (module, logManager, fs, path, child_process, JobInfo, WorkerInfo) {
+    var domainToolsNodeRequire = require.nodeRequire(module.uri).domainToolsNodeRequire;
+    var bufferEqual = domainToolsNodeRequire('buffer-equal-constant-time');
+    var Datastore = domainToolsNodeRequire('nedb');
+    var unzip = domainToolsNodeRequire('unzip');
+    var minimatch = domainToolsNodeRequire('minimatch');
     var logger = logManager.create('REST-External-Executor'); //how to define your own logger which will use the global settings
 
     var jobList = new Datastore({ filename: 'jobList.nedb', autoload: true });
