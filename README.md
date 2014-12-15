@@ -31,3 +31,10 @@ If the package.json changes then:
 `node node_modules\webgme\src\bin\run_plugin.js --help` gives detailed description about the available command line flags.
 
 Example: `node node_modules\webgme\src\bin\run_plugin.js -c config.json -p Test -n ChildrenConfig`
+
+## Running Tests ##
+
+**webgme-domain-tools** includes both [mocha](http://mochajs.org/) (unit) and [karma](karma-runner.github.io) (end-to-end) tests.
+
+* **mocha**: `npm run test_win`
+* **karma**: `npm run test_karma`
