@@ -27,13 +27,13 @@ requirejs.config({
 GLOBAL.webGMEGlobal =  { getConfig: function() { return { }; } } // server: config.server, serverPort: config.port, httpsecure: config.protocol==='https' }; } };
 var url = require('url');
 
-function addWebGMEConnection(webGMEUrl) {
+function addWebGMEConnection(webGMEUrl, tempPath) {
     var worker;
     requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function (ExecutorWorker, JobInfo, ExecutorWorkerController) {
         var webGMEPort = url.parse(webGMEUrl).port || (url.parse(webGMEUrl).protocol === 'https:' ? 443 : 80);
         worker = new ExecutorWorker({ server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort,
             httpsecure: url.parse(webGMEUrl).protocol === 'https:', sessionId: undefined,
-            availableProcessesContainer: availableProcessesContainer});
+            availableProcessesContainer: availableProcessesContainer, workingDirectory: tempPath});
 
         console.log("Connecting to " + webGMEUrl);
 
@@ -59,6 +59,7 @@ function addWebGMEConnection(webGMEUrl) {
 
 var webGMEUrls = Object.create(null);
 var availableProcessesContainer = { availableProcesses: 1 }; // shared among all ExecutorWorkers
+
 (function() {
     var fs = nodeRequire('fs');
 
@@ -84,11 +85,21 @@ var availableProcessesContainer = { availableProcesses: 1 }; // shared among all
         Object.getOwnPropertyNames(config).forEach(function (webGMEUrl) {
             if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
             } else {
-                webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, config[webGMEUrl]);
+                webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, workingDirectory, config[webGMEUrl]);
             }
             // TODO: handle removing URL
         });
     }
-    readConfig();
-    fs.watch("config.json", function() { setTimeout(readConfig, 200); }); // setTimeout: likely handle O_TRUNC of config.json (though `move config.json.tmp config.json` is preferred)
+
+    var workingDirectory = 'executor-temp';
+    var rimraf = nodeRequire('rimraf');
+    rimraf(workingDirectory, function (err) {
+        if (err) {
+            console.log('Could not delete working directory (' + workingDirectory + '), err: ' + err);
+            process.exit(2);
+        }
+
+        readConfig();
+        fs.watch("config.json", function() { setTimeout(readConfig, 200); }); // setTimeout: likely handle O_TRUNC of config.json (though `move config.json.tmp config.json` is preferred)
+    });
 })();

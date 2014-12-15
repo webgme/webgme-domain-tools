@@ -84,7 +84,7 @@ define(['logManager',
         this.resultFilename = 'execution_results';
         this.executorConfigFilename = 'executor_config.json';
 
-        this.workingDirectory = 'executor-temp';
+        this.workingDirectory = parameters.workingDirectory || 'executor-temp';
 
         if (!fs.existsSync(this.workingDirectory)) {
             fs.mkdirSync(this.workingDirectory);
