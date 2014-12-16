@@ -27,13 +27,13 @@ requirejs.config({
 GLOBAL.webGMEGlobal =  { getConfig: function() { return { }; } } // server: config.server, serverPort: config.port, httpsecure: config.protocol==='https' }; } };
 var url = require('url');
 
-function addWebGMEConnection(webGMEUrl, tempPath) {
+function addWebGMEConnection(webGMEUrl, tempPath, parameters) {
     var worker;
     requirejs(['executor/ExecutorWorker', 'executor/JobInfo', 'executor/ExecutorWorkerController'], function (ExecutorWorker, JobInfo, ExecutorWorkerController) {
         var webGMEPort = url.parse(webGMEUrl).port || (url.parse(webGMEUrl).protocol === 'https:' ? 443 : 80);
         worker = new ExecutorWorker({ server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort,
             httpsecure: url.parse(webGMEUrl).protocol === 'https:', sessionId: undefined,
-            availableProcessesContainer: availableProcessesContainer, workingDirectory: tempPath});
+            availableProcessesContainer: availableProcessesContainer, workingDirectory: tempPath, executorNonce: parameters.executorNonce});
 
         console.log("Connecting to " + webGMEUrl);
 
