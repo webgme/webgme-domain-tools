@@ -249,25 +249,37 @@ define(['logManager',
         };
 
         archiveFile = function (filename, filePath, callback) {
-            var data = new File(filePath, filename);
-            jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
-                var j;
-                if (err) {
-                    logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
-                    callback('FAILED_TO_ARCHIVE_FILE');
-                } else {
-                    // Add the file-hash to the results artifacts containing the filename.
-                    //console.log('Filename added : ' + filename);
-                    for (j = 0; j < resultsArtifacts.length; j += 1) {
-                        if (resultsArtifacts[j].files[filename] === true) {
-                            resultsArtifacts[j].files[filename] = hash;
-                            //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[j].name
-                            //    + '" with hash: ' + hash);
+            var archiveData = function (err, data) {
+                jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
+                    var j;
+                    if (err) {
+                        logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
+                        callback('FAILED_TO_ARCHIVE_FILE');
+                    } else {
+                        // Add the file-hash to the results artifacts containing the filename.
+                        //console.log('Filename added : ' + filename);
+                        for (j = 0; j < resultsArtifacts.length; j += 1) {
+                            if (resultsArtifacts[j].files[filename] === true) {
+                                resultsArtifacts[j].files[filename] = hash;
+                                //console.log('Replaced! filename: "' + filename + '", artifact "' + resultsArtifacts[j].name
+                                //    + '" with hash: ' + hash);
+                            }
                         }
+                        callback(null);
                     }
-                    callback(null);
-                }
-            });
+                });
+            };
+            if (typeof File === 'undefined') { // nodejs doesn't have File
+                fs.readFile(filePath, function (err, data) {
+                    if (err) {
+                        logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
+                        return callback('FAILED_TO_ARCHIVE_FILE');
+                    }
+                    archiveData(null, data);
+                });
+            } else {
+                archiveData(null, new File(filePath, filename));
+            }
         };
 
         afterAllFilesArchived = function () {
