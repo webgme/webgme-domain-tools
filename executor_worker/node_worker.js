@@ -69,8 +69,9 @@ var availableProcessesContainer = { availableProcesses: 1 }; // shared among all
             var configJSON = fs.readFileSync('config.json', {encoding: 'utf8'});
             config = JSON.parse(configJSON);
             if (Array.isArray(config)) {
+                var oldConfig = config;
                 config = {};
-                config.forEach(function (webGMEUrl) {
+                oldConfig.forEach(function (webGMEUrl) {
                     config[webGMEUrl] = {};
                 });
             } else if (typeof(config) === "string") {
