@@ -87,7 +87,11 @@ if __name__ == '__main__':
         import subprocess
         import io
         import codecs
-        os.unlink('secpol.inf')
+        try:
+            os.unlink('secpol.inf')
+        except OSError as e:
+            if e.errno != 2:
+                raise
         subprocess.check_call('secedit /export /cfg secpol.inf')
         with io.open('secpol.inf', 'r', encoding='utf-16-le') as secpol_inf:
             line = [l for l in secpol_inf.readlines() if l.startswith('SeServiceLogonRight = ')][0]
