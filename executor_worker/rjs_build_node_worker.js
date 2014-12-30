@@ -6,6 +6,7 @@
         eventDispatcher: "node_modules/webgme/src/common/EventDispatcher",
         logManager: "node_modules/webgme/src/common/LogManager",
         blob: "node_modules/webgme/src/middleware/blob",
+        core: "node_modules/webgme/src/common/core",
         executor: "../src/rest/executor",
         superagent: "empty:",
         fs: "empty:",
