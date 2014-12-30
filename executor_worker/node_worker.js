@@ -33,7 +33,7 @@ if (typeof define !== 'undefined') {
                 var refreshPeriod = 60 * 1000;
                 var callback = function (err, response) {
                     if (err) {
-                        console.log(err);
+                        console.log("Error connecting to " + webGMEUrl + " " + err);
                     } else {}
                     if (response && response.refreshPeriod) {
                         refreshPeriod = response.refreshPeriod;
@@ -44,7 +44,7 @@ if (typeof define !== 'undefined') {
                 };
                 callback(err, response);
             });
-        }
+        };
     });
 }
 

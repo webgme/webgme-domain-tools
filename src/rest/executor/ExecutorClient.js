@@ -1,9 +1,5 @@
 /**
  * Created by Zsolt on 5/21/2014.
- * 
- * THIS IS A THROW AWAY CODE AND IMPLEMENTATION.
- *
- * TEMPORARY CODE AND IMPLEMENTATION.
  *
  */
 

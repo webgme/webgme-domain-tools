@@ -170,15 +170,9 @@ define(['logManager',
                             child.stdout.pipe(outlog);
                             child.stdout.pipe(fs.createWriteStream(path.join(self.workingDirectory, jobInfo.hash.substr(0, 6) + '_stdout.txt')));
                             child.stderr.pipe(fs.createWriteStream(path.join(jobDir, 'job_stderr.txt'))); // TODO: maybe put in the same file as stdout
-                            child.on('close', function (code, stdout, stderr) {
+                            child.on('close', function (code, signal) {
 
                                     jobInfo.finishTime = new Date().toISOString();
-
-                                    logger.debug(jobInfo.hash + ' stdout: ' + stdout);
-
-                                    if (stderr) {
-                                        logger.error(jobInfo.hash + ' stderr: ' + stderr);
-                                    }
 
                                     if (code !== 0) {
                                         logger.error(jobInfo.hash + ' exec error: ' + code);
@@ -240,7 +234,7 @@ define(['logManager',
                 };
             counter = filesToArchive.length;
             if (filesToArchive.length === 0) {
-                logger.info('There were no files to archive..');
+                logger.info(jobInfo.hash + ' There were no files to archive..');
                 counterCallback(null);
             }
             for (i = 0; i < filesToArchive.length; i += 1) {
@@ -253,7 +247,7 @@ define(['logManager',
                 jointArtifact.addFileAsSoftLink(filename, data, function (err, hash) {
                     var j;
                     if (err) {
-                        logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
+                        logger.error(jobInfo.hash + ' Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
                         callback('FAILED_TO_ARCHIVE_FILE');
                     } else {
                         // Add the file-hash to the results artifacts containing the filename.
@@ -272,7 +266,7 @@ define(['logManager',
             if (typeof File === 'undefined') { // nodejs doesn't have File
                 fs.readFile(filePath, function (err, data) {
                     if (err) {
-                        logger.error('Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
+                        logger.error(jobInfo.hash + ' Failed to archive as "' + filename + '" from "' + filePath + '", err: ' + err);
                         return callback('FAILED_TO_ARCHIVE_FILE');
                     }
                     archiveData(null, data);
@@ -289,7 +283,7 @@ define(['logManager',
                     i,
                     counterCallback;
                 if (err) {
-                    logger.error(err);
+                    logger.error(jobInfo.hash + " " + err);
                     jobInfo.status = 'FAILED_TO_SAVE_JOINT_ARTIFACT';
                     self.sendJobUpdate(jobInfo);
                 } else {
@@ -329,12 +323,12 @@ define(['logManager',
         addObjectHashesAndSaveArtifact = function (resultArtifact, callback) {
             resultArtifact.artifact.addMetadataHashes(resultArtifact.files, function (err, hashes) {
                 if (err) {
-                    logger.error(err);
+                    logger.error(jobInfo.hash + " " + err);
                     return callback('FAILED_TO_ADD_OBJECT_HASHES');
                 }
                 resultArtifact.artifact.save(function (err, resultHash) {
                     if (err) {
-                        logger.error(err);
+                        logger.error(jobInfo.hash + " " + err);
                         return callback('FAILED_TO_SAVE_ARTIFACT');
                     }
                     jobInfo.resultHashes[resultArtifact.name] = resultHash;
@@ -442,7 +436,7 @@ define(['logManager',
                                 self.availableProcessesContainer.availableProcesses -= 1;
                                 self.emit('jobUpdate', info);
                                 self.startJob(info, function (err) {
-                                    logger.error("Job " + info.hash + " failed to run: " + err + ". Status: " + info.status);
+                                    logger.error(info.hash + " failed to run: " + err + ". Status: " + info.status);
                                     self.sendJobUpdate(info);
                                 }, function(jobInfo, jobDir, executorConfig) {
                                     self.saveJobResults(jobInfo, jobDir, executorConfig);
