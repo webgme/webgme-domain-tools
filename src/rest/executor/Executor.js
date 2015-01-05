@@ -81,8 +81,8 @@ define(['module',
     watchLabelJobs();
 
     var ExecutorREST = function(req,res,next){
-        //global config is accessible via webGMEGlobal.getConfig()
-        var config = webGMEGlobal.getConfig();
+        //global config is accessible via WebGMEGlobal.getConfig()
+        var config = WebGMEGlobal.getConfig();
         // logger.debug('Executor request');
 
         var authenticate = function() {

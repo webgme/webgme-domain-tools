@@ -34,7 +34,7 @@ var url = require('url');
 var path = require('path');
 var fs = require('fs');
 var webGMEPort = url.parse(webGMEUrl).port || (url.parse(webGMEUrl).protocol === 'https:' ? 443 : 80);
-GLOBAL.webGMEGlobal =  { getConfig: function() { return { server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort, httpsecure: url.parse(webGMEUrl).protocol === 'https:' }; } };
+GLOBAL.WebGMEGlobal =  { getConfig: function() { return { server: url.parse(webGMEUrl).hostname, serverPort: webGMEPort, httpsecure: url.parse(webGMEUrl).protocol === 'https:' }; } };
 
 requirejs(['blob/BlobClient', 'minimatch'], function(BlobClient, minimatch) {
     var files;
@@ -44,7 +44,7 @@ requirejs(['blob/BlobClient', 'minimatch'], function(BlobClient, minimatch) {
         files = [filearg];
 
     var hashes = {};
-    var blobClient = new BlobClient(GLOBAL.webGMEGlobal.getConfig());
+    var blobClient = new BlobClient(GLOBAL.WebGMEGlobal.getConfig());
     var completed = 0;
     
     for (var i = 0; i < files.length; i++) {

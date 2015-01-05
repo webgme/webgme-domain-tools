@@ -8,7 +8,7 @@ if (typeof window === 'undefined') {
     // server-side setup
     var webgme = require('webgme');
     var CONFIG = require('../../config.json');
-    webGMEGlobal.setConfig(CONFIG);
+    WebGMEGlobal.setConfig(CONFIG);
 
     var chai = require('chai'),
         should = chai.should(),
@@ -18,7 +18,7 @@ if (typeof window === 'undefined') {
 
 describe("Functional plugin tests", function() {
     it('should run ChildrenConfig on Test', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'Test',
             pluginName: 'ChildrenConfig',
             activeNode: ''
@@ -31,7 +31,7 @@ describe("Functional plugin tests", function() {
     });
 
     it('should ChildrenConfig fail if no active node', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'Test',
             pluginName: 'ChildrenConfig'
         }, function (err, result) {
@@ -41,7 +41,7 @@ describe("Functional plugin tests", function() {
     });
 
     it('should run CoreExamples on TestCore project', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'TestCore',
             pluginName: 'CoreExamples',
             activeNode: '/1023960100'
@@ -54,7 +54,7 @@ describe("Functional plugin tests", function() {
     });
 
     it('should run CoreExamples on TestCore project with activeSelection', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'TestCore',
             pluginName: 'CoreExamples',
             activeNode: '/1023960100',
@@ -68,7 +68,7 @@ describe("Functional plugin tests", function() {
     });
 
     it('should run CoreExamples on TestCore project with activeSelection and bad path', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'TestCore',
             pluginName: 'CoreExamples',
             activeNode: '/1023960100',
@@ -82,7 +82,7 @@ describe("Functional plugin tests", function() {
     });
 
     it('should fail CoreExamples on wrong active node', function(done) {
-        webgme.runPlugin.main(webGMEGlobal.getConfig(), {
+        webgme.runPlugin.main(WebGMEGlobal.getConfig(), {
             projectName: 'TestCore',
             pluginName: 'CoreExamples',
             activeNode: '/1583045286'

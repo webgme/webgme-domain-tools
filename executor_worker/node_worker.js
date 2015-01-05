@@ -65,7 +65,7 @@ if (nodeRequire.main === module) {
         requirejs.s.contexts._.defined[name] = nodeRequire(name);
     });
 
-    GLOBAL.webGMEGlobal = {
+    GLOBAL.WebGMEGlobal = {
         getConfig: function () {
             return {};
         }

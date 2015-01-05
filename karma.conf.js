@@ -97,9 +97,9 @@ module.exports = function(config) {
               };
               var webgme = require('webgme');
               var config = require('./config.json');
-              global.webGMEGlobal.setConfig(config);
+              global.WebGMEGlobal.setConfig(config);
 
-              var requirejs = global.webGMEGlobal.requirejs;
+              var requirejs = global.WebGMEGlobal.requirejs;
 
               requirejs(['blob/BlobFSBackend', 'blob/BlobServer'], function(BlobFSBackend, BlobServer) {
                   var blobBackend = new BlobFSBackend();
