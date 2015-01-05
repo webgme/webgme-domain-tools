@@ -5,10 +5,6 @@
  * http://localhost:8888/rest/external/executor/
  * http://localhost:8888/rest/external/executor/create/[validhash]
  *
- * THIS IS A THROW AWAY CODE AND IMPLEMENTATION.
- *
- * TEMPORARY CODE AND IMPLEMENTATION.
- *
  */
 
 if (typeof module !== 'undefined') {

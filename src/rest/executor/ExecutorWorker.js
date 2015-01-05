@@ -2,10 +2,6 @@
 /**
  * Created by Zsolt on 5/16/2014.
  *
- * THIS IS A THROW AWAY CODE AND IMPLEMENTATION.
- *
- * TEMPORARY CODE AND IMPLEMENTATION.
- *
  */
 
 // eb.executorClient.createJob('1092dd2b135af5d164b9d157b5360391246064db', function (err, res) { console.log(require('util').inspect(res)); })
