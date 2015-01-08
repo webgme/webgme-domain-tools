@@ -5,6 +5,7 @@
  * http://localhost:8888/rest/external/executor/
  * http://localhost:8888/rest/external/executor/create/[validhash]
  *
+ curl -X POST -H "Content-Type: application/json" -d {} http://localhost:8855/rest/external/executor/create/77704f10a36aa4214f5b0095ba8099e729a10f46
  */
 
 if (typeof module !== 'undefined') {
@@ -173,12 +174,21 @@ define(['module',
         info.status = info.status || 'CREATED'; // TODO: define a constant for this
         var jobInfo = new JobInfo(info);
         // TODO: check if hash ok
-        jobList.update({ hash: hash }, jobInfo, { upsert: true }, function(err) {
+        jobList.find({hash: hash}, function(err, docs) {
             if (err) {
                 res.send(500);
+            } else if (docs.length === 0) {
+                jobList.update({hash: hash}, jobInfo, {upsert: true}, function (err) {
+                    if (err) {
+                        res.send(500);
+                    } else {
+                        delete jobInfo._id;
+                        res.send(jobInfo);
+                    }
+                });
             } else {
-                delete jobInfo._id;
-                res.send(jobInfo);
+                delete docs[0]._id;
+                res.send(docs[0]);
             }
         });
 
