@@ -3373,6 +3373,12 @@ define('blob/BlobClient',['./Artifact', 'blob/BlobMetadata', 'superagent'], func
         if (typeof window !== 'undefined' && typeof Buffer !== 'undefined' && data instanceof Buffer) {
             data = toArrayBuffer(data); // FIXME will this have performance problems
         }
+        // on node, empty Buffers will cause a crash in superagent
+        if (typeof window === 'undefined' && typeof Buffer !== 'undefined' && data instanceof Buffer) {
+            if (data.length === 0) {
+                data = '';
+            }
+        }
         superagent.post(this.getCreateURL(name))
             .set('Content-Type', 'application/octet-stream')
             .set('Content-Length', data.length)
@@ -3835,7 +3841,7 @@ define('executor/ExecutorClient',['superagent'], function (superagent) {
         this.executorUrl = this.executorUrl + '/rest/external/executor/'; // TODO: any ways to ask for this or get it from the configuration?
         if (parameters.executorNonce) {
             this.executorNonce = parameters.executorNonce;
-        } else if (typeof WebGMEGlobal !== "undefined") {
+        } else if (typeof WebGMEGlobal !== "undefined" && typeof WebGMEGlobal.getConfig !== "undefined") {
             var webGMEConfig = WebGMEGlobal.getConfig();
             if (webGMEConfig.executorNonce) {
                 this.executorNonce = webGMEConfig.executorNonce;
@@ -4022,10 +4028,6 @@ define('executor/JobInfo',[], function() {
 /*globals require, nodeRequire, process, console*/
 /**
  * Created by Zsolt on 5/16/2014.
- *
- * THIS IS A THROW AWAY CODE AND IMPLEMENTATION.
- *
- * TEMPORARY CODE AND IMPLEMENTATION.
  *
  */
 
