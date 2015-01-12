@@ -26,12 +26,13 @@ if (typeof define !== 'undefined') {
 
             console.log("Connecting to " + webGMEUrl);
 
+            var callback;
             worker.queryWorkerAPI(function (err, response) {
                 if (!err) {
                     console.log("Connected to " + webGMEUrl);
                 }
                 var refreshPeriod = 60 * 1000;
-                var callback = function (err, response) {
+                callback = callback || function (err, response) {
                     if (err) {
                         console.log("Error connecting to " + webGMEUrl + " " + err);
                     } else {}
@@ -44,6 +45,10 @@ if (typeof define !== 'undefined') {
                 };
                 callback(err, response);
             });
+            var cancel = function() {
+                callback = function() {};
+            };
+            return cancel;
         };
     });
 }
@@ -72,8 +77,9 @@ if (nodeRequire.main === module) {
     } // server: config.server, serverPort: config.port, httpsecure: config.protocol==='https' }; } };
 
     var webGMEUrls = Object.create(null);
+    var maxConcurrentJobs = 1;
     var availableProcessesContainer = {
-        availableProcesses: 1
+        availableProcesses: maxConcurrentJobs
     }; // shared among all ExecutorWorkers
 
     requirejs(['node_worker'], function (addWebGMEConnection) {
@@ -104,13 +110,29 @@ if (nodeRequire.main === module) {
                     throw e;
                 }
             }
-            Object.getOwnPropertyNames(config).forEach(function (webGMEUrl) {
+            Object.getOwnPropertyNames(config).forEach(function (key) {
+                var webGMEUrl;
+                if (key.indexOf("http") === 0) {
+                    webGMEUrl = key;
                     if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
                     } else {
                         webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, workingDirectory, config[webGMEUrl]);
                     }
-                    // TODO: handle removing URL
-                });
+                } else if (key === "maxConcurrentJobs") {
+                    availableProcessesContainer.availableProcesses += config[maxConcurrentJobs] - maxConcurrentJobs;
+                    maxConcurrentJobs = config[maxConcurrentJobs];
+                } else {
+                    console.log("Unknown configuration key " + key);
+                }
+            });
+            // remove webGMEUrls no longer in config
+            Object.getOwnPropertyNames(webGMEUrls).forEach(function (webGMEUrl) {
+                if (Object.prototype.hasOwnProperty.call(config, webGMEUrl) === false) {
+                    console.log("Removing " + webGMEUrl);
+                    webGMEUrls[webGMEUrl]();
+                    delete webGMEUrls[webGMEUrl];
+                }
+            });
         }
 
         var workingDirectory = 'executor-temp';

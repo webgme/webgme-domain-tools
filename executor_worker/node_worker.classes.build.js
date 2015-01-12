@@ -4592,12 +4592,13 @@ if (typeof define !== 'undefined') {
 
             console.log("Connecting to " + webGMEUrl);
 
+            var callback;
             worker.queryWorkerAPI(function (err, response) {
                 if (!err) {
                     console.log("Connected to " + webGMEUrl);
                 }
                 var refreshPeriod = 60 * 1000;
-                var callback = function (err, response) {
+                callback = callback || function (err, response) {
                     if (err) {
                         console.log("Error connecting to " + webGMEUrl + " " + err);
                     } else {}
@@ -4610,6 +4611,10 @@ if (typeof define !== 'undefined') {
                 };
                 callback(err, response);
             });
+            var cancel = function() {
+                callback = function() {};
+            };
+            return cancel;
         };
     });
 }

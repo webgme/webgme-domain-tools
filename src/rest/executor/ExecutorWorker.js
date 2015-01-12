@@ -400,7 +400,7 @@ define(['logManager',
 
         var _queryWorkerAPI = function() {
 
-            this.clientRequest.availableProcesses = this.availableProcessesContainer.availableProcesses;
+            this.clientRequest.availableProcesses = Math.max(0, this.availableProcessesContainer.availableProcesses);
             var req = superagent.post(self.executorClient.executorUrl + 'worker');
             if (this.executorClient.executorNonce) {
                 req.set('x-executor-nonce', this.executorClient.executorNonce);
@@ -424,8 +424,8 @@ define(['logManager',
                         for (var i = 0; i < jobsToStart.length; i++) {
                             self.executorClient.getInfo(jobsToStart[i], function (err, info) {
                                 if (err) {
-                                    // TODO
-                                    this.availableProcessesContainer.availableProcesses += 1;
+                                    info.status = 'FAILED_SOURCE_COULD_NOT_BE_OBTAINED';
+                                    self.sendJobUpdate(info);
                                     return;
                                 }
                                 self.jobList[info.hash] = info;
