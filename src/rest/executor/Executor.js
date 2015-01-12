@@ -2,10 +2,9 @@
 /**
  * Created by Zsolt on 5/16/2014.
  *
- * http://localhost:8888/rest/external/executor/
- * http://localhost:8888/rest/external/executor/create/[validhash]
- *
+ curl http://localhost:8855/rest/external/executor/info/77704f10a36aa4214f5b0095ba8099e729a10f46
  curl -X POST -H "Content-Type: application/json" -d {} http://localhost:8855/rest/external/executor/create/77704f10a36aa4214f5b0095ba8099e729a10f46
+ curl -X POST -H "Content-Type: application/json" -d {\"status\":\"CREATED\"} http://localhost:8855/rest/external/executor/update/77704f10a36aa4214f5b0095ba8099e729a10f46
  */
 
 if (typeof module !== 'undefined') {
