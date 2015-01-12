@@ -23,6 +23,7 @@ define([], function () {
             nodes = model.nodes,
             timeoutTimes = opts.timeouts || [10],
             mod = timeoutTimes.length,
+            relid = 2,
             asynchCount = 0;
 
         /**** Internal helper functions ****/
@@ -48,18 +49,74 @@ define([], function () {
             setTimeout(func, timeoutTime);
         }
 
+        function generateGUID() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
+
+        function addNewNode(baseNode, baseGuid, parentTreeNode) {
+            var newGuid,
+                newId,
+                newNode;
+
+            relid += 1;
+            newId = nodes[parentTreeNode.guid].id + '/' + relid.toString();
+            newGuid = generateGUID();
+            console.log(newId);
+            newNode = {
+                attributes: {},
+                base: baseGuid,
+                id: newId,
+                meta: JSON.parse(JSON.stringify(baseNode.meta)),
+                parent: parentTreeNode.guid,
+                pointers: {
+                    'base': baseGuid
+                },
+                registry: {},
+                sets: {}
+            };
+            nodes[newGuid] = newNode;
+
+            return newGuid;
+        }
+
+        function buildTreeRec(baseTreeNode, treeNode) {
+            var key,
+                newGuid,
+                newTreeNode;
+            for (key in baseTreeNode) {
+                if (baseTreeNode.hasOwnProperty(key) && key !== 'guid') {
+                    console.log(key);
+                    newGuid = addNewNode(nodes[baseTreeNode[key].guid], baseTreeNode[key].guid, treeNode);
+                    newTreeNode = { guid: newGuid };
+                    treeNode[relid.toString()] = newTreeNode;
+                    buildTreeRec(baseTreeNode[key], newTreeNode);
+                }
+            }
+        }
+
         /**** External test helper functions, e.g. for running plugin or setting up some context. ****/
-        function _getRootNode() {
+        function mockGetRootNode() {
             var rootPath = Object.keys(tree)[0];
             return nodes[tree[rootPath].guid];
         }
 
-        function _getNodeByPath(path) {
+        function mockGetNodeByPath(path) {
             return nodes[getTreeNode(path).guid];
         }
 
-        function _getNodeByGuid(guid) {
+        function mockGetNodeByGuid(guid) {
             return nodes[guid];
+        }
+
+        function mockGetTree() {
+            return tree;
+        }
+
+        function mockGetNodes() {
+            return nodes;
         }
 
         /**** Basic functions ****/
@@ -169,6 +226,28 @@ define([], function () {
                 }
                 callback(null, result);
             });
+        }
+
+        /**** Creators ****/
+        function createNode(parameters) {
+            var baseTreeNode,
+                newTreeNode,
+                newGuid,
+                parentTreeNode;
+            console.assert (typeof parameters.parent === 'object' && typeof parameters.base === 'object' &&
+                parameters.parent !== null && parameters.base !== null);
+
+            baseTreeNode = getTreeNode(parameters.base.id);
+            parentTreeNode = getTreeNode(parameters.parent.id);
+            newGuid = addNewNode(parameters.base, baseTreeNode.guid, parentTreeNode);
+            newTreeNode = { guid: newGuid };
+            parentTreeNode[relid.toString()] = newTreeNode;
+            buildTreeRec(baseTreeNode, newTreeNode);
+            return nodes[newGuid];
+        }
+
+        function copyNode(node, parent) {
+            throw new Error('Not implemented!');
         }
 
         /**** Pointers/Collections ****/
@@ -367,6 +446,9 @@ define([], function () {
             getChildrenPaths: getChildrenPaths,
             loadChildren: loadChildren,
 
+            createNode: createNode,
+            copyNode: copyNode,
+
             getOwnPointerNames: getOwnPointerNames,
             getOwnPointerPath: getOwnPointerPath,
             getPointerNames: getPointerNames,
@@ -385,9 +467,11 @@ define([], function () {
             getMemberRegistry: getMemberRegistry,
 
             /* These are ONLY utilities for setting up a context! */
-            _getRootNode: _getRootNode,
-            _getNodeByPath: _getNodeByPath,
-            _getNodeByGuid: _getNodeByGuid
+            mockGetRootNode: mockGetRootNode,
+            mockGetNodeByPath: mockGetNodeByPath,
+            mockGetNodeByGuid: mockGetNodeByGuid,
+            mockGetTree: mockGetTree,
+            mockGetNodes: mockGetNodes
         };
     };
 
@@ -501,7 +585,7 @@ define([], function () {
  isValidRelid
  isValidTargetOf
  joinPaths
- loadByPath
+ loadByPath                 #
  loadChild
  loadChildren               #
  loadCollection             #
