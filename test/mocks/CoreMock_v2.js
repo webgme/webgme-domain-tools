@@ -56,7 +56,7 @@ define([], function () {
             return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
         }
 
-        function addNewNode(baseNode, baseGuid, parentTreeNode) {
+        function addNewNode(baseNode, baseGuid, parentTreeNode, copy) {
             var newGuid,
                 newId,
                 newNode;
@@ -64,7 +64,7 @@ define([], function () {
             relid += 1;
             newId = nodes[parentTreeNode.guid].id + '/' + relid.toString();
             newGuid = generateGUID();
-            console.log(newId);
+
             newNode = {
                 attributes: {},
                 base: baseGuid,
@@ -77,22 +77,77 @@ define([], function () {
                 registry: {},
                 sets: {}
             };
+
+            if (copy) {
+                newNode = JSON.parse(JSON.stringify(baseNode));
+                newNode.id = newId;
+                newNode.parent = parentTreeNode.guid;
+                newNode.collection = {};
+            } else {
+                newNode = {
+                    attributes: {},
+                    base: baseGuid,
+                    id: newId,
+                    meta: JSON.parse(JSON.stringify(baseNode.meta)),
+                    parent: parentTreeNode.guid,
+                    pointers: {
+                        'base': baseGuid
+                    },
+                    registry: {},
+                    sets: {}
+                };
+            }
+
             nodes[newGuid] = newNode;
 
             return newGuid;
         }
 
-        function buildTreeRec(baseTreeNode, treeNode) {
+        function buildTreeRec(baseTreeNode, treeNode, orgToCopy, copy) {
             var key,
                 newGuid,
                 newTreeNode;
             for (key in baseTreeNode) {
                 if (baseTreeNode.hasOwnProperty(key) && key !== 'guid') {
-                    console.log(key);
-                    newGuid = addNewNode(nodes[baseTreeNode[key].guid], baseTreeNode[key].guid, treeNode);
+
+                    newGuid = addNewNode(nodes[baseTreeNode[key].guid], baseTreeNode[key].guid, treeNode, copy);
+                    if (orgToCopy) {
+                        orgToCopy[baseTreeNode[key].guid] = newGuid;
+                    }
                     newTreeNode = { guid: newGuid };
                     treeNode[relid.toString()] = newTreeNode;
                     buildTreeRec(baseTreeNode[key], newTreeNode);
+                }
+            }
+        }
+
+        function updatePointers(treeNode, orgToCopy) {
+            var node = nodes[treeNode.guid],
+                pName,
+                key,
+                copyGuid,
+                pGuid;
+            for (pName in node.pointers) {
+                if (node.pointers.hasOwnProperty(pName) && pName !== 'base') {
+                    pGuid = node.pointers[pName];
+                    copyGuid = orgToCopy[pGuid];
+                    if (copyGuid) {
+                        // The pointer target was within the copied node.
+                        // Set the pointer to the newly create child.
+                        node.pointers[pName] = copyGuid;
+                        // Update the collection of this child.
+                        nodes[copyGuid].collection[pName] = nodes[copyGuid].collection[pName] || [];
+                        nodes[copyGuid].collection[pName].push(treeNode.guid);
+                    } else {
+                        // The pointer target was outside of copied node.
+                        // Keep the pointer, but update the collection of the target node.
+                        nodes[copyGuid].collection[pName].push(treeNode.guid);
+                    }
+                }
+            }
+            for (key in treeNode) {
+                if (treeNode.hasOwnProperty(key) && key !== 'guid') {
+                    updatePointers(treeNode[key], orgToCopy);
                 }
             }
         }
@@ -117,6 +172,18 @@ define([], function () {
 
         function mockGetNodes() {
             return nodes;
+        }
+
+        function mockGetChildren(node) {
+            var treeNode = getTreeNode(node.id),
+                key,
+                result = [];
+            for (key in treeNode) {
+                if (treeNode.hasOwnProperty(key) && key !== 'guid') {
+                    result.push(nodes[treeNode[key].guid]);
+                }
+            }
+            return result;
         }
 
         /**** Basic functions ****/
@@ -242,12 +309,32 @@ define([], function () {
             newGuid = addNewNode(parameters.base, baseTreeNode.guid, parentTreeNode);
             newTreeNode = { guid: newGuid };
             parentTreeNode[relid.toString()] = newTreeNode;
-            buildTreeRec(baseTreeNode, newTreeNode);
+            buildTreeRec(baseTreeNode, newTreeNode, null, false); // false -> no copy
             return nodes[newGuid];
         }
 
         function copyNode(node, parent) {
-            throw new Error('Not implemented!');
+            var baseTreeNode,
+                newTreeNode,
+                newGuid,
+                parentTreeNode,
+                orgToCopy = {};
+
+            baseTreeNode = getTreeNode(node.id);
+            parentTreeNode = getTreeNode(parent.id);
+            // Make a copy of node
+            newGuid = addNewNode(node, baseTreeNode.guid, parentTreeNode, true); // true -> copy
+
+            // Insert and update the containment tree
+            newTreeNode = { guid: newGuid };
+            orgToCopy[baseTreeNode.guid] = newGuid;
+            parentTreeNode[relid.toString()] = newTreeNode;
+            buildTreeRec(baseTreeNode, newTreeNode, orgToCopy, true); // true -> copy
+
+            // Go through all new pointers and update the internal ones.
+            updatePointers(newTreeNode, orgToCopy);
+
+            return nodes[newGuid];
         }
 
         /**** Pointers/Collections ****/
@@ -265,7 +352,7 @@ define([], function () {
                     var i,
                         pNames = Object.keys(node.pointers);
                     for (i = 0; i < pNames.length; i += 1) {
-                        if (names.indexOf[pNames[i]]) {
+                        if (names.indexOf(pNames[i]) === -1) {
                             names.push(pNames[i]);
                         }
                     }
@@ -279,8 +366,28 @@ define([], function () {
             return names;
         }
 
+        function setPointer(node, name, target) {
+            var nodeGuid = getTreeNode(node.id),
+                prevTarget,
+                indexOfPrev,
+                targetGuid = getTreeNode(target.id);
+
+            node.pointers = node.pointers || {};
+            prevTarget = node.pointers[name];
+            node.pointers[name] = targetGuid;
+
+            if (prevTarget) {
+                indexOfPrev = nodes[prevTarget].collection[name].indexOf(nodeGuid);
+                nodes[prevTarget].collection[name].splice(indexOfPrev, 1);
+            }
+
+            target.collection = target.collection || {};
+            target.collection[name] = target.collection[name] || [];
+            target.collection[name].push(nodeGuid);
+        }
+
         function hasPointer(node, name) {
-            return getPointerNames(node).hasOwnProperty(name);
+            return getPointerNames(node).indexOf(name) > -1;
         }
 
         function getPointerPath(node, name) {
@@ -471,7 +578,8 @@ define([], function () {
             mockGetNodeByPath: mockGetNodeByPath,
             mockGetNodeByGuid: mockGetNodeByGuid,
             mockGetTree: mockGetTree,
-            mockGetNodes: mockGetNodes
+            mockGetNodes: mockGetNodes,
+            mockGetChildren: mockGetChildren
         };
     };
 
@@ -548,8 +656,8 @@ define([], function () {
  getOwnAttributeNames
  getOwnConstraintNames
  getOwnJsonMeta
- getOwnPointerNames
- getOwnPointerPath
+ getOwnPointerNames         #
+ getOwnPointerPath          #
  getOwnRegistry
  getOwnRegistryNames
  getParent                  #
