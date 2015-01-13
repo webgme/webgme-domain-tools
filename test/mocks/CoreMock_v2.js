@@ -205,7 +205,7 @@ define([], function () {
             });
         }
 
-        function loadByPath(node, pathToObject, callback) {
+        function loadByPath(rootNode, pathToObject, callback) {
             wrapInAsynch(function () {
                 var guid;
                 try {
@@ -465,7 +465,7 @@ define([], function () {
                         guid = getTreeNode(paths[i]).guid;
                         collection.push(nodes[guid]);
                     }
-                    callback(null, nodes[guid]);
+                    callback(null, collection);
                 } catch (err) {
                     callback(err.toString());
                 }

@@ -21,7 +21,7 @@ describe('Core Mock', function() {
         requirejs(['mocks/CoreMock_v2'],
             function (CoreMock) {
                 var model = JSON.parse(fs.readFileSync('test/unit/mocks/flat_test.json', 'utf8'));
-                core = new CoreMock(model, {});
+                core = new CoreMock(model, { timeouts: [1] });
                 done();
             });
     });
@@ -123,6 +123,41 @@ describe('Core Mock', function() {
         assert.equal(core.getOwnPointerNames(testNode).length, 1);
 //        assert.equal(core.getOwnPointerPath(testNode, 'TestPoint'), undefined);
 //        assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1109909121/1157805101');
+    });
+
+    it('getCollectionNames/Paths correct of pointed node after copy and instantiation of pointing node', function() {
+        var testPath = '/1109909121/1368819315',
+            testNode = core.mockGetNodeByPath(testPath),
+            cNames = core.getCollectionNames(testNode),
+            cPaths;
+
+        assert.equal(cNames.length, 1);
+        assert.equal(cNames[0], 'TestPoint');
+        cPaths = core.getCollectionPaths(testNode, 'TestPoint');
+        assert.equal(cPaths.length, 2);
+        assert.equal(cPaths.indexOf('/1109909121/1157805101') > -1, true);
+        assert.equal(cPaths.indexOf('/1109909121/2065146708') > -1, true);
+    });
+
+    it('loadCollection correct of pointed node after copy and instantiation of pointing node', function(done) {
+        var testPath = '/1109909121/1368819315',
+            testNode = core.mockGetNodeByPath(testPath),
+            expectedIds = {
+                '/1109909121/1157805101': 0,
+                '/1109909121/2065146708': 0
+            };
+
+        core.loadCollection(testNode, 'TestPoint', function(err, pNodes) {
+            var i;
+            assert.equal(err, null);
+            for (i = 0; i < pNodes.length; i += 1) {
+                assert.equal(expectedIds.hasOwnProperty(pNodes[i].id), true);
+                expectedIds[pNodes[i].id] += 1;
+            }
+            assert.equal(expectedIds['/1109909121/1157805101'], 1);
+            assert.equal(expectedIds['/1109909121/2065146708'], 1);
+            done();
+        });
     });
 
     it('hasPointer dst/src true for connection', function () {

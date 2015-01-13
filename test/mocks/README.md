@@ -4,10 +4,10 @@
 - [ ] buildPath
 - [ ] clearMetaRules
 - [ ] copyData
-- [x] copyNode
-- [ ] copyNodes
+- [x] copyNode(node, parent)
+- [ ] copyNodes(nodes, parent)
 - [ ] createChild
-- [x] createNode
+- [x] createNode(parameters)
 - [ ] createRoot
 - [ ] createSet
 - [ ] delAspectMeta
@@ -31,18 +31,18 @@
 - [ ] deleteProperty
 - [ ] deleteSet
 - [ ] getAncestor
-- [x] getAttribute
+- [x] getAttribute(node, name)
 - [ ] getAttributeDescriptor
 - [ ] getAttributeMeta
-- [x] getAttributeNames
+- [ ] getAttributeNames
 - [ ] getBase
 - [ ] getBaseRoot
 - [ ] getBaseType
 - [ ] getChild
-- [x] getChildrenPaths
-- [x] getChildrenRelids
-- [x] getCollectionNames
-- [x] getCollectionPaths
+- [x] getChildrenPaths(node)
+- [x] getChildrenRelids(node)
+- [x] getCollectionNames(node)
+- [x] getCollectionPaths(node, name)
 - [ ] getCommonPathPrefixData
 - [ ] getConstraint
 - [ ] getConstraintNames
@@ -51,7 +51,7 @@
 - [ ] getDataForSingleHash
 - [ ] getDescendant
 - [ ] getDescendantByPath
-- [x] getGuid
+- [x] getGuid(node)
 - [ ] getHash
 - [ ] getJsonMeta
 - [ ] getKeys
@@ -68,18 +68,18 @@
 - [ ] getOwnAttributeNames
 - [ ] getOwnConstraintNames
 - [ ] getOwnJsonMeta
-- [x] getOwnPointerNames
-- [x] getOwnPointerPath
+- [x] getOwnPointerNames(node)
+- [x] getOwnPointerPath(node, name)
 - [ ] getOwnRegistry
 - [ ] getOwnRegistryNames
-- [x] getParent
-- [x] getPath
+- [x] getParent(node)
+- [x] getPath(node)
 - [ ] getPointerDescriptor
-- [x] getPointerNames
-- [x] getPointerPath
+- [x] getPointerNames(node)
+- [x] getPointerPath(node, name)
 - [ ] getProperty
-- [x] getRegistry
-- [x] getRegistryNames
+- [x] getRegistry(node, name)
+- [ ] getRegistryNames
 - [ ] getRelid
 - [ ] getRoot
 - [ ] getSetNames
@@ -89,7 +89,7 @@
 - [ ] getValidAttributeNames
 - [ ] getValidPointerNames
 - [ ] getValidSetNames
-- [x] hasPointer
+- [x] hasPointer(node, name)
 - [ ] isAncestor
 - [ ] isEmpty
 - [ ] isHashed
@@ -105,10 +105,10 @@
 - [ ] isValidRelid
 - [ ] isValidTargetOf
 - [ ] joinPaths
-- [x] loadByPath
+- [x] loadByPath(rootNode, pathToObject, callback)
 - [ ] loadChild
-- [x] loadChildren
-- [x] loadCollection
+- [x] loadChildren(node, callback)
+- [x] loadCollection(node, name, callback)
 - [x] loadPointer
 - [ ] loadRoot
 - [ ] loadSubTree
@@ -118,7 +118,7 @@
 - [ ] normalize
 - [ ] persist
 - [ ] setAspectMetaTarget
-- [x] setAttribute
+- [x] setAttribute(node, name, value)
 - [ ] setAttributeDescriptor
 - [ ] setAttributeMeta
 - [ ] setBase
@@ -136,5 +136,5 @@
 - [ ] setPointerMetaLimits
 - [ ] setPointerMetaTarget
 - [ ] setProperty
-- [x] setRegistry
+- [x] setRegistry(node, name, value)
 - [ ] splitPath
