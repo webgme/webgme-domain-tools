@@ -1,0 +1,140 @@
+# Core Mock #
+
+- [ ] addMember
+- [ ] buildPath
+- [ ] clearMetaRules
+- [ ] copyData
+- [x] copyNode
+- [ ] copyNodes
+- [ ] createChild
+- [x] createNode
+- [ ] createRoot
+- [ ] createSet
+- [ ] delAspectMeta
+- [ ] delAspectMetaTarget
+- [ ] delAttribute
+- [ ] delAttributeDescriptor
+- [ ] delAttributeMeta
+- [ ] delChildMeta
+- [ ] delConstraint
+- [ ] delMember
+- [ ] delMemberAttribute
+- [ ] delMemberRegistry
+- [ ] delNodeDescriptor
+- [ ] delPointerDescriptor
+- [ ] delPointerMeta
+- [ ] delPointerMetaTarget
+- [ ] delRegistry
+- [ ] deleteData
+- [ ] deleteNode
+- [ ] deletePointer
+- [ ] deleteProperty
+- [ ] deleteSet
+- [ ] getAncestor
+- [x] getAttribute
+- [ ] getAttributeDescriptor
+- [ ] getAttributeMeta
+- [x] getAttributeNames
+- [ ] getBase
+- [ ] getBaseRoot
+- [ ] getBaseType
+- [ ] getChild
+- [x] getChildrenPaths
+- [x] getChildrenRelids
+- [x] getCollectionNames
+- [x] getCollectionPaths
+- [ ] getCommonPathPrefixData
+- [ ] getConstraint
+- [ ] getConstraintNames
+- [ ] getCoreTree
+- [ ] getData
+- [ ] getDataForSingleHash
+- [ ] getDescendant
+- [ ] getDescendantByPath
+- [#] getGuid
+- [ ] getHash
+- [ ] getJsonMeta
+- [ ] getKeys
+- [ ] getLevel
+- [#] getMemberAttribute
+- [#] getMemberAttributeNames
+- [#] getMemberPaths
+- [#] getMemberRegistry
+- [#] getMemberRegistryNames
+- [ ] getMiddleGuid
+- [ ] getNodeDescriptor
+- [ ] getOutsidePointerPath
+- [ ] getOwnAttribute
+- [ ] getOwnAttributeNames
+- [ ] getOwnConstraintNames
+- [ ] getOwnJsonMeta
+- [#] getOwnPointerNames
+- [#] getOwnPointerPath
+- [ ] getOwnRegistry
+- [ ] getOwnRegistryNames
+- [#] getParent
+- [#] getPath
+- [ ] getPointerDescriptor
+- [#] getPointerNames
+- [#] getPointerPath
+- [ ] getProperty
+- [#] getRegistry
+- [#] getRegistryNames
+- [ ] getRelid
+- [ ] getRoot
+- [ ] getSetNames
+- [ ] getSetNumbers
+- [ ] getTypeRoot
+- [ ] getValidAspectNames
+- [ ] getValidAttributeNames
+- [ ] getValidPointerNames
+- [ ] getValidSetNames
+- [#] hasPointer
+- [ ] isAncestor
+- [ ] isEmpty
+- [ ] isHashed
+- [ ] isInstanceOf
+- [ ] isMemberOf
+- [ ] isMutable
+- [ ] isObject
+- [ ] isTypeOf
+- [ ] isValidAttributeValueOf
+- [ ] isValidChildOf
+- [ ] isValidNode
+- [ ] isValidPath
+- [ ] isValidRelid
+- [ ] isValidTargetOf
+- [ ] joinPaths
+- [#] loadByPath
+- [ ] loadChild
+- [#] loadChildren
+- [#] loadCollection
+- [#] loadPointer
+- [ ] loadRoot
+- [ ] loadSubTree
+- [ ] loadTree
+- [ ] moveNode
+- [ ] mutate
+- [ ] normalize
+- [ ] persist
+- [ ] setAspectMetaTarget
+- [#] setAttribute
+- [ ] setAttributeDescriptor
+- [ ] setAttributeMeta
+- [ ] setBase
+- [ ] setChildMeta
+- [ ] setChildrenMetaLimits
+- [ ] setConstraint
+- [ ] setData
+- [ ] setGuid
+- [ ] setHashed
+- [ ] setMemberAttribute
+- [ ] setMemberRegistry
+- [ ] setNodeDescriptor
+- [ ] setPointer
+- [ ] setPointerDescriptor
+- [ ] setPointerMetaLimits
+- [ ] setPointerMetaTarget
+- [ ] setProperty
+- [#] setRegistry
+- [ ] splitPath

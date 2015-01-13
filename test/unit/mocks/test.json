@@ -13,6 +13,7 @@
     "1deced2f-f026-ca87-711c-d8148b1dfd3c": "1598195376",
     "1f35a3aa-321d-359f-7838-242bc2d08ae5": "755698918",
     "2bc42bca-a9be-0f33-16a7-ea847e546b37": "34094492",
+    "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": "1717599495",
     "3317c9c6-6c44-1a06-a476-11f77d722b34": "1993805430",
     "418cb09d-88c3-1821-71a3-4a7d040cf151": "1944646755",
     "42c94a1d-329c-85c6-a822-482e4a4f250f": "607366216",
@@ -23,6 +24,7 @@
     "7528a414-d83e-4f3d-2d68-22809f29b727": "831766259",
     "79f0cc09-f068-284b-5473-efcf5dfa3497": "1949671222",
     "80da891d-22ea-46e5-6981-d4a572ef10d9": "1487053016",
+    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": "1069367098",
     "8b1e277e-0f88-a58b-4aff-51c74250671d": "398267330",
     "8c6ad0b0-09d6-4e46-1544-00972025712f": "2053279246",
     "9001f172-4258-ceaa-86e9-f6e80b85853d": "891929219",
@@ -34,7 +36,9 @@
     "a1e4a35d-de60-0fec-ba6d-e2bd8897e16f": "756182296",
     "a8727703-1c1a-fd09-673e-970b64f41691": "1879829870",
     "ab281360-2719-c4e0-c3c6-4eea03401141": "1220837843",
+    "b0eae8ec-317e-f376-a131-47b432458ec4": "2065146708",
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": "785604039",
+    "bb587071-260d-2547-db83-8c073cdbf306": "1746846111",
     "bb80cd14-74db-3d29-ac1e-9a6b5f881596": "1899800446",
     "be02d298-2892-180a-ed1a-138dc589dd5c": "1299690106",
     "c19f2211-fd35-3039-9d1e-4f734c4c8bdc": "2053279246",
@@ -46,6 +50,7 @@
     "d5fc3678-2722-5112-c0bb-fa758f113246": "1328879441",
     "dd35b139-3346-08f0-013c-1e3a8a522f7f": "794302266",
     "de842916-e961-6035-6827-629a2f64cc62": "1445725383",
+    "df1e15d1-7967-971c-2775-9077c917bafe": "1109909121",
     "dfb51263-aae3-ba23-6be8-6ece3c24e489": "1406577295",
     "dfe3df16-dfc2-d4b5-09f8-ca4758ae1454": "206008088",
     "e544f3e4-e550-5750-8540-5598bbbf343c": "1368062975",
@@ -56,8 +61,10 @@
     "eabeb727-783a-d70b-a9b0-57a527d54325": "1603277152",
     "edf95f43-efbd-5c2c-6384-6ab74c160c17": "91705197",
     "f0508110-9a11-3b6d-ea42-2193bf0485e0": "126974487",
+    "f6288b45-2cc7-4f3c-b638-a94f42bde3d2": "1368819315",
     "f8d9bcd3-5655-7ddb-850d-28046a9dfba5": "488584186",
-    "f9f20885-6316-a7b6-2196-8299f45692ff": "1474284259"
+    "f9f20885-6316-a7b6-2196-8299f45692ff": "1474284259",
+    "fc7681cc-08b0-3ee1-3cad-0a15b5e00caf": "1157805101"
   },
   "containment": {
     "1b2720ba-040c-e5ac-bb4c-4bd502ee3353": {
@@ -101,6 +108,7 @@
       }
     },
     "672da653-2737-4b37-cbc6-34febf0f9c75": {},
+    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": {},
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": {
       "cd2f7bbc-d609-389a-e1db-9b411e86ea2a": {
         "9f55c248-96e0-7bb9-bd00-615257bfe9ef": {},
@@ -108,6 +116,7 @@
         "e58785a2-e8f9-8376-ef64-d8ef089dec62": {}
       }
     },
+    "bb587071-260d-2547-db83-8c073cdbf306": {},
     "bb80cd14-74db-3d29-ac1e-9a6b5f881596": {
       "418cb09d-88c3-1821-71a3-4a7d040cf151": {},
       "eabeb727-783a-d70b-a9b0-57a527d54325": {
@@ -118,6 +127,12 @@
     },
     "cd891e7b-e2ea-e929-f6cd-9faf4f1fc045": {},
     "cfc862dd-faac-cabc-3b20-7fa7bfc3e17a": {},
+    "df1e15d1-7967-971c-2775-9077c917bafe": {
+      "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": {},
+      "b0eae8ec-317e-f376-a131-47b432458ec4": {},
+      "f6288b45-2cc7-4f3c-b638-a94f42bde3d2": {},
+      "fc7681cc-08b0-3ee1-3cad-0a15b5e00caf": {}
+    },
     "dfb51263-aae3-ba23-6be8-6ece3c24e489": {}
   },
   "nodes": {
@@ -1469,6 +1484,54 @@
       },
       "sets": {}
     },
+    "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": {
+      "attributes": {
+        "name": "TestInstance"
+      },
+      "base": "fc7681cc-08b0-3ee1-3cad-0a15b5e00caf",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "df1e15d1-7967-971c-2775-9077c917bafe",
+      "pointers": {
+        "base": "fc7681cc-08b0-3ee1-3cad-0a15b5e00caf"
+      },
+      "registry": {
+        "position": {
+          "x": 104,
+          "y": 371
+        }
+      },
+      "sets": {}
+    },
     "3317c9c6-6c44-1a06-a476-11f77d722b34": {
       "attributes": {
         "INFO": "System of components and sub-systems.",
@@ -1962,8 +2025,56 @@
       },
       "registry": {
         "position": {
-          "x": 164,
-          "y": 104
+          "x": 160,
+          "y": 101
+        }
+      },
+      "sets": {}
+    },
+    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": {
+      "attributes": {
+        "name": "TestCollectionGetters"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "005cb34a-7523-4940-a1e9-0cb530ba1005",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 83,
+          "y": 613
         }
       },
       "sets": {}
@@ -2596,6 +2707,55 @@
       },
       "sets": {}
     },
+    "b0eae8ec-317e-f376-a131-47b432458ec4": {
+      "attributes": {
+        "name": "TestCopy"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "df1e15d1-7967-971c-2775-9077c917bafe",
+      "pointers": {
+        "TestPoint": "f6288b45-2cc7-4f3c-b638-a94f42bde3d2",
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 100,
+          "y": 255
+        }
+      },
+      "sets": {}
+    },
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": {
       "attributes": {
         "name": "TestInstancePointers"
@@ -2640,6 +2800,54 @@
         "position": {
           "x": 742,
           "y": 292
+        }
+      },
+      "sets": {}
+    },
+    "bb587071-260d-2547-db83-8c073cdbf306": {
+      "attributes": {
+        "name": "TestMemberGetters"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "005cb34a-7523-4940-a1e9-0cb530ba1005",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 81,
+          "y": 527
         }
       },
       "sets": {}
@@ -3188,6 +3396,54 @@
       },
       "sets": {}
     },
+    "df1e15d1-7967-971c-2775-9077c917bafe": {
+      "attributes": {
+        "name": "TestPointerGetters"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "005cb34a-7523-4940-a1e9-0cb530ba1005",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 271,
+          "y": 528
+        }
+      },
+      "sets": {}
+    },
     "dfb51263-aae3-ba23-6be8-6ece3c24e489": {
       "attributes": {
         "name": "TestSetName"
@@ -3727,6 +3983,45 @@
       },
       "sets": {}
     },
+    "f6288b45-2cc7-4f3c-b638-a94f42bde3d2": {
+      "attributes": {},
+      "base": "3317c9c6-6c44-1a06-a476-11f77d722b34",
+      "meta": {
+        "attributes": {
+          "Type": {
+            "default": "Compound",
+            "enum": [
+              "Compound",
+              "Alternative",
+              "Optional"
+            ],
+            "type": "string"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "df1e15d1-7967-971c-2775-9077c917bafe",
+      "pointers": {
+        "base": "3317c9c6-6c44-1a06-a476-11f77d722b34"
+      },
+      "registry": {
+        "position": {
+          "x": 407,
+          "y": 168
+        }
+      },
+      "sets": {}
+    },
     "f8d9bcd3-5655-7ddb-850d-28046a9dfba5": {
       "attributes": {
         "INFO": "Composition between two connectors.",
@@ -3852,6 +4147,55 @@
         "position": {
           "x": 280,
           "y": 657
+        }
+      },
+      "sets": {}
+    },
+    "fc7681cc-08b0-3ee1-3cad-0a15b5e00caf": {
+      "attributes": {
+        "name": "TestBase"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "df1e15d1-7967-971c-2775-9077c917bafe",
+      "pointers": {
+        "TestPoint": "f6288b45-2cc7-4f3c-b638-a94f42bde3d2",
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 112,
+          "y": 107
         }
       },
       "sets": {}

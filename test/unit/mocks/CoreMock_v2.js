@@ -71,6 +71,60 @@ describe('Core Mock', function() {
         assert.equal(core.getAttribute(parentNode, 'name'), 'TestContainer');
     });
 
+    it('getPointerNames/Path correct for pointing node', function() {
+        var testPath = '/1109909121/1157805101',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getPointerNames(testNode).length, 2);
+        assert.equal(core.getPointerPath(testNode, 'TestPoint'), '/1109909121/1368819315');
+        assert.equal(core.getPointerPath(testNode, 'base'), '/1008889918/1922772359');
+    });
+
+    it('getPointerNames/Path correct for copy of pointing node', function() {
+        var testPath = '/1109909121/2065146708',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getPointerNames(testNode).length, 2);
+        assert.equal(core.getPointerPath(testNode, 'TestPoint'), '/1109909121/1368819315');
+        assert.equal(core.getPointerPath(testNode, 'base'), '/1008889918/1922772359');
+    });
+
+    it('getPointerNames/Path correct for instance of pointing node', function() {
+        var testPath = '/1109909121/1717599495',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getPointerNames(testNode).length, 2);
+        assert.equal(core.getPointerPath(testNode, 'TestPoint'), '/1109909121/1368819315');
+        assert.equal(core.getPointerPath(testNode, 'base'), '/1109909121/1157805101');
+    });
+
+    it('getOwnPointerNames/Path correct for pointing node', function() {
+        var testPath = '/1109909121/1157805101',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getOwnPointerNames(testNode).length, 2);
+        //assert.equal(core.getOwnPointerPath(testNode, 'TestPoint'), '/1109909121/1368819315');
+        //assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1008889918/1922772359');
+    });
+
+    it('getOwnPointerNames/Path correct for copy of pointing node', function() {
+        var testPath = '/1109909121/2065146708',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getOwnPointerNames(testNode).length, 2);
+        //assert.equal(core.getOwnPointerPath(testNode, 'TestPoint'), '/1109909121/1368819315');
+        //assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1008889918/1922772359');
+    });
+
+    it('getOwnPointerNames/Path correct for instance of pointing node', function() {
+        var testPath = '/1109909121/1717599495',
+            testNode = core.mockGetNodeByPath(testPath);
+
+        assert.equal(core.getOwnPointerNames(testNode).length, 1);
+//        assert.equal(core.getOwnPointerPath(testNode, 'TestPoint'), undefined);
+//        assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1109909121/1157805101');
+    });
+
     it('hasPointer dst/src true for connection', function () {
         var testPath = '/146679802/1487053016/1879829870',
             testNode = core.mockGetNodeByPath(testPath);
@@ -228,5 +282,5 @@ describe('Core Mock', function() {
             core.getParent(core.mockGetNodeByPath(cPaths[1])).id === newNode.id), true);
     });
 
-    
+
 });
