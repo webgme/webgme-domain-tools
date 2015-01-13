@@ -35,7 +35,7 @@
 - [ ] getAttributeDescriptor
 - [ ] getAttributeMeta
 - [ ] getAttributeNames
-- [ ] getBase
+- [x] getBase(node)
 - [ ] getBaseRoot
 - [ ] getBaseType
 - [ ] getChild
@@ -58,7 +58,7 @@
 - [ ] getLevel
 - [x] getMemberAttribute
 - [x] getMemberAttributeNames
-- [x] getMemberPaths
+- [x] getMemberPaths(node, name)
 - [x] getMemberRegistry
 - [x] getMemberRegistryNames
 - [ ] getMiddleGuid
@@ -82,8 +82,8 @@
 - [ ] getRegistryNames
 - [ ] getRelid
 - [ ] getRoot
-- [ ] getSetNames
-- [ ] getSetNumbers
+- [x] getSetNames(node)
+- [x] getSetNumbers(node)
 - [ ] getTypeRoot
 - [ ] getValidAspectNames
 - [ ] getValidAttributeNames

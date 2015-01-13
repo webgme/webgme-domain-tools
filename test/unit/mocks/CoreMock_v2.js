@@ -188,6 +188,48 @@ describe('Core Mock', function() {
         assert.equal(core.getCollectionPaths(testNode, 'dst')[0], '/146679802/1487053016/1879829870');
     });
 
+    it('getSetNames/Numbers and getMemberPaths correct for set node', function () {
+        var testPath = '/1746846111/1684391184',
+            testNode = core.mockGetNodeByPath(testPath);
+        assert.equal(core.getSetNumbers(testNode), 1);
+        assert.equal(core.getSetNames(testNode).length, 1);
+        assert.equal(core.getSetNames(testNode)[0], 'Selection');
+        assert.equal(core.getMemberPaths(testNode, 'Selection')[0], '/1746846111/562713150');
+    });
+
+    it('getSetNames/Numbers and getMemberPaths correct for copy of set node', function () {
+        var testPath = '/1746846111/1589023000',
+            testNode = core.mockGetNodeByPath(testPath);
+        assert.equal(core.getSetNumbers(testNode), 1);
+        assert.equal(core.getSetNames(testNode).length, 1);
+        assert.equal(core.getSetNames(testNode)[0], 'Selection');
+        assert.equal(core.getMemberPaths(testNode, 'Selection')[0], '/1746846111/562713150');
+    });
+
+    it('getSetNames/Numbers and getMemberPaths correct for instance of set node', function () {
+        var testPath = '/1746846111/1450335589',
+            testNode = core.mockGetNodeByPath(testPath);
+        assert.equal(core.getSetNumbers(testNode), 1);
+        assert.equal(core.getSetNames(testNode).length, 1);
+        assert.equal(core.getSetNames(testNode)[0], 'Selection');
+        assert.equal(core.getMemberPaths(testNode, 'Selection')[0], '/1746846111/562713150');
+    });
+
+    it('getMemberPaths for instance chain of set nodes with members added in instances', function () {
+        var testPath = '/1746846111/2007266796',
+            testNode = core.mockGetNodeByPath(testPath),
+            memberPaths;
+        assert.equal(core.getSetNumbers(testNode), 1);
+        assert.equal(core.getSetNames(testNode).length, 1);
+        assert.equal(core.getSetNames(testNode)[0], 'Selection');
+        memberPaths = core.getMemberPaths(testNode, 'Selection');
+        assert.equal(memberPaths.length, 3);
+        assert.equal(memberPaths.indexOf('/1746846111/562713150') > -1, true);
+        assert.equal(memberPaths.indexOf('/1746846111/953858631') > -1, true);
+        assert.equal(memberPaths.indexOf('/1746846111/952415335') > -1, true);
+    });
+
+    /* ***** Creation of Nodes ****** */
     it('name and names of children of copied node is same', function() {
         var testPath = '/146679802/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
@@ -316,6 +358,5 @@ describe('Core Mock', function() {
             core.getParent(core.mockGetNodeByPath(cPaths[0])).id === newNode.id,
             core.getParent(core.mockGetNodeByPath(cPaths[1])).id === newNode.id), true);
     });
-
 
 });

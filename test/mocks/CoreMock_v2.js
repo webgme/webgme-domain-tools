@@ -225,6 +225,10 @@ define([], function () {
             return getTreeNode(node.id).guid;
         }
 
+        function getBase(node) {
+            return nodes[node.base];
+        }
+
         function getAttribute(node, name) {
             if (node.attributes.hasOwnProperty(name)) {
                 return node.attributes[name];
@@ -473,13 +477,32 @@ define([], function () {
         }
 
         /**** Sets ****/
+        function getSetNames(node) {
+            return Object.keys(node.sets);
+        }
+
+        function getSetNumbers(node) {
+            return Object.keys(node.sets).length;
+        }
+
         function getMemberPaths(node, name) {
             var paths = [],
                 members = node.sets[name],
-                i;
+                addMembers = function (members) {
+                    var i;
+                    for (i = 0; i < members.length; i += 1) {
+                        paths.push(nodes[members[i].guid].id);
+                    }
+                };
+
             if (members) {
-                for (i = 0; i < members.length; i += 1) {
-                    paths.push(nodes[members[i].guid].id);
+                addMembers(members);
+                node = nodes[node.base];
+                members = node.sets[name];
+                while (node && members) {
+                    addMembers(members);
+                    node = nodes[node.base];
+                    members = node.sets[name];
                 }
             }
             return paths;
@@ -554,6 +577,7 @@ define([], function () {
             loadByPath: loadByPath,
             getPath: getPath,
             getGuid: getGuid,
+            getBase: getBase,
 
             getAttribute: getAttribute,
             setAttribute: setAttribute,
@@ -580,6 +604,8 @@ define([], function () {
             getCollectionPaths: getCollectionPaths,
             loadCollection: loadCollection,
 
+            getSetNames: getSetNames,
+            getSetNumbers: getSetNumbers,
             getMemberPaths: getMemberPaths,
             getMemberAttributeNames: getMemberAttributeNames,
             getMemberAttribute: getMemberAttribute,

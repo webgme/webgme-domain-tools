@@ -9,27 +9,34 @@
     "0375e1c1-1217-7aa9-5e14-53c709a2abbe": "1675023230",
     "07d79d42-e631-fb69-a1f7-25b044d94fbb": "319211427",
     "0bced7fe-4c88-f3c1-f877-6a0d0f344c46": "711037118",
+    "1043ee2d-be95-cbdd-bee0-abb7068f5510": "1450335589",
     "1b2720ba-040c-e5ac-bb4c-4bd502ee3353": "1008889918",
     "1deced2f-f026-ca87-711c-d8148b1dfd3c": "1598195376",
     "1f35a3aa-321d-359f-7838-242bc2d08ae5": "755698918",
     "2bc42bca-a9be-0f33-16a7-ea847e546b37": "34094492",
+    "2bf32265-1786-1d5d-f1cc-3a7b8906a594": "2007266796",
     "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": "1717599495",
     "3317c9c6-6c44-1a06-a476-11f77d722b34": "1993805430",
+    "3ff263e2-9876-9a8f-63b1-08299255077b": "229906765",
     "418cb09d-88c3-1821-71a3-4a7d040cf151": "1944646755",
     "42c94a1d-329c-85c6-a822-482e4a4f250f": "607366216",
+    "51d97950-3e22-1ab5-62e8-d95a6cad6527": "562713150",
     "58fcb797-8a06-2976-9632-d281b3c1ddd2": "1045980796",
+    "59e88b67-7c18-d3f6-accf-1e8879b7e7da": "952415335",
     "5daaaf16-8b73-ec64-74c5-238efb5d1326": "146679802",
     "65dcb250-dcb6-4cad-4617-0518a9a37d2e": "803021327",
     "672da653-2737-4b37-cbc6-34febf0f9c75": "2018335375",
     "7528a414-d83e-4f3d-2d68-22809f29b727": "831766259",
     "79f0cc09-f068-284b-5473-efcf5dfa3497": "1949671222",
     "80da891d-22ea-46e5-6981-d4a572ef10d9": "1487053016",
-    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": "1069367098",
+    "8227f6be-0bbf-cf76-bbcd-ecdd7faf26f3": "1589023000",
     "8b1e277e-0f88-a58b-4aff-51c74250671d": "398267330",
     "8c6ad0b0-09d6-4e46-1544-00972025712f": "2053279246",
     "9001f172-4258-ceaa-86e9-f6e80b85853d": "891929219",
     "97a00dee-7375-3637-ec08-b62588d4d71d": "1502717053",
+    "986fbd65-f0c5-1273-25b5-81bac7fd1608": "1684391184",
     "9a64640a-d8d6-9efa-cf2f-b622aaa6e5ae": "1010911100",
+    "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": "953858631",
     "9f55c248-96e0-7bb9-bd00-615257bfe9ef": "153477860",
     "9fab1244-f449-d3c0-bfdc-f166f724e3f2": "1624079113",
     "a0399d5f-26ab-3fac-def4-3834f5decac9": "1826321976",
@@ -108,7 +115,6 @@
       }
     },
     "672da653-2737-4b37-cbc6-34febf0f9c75": {},
-    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": {},
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": {
       "cd2f7bbc-d609-389a-e1db-9b411e86ea2a": {
         "9f55c248-96e0-7bb9-bd00-615257bfe9ef": {},
@@ -116,7 +122,16 @@
         "e58785a2-e8f9-8376-ef64-d8ef089dec62": {}
       }
     },
-    "bb587071-260d-2547-db83-8c073cdbf306": {},
+    "bb587071-260d-2547-db83-8c073cdbf306": {
+      "1043ee2d-be95-cbdd-bee0-abb7068f5510": {},
+      "2bf32265-1786-1d5d-f1cc-3a7b8906a594": {},
+      "3ff263e2-9876-9a8f-63b1-08299255077b": {},
+      "51d97950-3e22-1ab5-62e8-d95a6cad6527": {},
+      "59e88b67-7c18-d3f6-accf-1e8879b7e7da": {},
+      "8227f6be-0bbf-cf76-bbcd-ecdd7faf26f3": {},
+      "986fbd65-f0c5-1273-25b5-81bac7fd1608": {},
+      "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": {}
+    },
     "bb80cd14-74db-3d29-ac1e-9a6b5f881596": {
       "418cb09d-88c3-1821-71a3-4a7d040cf151": {},
       "eabeb727-783a-d70b-a9b0-57a527d54325": {
@@ -1221,6 +1236,40 @@
       },
       "sets": {}
     },
+    "1043ee2d-be95-cbdd-bee0-abb7068f5510": {
+      "attributes": {
+        "name": "SetInstance"
+      },
+      "base": "986fbd65-f0c5-1273-25b5-81bac7fd1608",
+      "meta": {
+        "attributes": {
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "986fbd65-f0c5-1273-25b5-81bac7fd1608"
+      },
+      "registry": {
+        "position": {
+          "x": 99,
+          "y": 351
+        }
+      },
+      "sets": {
+        "Selection": []
+      }
+    },
     "1b2720ba-040c-e5ac-bb4c-4bd502ee3353": {
       "attributes": {
         "name": "ADMEditorModelingLanguage"
@@ -1484,6 +1533,51 @@
       },
       "sets": {}
     },
+    "2bf32265-1786-1d5d-f1cc-3a7b8906a594": {
+      "attributes": {
+        "name": "SetInstance2"
+      },
+      "base": "3ff263e2-9876-9a8f-63b1-08299255077b",
+      "meta": {
+        "attributes": {
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "3ff263e2-9876-9a8f-63b1-08299255077b"
+      },
+      "registry": {
+        "position": {
+          "x": 542,
+          "y": 371
+        }
+      },
+      "sets": {
+        "Selection": [
+          {
+            "attributes": {},
+            "guid": "59e88b67-7c18-d3f6-accf-1e8879b7e7da",
+            "registry": {
+              "position": {
+                "x": 194,
+                "y": 423
+              }
+            }
+          }
+        ]
+      }
+    },
     "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": {
       "attributes": {
         "name": "TestInstance"
@@ -1625,6 +1719,51 @@
       },
       "sets": {}
     },
+    "3ff263e2-9876-9a8f-63b1-08299255077b": {
+      "attributes": {
+        "name": "SetInstance1"
+      },
+      "base": "986fbd65-f0c5-1273-25b5-81bac7fd1608",
+      "meta": {
+        "attributes": {
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "986fbd65-f0c5-1273-25b5-81bac7fd1608"
+      },
+      "registry": {
+        "position": {
+          "x": 527,
+          "y": 259
+        }
+      },
+      "sets": {
+        "Selection": [
+          {
+            "attributes": {},
+            "guid": "9e5cc24f-b516-ed83-8620-f4596a1ecb7f",
+            "registry": {
+              "position": {
+                "x": 195,
+                "y": 324
+              }
+            }
+          }
+        ]
+      }
+    },
     "418cb09d-88c3-1821-71a3-4a7d040cf151": {
       "attributes": {
         "name": "PointedTo"
@@ -1714,6 +1853,58 @@
       },
       "sets": {}
     },
+    "51d97950-3e22-1ab5-62e8-d95a6cad6527": {
+      "attributes": {
+        "name": "C1"
+      },
+      "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5",
+      "meta": {
+        "attributes": {
+          "Classifications": {
+            "default": "",
+            "type": "string"
+          },
+          "ID": {
+            "default": "",
+            "type": "string"
+          },
+          "Resource": {
+            "default": "",
+            "type": "asset"
+          },
+          "SchemaVersion": {
+            "default": "",
+            "type": "string"
+          },
+          "Version": {
+            "default": "",
+            "type": "string"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5"
+      },
+      "registry": {
+        "position": {
+          "x": 338,
+          "y": 101
+        }
+      },
+      "sets": {}
+    },
     "58fcb797-8a06-2976-9632-d281b3c1ddd2": {
       "attributes": {
         "ID": "",
@@ -1760,6 +1951,58 @@
         "position": {
           "x": 263,
           "y": 429
+        }
+      },
+      "sets": {}
+    },
+    "59e88b67-7c18-d3f6-accf-1e8879b7e7da": {
+      "attributes": {
+        "name": "C3"
+      },
+      "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5",
+      "meta": {
+        "attributes": {
+          "Classifications": {
+            "default": "",
+            "type": "string"
+          },
+          "ID": {
+            "default": "",
+            "type": "string"
+          },
+          "Resource": {
+            "default": "",
+            "type": "asset"
+          },
+          "SchemaVersion": {
+            "default": "",
+            "type": "string"
+          },
+          "Version": {
+            "default": "",
+            "type": "string"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5"
+      },
+      "registry": {
+        "position": {
+          "x": 771,
+          "y": 98
         }
       },
       "sets": {}
@@ -2031,29 +2274,13 @@
       },
       "sets": {}
     },
-    "832095f8-bf87-2cf7-bffe-3dc7ceefc2c8": {
+    "8227f6be-0bbf-cf76-bbcd-ecdd7faf26f3": {
       "attributes": {
-        "name": "TestCollectionGetters"
+        "name": "SetCopy"
       },
-      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "base": "97a00dee-7375-3637-ec08-b62588d4d71d",
       "meta": {
         "attributes": {
-          "artifacts": {
-            "default": "",
-            "type": "asset"
-          },
-          "isTest": {
-            "default": false,
-            "type": "boolean"
-          },
-          "plugins": {
-            "default": "",
-            "type": "string"
-          },
-          "success": {
-            "default": true,
-            "type": "boolean"
-          },
           "INFO": {
             "default": "",
             "type": "string"
@@ -2067,17 +2294,30 @@
           }
         }
       },
-      "parent": "005cb34a-7523-4940-a1e9-0cb530ba1005",
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
       "pointers": {
-        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+        "base": "97a00dee-7375-3637-ec08-b62588d4d71d"
       },
       "registry": {
         "position": {
-          "x": 83,
-          "y": 613
+          "x": 100,
+          "y": 247
         }
       },
-      "sets": {}
+      "sets": {
+        "Selection": [
+          {
+            "attributes": {},
+            "guid": "51d97950-3e22-1ab5-62e8-d95a6cad6527",
+            "registry": {
+              "position": {
+                "x": 191,
+                "y": 220
+              }
+            }
+          }
+        ]
+      }
     },
     "8b1e277e-0f88-a58b-4aff-51c74250671d": {
       "attributes": {
@@ -2257,6 +2497,51 @@
         "Selection": []
       }
     },
+    "986fbd65-f0c5-1273-25b5-81bac7fd1608": {
+      "attributes": {
+        "name": "SetBase"
+      },
+      "base": "97a00dee-7375-3637-ec08-b62588d4d71d",
+      "meta": {
+        "attributes": {
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "97a00dee-7375-3637-ec08-b62588d4d71d"
+      },
+      "registry": {
+        "position": {
+          "x": 101,
+          "y": 137
+        }
+      },
+      "sets": {
+        "Selection": [
+          {
+            "attributes": {},
+            "guid": "51d97950-3e22-1ab5-62e8-d95a6cad6527",
+            "registry": {
+              "position": {
+                "x": 191,
+                "y": 220
+              }
+            }
+          }
+        ]
+      }
+    },
     "9a64640a-d8d6-9efa-cf2f-b622aaa6e5ae": {
       "attributes": {
         "INFO": "A set of requirements for a work-space.",
@@ -2308,6 +2593,58 @@
         "position": {
           "x": 1229,
           "y": 353
+        }
+      },
+      "sets": {}
+    },
+    "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": {
+      "attributes": {
+        "name": "C2"
+      },
+      "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5",
+      "meta": {
+        "attributes": {
+          "Classifications": {
+            "default": "",
+            "type": "string"
+          },
+          "ID": {
+            "default": "",
+            "type": "string"
+          },
+          "Resource": {
+            "default": "",
+            "type": "asset"
+          },
+          "SchemaVersion": {
+            "default": "",
+            "type": "string"
+          },
+          "Version": {
+            "default": "",
+            "type": "string"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "cb92c02d-84cf-f104-938b-b7de6641f8e5"
+      },
+      "registry": {
+        "position": {
+          "x": 560,
+          "y": 105
         }
       },
       "sets": {}
