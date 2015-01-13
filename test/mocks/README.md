@@ -51,16 +51,16 @@
 - [ ] getDataForSingleHash
 - [ ] getDescendant
 - [ ] getDescendantByPath
-- [#] getGuid
+- [x] getGuid
 - [ ] getHash
 - [ ] getJsonMeta
 - [ ] getKeys
 - [ ] getLevel
-- [#] getMemberAttribute
-- [#] getMemberAttributeNames
-- [#] getMemberPaths
-- [#] getMemberRegistry
-- [#] getMemberRegistryNames
+- [x] getMemberAttribute
+- [x] getMemberAttributeNames
+- [x] getMemberPaths
+- [x] getMemberRegistry
+- [x] getMemberRegistryNames
 - [ ] getMiddleGuid
 - [ ] getNodeDescriptor
 - [ ] getOutsidePointerPath
@@ -68,18 +68,18 @@
 - [ ] getOwnAttributeNames
 - [ ] getOwnConstraintNames
 - [ ] getOwnJsonMeta
-- [#] getOwnPointerNames
-- [#] getOwnPointerPath
+- [x] getOwnPointerNames
+- [x] getOwnPointerPath
 - [ ] getOwnRegistry
 - [ ] getOwnRegistryNames
-- [#] getParent
-- [#] getPath
+- [x] getParent
+- [x] getPath
 - [ ] getPointerDescriptor
-- [#] getPointerNames
-- [#] getPointerPath
+- [x] getPointerNames
+- [x] getPointerPath
 - [ ] getProperty
-- [#] getRegistry
-- [#] getRegistryNames
+- [x] getRegistry
+- [x] getRegistryNames
 - [ ] getRelid
 - [ ] getRoot
 - [ ] getSetNames
@@ -89,7 +89,7 @@
 - [ ] getValidAttributeNames
 - [ ] getValidPointerNames
 - [ ] getValidSetNames
-- [#] hasPointer
+- [x] hasPointer
 - [ ] isAncestor
 - [ ] isEmpty
 - [ ] isHashed
@@ -105,11 +105,11 @@
 - [ ] isValidRelid
 - [ ] isValidTargetOf
 - [ ] joinPaths
-- [#] loadByPath
+- [x] loadByPath
 - [ ] loadChild
-- [#] loadChildren
-- [#] loadCollection
-- [#] loadPointer
+- [x] loadChildren
+- [x] loadCollection
+- [x] loadPointer
 - [ ] loadRoot
 - [ ] loadSubTree
 - [ ] loadTree
@@ -118,7 +118,7 @@
 - [ ] normalize
 - [ ] persist
 - [ ] setAspectMetaTarget
-- [#] setAttribute
+- [x] setAttribute
 - [ ] setAttributeDescriptor
 - [ ] setAttributeMeta
 - [ ] setBase
@@ -136,5 +136,5 @@
 - [ ] setPointerMetaLimits
 - [ ] setPointerMetaTarget
 - [ ] setProperty
-- [#] setRegistry
+- [x] setRegistry
 - [ ] splitPath
