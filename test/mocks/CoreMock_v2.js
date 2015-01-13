@@ -49,34 +49,16 @@ define([], function () {
             setTimeout(func, timeoutTime);
         }
 
-        function generateGUID() {
-            function s4() {
-                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-            }
-            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-        }
-
         function addNewNode(baseNode, baseGuid, parentTreeNode, copy) {
             var newGuid,
                 newId,
+                setNames,
+                i,
                 newNode;
 
             relid += 1;
             newId = nodes[parentTreeNode.guid].id + '/' + relid.toString();
             newGuid = generateGUID();
-
-            newNode = {
-                attributes: {},
-                base: baseGuid,
-                id: newId,
-                meta: JSON.parse(JSON.stringify(baseNode.meta)),
-                parent: parentTreeNode.guid,
-                pointers: {
-                    'base': baseGuid
-                },
-                registry: {},
-                sets: {}
-            };
 
             if (copy) {
                 newNode = JSON.parse(JSON.stringify(baseNode));
@@ -96,6 +78,10 @@ define([], function () {
                     registry: {},
                     sets: {}
                 };
+                setNames = Object.keys(baseNode.sets);
+                for (i = 0; i < setNames.length; i += 1) {
+                    newNode.sets[setNames[i]] = [];
+                }
             }
 
             nodes[newGuid] = newNode;
@@ -621,6 +607,13 @@ define([], function () {
             mockGetChildren: mockGetChildren
         };
     };
+
+    function generateGUID() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
 
     return CoreMock;
 });
