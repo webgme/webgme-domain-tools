@@ -8,6 +8,10 @@ var chai = require('chai'),
     requirejs = require('requirejs'),
     assert = chai.assert;
 
+function XOR(a, b) {
+    'use strict';
+    return ( a || b ) && !( a && b );
+}
 
 describe('Core Mock', function() {
     'use strict';
@@ -81,6 +85,20 @@ describe('Core Mock', function() {
         assert.equal(core.getPointerPath(testNode, 'src'), '/146679802/1487053016/153477860');
     });
 
+    it('getCollectionNames correct for dst/src for connection', function () {
+        var testPath = '/146679802/1487053016/2053279246',
+            testNode = core.mockGetNodeByPath(testPath);
+        assert.equal(core.getCollectionNames(testNode).length, 1);
+        assert.equal(core.getCollectionNames(testNode)[0], 'dst');
+    });
+
+    it('getCollectionPaths correct for dst/src for connection', function () {
+        var testPath = '/146679802/1487053016/2053279246',
+            testNode = core.mockGetNodeByPath(testPath);
+        assert.equal(core.getCollectionPaths(testNode, 'dst').length, 1);
+        assert.equal(core.getCollectionPaths(testNode, 'dst')[0], '/146679802/1487053016/1879829870');
+    });
+
     it('name and names of children of copied node is same', function() {
         var testPath = '/146679802/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
@@ -136,7 +154,7 @@ describe('Core Mock', function() {
         }
     });
 
-    it('name and names of children of instantiated node is same', function() {
+    it('name and names of children of base and instance is same', function() {
         var testPath = '/785604039/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -163,7 +181,7 @@ describe('Core Mock', function() {
         }
     });
 
-    it('internal pointers point to nodes in base', function() {
+    it('internal pointers point to nodes in base of instance', function() {
         var testPath = '/785604039/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -190,4 +208,25 @@ describe('Core Mock', function() {
             }
         }
     });
+
+    it('external pointers point to original node after copy', function() {
+        var testPath = '/1899800446/1603277152',
+            testNode = core.mockGetNodeByPath(testPath),
+            parentNode = core.getParent(testNode),
+            pNode = core.mockGetNodeByPath('/1899800446/1944646755'),
+            cPaths = core.getCollectionPaths(pNode, 'TestPoint'),
+            newNode;
+        assert.equal(cPaths.length, 1);
+        newNode = core.copyNode(testNode, parentNode);
+
+        cPaths = core.getCollectionPaths(pNode, 'TestPoint');
+        assert.equal(cPaths.length, 2);
+
+        // Check that one and only one of the collection paths is within the new Node
+        assert.equal( XOR(
+            core.getParent(core.mockGetNodeByPath(cPaths[0])).id === newNode.id,
+            core.getParent(core.mockGetNodeByPath(cPaths[1])).id === newNode.id), true);
+    });
+
+    
 });

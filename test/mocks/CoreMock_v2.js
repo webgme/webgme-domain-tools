@@ -141,7 +141,7 @@ define([], function () {
                     } else {
                         // The pointer target was outside of copied node.
                         // Keep the pointer, but update the collection of the target node.
-                        nodes[copyGuid].collection[pName].push(treeNode.guid);
+                        nodes[pGuid].collection[pName].push(treeNode.guid);
                     }
                 }
             }
@@ -159,11 +159,21 @@ define([], function () {
         }
 
         function mockGetNodeByPath(path) {
-            return nodes[getTreeNode(path).guid];
+            var result = nodes[getTreeNode(path).guid];
+            if (result) {
+                return result;
+            } else {
+                throw new Error('Path does not exist: ' + path);
+            }
         }
 
         function mockGetNodeByGuid(guid) {
-            return nodes[guid];
+            var result = nodes[guid];
+            if (result) {
+                return result;
+            } else {
+                throw new Error('Guid does not exist: ' + guid);
+            }
         }
 
         function mockGetTree() {
@@ -436,7 +446,9 @@ define([], function () {
 
         function getCollectionPaths(node, name) {
             if (node.collection && node.collection[name]) {
-                return node.collection[name];
+                return node.collection[name].map(function(guid) {
+                    return nodes[guid].id;
+                });
             } else {
                 return [];
             }
@@ -562,6 +574,7 @@ define([], function () {
             hasPointer: hasPointer,
             getPointerPath: getPointerPath,
             loadPointer: loadPointer,
+            setPointer: setPointer,
 
             getCollectionNames: getCollectionNames,
             getCollectionPaths: getCollectionPaths,
