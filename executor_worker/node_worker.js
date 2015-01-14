@@ -84,6 +84,7 @@ if (nodeRequire.main === module) {
 
     requirejs(['node_worker'], function (addWebGMEConnection) {
         var fs = nodeRequire('fs');
+        var path = nodeRequire('path');
 
         function readConfig() {
             var config = {
@@ -116,7 +117,7 @@ if (nodeRequire.main === module) {
                     webGMEUrl = key;
                     if (Object.prototype.hasOwnProperty.call(webGMEUrls, webGMEUrl)) {
                     } else {
-                        webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, workingDirectory, config[webGMEUrl]);
+                        webGMEUrls[webGMEUrl] = addWebGMEConnection(webGMEUrl, path.join(workingDirectory, '' + workingDirectoryCount++), config[webGMEUrl]);
                     }
                 } else if (key === "maxConcurrentJobs") {
                     availableProcessesContainer.availableProcesses += config[maxConcurrentJobs] - maxConcurrentJobs;
@@ -135,12 +136,16 @@ if (nodeRequire.main === module) {
             });
         }
 
+        var workingDirectoryCount = 0;
         var workingDirectory = 'executor-temp';
         var rimraf = nodeRequire('rimraf');
         rimraf(workingDirectory, function (err) {
             if (err) {
                 console.log('Could not delete working directory (' + workingDirectory + '), err: ' + err);
                 process.exit(2);
+            }
+            if (!fs.existsSync(workingDirectory)) {
+                fs.mkdirSync(workingDirectory);
             }
 
             readConfig();
