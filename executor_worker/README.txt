@@ -27,7 +27,10 @@ Recover from transient errors
 Handle disconnecting/reconnecting of workers more gracefully
 Expose REST API for workers
 
-Labels
+https:
+Put CA .crt or .pem files in this directory to add non-trusted CAs.
+
+Labels:
 Jobs with labels specified require an executor_worker that has all of the jobs' labels. executor_workers get labels automatically, by running jobs that determine if a tool is on that machine.
 HOWTO: add label job
 1. Create the job itself:

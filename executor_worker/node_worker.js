@@ -54,6 +54,21 @@ if (typeof define !== 'undefined') {
 }
 
 if (nodeRequire.main === module) {
+    var fs = nodeRequire('fs'),
+        path = nodeRequire('path'),
+        cas = nodeRequire('ssl-root-cas/latest'),
+        superagent = nodeRequire('superagent'),
+        https = nodeRequire('https');
+
+    cas.inject();
+    fs.readdirSync(__dirname).forEach(function (file) {
+        var filename = path.resolve(__dirname, file);
+        if ((filename.indexOf('.pem') == filename.length - 4) || (filename.indexOf('.crt') == filename.length - 4)) {
+            console.log('Adding ' + file + ' to trusted CAs');
+            cas.addFile(filename);
+        }
+    });
+    superagent.Request.prototype._ca = (require('https').globalAgent.options.ca);
     var requirejs = require('./node_worker.classes.build').requirejs;
 
     [
@@ -133,7 +148,7 @@ if (nodeRequire.main === module) {
                     webGMEUrls[webGMEUrl]();
                     delete webGMEUrls[webGMEUrl];
                 }
-            });
+                });
         }
 
         var workingDirectoryCount = 0;
