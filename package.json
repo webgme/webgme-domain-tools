@@ -38,10 +38,11 @@
     },
   "scripts": {
     "start": "node app.js",
-        "test": "./node_modules/.bin/istanbul --hook-run-in-context test ./node_modules/.bin/_mocha -- -R spec --recursive ./test/unit",
+    "test": "node node_modules/istanbul/lib/cli.js --hook-run-in-context test node_modules/mocha/bin/_mocha -- -R spec --recursive test/unit",
+    "test_win": "node_modules\\.bin\\istanbul.cmd --hook-run-in-context test node_modules\\mocha\\bin\\_mocha -- -R spec --recursive .\\test\\unit",
+    "test_cover": "node node_modules/istanbul/lib/cli.js --hook-run-in-context cover node_modules/mocha/bin/_mocha -- -R spec --recursive test/unit",
     "test_karma": "node ./node_modules/karma/bin/karma start karma.conf.js --single-run --browsers Firefox",
-        "test_win": "node_modules\\.bin\\istanbul.cmd --hook-run-in-context test node_modules\\mocha\\bin\\_mocha -- -R spec --recursive .\\test\\unit",
-        "jsdoc": "node_modules/.bin/jsdoc src -r",
+    "jsdoc": "node_modules/.bin/jsdoc src -r",
     "plugin": "node node_modules/webgme/bin/run_plugin.js -c config.json"
 }
 }
