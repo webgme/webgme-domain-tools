@@ -26,20 +26,20 @@ describe('Core Mock', function() {
             });
     });
 
-    it('getAttribute name', function() {
+    it('getAttribute name', function () {
         var testPath = '/1029223470',
             testNode = core.mockGetNodeByPath(testPath);
         assert.equal(core.getAttribute(testNode, 'name'), 'TestName');
     });
 
-    it('setAttribute name', function() {
+    it('setAttribute name', function () {
         var testPath = '/1406577295',
             testNode = core.mockGetNodeByPath(testPath);
         core.setAttribute(testNode, 'name', 'newName');
         assert.equal(core.getAttribute(testNode, 'name'), 'newName');
     });
 
-    it('getRegistry position', function() {
+    it('getRegistry position', function () {
         var testPath = '/2018335375',
             testNode = core.mockGetNodeByPath(testPath),
             pos;
@@ -49,7 +49,7 @@ describe('Core Mock', function() {
         assert.equal(pos.y, 291);
     });
 
-    it('setRegistry position', function() {
+    it('setRegistry position', function () {
         var testPath = '/607366216',
             testNode = core.mockGetNodeByPath(testPath),
             pos,
@@ -62,7 +62,7 @@ describe('Core Mock', function() {
         assert.equal(pos.y, 10);
     });
 
-    it('getParent correct path and name', function() {
+    it('getParent correct path and name', function () {
         var testPath = '/146679802/1487053016/1879829870',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode);
@@ -71,7 +71,7 @@ describe('Core Mock', function() {
         assert.equal(core.getAttribute(parentNode, 'name'), 'TestContainer');
     });
 
-    it('getPointerNames/Path correct for pointing node', function() {
+    it('getPointerNames/Path correct for pointing node', function () {
         var testPath = '/1109909121/1157805101',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -80,7 +80,7 @@ describe('Core Mock', function() {
         assert.equal(core.getPointerPath(testNode, 'base'), '/1008889918/1922772359');
     });
 
-    it('getPointerNames/Path correct for copy of pointing node', function() {
+    it('getPointerNames/Path correct for copy of pointing node', function () {
         var testPath = '/1109909121/2065146708',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -89,7 +89,7 @@ describe('Core Mock', function() {
         assert.equal(core.getPointerPath(testNode, 'base'), '/1008889918/1922772359');
     });
 
-    it('getPointerNames/Path correct for instance of pointing node', function() {
+    it('getPointerNames/Path correct for instance of pointing node', function () {
         var testPath = '/1109909121/1717599495',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -98,7 +98,7 @@ describe('Core Mock', function() {
         assert.equal(core.getPointerPath(testNode, 'base'), '/1109909121/1157805101');
     });
 
-    it('getOwnPointerNames/Path correct for pointing node', function() {
+    it('getOwnPointerNames/Path correct for pointing node', function () {
         var testPath = '/1109909121/1157805101',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -107,7 +107,7 @@ describe('Core Mock', function() {
         //assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1008889918/1922772359');
     });
 
-    it('getOwnPointerNames/Path correct for copy of pointing node', function() {
+    it('getOwnPointerNames/Path correct for copy of pointing node', function () {
         var testPath = '/1109909121/2065146708',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -116,7 +116,7 @@ describe('Core Mock', function() {
         //assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1008889918/1922772359');
     });
 
-    it('getOwnPointerNames/Path correct for instance of pointing node', function() {
+    it('getOwnPointerNames/Path correct for instance of pointing node', function () {
         var testPath = '/1109909121/1717599495',
             testNode = core.mockGetNodeByPath(testPath);
 
@@ -125,7 +125,7 @@ describe('Core Mock', function() {
 //        assert.equal(core.getOwnPointerPath(testNode, 'base'), '/1109909121/1157805101');
     });
 
-    it('getCollectionNames/Paths correct of pointed node after copy and instantiation of pointing node', function() {
+    it('getCollectionNames/Paths correct of pointed node after copy and instantiation of pointing node', function () {
         var testPath = '/1109909121/1368819315',
             testNode = core.mockGetNodeByPath(testPath),
             cNames = core.getCollectionNames(testNode),
@@ -139,7 +139,7 @@ describe('Core Mock', function() {
         assert.equal(cPaths.indexOf('/1109909121/2065146708') > -1, true);
     });
 
-    it('loadCollection correct of pointed node after copy and instantiation of pointing node', function(done) {
+    it('loadCollection correct of pointed node after copy and instantiation of pointing node', function (done) {
         var testPath = '/1109909121/1368819315',
             testNode = core.mockGetNodeByPath(testPath),
             expectedIds = {
@@ -147,7 +147,7 @@ describe('Core Mock', function() {
                 '/1109909121/2065146708': 0
             };
 
-        core.loadCollection(testNode, 'TestPoint', function(err, pNodes) {
+        core.loadCollection(testNode, 'TestPoint', function (err, pNodes) {
             var i;
             assert.equal(err, null);
             for (i = 0; i < pNodes.length; i += 1) {
@@ -230,7 +230,7 @@ describe('Core Mock', function() {
     });
 
     /* ***** Creation of Nodes ****** */
-    it('name and names of children of copied node is same', function() {
+    it('name and names of children of copied node is same', function () {
         var testPath = '/146679802/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -257,7 +257,7 @@ describe('Core Mock', function() {
         }
     });
 
-    it('internal pointers point to nodes in copied node', function() {
+    it('internal pointers point to nodes in copied node', function () {
         var testPath = '/146679802/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -269,7 +269,7 @@ describe('Core Mock', function() {
             newNode = core.copyNode(testNode, parentNode);
 
         children = core.mockGetChildren(newNode);
-        for (i = 0; i < children.length; i+= 1) {
+        for (i = 0; i < children.length; i += 1) {
             childName = core.getAttribute(children[i], 'name');
             if (childName === 'Composition') {
                 assert.equal(core.hasPointer(children[i], 'dst'), true);
@@ -285,7 +285,7 @@ describe('Core Mock', function() {
         }
     });
 
-    it('name and names of children of base and instance is same', function() {
+    it('name and names of children of base and instance is same', function () {
         var testPath = '/785604039/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -300,19 +300,19 @@ describe('Core Mock', function() {
             newNode = core.createNode({ base: testNode, parent: parentNode });
         assert.equal(core.getAttribute(testNode, 'name'), core.getAttribute(newNode, 'name'));
         children = core.mockGetChildren(newNode);
-        for (i = 0; i < children.length; i+= 1) {
+        for (i = 0; i < children.length; i += 1) {
             childName = core.getAttribute(children[i], 'name');
             assert.equal(names.hasOwnProperty(childName), true);
             names[childName] += 1;
         }
-        for (i in names){
+        for (i in names) {
             if (names.hasOwnProperty(i)) {
                 assert.equal(names[i], 1);
             }
         }
     });
 
-    it('internal pointers point to nodes in base of instance', function() {
+    it('internal pointers point to nodes in base of instance', function () {
         var testPath = '/785604039/1487053016',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -324,7 +324,7 @@ describe('Core Mock', function() {
             newNode = core.createNode({ base: testNode, parent: parentNode });
 
         children = core.mockGetChildren(newNode);
-        for (i = 0; i < children.length; i+= 1) {
+        for (i = 0; i < children.length; i += 1) {
             childName = core.getAttribute(children[i], 'name');
             if (childName === 'Composition') {
                 assert.equal(core.hasPointer(children[i], 'dst'), true);
@@ -340,7 +340,7 @@ describe('Core Mock', function() {
         }
     });
 
-    it('external pointers point to original node after copy', function() {
+    it('external pointers point to original node after copy', function () {
         var testPath = '/1899800446/1603277152',
             testNode = core.mockGetNodeByPath(testPath),
             parentNode = core.getParent(testNode),
@@ -354,9 +354,26 @@ describe('Core Mock', function() {
         assert.equal(cPaths.length, 2);
 
         // Check that one and only one of the collection paths is within the new Node
-        assert.equal( XOR(
+        assert.equal(XOR(
             core.getParent(core.mockGetNodeByPath(cPaths[0])).id === newNode.id,
-            core.getParent(core.mockGetNodeByPath(cPaths[1])).id === newNode.id), true);
+            core.getParent(core.mockGetNodeByPath(cPaths[1])).id === newNode.id
+        ),
+            true);
     });
 
+    it('external pointers point to original node in instance', function () {
+        var testPath = '/505468570/1603277152',
+            testNode = core.mockGetNodeByPath(testPath),
+            parentNode = core.getParent(testNode),
+            pNode = core.mockGetNodeByPath('/505468570/1944646755'),
+            cPaths = core.getCollectionPaths(pNode, 'TestPoint'),
+            newNode;
+        assert.equal(cPaths.length, 1);
+        newNode = core.createNode({ base: testNode, parent: parentNode });
+
+        cPaths = core.getCollectionPaths(pNode, 'TestPoint');
+        assert.equal(cPaths.length, 1);
+        // The reverse pointer should not refer to the new instance.
+        assert.equal(core.getParent(core.mockGetNodeByPath(cPaths[0])).id === newNode.id, false);
+    });
 });

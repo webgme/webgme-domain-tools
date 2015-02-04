@@ -8,6 +8,7 @@
     "005cb34a-7523-4940-a1e9-0cb530ba1005": null,
     "0375e1c1-1217-7aa9-5e14-53c709a2abbe": "1675023230",
     "07d79d42-e631-fb69-a1f7-25b044d94fbb": "319211427",
+    "0821b185-5560-30f0-dfb5-9761555e59ec": "831766259",
     "0bced7fe-4c88-f3c1-f877-6a0d0f344c46": "711037118",
     "1043ee2d-be95-cbdd-bee0-abb7068f5510": "1450335589",
     "1b2720ba-040c-e5ac-bb4c-4bd502ee3353": "1008889918",
@@ -17,6 +18,7 @@
     "2bf32265-1786-1d5d-f1cc-3a7b8906a594": "2007266796",
     "2f787345-dd61-e8e4-b81d-0eec4ec2a9ab": "1717599495",
     "3317c9c6-6c44-1a06-a476-11f77d722b34": "1993805430",
+    "3c85a50c-059d-67ec-837e-ff9cce7b1f9a": "1944646755",
     "3ff263e2-9876-9a8f-63b1-08299255077b": "229906765",
     "418cb09d-88c3-1821-71a3-4a7d040cf151": "1944646755",
     "42c94a1d-329c-85c6-a822-482e4a4f250f": "607366216",
@@ -33,7 +35,9 @@
     "8b1e277e-0f88-a58b-4aff-51c74250671d": "398267330",
     "8c6ad0b0-09d6-4e46-1544-00972025712f": "2053279246",
     "9001f172-4258-ceaa-86e9-f6e80b85853d": "891929219",
+    "947e84ff-5098-655f-3ff5-6e7190b458d0": "1262800818",
     "97a00dee-7375-3637-ec08-b62588d4d71d": "1502717053",
+    "97b7a2b6-f564-a8c6-5b6d-e244eda2adee": "1603277152",
     "986fbd65-f0c5-1273-25b5-81bac7fd1608": "1684391184",
     "9a64640a-d8d6-9efa-cf2f-b622aaa6e5ae": "1010911100",
     "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": "953858631",
@@ -41,7 +45,9 @@
     "9fab1244-f449-d3c0-bfdc-f166f724e3f2": "1624079113",
     "a0399d5f-26ab-3fac-def4-3834f5decac9": "1826321976",
     "a1e4a35d-de60-0fec-ba6d-e2bd8897e16f": "756182296",
+    "a38d3c87-643f-1ff8-9afa-d77be51322a9": "1445725383",
     "a8727703-1c1a-fd09-673e-970b64f41691": "1879829870",
+    "a995a961-f985-42e4-5ec3-2f8a95fffb5d": "505468570",
     "ab281360-2719-c4e0-c3c6-4eea03401141": "1220837843",
     "b0eae8ec-317e-f376-a131-47b432458ec4": "2065146708",
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": "785604039",
@@ -58,6 +64,7 @@
     "dd35b139-3346-08f0-013c-1e3a8a522f7f": "794302266",
     "de842916-e961-6035-6827-629a2f64cc62": "1445725383",
     "df1e15d1-7967-971c-2775-9077c917bafe": "1109909121",
+    "df293147-9b20-b4dd-fdfd-9a4a42db3d00": "399668331",
     "dfb51263-aae3-ba23-6be8-6ece3c24e489": "1406577295",
     "dfe3df16-dfc2-d4b5-09f8-ca4758ae1454": "206008088",
     "e544f3e4-e550-5750-8540-5598bbbf343c": "1368062975",
@@ -115,6 +122,14 @@
       }
     },
     "672da653-2737-4b37-cbc6-34febf0f9c75": {},
+    "a995a961-f985-42e4-5ec3-2f8a95fffb5d": {
+      "3c85a50c-059d-67ec-837e-ff9cce7b1f9a": {},
+      "97b7a2b6-f564-a8c6-5b6d-e244eda2adee": {
+        "0821b185-5560-30f0-dfb5-9761555e59ec": {},
+        "947e84ff-5098-655f-3ff5-6e7190b458d0": {},
+        "a38d3c87-643f-1ff8-9afa-d77be51322a9": {}
+      }
+    },
     "b56e7fd0-7f90-921b-fc9f-6c6a9734e9d5": {
       "cd2f7bbc-d609-389a-e1db-9b411e86ea2a": {
         "9f55c248-96e0-7bb9-bd00-615257bfe9ef": {},
@@ -130,7 +145,8 @@
       "59e88b67-7c18-d3f6-accf-1e8879b7e7da": {},
       "8227f6be-0bbf-cf76-bbcd-ecdd7faf26f3": {},
       "986fbd65-f0c5-1273-25b5-81bac7fd1608": {},
-      "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": {}
+      "9e5cc24f-b516-ed83-8620-f4596a1ecb7f": {},
+      "df293147-9b20-b4dd-fdfd-9a4a42db3d00": {}
     },
     "bb80cd14-74db-3d29-ac1e-9a6b5f881596": {
       "418cb09d-88c3-1821-71a3-4a7d040cf151": {},
@@ -1187,6 +1203,55 @@
       },
       "sets": {}
     },
+    "0821b185-5560-30f0-dfb5-9761555e59ec": {
+      "attributes": {
+        "name": "TestPointsOutside"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "97b7a2b6-f564-a8c6-5b6d-e244eda2adee",
+      "pointers": {
+        "TestPoint": "3c85a50c-059d-67ec-837e-ff9cce7b1f9a",
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 112,
+          "y": 220
+        }
+      },
+      "sets": {}
+    },
     "0bced7fe-4c88-f3c1-f877-6a0d0f344c46": {
       "attributes": {
         "INFO": "Simple mathematical operations.",
@@ -1715,6 +1780,47 @@
         "position": {
           "x": 168,
           "y": 354
+        }
+      },
+      "sets": {}
+    },
+    "3c85a50c-059d-67ec-837e-ff9cce7b1f9a": {
+      "attributes": {
+        "name": "PointedTo"
+      },
+      "base": "3317c9c6-6c44-1a06-a476-11f77d722b34",
+      "meta": {
+        "attributes": {
+          "Type": {
+            "default": "Compound",
+            "enum": [
+              "Compound",
+              "Alternative",
+              "Optional"
+            ],
+            "type": "string"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "a995a961-f985-42e4-5ec3-2f8a95fffb5d",
+      "pointers": {
+        "base": "3317c9c6-6c44-1a06-a476-11f77d722b34"
+      },
+      "registry": {
+        "position": {
+          "x": 96,
+          "y": 256
         }
       },
       "sets": {}
@@ -2449,6 +2555,55 @@
       },
       "sets": {}
     },
+    "947e84ff-5098-655f-3ff5-6e7190b458d0": {
+      "attributes": {
+        "name": "TestPointsInside"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "97b7a2b6-f564-a8c6-5b6d-e244eda2adee",
+      "pointers": {
+        "TestPoint": "a38d3c87-643f-1ff8-9afa-d77be51322a9",
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 112,
+          "y": 93
+        }
+      },
+      "sets": {}
+    },
     "97a00dee-7375-3637-ec08-b62588d4d71d": {
       "attributes": {
         "name": "AssemblyRoot"
@@ -2496,6 +2651,54 @@
       "sets": {
         "Selection": []
       }
+    },
+    "97b7a2b6-f564-a8c6-5b6d-e244eda2adee": {
+      "attributes": {
+        "name": "Test"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "a995a961-f985-42e4-5ec3-2f8a95fffb5d",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 96,
+          "y": 122
+        }
+      },
+      "sets": {}
     },
     "986fbd65-f0c5-1273-25b5-81bac7fd1608": {
       "attributes": {
@@ -2923,6 +3126,54 @@
       },
       "sets": {}
     },
+    "a38d3c87-643f-1ff8-9afa-d77be51322a9": {
+      "attributes": {
+        "name": "TestNoPointer"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "97b7a2b6-f564-a8c6-5b6d-e244eda2adee",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 102,
+          "y": 338
+        }
+      },
+      "sets": {}
+    },
     "a8727703-1c1a-fd09-673e-970b64f41691": {
       "attributes": {
         "name": "Composition"
@@ -2953,6 +3204,54 @@
         "position": {
           "x": 100,
           "y": 100
+        }
+      },
+      "sets": {}
+    },
+    "a995a961-f985-42e4-5ec3-2f8a95fffb5d": {
+      "attributes": {
+        "name": "TestInstanceOutsidePointers"
+      },
+      "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961",
+      "meta": {
+        "attributes": {
+          "artifacts": {
+            "default": "",
+            "type": "asset"
+          },
+          "isTest": {
+            "default": false,
+            "type": "boolean"
+          },
+          "plugins": {
+            "default": "",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "type": "boolean"
+          },
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "005cb34a-7523-4940-a1e9-0cb530ba1005",
+      "pointers": {
+        "base": "e87743ed-b89e-d8ce-7b87-7b9aadcb4961"
+      },
+      "registry": {
+        "position": {
+          "x": 736,
+          "y": 393
         }
       },
       "sets": {}
@@ -3780,6 +4079,40 @@
         }
       },
       "sets": {}
+    },
+    "df293147-9b20-b4dd-fdfd-9a4a42db3d00": {
+      "attributes": {
+        "name": "EmptySet"
+      },
+      "base": "97a00dee-7375-3637-ec08-b62588d4d71d",
+      "meta": {
+        "attributes": {
+          "INFO": {
+            "default": "",
+            "type": "string"
+          },
+          "ReadMe": {
+            "default": "",
+            "type": "asset"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "bb587071-260d-2547-db83-8c073cdbf306",
+      "pointers": {
+        "base": "97a00dee-7375-3637-ec08-b62588d4d71d"
+      },
+      "registry": {
+        "position": {
+          "x": 309,
+          "y": 512
+        }
+      },
+      "sets": {
+        "Selection": []
+      }
     },
     "dfb51263-aae3-ba23-6be8-6ece3c24e489": {
       "attributes": {
