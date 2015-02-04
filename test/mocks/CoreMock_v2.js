@@ -11,7 +11,7 @@ define([], function () {
 
     /**
      *
-     * @param {Object} model - output from flatten_project.py
+     * @param {Object} model - output from project export
      * @param {Object} opts - options for the instance.
      * @param {number[]} opts.timeouts - Array of timeout durations for calls, see wrapInAsynch for more info.
      * @returns {Object} - Mock of the core in webgme.
@@ -19,12 +19,76 @@ define([], function () {
      */
     var CoreMock = function (model, opts) {
 
-        var tree = model.tree,
-            nodes = model.nodes,
+        var tree,
+            nodes,
             timeoutTimes = opts.timeouts || [10],
             mod = timeoutTimes.length,
             relid = 2,
             asynchCount = 0;
+
+        model = flattenProject(model);
+        tree = model.tree;
+        nodes = model.nodes;
+        /**
+         * Takes a project dump and flattens out the reverse pointers and builds tree using paths.
+         * @param {Object} model - Object
+         * @returns {Object}
+         */
+        function flattenProject(model) {
+            var nodes = model.nodes,
+                rootGuid,
+                rootId,
+                traverse,
+                treeRoot,
+                flatModel = { nodes: model.nodes, tree: {}},
+                addCollections;
+
+            rootGuid = model.root.guid;
+            rootId = model.root.path;
+            treeRoot = { guid: rootGuid };
+            nodes[rootGuid].id = rootId;
+            flatModel.tree[rootId] = treeRoot;
+
+            traverse = function (oldRoot, newRoot, path) {
+                var guid,
+                    node,
+                    relId,
+                    childPath,
+                    treeNode;
+                for (guid in oldRoot) {
+                    if (oldRoot.hasOwnProperty(guid)) {
+                        node = nodes[guid];
+                        relId = model.relids[guid];
+                        childPath = path + '/' + relId;
+
+                        node.id = childPath;
+                        addCollections(guid, node);
+
+                        treeNode = { guid: guid };
+                        newRoot[relId] = treeNode;
+                        traverse(oldRoot[guid], treeNode, childPath);
+                    }
+                }
+            };
+
+            addCollections = function (guid, node) {
+                var pointerName,
+                    pointedTo;
+                for (pointerName in node.pointers) {
+                    if (node.pointers.hasOwnProperty(pointerName)) {
+                        pointedTo = node.pointers[pointerName];
+                        if (pointerName !== 'base' && pointedTo) {
+                            nodes[pointedTo].collection = nodes[pointedTo].collection || {};
+                            nodes[pointedTo].collection[pointerName] = nodes[pointedTo].collection[pointerName] || [];
+                            nodes[pointedTo].collection[pointerName].push(guid);
+                        }
+                    }
+                }
+            };
+            traverse(model.containment, treeRoot, rootId);
+
+            return flatModel;
+        }
 
         /**** Internal helper functions ****/
         function getTreeNode(path) {

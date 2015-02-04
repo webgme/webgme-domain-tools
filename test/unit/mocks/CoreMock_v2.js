@@ -20,7 +20,7 @@ describe('Core Mock', function() {
     before(function (done) {
         requirejs(['mocks/CoreMock_v2'],
             function (CoreMock) {
-                var model = JSON.parse(fs.readFileSync('test/unit/mocks/flat_test.json', 'utf8'));
+                var model = JSON.parse(fs.readFileSync('test/unit/mocks/test.json', 'utf8'));
                 core = new CoreMock(model, { timeouts: [1] });
                 done();
             });
