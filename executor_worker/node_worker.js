@@ -26,16 +26,24 @@ if (typeof define !== 'undefined') {
 
             console.log("Connecting to " + webGMEUrl);
 
+            var connected = false;
+            var printStatus = function (err) {
+                if (!err) {
+                    if (connected === false) {
+                        console.log("Connected to " + webGMEUrl);
+                        connected = true;
+                    }
+                } else {
+                    console.log("Error connecting to " + webGMEUrl + " " + err);
+                    connected = false;
+                }
+            };
             var callback;
             worker.queryWorkerAPI(function (err, response) {
-                if (!err) {
-                    console.log("Connected to " + webGMEUrl);
-                }
+                printStatus(err);
                 var refreshPeriod = 60 * 1000;
                 callback = callback || function (err, response) {
-                    if (err) {
-                        console.log("Error connecting to " + webGMEUrl + " " + err);
-                    } else {}
+                    printStatus(err);
                     if (response && response.refreshPeriod) {
                         refreshPeriod = response.refreshPeriod;
                     }
