@@ -30,7 +30,7 @@ define(['./NodeMock'], function (NodeMock) {
         var newNode = node.clone(this, parentNode, this._nodes);
 
         return newNode;
-    }
+    };
 
     CoreMock.prototype.addChild = function (node, child) {
         node.children.push(this.getPath(child));
@@ -78,7 +78,7 @@ define(['./NodeMock'], function (NodeMock) {
 
     CoreMock.prototype.getRegistryNames = function getRegistryNames(node) {
         return Object.keys(node.registry);
-    }
+    };
 
     CoreMock.prototype.getOwnRegistryNames = CoreMock.prototype.getRegistryNames;
 

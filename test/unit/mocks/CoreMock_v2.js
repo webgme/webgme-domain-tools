@@ -3,10 +3,15 @@
  * Created by pmeijer on 1/12/2015.
  */
 
-var chai = require('chai'),
-    fs = require('fs'),
-    requirejs = require('requirejs'),
-    assert = chai.assert;
+ if (typeof window === 'undefined') {
+
+    // server-side setup
+    var requirejs = require("../../../test-conf.js").requirejs,
+        chai = require('chai'),
+        fs = require('fs'),
+        assert = chai.assert;
+}
+
 
 function XOR(a, b) {
     'use strict';
