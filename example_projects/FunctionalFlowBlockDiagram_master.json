@@ -1,0 +1,2968 @@
+{
+  "bases": {},
+  "root": {
+    "path": "",
+    "guid": "0a761b4d-a441-2aa4-78b9-14b521931869"
+  },
+  "relids": {
+    "0312f058-cce3-55bd-51fb-732a1fc7de9a": "-197",
+    "03f1ac14-0a09-a643-64bf-19e7b63c49cd": "-188",
+    "05447961-f381-ba47-6931-42d3de268c20": "-193",
+    "0a761b4d-a441-2aa4-78b9-14b521931869": null,
+    "0bbef8e5-cf9f-bae3-25af-51fba17c54b6": "-153",
+    "0f69181e-0567-df76-71b0-1db405881487": "-161",
+    "218100a6-19a6-fdca-4127-52032b8b3561": "-183",
+    "22d8ac7d-8276-5be4-988a-bdc3f3faade0": "-185",
+    "28c73294-0d4f-cc80-520e-bccc256bd9a7": "-133",
+    "2ffdd4e3-7555-dfe1-1f11-c10afdea5bf7": "-171",
+    "3075b103-6aa9-2eb8-803b-80642f830e5f": "-198",
+    "30fc98c0-2a3f-6fee-ddbe-7599b46e987f": "-166",
+    "323f12f1-273f-98de-8c27-d21c6e7959c6": "-143",
+    "32f364bb-c9cb-d7a1-565c-aa39d4d8dfcc": "-180",
+    "361d68ad-6718-4de9-3cbf-60a7209fa836": "-191",
+    "393eecfc-6b1c-144e-5f95-c15e228221a3": "-156",
+    "3bc776ea-4c9a-3273-2ff3-9e242da41d19": "-177",
+    "3ca579e0-2103-8af7-8e1c-d84b9a4b05e9": "-184",
+    "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb": "-131",
+    "41c92448-bc92-6fc3-2ced-ce21b7e8a2de": "-189",
+    "4417bbcf-83b5-f8d2-f07a-5c16a8298c85": "-196",
+    "454fec06-ffb2-6909-a044-6ec58e801d62": "-199",
+    "45ca4331-80f2-7a97-a96a-ce49efec11a7": "-181",
+    "4ad9f84c-f007-ebf9-6c84-6297af6990ad": "-132",
+    "4ff2d0ce-8873-a05b-99da-5c78bf743ee5": "-136",
+    "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6": "-154",
+    "5a029917-c912-e610-855f-018ddccca797": "-190",
+    "5a334a94-5da3-60df-c700-c20552b97faf": "-157",
+    "5cc81a00-45e1-de0b-e210-7877bd24dd2b": "-7",
+    "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3": "-163",
+    "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66": "-144",
+    "5fd5e7c0-51b4-d625-bdcd-047a2e642d75": "-175",
+    "61a6876a-583d-e6a6-4a9a-b976179b289e": "-134",
+    "64d98f14-9566-93b8-1b9d-06ff91318dc2": "-182",
+    "6845e37b-dde8-8145-17ba-70271c900585": "-174",
+    "6a6affed-0c74-ae69-e21f-6fffbc9a960d": "-178",
+    "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5": "-152",
+    "779607e5-d382-0965-1ace-88642d130251": "-165",
+    "80e82481-6699-e39f-37f1-ddbadd69bd4f": "-192",
+    "8cf772ac-200a-f7ec-65fb-b77a9e718437": "-135",
+    "96c32b59-2072-30fe-8e62-ea808cabda95": "-172",
+    "994201f3-eed9-72db-c7aa-e61096d5dc59": "-145",
+    "9b606cde-4e78-9a71-838d-a4ade7b69030": "-150",
+    "a5fc0402-2b9d-b962-9f14-9e4caf7eed85": "-167",
+    "a73e880d-bb8e-664c-f4f4-b5495abd5417": "-151",
+    "aad5298e-9484-ded9-79df-e0f13ec7f7ec": "-162",
+    "ace2c080-fe93-8cae-2164-6c9b81f78191": "-173",
+    "b0f857d9-2b1e-d8e1-e047-999d6c303f33": "-160",
+    "b6c20350-8006-ad32-21a4-47c0aa607b00": "-194",
+    "bacf4983-f452-a593-8188-3354e91ef4ad": "-170",
+    "c27d4452-f6fb-d2b5-353c-c9485599ca6f": "-129",
+    "ccf9392b-3ebe-e755-327b-dd80df448775": "-137",
+    "d22a23f2-846c-6393-8e7f-d9107630df2f": "-164",
+    "d4daf568-969c-1989-7cae-58e8df01b419": "-168",
+    "d64324d7-5506-d569-0c1f-6096677539e3": "-195",
+    "da4804a6-f0b4-4fa9-292e-78d23073090b": "-176",
+    "dddea9e2-505e-74fc-ea36-787a36281e26": "-186",
+    "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f": "-158",
+    "e26c1333-9233-ebfd-daf2-bf5e69b11e98": "-169",
+    "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d": "-155",
+    "eda2f598-fffd-78cf-a80d-d7c644c19678": "-187",
+    "f4726335-f742-5fd9-e48f-7a377db9b07e": "-200",
+    "f806942e-4ea2-a8df-6b6b-1a189736f69d": "-159",
+    "ff118b52-1c34-1edb-75da-5774a10d4b28": "-141"
+  },
+  "containment": {
+    "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb": {
+      "0bbef8e5-cf9f-bae3-25af-51fba17c54b6": {},
+      "28c73294-0d4f-cc80-520e-bccc256bd9a7": {},
+      "323f12f1-273f-98de-8c27-d21c6e7959c6": {},
+      "393eecfc-6b1c-144e-5f95-c15e228221a3": {},
+      "4ad9f84c-f007-ebf9-6c84-6297af6990ad": {},
+      "4ff2d0ce-8873-a05b-99da-5c78bf743ee5": {},
+      "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6": {},
+      "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66": {},
+      "61a6876a-583d-e6a6-4a9a-b976179b289e": {},
+      "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5": {},
+      "8cf772ac-200a-f7ec-65fb-b77a9e718437": {},
+      "994201f3-eed9-72db-c7aa-e61096d5dc59": {},
+      "9b606cde-4e78-9a71-838d-a4ade7b69030": {},
+      "a73e880d-bb8e-664c-f4f4-b5495abd5417": {},
+      "ccf9392b-3ebe-e755-327b-dd80df448775": {},
+      "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d": {},
+      "ff118b52-1c34-1edb-75da-5774a10d4b28": {}
+    },
+    "5a334a94-5da3-60df-c700-c20552b97faf": {
+      "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f": {
+        "0312f058-cce3-55bd-51fb-732a1fc7de9a": {},
+        "03f1ac14-0a09-a643-64bf-19e7b63c49cd": {},
+        "05447961-f381-ba47-6931-42d3de268c20": {},
+        "0f69181e-0567-df76-71b0-1db405881487": {},
+        "218100a6-19a6-fdca-4127-52032b8b3561": {},
+        "22d8ac7d-8276-5be4-988a-bdc3f3faade0": {},
+        "2ffdd4e3-7555-dfe1-1f11-c10afdea5bf7": {},
+        "3075b103-6aa9-2eb8-803b-80642f830e5f": {},
+        "30fc98c0-2a3f-6fee-ddbe-7599b46e987f": {},
+        "32f364bb-c9cb-d7a1-565c-aa39d4d8dfcc": {},
+        "361d68ad-6718-4de9-3cbf-60a7209fa836": {},
+        "3bc776ea-4c9a-3273-2ff3-9e242da41d19": {},
+        "3ca579e0-2103-8af7-8e1c-d84b9a4b05e9": {},
+        "41c92448-bc92-6fc3-2ced-ce21b7e8a2de": {},
+        "4417bbcf-83b5-f8d2-f07a-5c16a8298c85": {},
+        "454fec06-ffb2-6909-a044-6ec58e801d62": {},
+        "45ca4331-80f2-7a97-a96a-ce49efec11a7": {},
+        "5a029917-c912-e610-855f-018ddccca797": {},
+        "5cc81a00-45e1-de0b-e210-7877bd24dd2b": {},
+        "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3": {},
+        "5fd5e7c0-51b4-d625-bdcd-047a2e642d75": {},
+        "64d98f14-9566-93b8-1b9d-06ff91318dc2": {},
+        "6845e37b-dde8-8145-17ba-70271c900585": {},
+        "6a6affed-0c74-ae69-e21f-6fffbc9a960d": {},
+        "779607e5-d382-0965-1ace-88642d130251": {},
+        "80e82481-6699-e39f-37f1-ddbadd69bd4f": {},
+        "96c32b59-2072-30fe-8e62-ea808cabda95": {},
+        "a5fc0402-2b9d-b962-9f14-9e4caf7eed85": {},
+        "aad5298e-9484-ded9-79df-e0f13ec7f7ec": {},
+        "ace2c080-fe93-8cae-2164-6c9b81f78191": {},
+        "b0f857d9-2b1e-d8e1-e047-999d6c303f33": {},
+        "b6c20350-8006-ad32-21a4-47c0aa607b00": {},
+        "bacf4983-f452-a593-8188-3354e91ef4ad": {},
+        "d22a23f2-846c-6393-8e7f-d9107630df2f": {},
+        "d4daf568-969c-1989-7cae-58e8df01b419": {},
+        "d64324d7-5506-d569-0c1f-6096677539e3": {},
+        "da4804a6-f0b4-4fa9-292e-78d23073090b": {},
+        "dddea9e2-505e-74fc-ea36-787a36281e26": {},
+        "e26c1333-9233-ebfd-daf2-bf5e69b11e98": {},
+        "eda2f598-fffd-78cf-a80d-d7c644c19678": {},
+        "f4726335-f742-5fd9-e48f-7a377db9b07e": {},
+        "f806942e-4ea2-a8df-6b6b-1a189736f69d": {}
+      }
+    },
+    "c27d4452-f6fb-d2b5-353c-c9485599ca6f": {}
+  },
+  "nodes": {
+    "0312f058-cce3-55bd-51fb-732a1fc7de9a": {
+      "attributes": {},
+      "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+        "dst": "96c32b59-2072-30fe-8e62-ea808cabda95",
+        "src": "ace2c080-fe93-8cae-2164-6c9b81f78191"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 1119,
+          "y": 328
+        }
+      },
+      "sets": {}
+    },
+    "03f1ac14-0a09-a643-64bf-19e7b63c49cd": {
+      "attributes": {},
+      "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+        "dst": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f",
+        "src": "a5fc0402-2b9d-b962-9f14-9e4caf7eed85"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "05447961-f381-ba47-6931-42d3de268c20": {
+      "attributes": {},
+      "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+        "dst": "2ffdd4e3-7555-dfe1-1f11-c10afdea5bf7",
+        "src": "bacf4983-f452-a593-8188-3354e91ef4ad"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 1144,
+          "y": 326
+        }
+      },
+      "sets": {}
+    },
+    "0a761b4d-a441-2aa4-78b9-14b521931869": {
+      "attributes": {
+        "name": "ROOT"
+      },
+      "base": null,
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "minItems": [
+            -1
+          ],
+          "maxItems": [
+            -1
+          ],
+          "items": [
+            "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+          ],
+          "min": "undefined",
+          "max": "undefined"
+        }
+      },
+      "parent": null,
+      "pointers": {
+        "base": null
+      },
+      "registry": {
+        "MetaSheets": [
+          {
+            "SetID": "MetaAspectSet_ac2431f7-5837-c954-825c-0067e28deb28",
+            "order": 0,
+            "title": "All"
+          },
+          {
+            "SetID": "MetaAspectSet_2bedaf96-4305-0668-10b6-e29712ba295f",
+            "order": 1,
+            "title": "Elements"
+          },
+          {
+            "SetID": "MetaAspectSet_5a807fe1-cc83-a78b-b604-c23cfd0ad593",
+            "order": 2,
+            "title": "Connections"
+          }
+        ],
+        "ProjectRegistry": {
+          "FCO_ID": "/-129"
+        }
+      },
+      "sets": {
+        "MetaAspectSet": [
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 839
+              }
+            },
+            "guid": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 341,
+                "y": 268
+              }
+            },
+            "guid": "28c73294-0d4f-cc80-520e-bccc256bd9a7",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 619
+              }
+            },
+            "guid": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 441,
+                "y": 1256
+              }
+            },
+            "guid": "393eecfc-6b1c-144e-5f95-c15e228221a3",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 525,
+                "y": 45
+              }
+            },
+            "guid": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 353,
+                "y": 160
+              }
+            },
+            "guid": "4ad9f84c-f007-ebf9-6c84-6297af6990ad",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 596,
+                "y": 499
+              }
+            },
+            "guid": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 454,
+                "y": 947
+              }
+            },
+            "guid": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 859
+              }
+            },
+            "guid": "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 164,
+                "y": 501
+              }
+            },
+            "guid": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 444,
+                "y": 1149
+              }
+            },
+            "guid": "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 333,
+                "y": 497
+              }
+            },
+            "guid": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 619
+              }
+            },
+            "guid": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 729
+              }
+            },
+            "guid": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 444,
+                "y": 1049
+              }
+            },
+            "guid": "a73e880d-bb8e-664c-f4f4-b5495abd5417",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 355,
+                "y": 35
+              }
+            },
+            "guid": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 499
+              }
+            },
+            "guid": "ccf9392b-3ebe-e755-327b-dd80df448775",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 436,
+                "y": 1369
+              }
+            },
+            "guid": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+            "registry": {}
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 739
+              }
+            },
+            "guid": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+            "registry": {}
+          }
+        ],
+        "MetaAspectSet_2bedaf96-4305-0668-10b6-e29712ba295f": [
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 406,
+                "y": 262
+              }
+            },
+            "guid": "28c73294-0d4f-cc80-520e-bccc256bd9a7",
+            "registry": {
+              "position": {
+                "x": 671,
+                "y": 217
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 216,
+                "y": 656
+              }
+            },
+            "guid": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+            "registry": {
+              "position": {
+                "x": 691,
+                "y": 533
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 409,
+                "y": 133
+              }
+            },
+            "guid": "4ad9f84c-f007-ebf9-6c84-6297af6990ad",
+            "registry": {
+              "position": {
+                "x": 671,
+                "y": 117
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 319,
+                "y": 488
+              }
+            },
+            "guid": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+            "registry": {
+              "position": {
+                "x": 672,
+                "y": 418
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 316,
+                "y": 656
+              }
+            },
+            "guid": "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66",
+            "registry": {
+              "position": {
+                "x": 791,
+                "y": 533
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 444,
+                "y": 490
+              }
+            },
+            "guid": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+            "registry": {
+              "position": {
+                "x": 406,
+                "y": 419
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 581,
+                "y": 490
+              }
+            },
+            "guid": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+            "registry": {
+              "position": {
+                "x": 552,
+                "y": 421
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 689,
+                "y": 490
+              }
+            },
+            "guid": "ccf9392b-3ebe-e755-327b-dd80df448775",
+            "registry": {
+              "position": {
+                "x": 795,
+                "y": 421
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 416,
+                "y": 656
+              }
+            },
+            "guid": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+            "registry": {
+              "position": {
+                "x": 591,
+                "y": 533
+              }
+            }
+          }
+        ],
+        "MetaAspectSet_5a807fe1-cc83-a78b-b604-c23cfd0ad593": [
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 591
+              }
+            },
+            "guid": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+            "registry": {
+              "position": {
+                "x": 531,
+                "y": 307
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 691
+              }
+            },
+            "guid": "393eecfc-6b1c-144e-5f95-c15e228221a3",
+            "registry": {
+              "position": {
+                "x": 310,
+                "y": 309
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 914,
+                "y": 739
+              }
+            },
+            "guid": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+            "registry": {
+              "position": {
+                "x": 482,
+                "y": 581
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 791
+              }
+            },
+            "guid": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+            "registry": {
+              "position": {
+                "x": 965,
+                "y": 310
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 339,
+                "y": 466
+              }
+            },
+            "guid": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+            "registry": {
+              "position": {
+                "x": 734,
+                "y": 571
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 291
+              }
+            },
+            "guid": "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5",
+            "registry": {
+              "position": {
+                "x": 808,
+                "y": 310
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 912,
+                "y": 471
+              }
+            },
+            "guid": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+            "registry": {
+              "position": {
+                "x": 614,
+                "y": 571
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 391
+              }
+            },
+            "guid": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+            "registry": {
+              "position": {
+                "x": 664,
+                "y": 312
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 630,
+                "y": 894
+              }
+            },
+            "guid": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+            "registry": {
+              "position": {
+                "x": 191,
+                "y": 307
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 491
+              }
+            },
+            "guid": "a73e880d-bb8e-664c-f4f4-b5495abd5417",
+            "registry": {
+              "position": {
+                "x": 1091,
+                "y": 311
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 51
+              }
+            },
+            "guid": "ccf9392b-3ebe-e755-327b-dd80df448775",
+            "registry": {
+              "position": {
+                "x": 527,
+                "y": 170
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 632,
+                "y": 191
+              }
+            },
+            "guid": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+            "registry": {
+              "position": {
+                "x": 425,
+                "y": 312
+              }
+            }
+          }
+        ],
+        "MetaAspectSet_ac2431f7-5837-c954-825c-0067e28deb28": [
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 839
+              }
+            },
+            "guid": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+            "registry": {
+              "position": {
+                "x": 1162,
+                "y": 569
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 341,
+                "y": 268
+              }
+            },
+            "guid": "28c73294-0d4f-cc80-520e-bccc256bd9a7",
+            "registry": {
+              "position": {
+                "x": 594,
+                "y": 285
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 619
+              }
+            },
+            "guid": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+            "registry": {
+              "position": {
+                "x": 666,
+                "y": 567
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 441,
+                "y": 1256
+              }
+            },
+            "guid": "393eecfc-6b1c-144e-5f95-c15e228221a3",
+            "registry": {
+              "position": {
+                "x": 1157,
+                "y": 728
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 525,
+                "y": 45
+              }
+            },
+            "guid": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+            "registry": {
+              "position": {
+                "x": 815,
+                "y": 104
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 353,
+                "y": 160
+              }
+            },
+            "guid": "4ad9f84c-f007-ebf9-6c84-6297af6990ad",
+            "registry": {
+              "position": {
+                "x": 593,
+                "y": 195
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 596,
+                "y": 499
+              }
+            },
+            "guid": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+            "registry": {
+              "position": {
+                "x": 783,
+                "y": 454
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 454,
+                "y": 947
+              }
+            },
+            "guid": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+            "registry": {
+              "position": {
+                "x": 1000,
+                "y": 808
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 859
+              }
+            },
+            "guid": "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66",
+            "registry": {
+              "position": {
+                "x": 867,
+                "y": 572
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 164,
+                "y": 501
+              }
+            },
+            "guid": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+            "registry": {
+              "position": {
+                "x": 392,
+                "y": 455
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 444,
+                "y": 1149
+              }
+            },
+            "guid": "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5",
+            "registry": {
+              "position": {
+                "x": 1000,
+                "y": 570
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 333,
+                "y": 497
+              }
+            },
+            "guid": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+            "registry": {
+              "position": {
+                "x": 607,
+                "y": 448
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 619
+              }
+            },
+            "guid": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+            "registry": {
+              "position": {
+                "x": 1000,
+                "y": 730
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 729
+              }
+            },
+            "guid": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+            "registry": {
+              "position": {
+                "x": 1159,
+                "y": 650
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 444,
+                "y": 1049
+              }
+            },
+            "guid": "a73e880d-bb8e-664c-f4f4-b5495abd5417",
+            "registry": {
+              "position": {
+                "x": 1000,
+                "y": 650
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 355,
+                "y": 35
+              }
+            },
+            "guid": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+            "registry": {
+              "position": {
+                "x": 605,
+                "y": 90
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 446,
+                "y": 499
+              }
+            },
+            "guid": "ccf9392b-3ebe-e755-327b-dd80df448775",
+            "registry": {
+              "position": {
+                "x": 1058,
+                "y": 453
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 436,
+                "y": 1369
+              }
+            },
+            "guid": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+            "registry": {
+              "position": {
+                "x": 1158,
+                "y": 807
+              }
+            }
+          },
+          {
+            "attributes": {
+              "MetaAspectPosition": {
+                "x": 606,
+                "y": 739
+              }
+            },
+            "guid": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+            "registry": {
+              "position": {
+                "x": 769,
+                "y": 568
+              }
+            }
+          }
+        ]
+      }
+    },
+    "0bbef8e5-cf9f-bae3-25af-51fba17c54b6": {
+      "attributes": {
+        "name": "Function2Logic"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 799,
+          "y": 665
+        }
+      },
+      "sets": {}
+    },
+    "0f69181e-0567-df76-71b0-1db405881487": {
+      "attributes": {
+        "name": "and"
+      },
+      "base": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "ff118b52-1c34-1edb-75da-5774a10d4b28"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 272,
+          "y": 310
+        }
+      },
+      "sets": {}
+    },
+    "218100a6-19a6-fdca-4127-52032b8b3561": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "779607e5-d382-0965-1ace-88642d130251",
+        "src": "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "22d8ac7d-8276-5be4-988a-bdc3f3faade0": {
+      "attributes": {},
+      "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+        "dst": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f",
+        "src": "779607e5-d382-0965-1ace-88642d130251"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "28c73294-0d4f-cc80-520e-bccc256bd9a7": {
+      "attributes": {
+        "Creation": "",
+        "Date": "",
+        "FunctionName": "",
+        "Number": null,
+        "name": "FFBDiagram"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "Creation": {
+            "default": "",
+            "type": "string"
+          },
+          "Date": {
+            "default": "",
+            "type": "string"
+          },
+          "FunctionName": {
+            "default": "",
+            "type": "string"
+          },
+          "Number": {
+            "default": null,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "items": [
+            "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+            "61a6876a-583d-e6a6-4a9a-b976179b289e",
+            "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+            "ccf9392b-3ebe-e755-327b-dd80df448775"
+          ],
+          "minItems": [
+            -1,
+            -1,
+            -1,
+            -1
+          ],
+          "maxItems": [
+            -1,
+            -1,
+            -1,
+            -1
+          ],
+          "min": "undefined",
+          "max": "undefined"
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "position": {
+          "x": 530,
+          "y": 193
+        }
+      },
+      "sets": {}
+    },
+    "2ffdd4e3-7555-dfe1-1f11-c10afdea5bf7": {
+      "attributes": {
+        "IconColor": "#FFFFFF",
+        "name": "Function"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 681,
+          "y": 377
+        }
+      },
+      "sets": {}
+    },
+    "3075b103-6aa9-2eb8-803b-80642f830e5f": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "96c32b59-2072-30fe-8e62-ea808cabda95",
+        "src": "bacf4983-f452-a593-8188-3354e91ef4ad"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 1144,
+          "y": 326
+        }
+      },
+      "sets": {}
+    },
+    "30fc98c0-2a3f-6fee-ddbe-7599b46e987f": {
+      "attributes": {
+        "name": "9.2.3"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 510,
+          "y": 382
+        }
+      },
+      "sets": {}
+    },
+    "323f12f1-273f-98de-8c27-d21c6e7959c6": {
+      "attributes": {
+        "name": "OR"
+      },
+      "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+      },
+      "registry": {
+        "isAbstract": false,
+        "position": {
+          "x": 661,
+          "y": 452
+        }
+      },
+      "sets": {}
+    },
+    "32f364bb-c9cb-d7a1-565c-aa39d4d8dfcc": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3",
+        "src": "aad5298e-9484-ded9-79df-e0f13ec7f7ec"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "361d68ad-6718-4de9-3cbf-60a7209fa836": {
+      "attributes": {},
+      "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+        "dst": "d4daf568-969c-1989-7cae-58e8df01b419",
+        "src": "e26c1333-9233-ebfd-daf2-bf5e69b11e98"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 517,
+          "y": 330
+        }
+      },
+      "sets": {}
+    },
+    "393eecfc-6b1c-144e-5f95-c15e228221a3": {
+      "attributes": {
+        "name": "Logic2Ref"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 800,
+          "y": 873
+        }
+      },
+      "sets": {}
+    },
+    "3bc776ea-4c9a-3273-2ff3-9e242da41d19": {
+      "attributes": {},
+      "base": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+        "dst": "0f69181e-0567-df76-71b0-1db405881487",
+        "src": "f806942e-4ea2-a8df-6b6b-1a189736f69d"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "3ca579e0-2103-8af7-8e1c-d84b9a4b05e9": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "d4daf568-969c-1989-7cae-58e8df01b419",
+        "src": "779607e5-d382-0965-1ace-88642d130251"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb": {
+      "attributes": {
+        "name": "FFBDMetaLanguage"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "items": [
+            "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+          ],
+          "minItems": [
+            -1
+          ],
+          "maxItems": [
+            -1
+          ],
+          "min": "undefined",
+          "max": "undefined"
+        }
+      },
+      "parent": "0a761b4d-a441-2aa4-78b9-14b521931869",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "position": {
+          "x": 407,
+          "y": 109
+        }
+      },
+      "sets": {}
+    },
+    "41c92448-bc92-6fc3-2ced-ce21b7e8a2de": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "a5fc0402-2b9d-b962-9f14-9e4caf7eed85",
+        "src": "d22a23f2-846c-6393-8e7f-d9107630df2f"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "4417bbcf-83b5-f8d2-f07a-5c16a8298c85": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "da4804a6-f0b4-4fa9-292e-78d23073090b",
+        "src": "ace2c080-fe93-8cae-2164-6c9b81f78191"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 645,
+          "y": 406
+        }
+      },
+      "sets": {}
+    },
+    "454fec06-ffb2-6909-a044-6ec58e801d62": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "6845e37b-dde8-8145-17ba-70271c900585",
+        "src": "96c32b59-2072-30fe-8e62-ea808cabda95"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 1119,
+          "y": 328
+        }
+      },
+      "sets": {}
+    },
+    "45ca4331-80f2-7a97-a96a-ce49efec11a7": {
+      "attributes": {},
+      "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "9b606cde-4e78-9a71-838d-a4ade7b69030",
+        "dst": "d22a23f2-846c-6393-8e7f-d9107630df2f",
+        "src": "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "4ad9f84c-f007-ebf9-6c84-6297af6990ad": {
+      "attributes": {
+        "name": "FFBDFolder"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "items": [
+            "28c73294-0d4f-cc80-520e-bccc256bd9a7",
+            "4ad9f84c-f007-ebf9-6c84-6297af6990ad"
+          ],
+          "minItems": [
+            -1,
+            -1
+          ],
+          "maxItems": [
+            -1,
+            -1
+          ],
+          "min": "undefined",
+          "max": "undefined"
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "position": {
+          "x": 587,
+          "y": 92
+        }
+      },
+      "sets": {}
+    },
+    "4ff2d0ce-8873-a05b-99da-5c78bf743ee5": {
+      "attributes": {
+        "name": "LogicSymbol"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "isAbstract": true,
+        "position": {
+          "x": 611,
+          "y": 311
+        }
+      },
+      "sets": {}
+    },
+    "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6": {
+      "attributes": {
+        "name": "Logic2Function"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 799,
+          "y": 729
+        }
+      },
+      "sets": {}
+    },
+    "5a029917-c912-e610-855f-018ddccca797": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "e26c1333-9233-ebfd-daf2-bf5e69b11e98",
+        "src": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 558,
+          "y": 400
+        }
+      },
+      "sets": {}
+    },
+    "5a334a94-5da3-60df-c700-c20552b97faf": {
+      "attributes": {
+        "name": "Examples"
+      },
+      "base": "4ad9f84c-f007-ebf9-6c84-6297af6990ad",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "0a761b4d-a441-2aa4-78b9-14b521931869",
+      "pointers": {
+        "base": "4ad9f84c-f007-ebf9-6c84-6297af6990ad"
+      },
+      "registry": {
+        "position": {
+          "x": 409,
+          "y": 205
+        }
+      },
+      "sets": {}
+    },
+    "5cc81a00-45e1-de0b-e210-7877bd24dd2b": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "aad5298e-9484-ded9-79df-e0f13ec7f7ec",
+        "src": "0f69181e-0567-df76-71b0-1db405881487"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "5d264d62-3f9e-a93a-37f7-0ea5acadc8f3": {
+      "attributes": {},
+      "base": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "ff118b52-1c34-1edb-75da-5774a10d4b28"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 442,
+          "y": 310
+        }
+      },
+      "sets": {}
+    },
+    "5e13f9b6-a973-9dfe-c8f6-e34858ca8c66": {
+      "attributes": {
+        "name": "XOR"
+      },
+      "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+      },
+      "registry": {
+        "isAbstract": false,
+        "position": {
+          "x": 661,
+          "y": 512
+        }
+      },
+      "sets": {}
+    },
+    "5fd5e7c0-51b4-d625-bdcd-047a2e642d75": {
+      "attributes": {
+        "IconColor": "#FFFFFF",
+        "name": "referenceblahaha"
+      },
+      "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+      "meta": {
+        "attributes": {
+          "RefFuncNum": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+      },
+      "registry": {
+        "borderColor": "#ffffff",
+        "color": "#ffffcc",
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 977,
+          "y": 296
+        }
+      },
+      "sets": {}
+    },
+    "61a6876a-583d-e6a6-4a9a-b976179b289e": {
+      "attributes": {
+        "DecimalDelimitedNumber": "",
+        "name": "Function"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "position": {
+          "x": 261,
+          "y": 310
+        }
+      },
+      "sets": {}
+    },
+    "64d98f14-9566-93b8-1b9d-06ff91318dc2": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f",
+        "src": "d22a23f2-846c-6393-8e7f-d9107630df2f"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 558,
+          "y": 400
+        }
+      },
+      "sets": {}
+    },
+    "6845e37b-dde8-8145-17ba-70271c900585": {
+      "attributes": {},
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 845,
+          "y": 301
+        }
+      },
+      "sets": {}
+    },
+    "6a6affed-0c74-ae69-e21f-6fffbc9a960d": {
+      "attributes": {},
+      "base": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d",
+        "dst": "0f69181e-0567-df76-71b0-1db405881487",
+        "src": "b0f857d9-2b1e-d8e1-e047-999d6c303f33"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "6e551c6b-ce42-c31a-78ad-e6a85f4d41f5": {
+      "attributes": {
+        "name": "Reference2Function"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 803,
+          "y": 587
+        }
+      },
+      "sets": {}
+    },
+    "779607e5-d382-0965-1ace-88642d130251": {
+      "attributes": {
+        "name": "9.2.2"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "borderColor": "#ffffff",
+        "color": "#cccccc",
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 512,
+          "y": 300
+        },
+        "textColor": "#000000"
+      },
+      "sets": {}
+    },
+    "80e82481-6699-e39f-37f1-ddbadd69bd4f": {
+      "attributes": {},
+      "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "50a5edcb-3ed0-9b6f-7b48-64178f7c5de6",
+        "dst": "bacf4983-f452-a593-8188-3354e91ef4ad",
+        "src": "d4daf568-969c-1989-7cae-58e8df01b419"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 517,
+          "y": 330
+        }
+      },
+      "sets": {}
+    },
+    "8cf772ac-200a-f7ec-65fb-b77a9e718437": {
+      "attributes": {
+        "RefFuncNum": "",
+        "name": "Reference"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "RefFuncNum": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "position": {
+          "x": 429,
+          "y": 315
+        }
+      },
+      "sets": {}
+    },
+    "96c32b59-2072-30fe-8e62-ea808cabda95": {
+      "attributes": {},
+      "base": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "323f12f1-273f-98de-8c27-d21c6e7959c6"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 781,
+          "y": 310
+        }
+      },
+      "sets": {}
+    },
+    "994201f3-eed9-72db-c7aa-e61096d5dc59": {
+      "attributes": {
+        "name": "Function2Function"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 799,
+          "y": 385
+        }
+      },
+      "sets": {}
+    },
+    "9b606cde-4e78-9a71-838d-a4ade7b69030": {
+      "attributes": {
+        "name": "Logic2Logic"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 797,
+          "y": 448
+        }
+      },
+      "sets": {}
+    },
+    "a5fc0402-2b9d-b962-9f14-9e4caf7eed85": {
+      "attributes": {
+        "name": "9.2.4"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 509,
+          "y": 464
+        }
+      },
+      "sets": {}
+    },
+    "a73e880d-bb8e-664c-f4f4-b5495abd5417": {
+      "attributes": {
+        "name": "Function2Reference"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "61a6876a-583d-e6a6-4a9a-b976179b289e"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 800,
+          "y": 517
+        }
+      },
+      "sets": {}
+    },
+    "aad5298e-9484-ded9-79df-e0f13ec7f7ec": {
+      "attributes": {
+        "IconColor": "#FFF6BD",
+        "name": "9.2.1"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "borderColor": "#cc0000",
+        "color": "#ffffff",
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 342,
+          "y": 300
+        },
+        "textColor": "#000000"
+      },
+      "sets": {}
+    },
+    "ace2c080-fe93-8cae-2164-6c9b81f78191": {
+      "attributes": {
+        "IconColor": "#FFFFFF",
+        "name": "OR"
+      },
+      "base": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "323f12f1-273f-98de-8c27-d21c6e7959c6"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 782,
+          "y": 391
+        }
+      },
+      "sets": {}
+    },
+    "b0f857d9-2b1e-d8e1-e047-999d6c303f33": {
+      "attributes": {
+        "name": "1.1.2 Ref"
+      },
+      "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+      "meta": {
+        "attributes": {
+          "RefFuncNum": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 152,
+          "y": 380
+        }
+      },
+      "sets": {}
+    },
+    "b6c20350-8006-ad32-21a4-47c0aa607b00": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "e26c1333-9233-ebfd-daf2-bf5e69b11e98",
+        "src": "a5fc0402-2b9d-b962-9f14-9e4caf7eed85"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 645,
+          "y": 406
+        }
+      },
+      "sets": {}
+    },
+    "bacf4983-f452-a593-8188-3354e91ef4ad": {
+      "attributes": {
+        "IconColor": "#FFFFFF",
+        "name": "Function"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 685,
+          "y": 298
+        }
+      },
+      "sets": {}
+    },
+    "c27d4452-f6fb-d2b5-353c-c9485599ca6f": {
+      "attributes": {
+        "name": "FCO"
+      },
+      "base": null,
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "minItems": [],
+          "maxItems": [],
+          "items": []
+        }
+      },
+      "parent": "0a761b4d-a441-2aa4-78b9-14b521931869",
+      "pointers": {
+        "base": null
+      },
+      "registry": {
+        "DisplayFormat": "$name",
+        "PortSVGIcon": "",
+        "SVGIcon": "",
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "isAbstract": false,
+        "isPort": false,
+        "position": {
+          "x": 176,
+          "y": 111
+        }
+      },
+      "sets": {}
+    },
+    "ccf9392b-3ebe-e755-327b-dd80df448775": {
+      "attributes": {
+        "name": "FlowConnection"
+      },
+      "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "c27d4452-f6fb-d2b5-353c-c9485599ca6f"
+      },
+      "registry": {
+        "isAbstract": true,
+        "isPort": false,
+        "position": {
+          "x": 800,
+          "y": 307
+        }
+      },
+      "sets": {}
+    },
+    "d22a23f2-846c-6393-8e7f-d9107630df2f": {
+      "attributes": {},
+      "base": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "323f12f1-273f-98de-8c27-d21c6e7959c6"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 440,
+          "y": 392
+        }
+      },
+      "sets": {}
+    },
+    "d4daf568-969c-1989-7cae-58e8df01b419": {
+      "attributes": {
+        "IconColor": "#FFFFFF"
+      },
+      "base": "ff118b52-1c34-1edb-75da-5774a10d4b28",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "ff118b52-1c34-1edb-75da-5774a10d4b28"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 621,
+          "y": 312
+        }
+      },
+      "sets": {}
+    },
+    "d64324d7-5506-d569-0c1f-6096677539e3": {
+      "attributes": {},
+      "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "0bbef8e5-cf9f-bae3-25af-51fba17c54b6",
+        "dst": "ace2c080-fe93-8cae-2164-6c9b81f78191",
+        "src": "2ffdd4e3-7555-dfe1-1f11-c10afdea5bf7"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 645,
+          "y": 406
+        }
+      },
+      "sets": {}
+    },
+    "da4804a6-f0b4-4fa9-292e-78d23073090b": {
+      "attributes": {
+        "IconColor": "#FFFFFF",
+        "name": "Function"
+      },
+      "base": "61a6876a-583d-e6a6-4a9a-b976179b289e",
+      "meta": {
+        "attributes": {
+          "DecimalDelimitedNumber": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "61a6876a-583d-e6a6-4a9a-b976179b289e"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 978,
+          "y": 377
+        }
+      },
+      "sets": {}
+    },
+    "dddea9e2-505e-74fc-ea36-787a36281e26": {
+      "attributes": {},
+      "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+        "dst": "779607e5-d382-0965-1ace-88642d130251",
+        "src": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f": {
+      "attributes": {
+        "name": "Example1"
+      },
+      "base": "28c73294-0d4f-cc80-520e-bccc256bd9a7",
+      "meta": {
+        "attributes": {
+          "Creation": {
+            "default": "",
+            "type": "string"
+          },
+          "Date": {
+            "default": "",
+            "type": "string"
+          },
+          "FunctionName": {
+            "default": "",
+            "type": "string"
+          },
+          "Number": {
+            "default": null,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "5a334a94-5da3-60df-c700-c20552b97faf",
+      "pointers": {
+        "base": "28c73294-0d4f-cc80-520e-bccc256bd9a7"
+      },
+      "registry": {
+        "position": {
+          "x": 672,
+          "y": 130
+        }
+      },
+      "sets": {}
+    },
+    "e26c1333-9233-ebfd-daf2-bf5e69b11e98": {
+      "attributes": {},
+      "base": "323f12f1-273f-98de-8c27-d21c6e7959c6",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "323f12f1-273f-98de-8c27-d21c6e7959c6"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 620,
+          "y": 392
+        }
+      },
+      "sets": {}
+    },
+    "e47a0e5d-89a5-38ff-b3b8-c8a3c4e4d16d": {
+      "attributes": {
+        "name": "Ref2Logic"
+      },
+      "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "pointers": {
+          "dst": {
+            "items": [
+              "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          },
+          "src": {
+            "items": [
+              "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+            ],
+            "min": 1,
+            "max": 1,
+            "minItems": [
+              -1
+            ],
+            "maxItems": [
+              1
+            ]
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "ccf9392b-3ebe-e755-327b-dd80df448775",
+        "dst": null,
+        "src": null
+      },
+      "registry": {
+        "DisplayFormat": "",
+        "isAbstract": false,
+        "position": {
+          "x": 800,
+          "y": 801
+        }
+      },
+      "sets": {}
+    },
+    "eda2f598-fffd-78cf-a80d-d7c644c19678": {
+      "attributes": {},
+      "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "994201f3-eed9-72db-c7aa-e61096d5dc59",
+        "dst": "a5fc0402-2b9d-b962-9f14-9e4caf7eed85",
+        "src": "30fc98c0-2a3f-6fee-ddbe-7599b46e987f"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 546,
+          "y": 344
+        }
+      },
+      "sets": {}
+    },
+    "f4726335-f742-5fd9-e48f-7a377db9b07e": {
+      "attributes": {},
+      "base": "a73e880d-bb8e-664c-f4f4-b5495abd5417",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "a73e880d-bb8e-664c-f4f4-b5495abd5417",
+        "dst": "5fd5e7c0-51b4-d625-bdcd-047a2e642d75",
+        "src": "6845e37b-dde8-8145-17ba-70271c900585"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 1037,
+          "y": 327
+        }
+      },
+      "sets": {}
+    },
+    "f806942e-4ea2-a8df-6b6b-1a189736f69d": {
+      "attributes": {
+        "name": "3.5 Ref"
+      },
+      "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437",
+      "meta": {
+        "attributes": {
+          "RefFuncNum": {
+            "default": "",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "e1c6cdc2-e0c3-f3f8-28e2-cf0e7e046a2f",
+      "pointers": {
+        "base": "8cf772ac-200a-f7ec-65fb-b77a9e718437"
+      },
+      "registry": {
+        "decorator": "FunctionalFlowBlockDiagramDecorator",
+        "position": {
+          "x": 152,
+          "y": 300
+        }
+      },
+      "sets": {}
+    },
+    "ff118b52-1c34-1edb-75da-5774a10d4b28": {
+      "attributes": {
+        "name": "AND"
+      },
+      "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5",
+      "meta": {
+        "attributes": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "parent": "3e54c7fc-e9c0-1a28-8fe3-8465587be7eb",
+      "pointers": {
+        "base": "4ff2d0ce-8873-a05b-99da-5c78bf743ee5"
+      },
+      "registry": {
+        "isAbstract": false,
+        "position": {
+          "x": 661,
+          "y": 392
+        }
+      },
+      "sets": {}
+    }
+  },
+  "metaSheets": {}
+}
