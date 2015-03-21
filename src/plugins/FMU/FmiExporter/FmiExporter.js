@@ -8,8 +8,7 @@ define(['plugin/PluginConfig',
         'plugin/FmiExporter/FmiExporter/tarjan',
         'plugin/FmiExporter/FmiExporter/Templates/Templates',
         'ejs',
-        'executor/ExecutorClient'], function (PluginConfig, PluginBase, FmuMetaTypes, Tarjan, TEMPLATES, ejs, ExecutorClient) {
-    // PM: This change saves you one indent (or JSLint complaints for each method).
+        'middleware/executor/ExecutorClient'], function (PluginConfig, PluginBase, FmuMetaTypes, Tarjan, TEMPLATES, ejs, ExecutorClient) {
     'use strict';
 
     /**
