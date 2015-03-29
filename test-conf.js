@@ -8,24 +8,14 @@
 
 var PATH = require('path');
 
-var CONFIG = require('./config.json');
+var gmeConfig = require('./config');
 var webgme = require('webgme');
-var requirejs = global.WebGMEGlobal.requirejs;
-WebGMEGlobal.setConfig(CONFIG);
-var requirejsBase = WebGMEGlobal.baseDir;
+var requirejs = webgme.requirejs;
 
-// specifies all test specific requirejs paths for server side tests
-// read it from the config file
-if (CONFIG.test_paths) {
-    var paths = {};
-    var keys = Object.keys(CONFIG.test_paths);
-    for (var i = 0; i < keys.length; i += 1) {
-        paths[keys[i]] = PATH.relative(requirejsBase,PATH.resolve(CONFIG.test_paths[keys[i]]));
-    }
-    requirejs.config({
-        paths:paths
-    });
-}
+gmeConfig.requirejsPaths.mocks = './test/mocks';
+gmeConfig.requirejsPaths.models = './test/models';
+
+webgme.addToRequireJsPaths(gmeConfig);
 
 exports.requirejs = requirejs;
 

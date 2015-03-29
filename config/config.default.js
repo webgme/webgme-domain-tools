@@ -24,7 +24,8 @@ config.requirejsPaths = {
     widgets: './src/widgets',
     json2xml: './lib/json2xml',
     xmljsonconverter: './lib/xmljsonconverter',
-    sax: './support/sax/sax'
+    sax: './support/sax/sax',
+    ejs: './support/ejs/ejs.min'
 };
 
 config.visualization.decoratorPaths.push('./src/decorators');
