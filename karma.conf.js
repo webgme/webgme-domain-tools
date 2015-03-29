@@ -25,6 +25,7 @@ module.exports = function(config) {
       {pattern: 'node_modules/webgme/src/client/lib/**/*.js', included: false},
       {pattern: 'node_modules/webgme/src/plugin/**/*.js', included: false},
       {pattern: 'node_modules/webgme/src/middleware/blob/*.js', included: false},
+      {pattern: 'node_modules/webgme/src/middleware/executor/*.js', included: false},
       {pattern: 'node_modules/webgme/src/common/core/*.js', included: false},
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'support/**/*.js', included: false},
@@ -96,13 +97,13 @@ module.exports = function(config) {
                   next();
               };
               var webgme = require('webgme');
-              var config = require('./config.json');
-              global.WebGMEGlobal.setConfig(config);
+              var gmeConfig = require('./config');
+              //global.WebGMEGlobal.setConfig(config);
 
-              var requirejs = global.WebGMEGlobal.requirejs;
+              var requirejs = webgme.requirejs;
 
               requirejs(['blob/BlobFSBackend', 'blob/BlobServer'], function(BlobFSBackend, BlobServer) {
-                  var blobBackend = new BlobFSBackend();
+                  var blobBackend = new BlobFSBackend(gmeConfig);
                   BlobServer.createExpressBlob(app, blobBackend, ensureAuthenticated, log);
               });
               app.use(function(req, res, next) {

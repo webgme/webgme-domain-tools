@@ -48,7 +48,7 @@ requirejs.config({
         "plugin/PetriNetExporter": "./src/plugins/PetriNet",
         "plugin/CoreExamples": "./src/plugins/TestCore",
 
-        "executor": "./src/rest/executor",
+        "middleware": "./node_modules/webgme/src/middleware",
         "blob": "./node_modules/webgme/src/middleware/blob",
         "core": "./node_modules/webgme/src/common/core",
 
