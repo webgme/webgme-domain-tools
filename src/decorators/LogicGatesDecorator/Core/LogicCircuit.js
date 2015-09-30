@@ -11,13 +11,11 @@
 
 define(['js/NodePropertyNames',
         'js/RegistryKeys',
-        'js/Utils/METAAspectHelper',
         './LogicGatesDecorator.Constants',
         './LogicGates.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
                                    REGISTRY_KEYS,
-                                   METAAspectHelper,
                                    LogicGatesDecoratorConstants,
                                    LogicGatesMETA,
                                    DiagramDesignerWidgetConstants,
@@ -47,8 +45,7 @@ define(['js/NodePropertyNames',
             client = this._control._client,
             nodeObj = client.getNode(gmeID),
             childrenIDs = nodeObj ?  nodeObj.getChildrenIds() : [],
-            META_TYPES = LogicGatesMETA.META_TYPES,
-            isTypeUserOutput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserOutput),
+            isTypeUserOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(gmeID),
             SVGWidth = parseInt(this.skinParts.$svg.attr('width')), // TODO: get height and width
             SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
             LEFT_OFFSET = isTypeUserOutput ? 0 : SVGWidth,
@@ -87,10 +84,10 @@ define(['js/NodePropertyNames',
 
             portId = childrenIDs[len];
 
-            isInput = METAAspectHelper.isMETAType(portId, META_TYPES.UserInput) ||
-                      METAAspectHelper.isMETAType(portId, META_TYPES.Clock);
+            isInput = LogicGatesMETA.TYPE_INFO.isUserInput(portId) ||
+                      LogicGatesMETA.TYPE_INFO.isClock(portId);
 
-            isOutput = METAAspectHelper.isMETAType(portId, META_TYPES.UserOutput);
+            isOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(portId);
 
             if (isInput) {
                 inputPortNum += 1;
@@ -117,7 +114,7 @@ define(['js/NodePropertyNames',
 
         SVGHeight = parseInt(this.skinParts.$svg.attr('height'));
 
-        var LogicGatesClassName = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        var LogicGatesClassName = LogicGatesMETA.getMetaTypesOf(gmeID)[0];
 
         var classNameSVG = $(svgIcon.find('.type')[0])[0];
 
@@ -147,10 +144,10 @@ define(['js/NodePropertyNames',
         while (len--) {
             portId = childrenIDs[len];
 
-            isInput = METAAspectHelper.isMETAType(portId, META_TYPES.UserInput) ||
-                      METAAspectHelper.isMETAType(portId, META_TYPES.Clock);
+            isInput = LogicGatesMETA.TYPE_INFO.isUserInput(portId) ||
+                      LogicGatesMETA.TYPE_INFO.isClock(portId);
 
-            isOutput = METAAspectHelper.isMETAType(portId, META_TYPES.UserOutput);
+            isOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(portId);
 
             if (isInput) {
                 // Input port
@@ -272,8 +269,7 @@ define(['js/NodePropertyNames',
      * @returns {Array} Connection areas to/from connections can be drawn.
      */
     LogicCircuit.prototype.getConnectionAreas = function (id, isEnd, connectionMetaInfo) {
-        var META_TYPES = LogicGatesMETA.META_TYPES,
-            isInput = METAAspectHelper.isMETAType(id, META_TYPES.InputPort);
+        var isInput = LogicGatesMETA.TYPE_INFO.isInputPort(id);
 
         if (this._portCoordinates[id]) {
             return [{

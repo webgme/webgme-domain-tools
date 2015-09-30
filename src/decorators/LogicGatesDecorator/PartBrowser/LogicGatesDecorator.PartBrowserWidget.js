@@ -9,17 +9,15 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/LogicGatesDecorator.Core.js',
     '../Core/LogicGatesDecorator.Constants',
     'css!./LogicGatesDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
-                                                       nodePropertyNames,
-                                                       PartBrowserWidgetDecoratorBase,
-                                                       LogicGatesDecoratorCore,
-                                                       LogicGatesDecoratorConstants) {
+                                                              nodePropertyNames,
+                                                              PartBrowserWidgetDecoratorBase,
+                                                              LogicGatesDecoratorCore,
+                                                              LogicGatesDecoratorConstants) {
 
     /**
      * A module representing PartBrowserWidget specific functionality for the LogicGatesModelingLanguage.
@@ -35,7 +33,7 @@ define(['js/Constants',
      * @constructor
      */
     LogicGatesDecoratorPartBrowserWidget = function (options) {
-        var opts = _.extend( {}, options);
+        var opts = _.extend({}, options);
 
         PartBrowserWidgetDecoratorBase.apply(this, [opts]);
 
@@ -75,7 +73,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    LogicGatesDecoratorPartBrowserWidget.prototype._registerForNotification = function(portId) {
+    LogicGatesDecoratorPartBrowserWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -83,7 +81,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    LogicGatesDecoratorPartBrowserWidget.prototype._unregisterForNotification = function(portId) {
+    LogicGatesDecoratorPartBrowserWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);

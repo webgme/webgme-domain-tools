@@ -10,12 +10,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './LogicGatesDecorator.Constants',
         './LogicGates.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    LogicGatesDecoratorConstants,
                                    LogicGatesMETA,
                                    DiagramDesignerWidgetConstants,
@@ -44,8 +42,8 @@ define(['js/NodePropertyNames',
 
         // initialize local variables
         var gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = LogicGatesMETA.META_TYPES,
-            isTypeUserOutput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserOutput),
+            META_TYPES = LogicGatesMETA.getMetaTypes(),
+            isTypeUserOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(gmeID),
             SVGWidth = parseInt(this.skinParts.$svg.attr('width')), // TODO: get height and width
             SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
             LEFT_OFFSET = isTypeUserOutput ? 0 : SVGWidth,

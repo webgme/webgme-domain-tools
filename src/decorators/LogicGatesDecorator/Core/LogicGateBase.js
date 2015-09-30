@@ -9,12 +9,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './LogicGatesDecorator.Constants',
         './LogicGates.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    LogicGatesDecoratorConstants,
                                    LogicGatesMETA,
                                    DiagramDesignerWidgetConstants,
@@ -44,8 +42,7 @@ define(['js/NodePropertyNames',
             client = this._control._client,
             nodeObj = client.getNode(gmeID),
             childrenIDs = nodeObj ?  nodeObj.getChildrenIds() : [],
-            META_TYPES = LogicGatesMETA.META_TYPES,
-            isTypeUserOutput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserOutput),
+            isTypeUserOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(gmeID),
             SVGWidth = parseInt(this.skinParts.$svg.attr('width')), // TODO: get height and width
             SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
             LEFT_OFFSET = isTypeUserOutput ? 0 : SVGWidth,
@@ -68,7 +65,7 @@ define(['js/NodePropertyNames',
         var inputPortNum = 0;
 
         while (len--) {
-            if (METAAspectHelper.isMETAType(childrenIDs[len], META_TYPES.InputPort)) {
+            if (LogicGatesMETA.TYPE_INFO.isInputPort(childrenIDs[len])) {
                 inputPortNum += 1;
             }
         }
@@ -83,7 +80,7 @@ define(['js/NodePropertyNames',
 
         while (len--) {
             portId = childrenIDs[len];
-            isInput = METAAspectHelper.isMETAType(portId, META_TYPES.InputPort);
+            isInput = LogicGatesMETA.TYPE_INFO.isInputPort(portId);
 
             if (isInput) {
                 LEFT_OFFSET = 0;
@@ -170,8 +167,7 @@ define(['js/NodePropertyNames',
      * @returns {Array} Connection areas to/from connections can be drawn.
      */
     LogicGateBase.prototype.getConnectionAreas = function (id, isEnd, connectionMetaInfo) {
-        var META_TYPES = LogicGatesMETA.META_TYPES,
-            isInput = METAAspectHelper.isMETAType(id, META_TYPES.InputPort);
+        var isInput = LogicGatesMETA.TYPE_INFO.isInputPort(id);
 
         if (this._portCoordinates[id]) {
             return [{

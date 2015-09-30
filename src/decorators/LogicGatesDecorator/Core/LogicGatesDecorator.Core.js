@@ -9,7 +9,6 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     './IOElements',
     './LogicGateBase',
@@ -18,21 +17,20 @@ define(['js/Constants',
     'text!./LogicGatesDecorator.html',
     'text!../default.svg',
     'text!../Icons/Port.svg'], function (CONSTANTS,
-                                      METAAspectHelper,
-                                      nodePropertyNames,
-                                      IOElements,
-                                      LogicGateBase,
-                                      LogicCircuit,
-                                      LogicGatesMETA,
-                                      LogicGatesDecoratorTemplate,
-                                      DefaultSvgTemplate,
-                                      PortSvg) {
+                                         nodePropertyNames,
+                                         IOElements,
+                                         LogicGateBase,
+                                         LogicCircuit,
+                                         LogicGatesMETA,
+                                         LogicGatesDecoratorTemplate,
+                                         DefaultSvgTemplate,
+                                         PortSvg) {
 
     /**
-    * A module representing core decorator functionality for the LogicGatesModelingLanguage.
-    * @exports LogicGatesDecoratorCore
-    * @version 1.0
-    */
+     * A module representing core decorator functionality for the LogicGatesModelingLanguage.
+     * @exports LogicGatesDecoratorCore
+     * @version 1.0
+     */
     var LogicGatesDecoratorCore,
         SVG_ICON_PATH = "/decorators/LogicGatesDecorator/Icons/",
         PortBase = $(PortSvg).find("g.port");
@@ -56,7 +54,7 @@ define(['js/Constants',
      * @type {*}
      * @private
      */
-    var _metaAspectTypes = LogicGatesMETA.META_TYPES;
+    var _metaAspectTypes = LogicGatesMETA.getMetaTypes();
 
     for (var m in _metaAspectTypes) {
 
@@ -67,7 +65,7 @@ define(['js/Constants',
 
             // get the svg from the server in SYNC mode, may take some time
             $.ajax(svg_resource_url, {'async': false})
-                .done(function ( data ) {
+                .done(function (data) {
 
                     // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
                     // downloaded successfully
@@ -101,10 +99,10 @@ define(['js/Constants',
     })();
 
     /**** Override from *.WidgetDecoratorBase ****/
-	LogicGatesDecoratorCore.prototype.getTerritoryQuery = function () {
+    LogicGatesDecoratorCore.prototype.getTerritoryQuery = function () {
         var territoryRule = {};
 
-        territoryRule[this._metaInfo[CONSTANTS.GME_ID]] = { "children": 1 };
+        territoryRule[this._metaInfo[CONSTANTS.GME_ID]] = {"children": 1};
 
         return territoryRule;
     };
@@ -138,7 +136,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        LogicGatesClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        LogicGatesClassNames = LogicGatesMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         LogicGatesClassNames.reverse();
@@ -217,7 +215,7 @@ define(['js/Constants',
         var gmeID = this._metaInfo[CONSTANTS.GME_ID];
 
         // meta type of the rendered object
-        this._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        this._metaType = LogicGatesMETA.getMetaTypesOf(gmeID)[0];
 
 
         if (DEBUG) {
@@ -251,12 +249,11 @@ define(['js/Constants',
         }
 
         // get domain specific knowledge
-        var META_TYPES = LogicGatesMETA.META_TYPES,
-            isTypeLogicCircuit = METAAspectHelper.isMETAType(gmeID, META_TYPES.LogicCircuit),
-            isTypeLogicGateBase = METAAspectHelper.isMETAType(gmeID, META_TYPES.LogicGateBase),
-            isTypeUserInput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserInput),
-            isTypeUserOutput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserOutput),
-            isTypeClock = METAAspectHelper.isMETAType(gmeID, META_TYPES.Clock);
+        var isTypeLogicCircuit = LogicGatesMETA.TYPE_INFO.isLogicCircuit(gmeID),
+            isTypeLogicGateBase = LogicGatesMETA.TYPE_INFO.isLogicGateBase(gmeID),
+            isTypeUserInput = LogicGatesMETA.TYPE_INFO.isUserInput(gmeID),
+            isTypeUserOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(gmeID),
+            isTypeClock = LogicGatesMETA.TYPE_INFO.isClock(gmeID);
 
         if (isTypeUserInput || isTypeUserOutput || isTypeClock) {
 
@@ -268,7 +265,7 @@ define(['js/Constants',
             // use the LogicGateBase decorator
             _.extend(this, new LogicGateBase());
 
-        }  else if (isTypeLogicCircuit) {
+        } else if (isTypeLogicCircuit) {
 
             // use the LogicCircuit decorator
             _.extend(this, new LogicCircuit());
@@ -308,7 +305,7 @@ define(['js/Constants',
         var gmeID = this._metaInfo[CONSTANTS.GME_ID],
             client = this._control._client,
             nodeObj = client.getNode(gmeID),
-            childrenIDs = nodeObj ?  nodeObj.getChildrenIds() : [],
+            childrenIDs = nodeObj ? nodeObj.getChildrenIds() : [],
             portId,
             len;
 
@@ -343,16 +340,20 @@ define(['js/Constants',
         // initialize local variables
         var control = this._control,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name), 
-            META_TYPES = LogicGatesMETA.META_TYPES,
-            isAbstractType = gmeID === META_TYPES.LogicGateBase || gmeID === META_TYPES.SimpleLogicGate || gmeID === META_TYPES.ComplexLogicGate,
-            isTypeLogicGate = METAAspectHelper.isMETAType(gmeID, META_TYPES.LogicGateBase) && !isAbstractType,
-            isAbstractIOType = gmeID === META_TYPES.PortBase || gmeID === META_TYPES.NumericIOBase || gmeID === META_TYPES.UserInputBase,
-            isTypeUserOutput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserOutput),
-            isAnyIOType = METAAspectHelper.isMETAType(gmeID, META_TYPES.NumericIOBase) || METAAspectHelper.isMETAType(gmeID, META_TYPES.PortBase) || METAAspectHelper.isMETAType(gmeID, META_TYPES.UserInputBase) || isTypeUserOutput,
+            name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name),
+            META_TYPES = LogicGatesMETA.getMetaTypes(),
+            isAbstractType = gmeID === META_TYPES.LogicGateBase || gmeID === META_TYPES.SimpleLogicGate ||
+                             gmeID === META_TYPES.ComplexLogicGate,
+            isTypeLogicGate = LogicGatesMETA.TYPE_INFO.isLogicGateBase(gmeID) && !isAbstractType,
+            isAbstractIOType = gmeID === META_TYPES.PortBase || gmeID === META_TYPES.NumericIOBase ||
+                               gmeID === META_TYPES.UserInputBase,
+            isTypeUserOutput = LogicGatesMETA.TYPE_INFO.isUserOutput(gmeID),
+            isAnyIOType = LogicGatesMETA.TYPE_INFO.isNumericIOBase(gmeID) ||
+                          LogicGatesMETA.TYPE_INFO.isPortBase(gmeID) ||
+                          LogicGatesMETA.TYPE_INFO.isUserInputBase(gmeID) || isTypeUserOutput,
             isIOType = isAnyIOType && !isAbstractType,
-            isTypeUserInput = METAAspectHelper.isMETAType(gmeID, META_TYPES.UserInput),
-            isTypeClock = METAAspectHelper.isMETAType(gmeID, META_TYPES.Clock);
+            isTypeUserInput = LogicGatesMETA.TYPE_INFO.isUserInput(gmeID),
+            isTypeClock = LogicGatesMETA.TYPE_INFO.isClock(gmeID);
 
         if (this.skinParts.$name) {
 
@@ -401,7 +402,7 @@ define(['js/Constants',
      * @param portId {string} GME ID for getting notification about this object.
      * @private
      */
-    LogicGatesDecoratorCore.prototype._registerForNotification = function(portId) {
+    LogicGatesDecoratorCore.prototype._registerForNotification = function (portId) {
 
     };
 
@@ -410,7 +411,7 @@ define(['js/Constants',
      * @param portId {string} GME ID for getting notification about this object.
      * @private
      */
-    LogicGatesDecoratorCore.prototype._unregisterForNotification = function(portId) {
+    LogicGatesDecoratorCore.prototype._unregisterForNotification = function (portId) {
 
     };
 
