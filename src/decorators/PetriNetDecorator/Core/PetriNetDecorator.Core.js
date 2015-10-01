@@ -8,7 +8,6 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     './PetriNetBase',
     './PetriNetDecorator.Constants',
@@ -16,7 +15,6 @@ define(['js/Constants',
     'text!./PetriNetDecorator.html',
     'text!../default.svg',
     'text!../Icons/Token.svg'], function (CONSTANTS,
-                                      METAAspectHelper,
                                       nodePropertyNames,
                                       PetriNetBase,
                                       PetriNetDecoratorConstants,
@@ -48,36 +46,6 @@ define(['js/Constants',
      */
     var errorSVGBase = $(DefaultSvgTemplate);
 
-    /**
-     * ID list of meta types.
-     * @type {*}
-     * @private
-     */
-    var _metaAspectTypes = PetriNetMETA.META_TYPES;
-
-    for (var m in _metaAspectTypes) {
-        // TODO: use the right code to do this
-        if (_metaAspectTypes.hasOwnProperty(m)) {
-
-            // get the svg's url on the server for this META type
-            var svg_resource_url = SVG_ICON_PATH + m + ".svg";
-
-            // get the svg from the server in SYNC mode, may take some time
-            $.ajax(svg_resource_url, {'async': false})
-                .done(function ( data ) {
-
-                    // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
-                    // downloaded successfully
-                    // cache the downloaded content
-                    svgCache[m] = $(data.childNodes[0]);
-                })
-                .fail(function () {
-
-                    // download failed for this type
-                    // TODO: console.warning('Failed to download: ' + svg_resource_url);
-                });
-        }
-    }
 
     /**
      * Creates a new instance of PetriNetDecoratorCore.
@@ -119,6 +87,34 @@ define(['js/Constants',
         if (params && params.connectors) {
             this._displayConnectors = params.connectors;
         }
+
+        if(Object.keys(svgCache || {}).length === 0){
+            var _metaAspectTypes = PetriNetMETA.getMetaTypes();
+
+            for (var m in _metaAspectTypes) {
+                // TODO: use the right code to do this
+                if (_metaAspectTypes.hasOwnProperty(m)) {
+
+                    // get the svg's url on the server for this META type
+                    var svg_resource_url = SVG_ICON_PATH + m + ".svg";
+
+                    // get the svg from the server in SYNC mode, may take some time
+                    $.ajax(svg_resource_url, {'async': false})
+                        .done(function ( data ) {
+
+                            // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
+                            // downloaded successfully
+                            // cache the downloaded content
+                            svgCache[m] = $(data.childNodes[0]);
+                        })
+                        .fail(function () {
+
+                            // download failed for this type
+                            // TODO: console.warning('Failed to download: ' + svg_resource_url);
+                        });
+                }
+            }
+        }
     };
 
     /**
@@ -135,7 +131,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        PetriNetClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        PetriNetClassNames = PetriNetMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         PetriNetClassNames.reverse();
@@ -202,12 +198,11 @@ define(['js/Constants',
 
         // gme id of the rendered object
         var gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = PetriNetMETA.META_TYPES,
-            isTypePlace = METAAspectHelper.isMETAType(gmeID, META_TYPES.Place),
-            isTypeTransition = METAAspectHelper.isMETAType(gmeID, META_TYPES.Transition);
+            isTypePlace = PetriNetMETA.TYPE_INFO.isPlace(gmeID),
+            isTypeTransition = PetriNetMETA.TYPE_INFO.isTransition(gmeID);
 
         // meta type of the rendered object
-        this._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        this._metaType = PetriNetMETA.getMetaTypesOf(gmeID)[0];
 
 
         if (DEBUG) {
@@ -301,9 +296,8 @@ define(['js/Constants',
         // initialize local variables
         var control = this._control,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = PetriNetMETA.META_TYPES,
-            isTypePlace = METAAspectHelper.isMETAType(gmeID, META_TYPES.Place),
-            isTypeTransition = METAAspectHelper.isMETAType(gmeID, META_TYPES.Transition),
+            isTypePlace = PetriNetMETA.TYPE_INFO.isPlace(gmeID),
+            isTypeTransition = PetriNetMETA.TYPE_INFO.isTransition(gmeID),
             name = control._client.getNode(gmeID).getAttribute(nodePropertyNames.Attributes.name);
 
         if (this.skinParts.$name) {

@@ -49,36 +49,6 @@ define(['js/Constants',
      */
     var errorSVGBase = $(DefaultSvgTemplate);
 
-    /**
-     * ID list of meta types.
-     * @type {*}
-     * @private
-     */
-    var _metaAspectTypes = LogicGatesMETA.getMetaTypes();
-
-    for (var m in _metaAspectTypes) {
-
-        if (_metaAspectTypes.hasOwnProperty(m)) {
-
-            // get the svg's url on the server for this META type
-            var svg_resource_url = SVG_ICON_PATH + m + ".svg";
-
-            // get the svg from the server in SYNC mode, may take some time
-            $.ajax(svg_resource_url, {'async': false})
-                .done(function (data) {
-
-                    // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
-                    // downloaded successfully
-                    // cache the downloaded content
-                    svgCache[m] = $(data.childNodes[0]);
-                })
-                .fail(function () {
-
-                    // download failed for this type
-                    // TODO: console.warning('Failed to download: ' + svg_resource_url);
-                });
-        }
-    }
 
     /**
      * Creates a new instance of LogicGatesDecoratorCore.
@@ -120,6 +90,35 @@ define(['js/Constants',
         if (params && params.connectors) {
             this._displayConnectors = params.connectors;
         }
+
+        if(Object.keys(svgCache || {}).length === 0){
+            var _metaAspectTypes = LogicGatesMETA.getMetaTypes();
+
+            for (var m in _metaAspectTypes) {
+
+                if (_metaAspectTypes.hasOwnProperty(m)) {
+
+                    // get the svg's url on the server for this META type
+                    var svg_resource_url = SVG_ICON_PATH + m + ".svg";
+
+                    // get the svg from the server in SYNC mode, may take some time
+                    $.ajax(svg_resource_url, {'async': false})
+                        .done(function (data) {
+
+                            // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
+                            // downloaded successfully
+                            // cache the downloaded content
+                            svgCache[m] = $(data.childNodes[0]);
+                        })
+                        .fail(function () {
+
+                            // download failed for this type
+                            // TODO: console.warning('Failed to download: ' + svg_resource_url);
+                        });
+                }
+            }
+        }
+
     };
 
     /**

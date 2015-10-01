@@ -10,12 +10,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './PetriNetDecorator.Constants',
         './PetriNet.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    PetriNetDecoratorConstants,
                                    PetriNetMETA,
                                    DiagramDesignerWidgetConstants,
@@ -126,9 +124,8 @@ define(['js/NodePropertyNames',
      */
     PetriNetBase.prototype._updatePorts = function () {
         var gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = PetriNetMETA.META_TYPES,
-            isTypePlace = METAAspectHelper.isMETAType(gmeID, META_TYPES.Place),
-            isTypeTransition = METAAspectHelper.isMETAType(gmeID, META_TYPES.Transition),
+            isTypePlace = PetriNetMETA.TYPE_INFO.isPlace(gmeID),
+            isTypeTransition = PetriNetMETA.TYPE_INFO.isTransition(gmeID),
             len = 4,
             portId,
             SVGWidth = parseInt(this.skinParts.$svg.attr('width')),
@@ -231,8 +228,7 @@ define(['js/NodePropertyNames',
             LEN = 20, // length of stem that can stick out of the connector before connections can turn 
             ANGLES = [180, 0, 270, 90], // L, R, T, B             
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = PetriNetMETA.META_TYPES,
-            isTypeTransition = METAAspectHelper.isMETAType(gmeID, META_TYPES.Transition);
+            isTypeTransition = PetriNetMETA.TYPE_INFO.isTransition(gmeID);
 
         //by default return the bounding box edges midpoints
 

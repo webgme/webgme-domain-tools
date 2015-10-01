@@ -8,13 +8,11 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/PetriNetDecorator.Core.js',
     '../Core/PetriNetDecorator.Constants',
     'css!./PetriNetDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
                                                        nodePropertyNames,
                                                        PartBrowserWidgetDecoratorBase,
                                                        PetriNetDecoratorCore,
