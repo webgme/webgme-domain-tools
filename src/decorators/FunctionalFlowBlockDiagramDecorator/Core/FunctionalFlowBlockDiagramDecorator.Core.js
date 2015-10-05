@@ -9,7 +9,6 @@
 
 define(['js/Constants',
     './FunctionalFlowBlockDiagramDecorator.Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/RegistryKeys',
     './FunctionalFlowBlockDiagramBase',
@@ -17,7 +16,6 @@ define(['js/Constants',
     'text!./FunctionalFlowBlockDiagramDecorator.html',
     'text!../default.svg'], function (CONSTANTS,
                                       FFBDCONSTANTS,
-                                      METAAspectHelper,
                                       nodePropertyNames,
                                       REGISTRY_KEYS,
                                       FunctionalFlowBlockDiagramBase,
@@ -26,10 +24,10 @@ define(['js/Constants',
                                       DefaultSvgTemplate) {
 
     /**
-    * A module representing core decorator functionality for the FunctionalFlowBlockDiagramModelingLanguage.
-    * @exports FunctionalFlowBlockDiagramDecoratorCore
-    * @version 1.0
-    */
+     * A module representing core decorator functionality for the FunctionalFlowBlockDiagramModelingLanguage.
+     * @exports FunctionalFlowBlockDiagramDecoratorCore
+     * @version 1.0
+     */
     var FunctionalFlowBlockDiagramDecoratorCore,
         SVG_ICON_PATH = "/decorators/FunctionalFlowBlockDiagramDecorator/Icons/";
 
@@ -47,34 +45,31 @@ define(['js/Constants',
      */
     var errorSVGBase = $(DefaultSvgTemplate);
 
-    /**
-     * ID list of meta types.
-     * @type {*}
-     * @private
-     */
-    var _metaAspectTypes = FunctionalFlowBlockDiagramMETA.META_TYPES;
+    if(Object.keys(svgCache || {}).length === 0){
+        var _metaAspectTypes = FunctionalFlowBlockDiagramMETA.getMetaTypes();
 
-    for (var m in _metaAspectTypes) {
-        // TODO: use the right code to do this
-        if (_metaAspectTypes.hasOwnProperty(m)) {
+        for (var m in _metaAspectTypes) {
 
-            // get the svg's url on the server for this META type
-            var svg_resource_url = SVG_ICON_PATH + m + ".svg";
+            if (_metaAspectTypes.hasOwnProperty(m)) {
 
-            // get the svg from the server in SYNC mode, may take some time
-            $.ajax(svg_resource_url, {'async': false})
-                .done(function ( data ) {
+                // get the svg's url on the server for this META type
+                var svg_resource_url = SVG_ICON_PATH + m + ".svg";
 
-                    // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
-                    // downloaded successfully
-                    // cache the downloaded content
-                    svgCache[m] = $(data.childNodes[0]);
-                })
-                .fail(function () {
+                // get the svg from the server in SYNC mode, may take some time
+                $.ajax(svg_resource_url, {'async': false})
+                    .done(function (data) {
 
-                    // download failed for this type
-                    // TODO: console.warning('Failed to download: ' + svg_resource_url);
-                });
+                        // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
+                        // downloaded successfully
+                        // cache the downloaded content
+                        svgCache[m] = $(data.childNodes[0]);
+                    })
+                    .fail(function () {
+
+                        // download failed for this type
+                        // TODO: console.warning('Failed to download: ' + svg_resource_url);
+                    });
+            }
         }
     }
 
@@ -97,7 +92,7 @@ define(['js/Constants',
     })();
 
     /**** Override from *.WidgetDecoratorBase ****/
-	FunctionalFlowBlockDiagramDecoratorCore.prototype.getTerritoryQuery = function () {
+    FunctionalFlowBlockDiagramDecoratorCore.prototype.getTerritoryQuery = function () {
         var territoryRule = {};
 
         territoryRule[this._metaInfo[CONSTANTS.GME_ID]] = { "children": 1 };
@@ -134,7 +129,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        FunctionalFlowBlockDiagramClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        FunctionalFlowBlockDiagramClassNames = FunctionalFlowBlockDiagramMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         FunctionalFlowBlockDiagramClassNames.reverse();
@@ -203,7 +198,7 @@ define(['js/Constants',
         var gmeID = this._metaInfo[CONSTANTS.GME_ID];
 
         // meta type of the rendered object
-        this._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        this._metaType = FunctionalFlowBlockDiagramMETA.getMetaTypesOf(gmeID)[0];
 
 
         if (DEBUG) {
@@ -236,16 +231,15 @@ define(['js/Constants',
         }
 
 
-        var META_TYPES = FunctionalFlowBlockDiagramMETA.META_TYPES,
-            isTypeFunction = METAAspectHelper.isMETAType(gmeID, META_TYPES.Function),
-            isTypeReference = METAAspectHelper.isMETAType(gmeID, META_TYPES.Reference),
-            isTypeLogicSymbol = METAAspectHelper.isMETAType(gmeID, META_TYPES.LogicSymbol);
+        var isTypeFunction = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isFunction(gmeID),
+            isTypeReference = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isReference(gmeID),
+            isTypeLogicSymbol = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isLogicSymbol(gmeID);
 
         if (isTypeReference || isTypeFunction || isTypeLogicSymbol) {
 
-        	_.extend(this, new FunctionalFlowBlockDiagramBase());
+            _.extend(this, new FunctionalFlowBlockDiagramBase());
         }
-        
+
 
         // call the type specific renderer
         this._renderMetaTypeSpecificParts();
@@ -295,7 +289,7 @@ define(['js/Constants',
 
         if (this.borderColor) {
             this.skinParts.$svg.css({'border-color': this.borderColor,
-                          'box-shadow': '0px 0px 7px 0px ' + this.borderColor + ' inset'});
+                'box-shadow': '0px 0px 7px 0px ' + this.borderColor + ' inset'});
             this.skinParts.$name.css({'border-color': this.borderColor});
         } else {
             this.$el.css({'border-color': '',
@@ -327,11 +321,10 @@ define(['js/Constants',
         var control = this._control,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
             name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name),
-            META_TYPES = FunctionalFlowBlockDiagramMETA.META_TYPES,
-            isTypeLogicSymbol = METAAspectHelper.isMETAType(gmeID, META_TYPES.LogicSymbol), 
-            isTypeReference = METAAspectHelper.isMETAType(gmeID, META_TYPES.Reference),
-            isTypeFunction = METAAspectHelper.isMETAType(gmeID, META_TYPES.Function),
-            isTypeFFBDiagram = METAAspectHelper.isMETAType(gmeID, META_TYPES.FFBDiagram),
+            isTypeLogicSymbol = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isLogicSymbol(gmeID),
+            isTypeReference = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isReference(gmeID),
+            isTypeFunction = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isFunction(gmeID),
+            isTypeFFBDiagram = FunctionalFlowBlockDiagramMETA.TYPE_INFO.isFFBDiagram(gmeID),
             MARGIN_TOPs = {'logic': '10px', 'default': '45px', 'diagram': '60px', 'other': '35px', 'none': '0px'},
             MARGIN_LEFT = '-20px',
             WIDTHs = {'logic': '38px', 'ref': '80px', 'default': '150px'};
@@ -353,8 +346,8 @@ define(['js/Constants',
                 this.skinParts.$name.css('text-decoration', 'none');
 
             }
-            
-            if (isTypeLogicSymbol && gmeID != META_TYPES.LogicSymbol) {
+
+            if (isTypeLogicSymbol && gmeID != FunctionalFlowBlockDiagramMETA.getMetaTypes().LogicSymbol) {
 
                 this.skinParts.$name.css('text-align', 'center');
                 this.skinParts.$name.css('width', WIDTHs['logic']);

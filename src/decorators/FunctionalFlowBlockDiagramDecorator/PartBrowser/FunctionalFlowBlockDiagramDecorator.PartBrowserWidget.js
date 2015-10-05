@@ -8,13 +8,11 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/FunctionalFlowBlockDiagramDecorator.Core.js',
     '../Core/FunctionalFlowBlockDiagramDecorator.Constants',
     'css!./FunctionalFlowBlockDiagramDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
                                                        nodePropertyNames,
                                                        PartBrowserWidgetDecoratorBase,
                                                        FunctionalFlowBlockDiagramDecoratorCore,

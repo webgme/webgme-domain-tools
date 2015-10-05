@@ -7,12 +7,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './FunctionalFlowBlockDiagramDecorator.Constants',
         './FunctionalFlowBlockDiagram.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    FunctionalFlowBlockDiagramDecoratorConstants,
                                    FunctionalFlowBlockDiagramMETA,
                                    DiagramDesignerWidgetConstants,

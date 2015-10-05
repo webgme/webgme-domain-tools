@@ -8,24 +8,24 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
+    '../Core/FunctionalFlowBlockDiagram.META',
     'js/NodePropertyNames',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.DecoratorBase',
     '../Core/FunctionalFlowBlockDiagramDecorator.Core.js',
     '../Core/FunctionalFlowBlockDiagramDecorator.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
     'css!./FunctionalFlowBlockDiagramDecorator.DiagramDesignerWidget'], function (CONSTANTS,
-                                                       METAAspectHelper,
-                                                       nodePropertyNames,
-                                                       DiagramDesignerWidgetDecoratorBase,
-                                                       FunctionalFlowBlockDiagramDecoratorCore,
-                                                       FunctionalFlowBlockDiagramDecoratorConstants,
-                                                       DiagramDesignerWidgetConstants) {
+                                                                                  FunctionalFlowBlockDiagramMETA,
+                                                                                  nodePropertyNames,
+                                                                                  DiagramDesignerWidgetDecoratorBase,
+                                                                                  FunctionalFlowBlockDiagramDecoratorCore,
+                                                                                  FunctionalFlowBlockDiagramDecoratorConstants,
+                                                                                  DiagramDesignerWidgetConstants) {
     /**
-    * A module representing DiagramDesignerWidget specific functionality for the FunctionalFlowBlockDiagramModelingLanguage.
-    * @exports FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget
-    * @version 1.0
-    */
+     * A module representing DiagramDesignerWidget specific functionality for the FunctionalFlowBlockDiagramModelingLanguage.
+     * @exports FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget
+     * @version 1.0
+     */
     var FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget,
         DECORATOR_ID = "FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget";
 
@@ -35,7 +35,7 @@ define(['js/Constants',
      * @constructor
      */
     FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget = function (options) {
-        var opts = _.extend( {}, options);
+        var opts = _.extend({}, options);
 
         DiagramDesignerWidgetDecoratorBase.apply(this, [opts]);
 
@@ -56,13 +56,12 @@ define(['js/Constants',
      * Called when a new element is added to the widget
      */
     FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget.prototype.on_addTo = function () {
-        var self = this,
-            META_TYPES = METAAspectHelper.getMETAAspectTypes();
+        var self = this;
 
         this._renderContent();
 
-        if ((this._metaType === METAAspectHelper.isMETAType(META_TYPES.FunctionalFlowBlockDiagramBase)) &&
-            (METAAspectHelper.getMETATypesOf(this._gmeID)[0] !== this._gmeID)) {
+        if (this._metaType === FunctionalFlowBlockDiagramMETA.TYPE_INFO.isFFBDMetaLanguage(this._gmeID) &&
+            FunctionalFlowBlockDiagramMETA.getMetaTypesOf(this._gmeID)[0] !== this._gmeID) {
 
             this.skinParts.$name.remove();
         } else {
@@ -70,11 +69,13 @@ define(['js/Constants',
             if (this.skinParts.$name) {
                 this.skinParts.$name.on("dblclick.editOnDblClick", null, function (event) {
                     if (self.hostDesignerItem.canvas.getIsReadOnlyMode() !== true) {
-                        $(this).editInPlace({"class": "",
+                        $(this).editInPlace({
+                            "class": "",
                             "onChange": function (oldValue, newValue) {
                                 self._onNodeTitleChanged(oldValue, newValue);
                                 self.updateName();
-                            }});
+                            }
+                        });
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -154,7 +155,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget.prototype._registerForNotification = function(portId) {
+    FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -162,7 +163,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function(portId) {
+    FunctionalFlowBlockDiagramDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);

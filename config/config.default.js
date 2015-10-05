@@ -9,7 +9,7 @@ config.server.port = 8888;
 
 config.mongo.uri = 'mongodb://129.59.105.224/multi';
 
-config.plugin.basePaths = [
+config.plugin.basePaths = config.plugin.basePaths.concat([
     './src/plugins/Examples',
     './src/plugins/META',
     './src/plugins/FMU',
@@ -17,7 +17,7 @@ config.plugin.basePaths = [
     './src/plugins/LogicGates',
     './src/plugins/TestCore',
     './src/plugins/PortHamiltonianSystem',
-    './src/plugins/Layout'];
+    './src/plugins/Layout']);
 
 config.requirejsPaths = {
     panels: './src/panels',
