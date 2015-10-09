@@ -266,7 +266,7 @@ define(['plugin/PluginConfig',
                 callback(err, self.result);
                 return;
             }
-            self.logger.warning(hashes.toString());
+            self.logger.warn(hashes.toString());
             artifact.save(function (err, hash) {
                 if (err) {
                     callback(err, self.result);
@@ -300,9 +300,10 @@ define(['plugin/PluginConfig',
                     self.components[j].size.width = parseInt($(comps[i]).find('.svg-container')[0].children[0].getAttribute('width'));
                     self.components[j].size.height = parseInt($(comps[i]).find('.svg-container')[0].children[0].getAttribute('height'));
 
-                    // get ports relative position info
+                    // todo: get ports relative position info
+                    // different decors wrap connectors differently
                     if (self.components[j].ports) {
-                        
+
                     }
                     break;
                 }
