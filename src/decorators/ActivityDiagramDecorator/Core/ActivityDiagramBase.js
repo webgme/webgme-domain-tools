@@ -8,12 +8,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './ActivityDiagramDecorator.Constants',
         './ActivityDiagram.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    ActivityDiagramDecoratorConstants,
                                    ActivityDiagramMETA,
                                    DiagramDesignerWidgetConstants,
@@ -42,9 +40,8 @@ define(['js/NodePropertyNames',
         var len = 6,
             portId,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = ActivityDiagramMETA.META_TYPES, 
-            isTypeAction = METAAspectHelper.isMETAType(gmeID, META_TYPES.Action),
-            isTypeBar = METAAspectHelper.isMETAType(gmeID, META_TYPES.Bar),
+            isTypeAction = ActivityDiagramMETA.TYPE_INFO.isAction(gmeID),
+            isTypeBar = ActivityDiagramMETA.TYPE_INFO.isBar(gmeID),
             name_len = this.skinParts.$name.contents()[0].length * ActivityDiagramDecoratorConstants.NAME_DIV_FIXTURE,
             width = name_len > ActivityDiagramDecoratorConstants.MIN_WIDTH ? name_len : ActivityDiagramDecoratorConstants.MIN_WIDTH,
             SVGWidth = isTypeAction ? width : parseInt(this.skinParts.$svg.attr('width')),
@@ -61,46 +58,46 @@ define(['js/NodePropertyNames',
         this._connectionAreas[0] = {
             "x1": SVGWidth / 2,
             "y1": 0
-        }
+        };
         // BOTTOM
         this._connectionAreas[1] = {
             "x1": SVGWidth / 2,
             "y1": SVGHeight
-        }       
+        };
         if (!isTypeBar){
 
             // LEFT
             this._connectionAreas[2] = {
                 "x1": 0,
                 "y1": SVGHeight / 2
-            }
+            };
             // RIGHT
             this._connectionAreas[3] = {
                 "x1": SVGWidth,
                 "y1": SVGHeight / 2
-            }
+            };
         } else {
 
              // TOP LEFT
             this._connectionAreas[2] = {
                 "x1": SVGWidth / 4,
                 "y1": 0
-            }
+            };
             // TOP RIGHT
             this._connectionAreas[3] = {
                 "x1": SVGWidth / 4 * 3,
                 "y1": 0
-            }
+            };
             // BOTTOM LEFT
             this._connectionAreas[4] = {
                 "x1": SVGWidth / 4,
                 "y1": SVGHeight
-            }
+            };
             // BOTTOM RIGHT
             this._connectionAreas[5] = {
                 "x1": SVGWidth / 4 * 3,
                 "y1": SVGHeight
-            }
+            };
         }
 
 
@@ -167,8 +164,7 @@ define(['js/NodePropertyNames',
             LEN = 10, // length of stem that can stick out of the connector before connections can turn 
             ANGLES = [270, 90, 180, 0], // L, R, T, B
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = ActivityDiagramMETA.META_TYPES,
-            isTypeBar = METAAspectHelper.isMETAType(gmeID, META_TYPES.Bar);
+            isTypeBar = ActivityDiagramMETA.TYPE_INFO.isBar(gmeID);
 
         //by default return the bounding box edges midpoints
 

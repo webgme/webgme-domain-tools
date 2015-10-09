@@ -8,17 +8,13 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/ActivityDiagramDecorator.Core.js',
-    '../Core/ActivityDiagramDecorator.Constants',
     'css!./ActivityDiagramDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
                                                        nodePropertyNames,
                                                        PartBrowserWidgetDecoratorBase,
-                                                       ActivityDiagramDecoratorCore,
-                                                       ActivityDiagramDecoratorConstants) {
+                                                       ActivityDiagramDecoratorCore) {
 
     /**
      * A module representing PartBrowserWidget specific functionality for the ActivityDiagramModelingLanguage.
@@ -76,7 +72,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    ActivityDiagramDecoratorPartBrowserWidget.prototype._registerForNotification = function(portId) {
+    ActivityDiagramDecoratorPartBrowserWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -84,7 +80,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    ActivityDiagramDecoratorPartBrowserWidget.prototype._unregisterForNotification = function(portId) {
+    ActivityDiagramDecoratorPartBrowserWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);

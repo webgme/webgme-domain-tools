@@ -1,132 +1,126 @@
-/*
- * Copyright (C) 2013 Vanderbilt University, All rights reserved.
- * 
- * AUTO GENERATED CODE FOR PROJECT BusinessProcessModeling
+/* globals define, _, WebGMEGlobal */
+/* jshint browser: true */
+/**
+ * @author zhangpn / https://github.com/zhangpn
  */
 
-"use strict";
+define(['underscore'], function (_underscore) {
+    'use strict';
 
-define(['underscore',
-        'js/Utils/METAAspectHelper'], function (_underscore,
-                                                METAAspectHelper) {
+    var _metaID = 'BusinessProcessModeling.META.js',
 
-    var _metaID = 'BusinessProcessModeling.META.js';
+        //META ASPECT TYPES
+        META_TYPES = {
+            'Activity': 'Activity',
+            'Annotation': 'Annotation',
+            'Artifact': 'Artifact',
+            'Artifact2Activity': 'Artifact2Activity',
+            'BPMFolder': 'BPMFolder',
+            'BPMMetaLanguage': 'BPMMetaLanguage',
+            'BPModel': 'BPModel',
+            'CallActivity': 'CallActivity',
+            'Complex': 'Complex',
+            'Conditional': 'Conditional',
+            'ConnectionBase': 'ConnectionBase',
+            'DataObject': 'DataObject',
+            'EndEvent': 'EndEvent',
+            'Event': 'Event',
+            'EventBased': 'EventBased',
+            'Event_Activity': 'Event_Activity',
+            'Exclusive': 'Exclusive',
+            'ExclusiveEventBased': 'ExclusiveEventBased',
+            'FCO': 'FCO',
+            'Gateway': 'Gateway',
+            'Gateway2Event': 'Gateway2Event',
+            'Gateway_Activity': 'Gateway_Activity',
+            'Group': 'Group',
+            'Inclusive': 'Inclusive',
+            'Intermediate2Gateway': 'Intermediate2Gateway',
+            'IntermediateEvent': 'IntermediateEvent',
+            'Lane': 'Lane',
+            'Parallel': 'Parallel',
+            'ParallelEventBased': 'ParallelEventBased',
+            'Pool': 'Pool',
+            'Sequential': 'Sequential',
+            'StartEvent': 'StartEvent',
+            'SubProcess': 'SubProcess',
+            'Task': 'Task',
+            'Transaction': 'Transaction'
+        },
+        client = WebGMEGlobal.Client;
 
-    //META ASPECT TYPES
-    var _metaTypes = {
-		'Activity': '/-2/-7',
-		'Annotation': '/-2/-1',
-		'Artifact': '/-2/-9',
-		'Artifact2Activity': '/-2/-49',
-		'BPMFolder': '/-2/-3',
-		'BPMMetaLanguage': '/-2',
-		'BPModel': '/-2/-4',
-		'CallActivity': '/-2/-22',
-		'Complex': '/-2/-37',
-		'Conditional': '/-2/-27',
-		'ConnectionBase': '/-2/-10',
-		'DataObject': '/-2/-12',
-		'EndEvent': '/-2/-20',
-		'Event': '/-2/-5',
-		'EventBased': '/-2/-29',
-		'Event_Activity': '/-2/-11',
-		'Exclusive': '/-2/-36',
-		'ExclusiveEventBased': '/-2/-2',
-		'FCO': '/-1',
-		'Gateway': '/-2/-6',
-		'Gateway2Event': '/-2/-48',
-		'Gateway_Activity': '/-2/-46',
-		'Group': '/-2/-25',
-		'Inclusive': '/-2/-43',
-		'Intermediate2Gateway': '/-2/-13',
-		'IntermediateEvent': '/-2/-19',
-		'Lane': '/-2/-24',
-		'Parallel': '/-2/-42',
-		'ParallelEventBased': '/-2/-38',
-		'Pool': '/-2/-8',
-		'Sequential': '/-2/-28',
-		'StartEvent': '/-2/-16',
-		'SubProcess': '/-2/-14',
-		'Task': '/-2/-21',
-		'Transaction': '/-2/-23'
-	};
+    function _getMetaTypes() {
+        var metaNodes = client.getAllMetaNodes(),
+            dictionary = {},
+            i,
+            name;
 
-    //META ASPECT TYPE CHECKING
-    var _isActivity = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Activity); };
-	var _isAnnotation = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Annotation); };
-	var _isArtifact = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Artifact); };
-	var _isArtifact2Activity = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Artifact2Activity); };
-	var _isBPMFolder = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.BPMFolder); };
-	var _isBPMMetaLanguage = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.BPMMetaLanguage); };
-	var _isBPModel = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.BPModel); };
-	var _isCallActivity = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.CallActivity); };
-	var _isComplex = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Complex); };
-	var _isConditional = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Conditional); };
-	var _isConnectionBase = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.ConnectionBase); };
-	var _isDataObject = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.DataObject); };
-	var _isEndEvent = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.EndEvent); };
-	var _isEvent = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Event); };
-	var _isEventBased = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.EventBased); };
-	var _isEvent_Activity = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Event_Activity); };
-	var _isExclusive = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Exclusive); };
-	var _isExclusiveEventBased = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.ExclusiveEventBased); };
-	var _isFCO = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.FCO); };
-	var _isGateway = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Gateway); };
-	var _isGateway2Event = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Gateway2Event); };
-	var _isGateway_Activity = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Gateway_Activity); };
-	var _isGroup = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Group); };
-	var _isInclusive = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Inclusive); };
-	var _isIntermediate2Gateway = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Intermediate2Gateway); };
-	var _isIntermediateEvent = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.IntermediateEvent); };
-	var _isLane = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Lane); };
-	var _isParallel = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Parallel); };
-	var _isParallelEventBased = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.ParallelEventBased); };
-	var _isPool = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Pool); };
-	var _isSequential = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Sequential); };
-	var _isStartEvent = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.StartEvent); };
-	var _isSubProcess = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.SubProcess); };
-	var _isTask = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Task); };
-	var _isTransaction = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Transaction); };
-	
-
-    var _queryMetaTypes = function () {
-        var nMetaTypes = METAAspectHelper.getMETAAspectTypes(),
-            m;
-
-        if (!_.isEqual(_metaTypes,nMetaTypes)) {
-            //TODO: when displaying an error message make sure it's the very same project
-            /*var metaOutOfDateMsg = _metaID + " is not up to date with the latest META aspect. Please update your local copy!";
-            if (console.error) {
-                console.error(metaOutOfDateMsg);
-            } else {
-                console.log(metaOutOfDateMsg);
-            }*/
-
-            for (m in _metaTypes) {
-                if (_metaTypes.hasOwnProperty(m)) {
-                    delete _metaTypes[m];
-                }
-            }
-
-            for (m in nMetaTypes) {
-                if (nMetaTypes.hasOwnProperty(m)) {
-                    _metaTypes[m] = nMetaTypes[m];
-                }
+        for (i = 0; i < metaNodes.length; i += 1) {
+            name = metaNodes[i].getAttribute('name');
+            if (META_TYPES[name]) {
+                dictionary[name] = metaNodes[i].getId();
             }
         }
-    };
 
-    //hook up to META ASPECT CHANGES
-    METAAspectHelper.addEventListener(METAAspectHelper.events.META_ASPECT_CHANGED, function () {
-        _queryMetaTypes();
-    });
+        return dictionary;
+    }
+    function _getMetaTypesOf(objId) {
+        var orderedMetaList = Object.keys(META_TYPES).sort(),
+            metaDictionary = _getMetaTypes(),
+            i,
+            result = [];
 
-    //generate the META types on the first run
-    _queryMetaTypes();
+        for (i = 0; i < orderedMetaList.length; i += 1) {
+            if (client.isTypeOf(objId, metaDictionary[orderedMetaList[i]])) {
+                result.push(orderedMetaList[i]);
+            }
+        }
+
+        return result;
+    }
+
+    //META ASPECT TYPE CHECKING
+    var _isActivity = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Activity]);};
+	var _isAnnotation = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Annotation]);};
+	var _isArtifact = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Artifact]);};
+	var _isArtifact2Activity = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Artifact2Activity]);};
+	var _isBPMFolder = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.BPMFolder]);};
+	var _isBPMMetaLanguage = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.BPMMetaLanguage]);};
+	var _isBPModel = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.BPModel]);};
+	var _isCallActivity = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.CallActivity]);};
+	var _isComplex = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Complex]);};
+	var _isConditional = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Conditional]);};
+	var _isConnectionBase = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.ConnectionBase]);};
+	var _isDataObject = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.DataObject]);};
+	var _isEndEvent = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.EndEvent]);};
+	var _isEvent = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Event]);};
+	var _isEventBased = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.EventBased]);};
+	var _isEvent_Activity = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Event_Activity]);};
+	var _isExclusive = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Exclusive]);};
+	var _isExclusiveEventBased = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.ExclusiveEventBased]);};
+	var _isFCO = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.FCO]);};
+	var _isGateway = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Gateway]);};
+	var _isGateway2Event = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Gateway2Event]);};
+	var _isGateway_Activity = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Gateway_Activity]);};
+	var _isGroup = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Group]);};
+	var _isInclusive = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Inclusive]);};
+	var _isIntermediate2Gateway = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Intermediate2Gateway]);};
+	var _isIntermediateEvent = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.IntermediateEvent]);};
+	var _isLane = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Lane]);};
+	var _isParallel = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Parallel]);};
+	var _isParallelEventBased = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.ParallelEventBased]);};
+	var _isPool = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Pool]);};
+	var _isSequential = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Sequential]);};
+	var _isStartEvent = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.StartEvent]);};
+	var _isSubProcess = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.SubProcess]);};
+	var _isTask = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Task]);};
+	var _isTransaction = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[META_TYPES.Transaction]);};
+	
 
     //return utility functions
     return {
-        META_TYPES: _metaTypes,
+        getMetaTypes: _getMetaTypes,
+        getMetaTypesOf: _getMetaTypesOf,
         TYPE_INFO: {
 			isActivity: _isActivity,
 			isAnnotation: _isAnnotation,

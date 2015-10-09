@@ -8,19 +8,19 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
+    '../Core/ActivityDiagram.META',
     'js/NodePropertyNames',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.DecoratorBase',
     '../Core/ActivityDiagramDecorator.Core.js',
     '../Core/ActivityDiagramDecorator.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
     'css!./ActivityDiagramDecorator.DiagramDesignerWidget'], function (CONSTANTS,
-                                                       METAAspectHelper,
-                                                       nodePropertyNames,
-                                                       DiagramDesignerWidgetDecoratorBase,
-                                                       ActivityDiagramDecoratorCore,
-                                                       ActivityDiagramDecoratorConstants,
-                                                       DiagramDesignerWidgetConstants) {
+                                                                       ActivityDiagramMETA,
+                                                                       nodePropertyNames,
+                                                                       DiagramDesignerWidgetDecoratorBase,
+                                                                       ActivityDiagramDecoratorCore,
+                                                                       ActivityDiagramDecoratorConstants,
+                                                                       DiagramDesignerWidgetConstants) {
     /**
     * A module representing DiagramDesignerWidget specific functionality for the ActivityDiagramModelingLanguage.
     * @exports ActivityDiagramDecoratorDiagramDesignerWidget
@@ -35,7 +35,7 @@ define(['js/Constants',
      * @constructor
      */
     ActivityDiagramDecoratorDiagramDesignerWidget = function (options) {
-        var opts = _.extend( {}, options);
+        var opts = _.extend({}, options);
 
         DiagramDesignerWidgetDecoratorBase.apply(this, [opts]);
 
@@ -56,14 +56,13 @@ define(['js/Constants',
      * Called when a new element is added to the widget
      */
     ActivityDiagramDecoratorDiagramDesignerWidget.prototype.on_addTo = function () {
-        var self = this,
-            META_TYPES = METAAspectHelper.getMETAAspectTypes();
+        var self = this;
 
         this._hideName = false;
         this._renderContent();
 
-        if ((this._metaType === METAAspectHelper.isMETAType(META_TYPES.ActivityDiagramBase)) &&
-            (METAAspectHelper.getMETATypesOf(this._gmeID)[0] !== this._gmeID)) {
+        if ((this._metaType === ActivityDiagramMETA.TYPE_INFO.isActivityDiagramMetaModel(this._gmeID)) &&
+            (ActivityDiagramMETA.getMetaTypesOf(this._gmeID)[0] !== this._gmeID)) {
 
             this.$name.remove();
         } else {
@@ -134,7 +133,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    ActivityDiagramDecoratorDiagramDesignerWidget.prototype._registerForNotification = function(portId) {
+    ActivityDiagramDecoratorDiagramDesignerWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -142,7 +141,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    ActivityDiagramDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function(portId) {
+    ActivityDiagramDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);

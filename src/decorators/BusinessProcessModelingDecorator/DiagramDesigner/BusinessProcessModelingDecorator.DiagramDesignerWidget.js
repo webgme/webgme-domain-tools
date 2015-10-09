@@ -8,19 +8,17 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.DecoratorBase',
     '../Core/BusinessProcessModelingDecorator.Core.js',
     '../Core/BusinessProcessModelingDecorator.Constants',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
     'css!./BusinessProcessModelingDecorator.DiagramDesignerWidget'], function (CONSTANTS,
-                                                       METAAspectHelper,
-                                                       nodePropertyNames,
-                                                       DiagramDesignerWidgetDecoratorBase,
-                                                       BusinessProcessModelingDecoratorCore,
-                                                       BusinessProcessModelingDecoratorConstants,
-                                                       DiagramDesignerWidgetConstants) {
+                                                                               nodePropertyNames,
+                                                                               DiagramDesignerWidgetDecoratorBase,
+                                                                               BusinessProcessModelingDecoratorCore,
+                                                                               BusinessProcessModelingDecoratorConstants,
+                                                                               DiagramDesignerWidgetConstants) {
     /**
     * A module representing DiagramDesignerWidget specific functionality for the BusinessProcessModelingModelingLanguage.
     * @exports BusinessProcessModelingDecoratorDiagramDesignerWidget
@@ -35,7 +33,7 @@ define(['js/Constants',
      * @constructor
      */
     BusinessProcessModelingDecoratorDiagramDesignerWidget = function (options) {
-        var opts = _.extend( {}, options);
+        var opts = _.extend({}, options);
 
         DiagramDesignerWidgetDecoratorBase.apply(this, [opts]);
 
@@ -56,9 +54,6 @@ define(['js/Constants',
      * Called when a new element is added to the widget
      */
     BusinessProcessModelingDecoratorDiagramDesignerWidget.prototype.on_addTo = function () {
-        var self = this,
-            META_TYPES = METAAspectHelper.getMETAAspectTypes();
-
         this._hideName = true;
         this._renderContent();
     };
@@ -113,7 +108,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    BusinessProcessModelingDecoratorDiagramDesignerWidget.prototype._registerForNotification = function(portId) {
+    BusinessProcessModelingDecoratorDiagramDesignerWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -121,7 +116,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    BusinessProcessModelingDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function(portId) {
+    BusinessProcessModelingDecoratorDiagramDesignerWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);

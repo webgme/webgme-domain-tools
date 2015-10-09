@@ -8,14 +8,12 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     './ActivityDiagramBase',
     './ActivityDiagram.META',
     './ActivityDiagramDecorator.Constants',
     'text!./ActivityDiagramDecorator.html',
     'text!../default.svg'], function (CONSTANTS,
-                                      METAAspectHelper,
                                       nodePropertyNames,
                                       ActivityDiagramBase,
                                       ActivityDiagramMETA,
@@ -50,29 +48,32 @@ define(['js/Constants',
      * @type {*}
      * @private
      */
-    var _metaAspectTypes = ActivityDiagramMETA.META_TYPES;
 
-    for (var m in _metaAspectTypes) {
-        // TODO: use the right code to do this
-        if (_metaAspectTypes.hasOwnProperty(m)) {
+    if(Object.keys(svgCache || {}).length === 0){
+        var _metaAspectTypes = ActivityDiagramMETA.getMetaTypes();
 
-            // get the svg's url on the server for this META type
-            var svg_resource_url = SVG_ICON_PATH + m + ".svg";
+        for (var m in _metaAspectTypes) {
 
-            // get the svg from the server in SYNC mode, may take some time
-            $.ajax(svg_resource_url, {'async': false})
-                .done(function ( data ) {
+            if (_metaAspectTypes.hasOwnProperty(m)) {
 
-                    // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
-                    // downloaded successfully
-                    // cache the downloaded content
-                    svgCache[m] = $(data.childNodes[0]);
-                })
-                .fail(function () {
+                // get the svg's url on the server for this META type
+                var svg_resource_url = SVG_ICON_PATH + m + ".svg";
 
-                    // download failed for this type
-                    // TODO: console.warning('Failed to download: ' + svg_resource_url);
-                });
+                // get the svg from the server in SYNC mode, may take some time
+                $.ajax(svg_resource_url, {'async': false})
+                    .done(function (data) {
+
+                        // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
+                        // downloaded successfully
+                        // cache the downloaded content
+                        svgCache[m] = $(data.childNodes[0]);
+                    })
+                    .fail(function () {
+
+                        // download failed for this type
+                        // TODO: console.warning('Failed to download: ' + svg_resource_url);
+                    });
+            }
         }
     }
 
@@ -132,7 +133,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        ActivityDiagramClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        ActivityDiagramClassNames = ActivityDiagramMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         ActivityDiagramClassNames.reverse();
@@ -197,14 +198,13 @@ define(['js/Constants',
 
         // gme id of the rendered object
         var gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = ActivityDiagramMETA.META_TYPES, 
-            isTypeDecision = METAAspectHelper.isMETAType(gmeID, META_TYPES.Decision),
-            isTypeBar = METAAspectHelper.isMETAType(gmeID, META_TYPES.Bar),
-            isTypeActionBase = METAAspectHelper.isMETAType(gmeID, META_TYPES.ActionBase),
-            isTypeAction = METAAspectHelper.isMETAType(gmeID, META_TYPES.Action);
+            isTypeDecision = ActivityDiagramMETA.TYPE_INFO.isDecision(gmeID),
+            isTypeBar = ActivityDiagramMETA.TYPE_INFO.isBar(gmeID),
+            isTypeActionBase = ActivityDiagramMETA.TYPE_INFO.isActionBase(gmeID),
+            isTypeAction = ActivityDiagramMETA.TYPE_INFO.isAction(gmeID);
 
         // meta type of the rendered object
-        this._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        this._metaType = ActivityDiagramMETA.getMetaTypesOf(gmeID)[0];
 
         if (DEBUG) {
 
@@ -300,13 +300,12 @@ define(['js/Constants',
         // initialize local variables
         var control = this._control,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name), 
-        	META_TYPES = ActivityDiagramMETA.META_TYPES, 
-        	isTypeAction = METAAspectHelper.isMETAType(gmeID, META_TYPES.Action),
-        	isTypeDecision = METAAspectHelper.isMETAType(gmeID, META_TYPES.Decision),
-        	isTypeBar = METAAspectHelper.isMETAType(gmeID, META_TYPES.Bar),
-        	isTypeStart = METAAspectHelper.isMETAType(gmeID, META_TYPES.Start),
-        	isTypeEnd = METAAspectHelper.isMETAType(gmeID, META_TYPES.End);
+            name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name),
+        	isTypeAction = ActivityDiagramMETA.TYPE_INFO.isAction(gmeID),
+        	isTypeDecision = ActivityDiagramMETA.TYPE_INFO.isDecision(gmeID),
+        	isTypeBar = ActivityDiagramMETA.TYPE_INFO.isBar(gmeID),
+        	isTypeStart = ActivityDiagramMETA.TYPE_INFO.isStart(gmeID),
+        	isTypeEnd = ActivityDiagramMETA.TYPE_INFO.isEnd(gmeID);
 
         // update bar's width attribute
         if (isTypeBar) {

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2013-2014 Vanderbilt University, All rights reserved.
- * 
+ *
  * Author:
  * Peng Zhang
  */
@@ -9,7 +9,6 @@
 
 define(['js/Constants',
     './BusinessProcessModelingDecorator.Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/RegistryKeys',
     './BusinessProcessModelingBase',
@@ -17,7 +16,6 @@ define(['js/Constants',
     'text!./BusinessProcessModelingDecorator.html',
     'text!../default.svg'], function (CONSTANTS,
                                       BPMDConstants,
-                                      METAAspectHelper,
                                       nodePropertyNames,
                                       REGISTRY_KEYS,
                                       BusinessProcessModelingBase,
@@ -52,29 +50,31 @@ define(['js/Constants',
      * @type {*}
      * @private
      */
-    var _metaAspectTypes = BusinessProcessModelingMETA.META_TYPES;
+    if(Object.keys(svgCache || {}).length === 0){
+        var _metaAspectTypes = BusinessProcessModelingMETA.getMetaTypes();
 
-    for (var m in _metaAspectTypes) {
-        // TODO: use the right code to do this
-        if (_metaAspectTypes.hasOwnProperty(m)) {
+        for (var m in _metaAspectTypes) {
 
-            // get the svg's url on the server for this META type
-            var svg_resource_url = SVG_ICON_PATH + m + ".svg";
+            if (_metaAspectTypes.hasOwnProperty(m)) {
 
-            // get the svg from the server in SYNC mode, may take some time
-            $.ajax(svg_resource_url, {'async': false})
-                .done(function ( data ) {
+                // get the svg's url on the server for this META type
+                var svg_resource_url = SVG_ICON_PATH + m + ".svg";
 
-                    // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
-                    // downloaded successfully
-                    // cache the downloaded content
-                    svgCache[m] = $(data.childNodes[0]);
-                })
-                .fail(function () {
+                // get the svg from the server in SYNC mode, may take some time
+                $.ajax(svg_resource_url, {'async': false})
+                    .done(function (data) {
 
-                    // download failed for this type
-                    // TODO: console.warning('Failed to download: ' + svg_resource_url);
-                });
+                        // TODO: console.debug('Successfully downloaded: ' + svg_resource_url + ' for ' + metaType);
+                        // downloaded successfully
+                        // cache the downloaded content
+                        svgCache[m] = $(data.childNodes[0]);
+                    })
+                    .fail(function () {
+
+                        // download failed for this type
+                        // TODO: console.warning('Failed to download: ' + svg_resource_url);
+                    });
+            }
         }
     }
 
@@ -134,7 +134,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        BusinessProcessModelingClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        BusinessProcessModelingClassNames = BusinessProcessModelingMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         BusinessProcessModelingClassNames.reverse();
@@ -207,19 +207,19 @@ define(['js/Constants',
         var gmeID = this._metaInfo[CONSTANTS.GME_ID];
 
                 // get domain specific knowledge
-        var META_TYPES = BusinessProcessModelingMETA.META_TYPES,
-            isTypeGateway = METAAspectHelper.isMETAType(gmeID, META_TYPES.Gateway),
-            isTypeConditional = METAAspectHelper.isMETAType(gmeID, META_TYPES.Conditional),
-            isTypeSequential = METAAspectHelper.isMETAType(gmeID, META_TYPES.Sequential),
-            isTypeEvent = METAAspectHelper.isMETAType(gmeID, META_TYPES.Event),
-            isTypeActivity = METAAspectHelper.isMETAType(gmeID, META_TYPES.Activity),
-            isTypeArtifact = METAAspectHelper.isMETAType(gmeID, META_TYPES.Artifact),
-            isTypeAnnotation = METAAspectHelper.isMETAType(gmeID, META_TYPES.Annotation),
+        var META_TYPES = BusinessProcessModelingMETA.getMetaTypes(),
+            isTypeGateway = BusinessProcessModelingMETA.TYPE_INFO.isGateway(gmeID),
+            isTypeConditional = BusinessProcessModelingMETA.TYPE_INFO.isConditional(gmeID),
+            isTypeSequential = BusinessProcessModelingMETA.TYPE_INFO.isSequential(gmeID),
+            isTypeEvent = BusinessProcessModelingMETA.TYPE_INFO.isEvent(gmeID),
+            isTypeActivity = BusinessProcessModelingMETA.TYPE_INFO.isActivity(gmeID),
+            isTypeArtifact = BusinessProcessModelingMETA.TYPE_INFO.isArtifact(gmeID),
+            isTypeAnnotation = BusinessProcessModelingMETA.TYPE_INFO.isAnnotation(gmeID),
             isAbstract = gmeID === META_TYPES.Conditional || gmeID === META_TYPES.Sequential || gmeID === META_TYPES.Event || gmeID === META_TYPES.Activity || gmeID === META_TYPES.Artifact;
 
 
         // meta type of the rendered object
-        this._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        this._metaType = BusinessProcessModelingMETA.getMetaTypesOf(gmeID)[0];
 
         if (DEBUG) {
 
@@ -351,22 +351,21 @@ define(['js/Constants',
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
             name = (control._client.getNode(gmeID)).getAttribute(nodePropertyNames.Attributes.name),
             desc = control._client.getNode(gmeID).getAttribute(BPMDConstants.DESC),    
-            META_TYPES = BusinessProcessModelingMETA.META_TYPES,
-            isTypeConditional = METAAspectHelper.isMETAType(gmeID, META_TYPES.Conditional),
-            isTypeIntermediateEvent = METAAspectHelper.isMETAType(gmeID, META_TYPES.IntermediateEvent),
-            isTypeSequential = METAAspectHelper.isMETAType(gmeID, META_TYPES.Sequential),
-            isTypeEvent = METAAspectHelper.isMETAType(gmeID, META_TYPES.Event),
-            isTypeActivity = METAAspectHelper.isMETAType(gmeID, META_TYPES.Activity),
-            isTypeArtifact = METAAspectHelper.isMETAType(gmeID, META_TYPES.Artifact),
-            isTypePool = METAAspectHelper.isMETAType(gmeID, META_TYPES.Pool), 
-            isTypeLane = METAAspectHelper.isMETAType(gmeID, META_TYPES.Lane),
+            META_TYPES = BusinessProcessModelingMETA.getMetaTypes(),
+            isTypeConditional = BusinessProcessModelingMETA.TYPE_INFO.isConditional(gmeID),
+            isTypeIntermediateEvent = BusinessProcessModelingMETA.TYPE_INFO.isIntermediateEvent(gmeID),
+            isTypeSequential = BusinessProcessModelingMETA.TYPE_INFO.isSequential(gmeID),
+            isTypeEvent = BusinessProcessModelingMETA.TYPE_INFO.isEvent(gmeID),
+            isTypeActivity = BusinessProcessModelingMETA.TYPE_INFO.isActivity(gmeID),
+            isTypeArtifact = BusinessProcessModelingMETA.TYPE_INFO.isArtifact(gmeID),
+            isTypePool = BusinessProcessModelingMETA.TYPE_INFO.isPool(gmeID),
+            isTypeLane = BusinessProcessModelingMETA.TYPE_INFO.isLane(gmeID),
             isAbstract = gmeID === META_TYPES.Conditional || gmeID === META_TYPES.Sequential || gmeID === META_TYPES.Event || gmeID === META_TYPES.Activity || gmeID === META_TYPES.Artifact,
             isNonAbstract = !isAbstract && (isTypeArtifact || isTypeLane || isTypePool || isTypeActivity || isTypeEvent || isTypeConditional || isTypeSequential);
 
 
-        var control = this._control,
-            isTypeGateway = METAAspectHelper.isMETAType(gmeID, META_TYPES.Gateway),
-            isTypeDataObject = METAAspectHelper.isMETAType(gmeID, META_TYPES.DataObject),
+        var isTypeGateway = BusinessProcessModelingMETA.TYPE_INFO.isGateway(gmeID),
+            isTypeDataObject = BusinessProcessModelingMETA.TYPE_INFO.isDataObject(gmeID),
             marginTop = isTypeDataObject ? 25 : 0,
             maxHeight = isTypeDataObject ? 54 : 80;
 
@@ -394,11 +393,11 @@ define(['js/Constants',
         if (this.skinParts.$name) {
 
             // if type is gateway, set name to desc
-            if (isTypeGateway | isTypeIntermediateEvent) {
+            if (isTypeGateway || isTypeIntermediateEvent) {
 
                 if (desc) {
 
-                	  this.skinParts.$name[0].className = "gateway-description";
+                    this.skinParts.$name[0].className = "gateway-description";
                     this.skinParts.$name.text(desc);
                     
                 } else {

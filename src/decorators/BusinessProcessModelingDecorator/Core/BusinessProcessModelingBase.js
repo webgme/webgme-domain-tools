@@ -8,12 +8,10 @@
 "use strict";
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './BusinessProcessModelingDecorator.Constants',
         './BusinessProcessModeling.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-                                   METAAspectHelper,
                                    BusinessProcessModelingDecoratorConstants,
                                    BusinessProcessModelingMETA,
                                    DiagramDesignerWidgetConstants,
@@ -44,9 +42,9 @@ define(['js/NodePropertyNames',
             SVGHeight = parseInt(this.skinParts.$svg.attr('height')),
             PortWidth = BusinessProcessModelingDecoratorConstants.PORT_WIDTH,
             gmeID = this._metaInfo[CONSTANTS.GME_ID],
-            META_TYPES = BusinessProcessModelingMETA.META_TYPES,
-            shiftingRight = METAAspectHelper.isMETAType(gmeID, META_TYPES.DataObject) || METAAspectHelper.isMETAType(gmeID, META_TYPES.Annotation),
-            shiftingLeft = METAAspectHelper.isMETAType(gmeID, META_TYPES.Activity),
+            META_TYPES = BusinessProcessModelingMETA.getMetaTypes(),
+            shiftingRight = BusinessProcessModelingMETA.TYPE_INFO.isDataObject(gmeID) || BusinessProcessModelingMETA.TYPE_INFO.isAnnotation(gmeID),
+            shiftingLeft = BusinessProcessModelingMETA.TYPE_INFO.isActivity(gmeID),
             offset = shiftingLeft ? (0 - PortWidth) : (shiftingRight ? PortWidth : 0),
             FIXTURE = this._noName ? 0 : (BusinessProcessModelingDecoratorConstants.NAME_LENGTH-SVGHeight) / 2 + offset;
 

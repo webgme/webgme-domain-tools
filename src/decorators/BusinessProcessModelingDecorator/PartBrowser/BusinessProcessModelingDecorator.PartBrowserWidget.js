@@ -8,17 +8,13 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/BusinessProcessModelingDecorator.Core.js',
-    '../Core/BusinessProcessModelingDecorator.Constants',
     'css!./BusinessProcessModelingDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
                                                        nodePropertyNames,
                                                        PartBrowserWidgetDecoratorBase,
-                                                       BusinessProcessModelingDecoratorCore,
-                                                       BusinessProcessModelingDecoratorConstants) {
+                                                       BusinessProcessModelingDecoratorCore) {
 
     /**
      * A module representing PartBrowserWidget specific functionality for the BusinessProcessModelingModelingLanguage.
@@ -74,7 +70,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    BusinessProcessModelingDecoratorPartBrowserWidget.prototype._registerForNotification = function(portId) {
+    BusinessProcessModelingDecoratorPartBrowserWidget.prototype._registerForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.registerComponentIDForPartID(portId, partId);
@@ -82,7 +78,7 @@ define(['js/Constants',
 
 
     /**** Override from ModelDecoratorCore ****/
-    BusinessProcessModelingDecoratorPartBrowserWidget.prototype._unregisterForNotification = function(portId) {
+    BusinessProcessModelingDecoratorPartBrowserWidget.prototype._unregisterForNotification = function (portId) {
         var partId = this._metaInfo[CONSTANTS.GME_ID];
 
         this._control.unregisterComponentIDFromPartID(portId, partId);
