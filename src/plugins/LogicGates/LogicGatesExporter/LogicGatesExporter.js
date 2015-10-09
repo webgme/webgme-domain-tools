@@ -98,7 +98,7 @@ define(['plugin/PluginConfig',
                 callback(err, self.result);
                 return;
             }
-            self.logger.warning('Visited all children!');
+            self.logger.warn('Visited all children!');
 
             afterWireAdded = function (err) {
                 error = err ? error += err : error;
@@ -130,7 +130,7 @@ define(['plugin/PluginConfig',
                 callback(err, self.result);
                 return;
             }
-            self.logger.warning(hashes.toString());
+            self.logger.warn(hashes.toString());
             artifact.save(function (err, hash) {
                 if (err) {
                     callback(err, self.result);
@@ -160,7 +160,7 @@ define(['plugin/PluginConfig',
             itrCallback = function (err) {
                 error = err ? error += err : error;
                 counter.visits -= 1;
-                self.logger.warning(counter.visits.toString());
+                self.logger.warn(counter.visits.toString());
                 if (counter.visits <= 0) {
                     callback(error);
                 }

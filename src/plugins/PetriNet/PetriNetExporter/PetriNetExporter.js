@@ -180,7 +180,7 @@ define(['plugin/PluginConfig',
                 callback(err, self.result);
                 return;
             }
-            self.logger.warning(hashes.toString());
+            self.logger.warn(hashes.toString());
             artifact.save(function (err, hash) {
                 if (err) {
                     callback(err, self.result);
