@@ -6,12 +6,10 @@
  */
 
 
-define(['logManager',
-    'js/Panels/ModelEditor/ModelEditorControl.DiagramDesignerWidgetEventHandlers',
+define(['js/Panels/ModelEditor/ModelEditorControl.DiagramDesignerWidgetEventHandlers',
     'js/Constants',
     'js/Utils/GMEConcepts',
-    'widgets/NetLabel/NetLabelConnection'], function (logManager,
-                                         ModelEditorControlDiagramDesignerWidgetEventHandlers,
+    'widgets/NetLabel/NetLabelConnection'], function (ModelEditorControlDiagramDesignerWidgetEventHandlers,
                                          CONSTANTS,
                                          GMEConcepts) {
 
