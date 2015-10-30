@@ -1,6 +1,7 @@
 # logs
 server.log
 npm-debug.log
+server-error.log
 
 # WebStorm
 .idea
@@ -31,3 +32,5 @@ mongodatabase/local.ns
 mongodatabase/mongod.lock
 mongodatabase/multi.0
 mongodatabase/multi.ns
+
+.DS_Store

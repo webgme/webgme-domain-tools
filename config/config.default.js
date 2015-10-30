@@ -29,6 +29,11 @@ config.requirejsPaths = {
 };
 
 config.visualization.decoratorPaths.push('./src/decorators');
+//config.client.usedDecorators = config.client.usedDecorators.concat(["PetriNetDecorator",
+//                                                                    "LogicGatesDecorator",
+//                                                                    "FunctionalFlowBlockDiagramDecorator",
+//                                                                    "ActivityDiagramDecorator",
+//                                                                    "BusinessProcessModelingDecorator"]);
 config.visualization.visualizerDescriptors.push('./Visualizers.json');
 
 config.executor.enable = true;
