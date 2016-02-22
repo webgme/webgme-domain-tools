@@ -5,12 +5,10 @@
 
 
 define(['js/NodePropertyNames',
-        'js/Utils/METAAspectHelper',
         './FMUDecorator.Constants',
         './FMU.META',
         'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
         'js/Constants'], function (nodePropertyNames,
-            METAAspectHelper,
             FMUDecoratorConstants,
             FMUMETA,
             DiagramDesignerWidgetConstants,
@@ -124,7 +122,9 @@ define(['js/NodePropertyNames',
         // var portName = port.getAttribute(nodePropertyNames.Attributes.name);
         // var svgPort = this.skinParts.$svg.find('#' + portName);
 
-        var isFmu = METAAspectHelper.isMETAType(gmeID, META_TYPES.FMU);
+        //var isFmu = METAAspectHelper.isMETAType(gmeID, META_TYPES.FMU);
+        var isFmu = FMUMETA.isFMU(gmeID);
+
         if (isFmu && len){
 
             this._bboxes = [];

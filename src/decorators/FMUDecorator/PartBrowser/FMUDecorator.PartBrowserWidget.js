@@ -7,13 +7,11 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/PartBrowser/PartBrowserWidget.DecoratorBase',
     '../Core/FMUDecorator.Core.js',
     '../Core/FMUDecorator.Constants',
     'css!./FMUDecorator.PartBrowserWidget'], function (CONSTANTS,
-                                                       METATypesHelper,
                                                        nodePropertyNames,
                                                        PartBrowserWidgetDecoratorBase,
                                                        FMUDecoratorCore,

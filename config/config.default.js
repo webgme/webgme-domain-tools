@@ -5,9 +5,6 @@
 
 var config = require('webgme/config/config.default');
 var path = require('path');
-config.server.port = 8888;
-
-config.mongo.uri = 'mongodb://129.59.105.224/multi';
 
 config.plugin.basePaths = config.plugin.basePaths.concat([
     './src/plugins/Examples',
@@ -35,6 +32,8 @@ config.visualization.decoratorPaths.push('./src/decorators');
 //                                                                    "ActivityDiagramDecorator",
 //                                                                    "BusinessProcessModelingDecorator"]);
 config.visualization.visualizerDescriptors.push('./Visualizers.json');
+
+config.seedProjects.basePaths.push('./example_projects');
 
 config.executor.enable = true;
 

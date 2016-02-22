@@ -5,9 +5,7 @@
  */
 
 
-define(['underscore',
-        'js/Utils/METAAspectHelper'], function (_underscore,
-                                                METAAspectHelper) {
+define(['underscore'], function (_underscore) {
     "use strict";
     var _metaID = 'FMU.META.js';
 
@@ -16,6 +14,7 @@ define(['underscore',
         'FCO': '/1',
         'FMI_Language': '/1822302751',
         'FMU': '/1822302751/902541625',
+        'FMUBase': '/1822302751/902541625',
         'FMU_Library': '/1822302751/531264123',
         'Input': '/1822302751/873609603',
         'ModelExchange': '/1822302751/637828452',
@@ -27,65 +26,74 @@ define(['underscore',
         'SimulationParameter': '/1822302751/1963127367',
         'SimulationParameterCompostiion': '/1822302751/238092457',
 
-    };
+        },
+        client = WebGMEGlobal.Client;
 
     //META ASPECT TYPE CHECKING
-    var _isFCO = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.FCO); };
-    var _isFMI_Language = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.FMI_Language); };
-    var _isFMU = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.FMU); };
-    var _isFMU_Library = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.FMU_Library); };
-    var _isInput = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Input); };
-    var _isModelExchange = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.ModelExchange); };
-    var _isModelExchange_Library = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.ModelExchange_Library); };
-    var _isOutput = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Output); };
-    var _isParameter = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Parameter); };
-    var _isPortComposition = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.PortComposition); };
-    var _isProperty = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.Property); };
-    var _isSimulationParameter = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.SimulationParameter); };
-    var _isSimulationParameterCompostiion = function (objID) { return METAAspectHelper.isMETAType(objID, _metaTypes.SimulationParameterCompostiion); };
+    var _isFCO = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.FCO]);};
+    var _isFMI_Language = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.FMI_Language]);};
+    var _isFMU = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.FMU]);};
+    var _isFMUBase = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.FMUBase]);};
+    var _isFMU_Library = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.FMU_Library]);};
+    var _isInput = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.Input]);};
+    var _isModelExchange = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.ModelExchange]);};
+    var _isModelExchange_Library = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.ModelExchange_Library]);};
+    var _isOutput = function (objID){ return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.Output]);};
+    var _isParameter = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.Parameter]);};
+    var _isPortComposition = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.PortComposition]);};
+    var _isProperty = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.Property]);};
+    var _isSimulationParameter = function (objID) { return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.SimulationParameter]);};
+    var _isSimulationParameterCompostiion = function (objID){ return client.isTypeOf(objID, _getMetaTypes()[_metaTypes.SimulationParameterCompostiion]);};
 
+    function _getMetaTypes() {
+        var metaNodes = client.getAllMetaNodes(),
+            dictionary = {},
+            i,
+            name;
 
-    var _queryMetaTypes = function () {
-        var nMetaTypes = METAAspectHelper.getMETAAspectTypes(),
-            m;
-
-        if (!_.isEqual(_metaTypes,nMetaTypes)) {
-            var metaOutOfDateMsg = _metaID + " is not up to date with the latest META aspect. Please update your local copy!";
-            if (console.error) {
-                console.error(metaOutOfDateMsg);
-            } else {
-                console.log(metaOutOfDateMsg);
-            }
-
-            for (m in _metaTypes) {
-                if (_metaTypes.hasOwnProperty(m)) {
-                    delete _metaTypes[m];
-                }
-            }
-
-            for (m in nMetaTypes) {
-                if (nMetaTypes.hasOwnProperty(m)) {
-                    _metaTypes[m] = nMetaTypes[m];
-                }
+        for (i = 0; i < metaNodes.length; i += 1) {
+            name = metaNodes[i].getAttribute('name');
+            if (_metaTypes[name]) {
+                dictionary[name] = metaNodes[i].getId();
             }
         }
-    };
+
+        return dictionary;
+    }
+
+    function _getMetaTypesOf(objId) {
+        var orderedMetaList = Object.keys(_metaTypes).sort(),
+            metaDictionary = _getMetaTypes(),
+            i,
+            result = [];
+
+        for (i = 0; i < orderedMetaList.length; i += 1) {
+            if (client.isTypeOf(objId, metaDictionary[orderedMetaList[i]])) {
+                result.push(orderedMetaList[i]);
+            }
+        }
+
+        return result;
+    }
 
     //hook up to META ASPECT CHANGES
-    METAAspectHelper.addEventListener(METAAspectHelper.events.META_ASPECT_CHANGED, function () {
-        _queryMetaTypes();
-    });
+    //METAAspectHelper.addEventListener(METAAspectHelper.events.META_ASPECT_CHANGED, function () {
+    //    _queryMetaTypes();
+    //});
 
     //generate the META types on the first run
-    _queryMetaTypes();
+    //_queryMetaTypes();
 
     //return utility functions
     return {
         META_TYPES: _metaTypes,
+        getMetaTypesOf: _getMetaTypesOf,
+        getMetaTypes: _getMetaTypes,
         TYPE_INFO: {
             isFCO: _isFCO,
             isFMI_Language: _isFMI_Language,
             isFMU: _isFMU,
+            isFMUBase: _isFMUBase,
             isFMU_Library: _isFMU_Library,
             isInput: _isInput,
             isModelExchange: _isModelExchange,

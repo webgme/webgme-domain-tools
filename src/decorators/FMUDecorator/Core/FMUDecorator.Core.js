@@ -5,7 +5,6 @@
 
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/RegistryKeys',
     './FMUBase',
@@ -13,7 +12,6 @@ define(['js/Constants',
     './FMUDecorator.Constants',
     'text!./FMUDecorator.html',
     'text!../default.svg'], function (CONSTANTS,
-        METAAspectHelper,
         nodePropertyNames,
         REGISTRY_KEYS,
         FMUBase,
@@ -131,7 +129,7 @@ define(['js/Constants',
             len;
 
         // get all META types for the given GME object including inheritance in the meta model
-        FMUClassNames = METAAspectHelper.getMETATypesOf(gmeID);
+        FMUClassNames = FMUMETA.getMetaTypesOf(gmeID);
 
         // reverse the list since the iteration is backwards in the while loop
         FMUClassNames.reverse();
@@ -191,7 +189,7 @@ define(['js/Constants',
             META_TYPES = FMUMETA.META_TYPES;
 
         // meta type of the rendered object
-        self._metaType = METAAspectHelper.getMETATypesOf(gmeID)[0];
+        self._metaType = FMUMETA.getMetaTypesOf(gmeID)[0];
 
         if (DEBUG) {
             //render GME-ID in the DOM, for debugging

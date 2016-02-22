@@ -7,18 +7,18 @@
 "use strict";
 
 define(['js/Constants',
-    'js/Utils/METAAspectHelper',
     'js/NodePropertyNames',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.DecoratorBase',
     '../Core/FMUDecorator.Core.js',
     '../Core/FMUDecorator.Constants',
+    '../Core/FMU.META',
     'js/Widgets/DiagramDesigner/DiagramDesignerWidget.Constants',
     'css!./FMUDecorator.DiagramDesignerWidget'], function (CONSTANTS,
-                                                       METAAspectHelper,
                                                        nodePropertyNames,
                                                        DiagramDesignerWidgetDecoratorBase,
                                                        FMUDecoratorCore,
                                                        FMUDecoratorConstants,
+                                                       FMUMETA,
                                                        DiagramDesignerWidgetConstants) {
     /**
     * A module representing DiagramDesignerWidget specific functionality for the FMUModelingLanguage.
@@ -56,14 +56,14 @@ define(['js/Constants',
      */
     FMUDecoratorDiagramDesignerWidget.prototype.on_addTo = function () {
         var self = this,
-            META_TYPES = METAAspectHelper.getMETAAspectTypes();
+            META_TYPES = FMUMETA.getMetaTypes();
 
         this._hideName = false;
         this._renderContent();
 
-        if ((this._metaType === METAAspectHelper.isMETAType(META_TYPES.FMUBase)) &&
-            (METAAspectHelper.getMETATypesOf(this._gmeID)[0] !== this._gmeID)) {
-
+        //if ((this._metaType === METAAspectHelper.isMETAType(META_TYPES.FMUBase)) &&
+            //(METAAspectHelper.getMETATypesOf(this._gmeID)[0] !== this._gmeID)) {
+        if (false) {
             this.$name.remove();
         } else {
             // set name editable on double-click
